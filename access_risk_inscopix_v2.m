@@ -1,14 +1,19 @@
 % load('BLA_Risk_Data_struct_01222023.mat')
 
+% load('BLA-NAcShell_Risk_2023_09_15.mat')
+
 % load('BLA_panneuronal_Risk_2023_07_06.mat')
 
 % load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
 
-load('BLA_panneuronal_Risk_matched_RM_D1_vs_Pre_RDT_RM.mat')
+% load('BLA_panneuronal_Risk_matched_RM_D1_vs_Pre_RDT_RM.mat')
+
+load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
+
 
 %%
 
-session_to_analyze = 'RM_D1';
+session_to_analyze = 'RDT_D1';
 epoc_to_align = 'choiceTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
@@ -39,7 +44,7 @@ for ii = 1:size(fieldnames(final),1)
     
    
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials,varargin] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2);
+        [data,trials,varargin] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2, 'BLOCK', 1);
         behav_tbl_temp{ii,:} = data;
         trials = cell2mat(trials);
     

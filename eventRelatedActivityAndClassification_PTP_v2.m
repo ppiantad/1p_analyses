@@ -1,15 +1,25 @@
+%% Run me first
+
+
+iter = 0;
+
+%% Load the session you want to examine
+
 % load('BLA_Risk_Data_struct_01222023.mat')
+
+% load('BLA-NAcShell_Risk_2023_09_15.mat')
 
 % load('BLA_panneuronal_Risk_2023_07_06.mat')
 
 % load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
 
-load('BLA_panneuronal_Risk_matched_RM_D1_vs_Pre_RDT_RM.mat')
+% load('BLA_panneuronal_Risk_matched_RM_D1_vs_Pre_RDT_RM.mat')
 
-iter = 0;
+load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
+
 %%
 
-session_to_analyze = 'RM_D1';
+session_to_analyze = 'RDT_D1';
 epoc_to_align = 'choiceTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
@@ -23,13 +33,13 @@ uv.chooseFluoresenceOrRate = 1;                                             %set
 uv.sigma = 1;                                                               %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % uv.evtSigWin.outcome = [-4 0];                                       %period within time window that response is classified on (sec relative to event)
-% uv.evtSigWin.outcome = [0 4]; %for REW
-uv.evtSigWin.outcome = [0 2]; %for SHK
+uv.evtSigWin.outcome = [0 4]; %for REW
+% uv.evtSigWin.outcome = [0 2]; %for SHK
 % uv.evtSigWin.groomingStop = [-.5 3];
 % uv.evtSigWin.faceGroomingStart = [-.5 2];
 % uv.evtSigWin.faceGroomingStop = [-.5 2];
 uv.dt = 0.1;                                                                %time step size (sec)
-uv.resamples = 100                                                         %number of resamples to use in shuffle analysis 1000
+uv.resamples = 1000                                                         %number of resamples to use in shuffle analysis 1000
 
 sub_window_idx = ts1 >= uv.evtSigWin.outcome(1) & ts1 <= uv.evtSigWin.outcome(2);
 
@@ -57,12 +67,13 @@ neuron_num = 0;
 for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2);
+        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2, 'BLOCK',1 );
+        behav_tbl_temp{ii,:} = data;
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');
         filter_args = strjoin(varargin_strings,'_');
-
+        
         trials = cell2mat(trials);
         
         for qq = 1:size(final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials,2)
@@ -102,6 +113,7 @@ for ii = 1:size(fieldnames(final),1)
                     
 %                     zall_to_BL_array(iter, neuron_num) = {final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials(qq).zall(trials,:)};
                 end
+                mouse_cells(iter, neuron_num) = {currentanimal};
                 zall_array(iter, neuron_num) = {zall};
                 neuron_mean(neuron_num,:) = sgolayfilt((mean(zall,1)), 9, 21);
                 neuron_sem(neuron_num,:) = sgolayfilt(nanstd(zall,1)/(sqrt(size(zall, 1))), 9, 21);
@@ -154,11 +166,11 @@ for ii = 1:size(fieldnames(final),1)
                 respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
                 respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) == 0 & respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) == 0;
                 if empiricalWinAvg > upperSD
-                    respClass_all(iter, neuron_num) = 1;
+                    respClass_all(neuron_num) = 1;
                 elseif empiricalWinAvg < lowerSD
-                    respClass_all(iter, neuron_num) = 2;
+                    respClass_all(neuron_num) = 2;
                 else 
-                    respClass_all(iter, neuron_num) = 3;
+                    respClass_all(neuron_num) = 3;
                 end
                 clear upperSD lowerSD empiricalWinAvg 
                 %             %% store trial by trial data
@@ -177,9 +189,13 @@ for ii = 1:size(fieldnames(final),1)
 
 
 end
-sum_activated(iter) = sum(respClass_all(iter,:) == 1);
-sum_inhibited(iter) = sum(respClass_all(iter,:) == 2);
-sum_neutral(iter) = sum(respClass_all(iter,:) == 3);
+varargin_list{iter,:} = varargin_identity_class;
+behav_tbl_iter{iter, :} = behav_tbl_temp;
+clear behav_tbl_temp
+
+sum_activated(iter) = sum(respClass_all == 1);
+sum_inhibited(iter) = sum(respClass_all == 2);
+sum_neutral(iter) = sum(respClass_all == 3);
 sum_inhibited_percent(iter) = (sum_inhibited(iter)/neuron_num)*100;
 sum_activated_percent(iter) = (sum_activated(iter)/neuron_num)*100;
 sum_neutral_percent(iter) = (sum_neutral(iter)/neuron_num)*100;
@@ -187,7 +203,9 @@ labels = {'activated', 'inhibited', 'neutral'};
 figure; pie([sum_activated(iter) sum_inhibited(iter) sum_neutral(iter)])
 neuron_mean_array(iter) = {neuron_mean};
 neuron_sem_array(iter) = {neuron_sem};
+respClass_all_array(:,iter) = {respClass_all}';
 
+clear respClass_all 
 
 
 %% plot activated neurons
@@ -196,33 +214,67 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 colormap(batlowW); % c1 = colorbar; 
 
 
-figure; plot(ts1, neuron_mean(respClass_all(iter,:) == 1,:))
+figure; plot(ts1, neuron_mean(respClass_all_array{:,iter} == 1,:))
 hold on;
 figure;
 % figure; plot(ts1, mean(neuron_mean(respClass_all(iter,:) == 1,:)))
-shadedErrorBar(ts1, mean(neuron_mean(respClass_all(iter,:) == 1,:)), mean(neuron_sem(respClass_all(iter,:) == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+shadedErrorBar(ts1, mean(neuron_mean(respClass_all_array{:,iter} == 1,:)), mean(neuron_sem(respClass_all_array{:,iter} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
 hold off; 
 % hold on;
 % figure; plot(ts1, mean(neuron_mean(respClass_all(iter,:) == 1,:)))
 % errorplot3(mean(neuron_mean(respClass_all(iter,:) == 1,:))-mean(neuron_sem(respClass_all(iter,:) == 1,:)),mean(neuron_mean(respClass_all(iter,:) == 1,:))+mean(neuron_sem(respClass_all(iter,:) == 1,:)),[-10 10],batlowW(iter,:),.15);
 % hold off;
 % plot inhibited neurons
-figure; plot(ts1, neuron_mean(respClass_all(iter,:) == 2,:))
-figure; shadedErrorBar(ts1, mean(neuron_mean(respClass_all(iter,:) == 2,:)), mean(neuron_sem(respClass_all(iter,:) == 2,:)), 'lineProps', {'color', batlowW(iter,:)});
+figure; plot(ts1, neuron_mean(respClass_all_array{:,iter} == 2,:))
+figure; shadedErrorBar(ts1, mean(neuron_mean(respClass_all_array{:,iter} == 2,:)), mean(neuron_sem(respClass_all_array{:,iter} == 2,:)), 'lineProps', {'color', batlowW(iter,:)});
 hold off; 
 % plot neutral neurons
-figure; plot(ts1, neuron_mean(respClass_all(iter,:) == 3,:))
-figure; shadedErrorBar(ts1, mean(neuron_mean(respClass_all(iter,:) == 3,:)), mean(neuron_sem(respClass_all(iter,:) == 3,:)), 'lineProps', {'color', batlowW(iter,:)});
+figure; plot(ts1, neuron_mean(respClass_all_array{:,iter} == 3,:))
+figure; shadedErrorBar(ts1, mean(neuron_mean(respClass_all_array{:,iter} == 3,:)), mean(neuron_sem(respClass_all_array{:,iter} == 3,:)), 'lineProps', {'color', batlowW(iter,:)});
 
+
+%% Use this code to plot heatmaps for each individual cell, across trials
+% Be careful because this code will make a ton of figures (1 for every
+% neuron)
+
+
+for ii = 1:size(zall_array, 2)
+    figure;
+    % Generate the heatmap
+    
+    imagesc(ts1, 1, zall_array{iter, ii});
+    hold on;
+    title("Cell from " + strrep(mouse_cells{iter,ii},'_', '-')  + " classified as " + respClass_all_array{iter}(ii))
+    
+    % Find the row index in animalIDs that matches mouse_cells{iter,ii}
+    isMatch = find(ismember(animalIDs, mouse_cells{iter, ii}));
+    
+    
+    if ~isempty(isMatch)
+        % Assuming that isMatch will be a vector of indices (it may be empty if there's no match)
+        % Access behav_tbl_iter using the first index (assuming there's only one match)
+        behav_tbl = behav_tbl_iter{iter, 1}{isMatch};
+%         isMatch = find(ismember(mouse_cells{iter, ii}, animalIDs));
+        time2Collect = behav_tbl.collectionTime(:)-behav_tbl.choiceTime(:);
+        trialStartTime = behav_tbl.stTime(:) - behav_tbl.choiceTime(:);
+        [numTrials,~]=size(behav_tbl.collectionTime(:));
+        Tris=[1:numTrials]';
+        scatter(time2Collect,Tris,'Marker','p','MarkerFaceColor','w')
+        scatter(trialStartTime,Tris,'Marker','s','MarkerFaceColor','k')
+        plot(zeros(numTrials,1),Tris)
+    end
+    hold off;
+    clear time2Collect trialStartTime numTrials Tris behav_tbl
+end
 
 
 %%
-co_activated = respClass_all(1,:) == 1 & respClass_all(2,:) == 1;
-co_inhibited = respClass_all(1,:) == 2 & respClass_all(2,:) == 2;
+co_activated = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 1;
+co_inhibited = respClass_all_array{1,1} == 2 & respClass_all_array{1,2};
 co_activated_sum = sum(co_activated);
 co_inhibited_sum = sum(co_inhibited);
-exclusive_activated = respClass_all(1,:) ~= 1 & respClass_all(2,:) == 1;
-exclusive_inhibited = respClass_all(1,:) ~= 2 & respClass_all(2,:) == 2;
+exclusive_activated = respClass_all_array{1,1} ~= 1 & respClass_all_array{1,2} == 1;
+exclusive_inhibited = respClass_all_array{1,1} ~= 2 & respClass_all_array{1,2} == 2;
 exclusive_activated_sum = sum(exclusive_activated);
 exclusive_inhibited_sum = sum(exclusive_inhibited);
 exclusive_modulated = exclusive_activated_sum + exclusive_inhibited_sum;
@@ -271,26 +323,26 @@ legend('Co-activated', 'Exclusive', 'Remaining');
 
 % UN-COMMENT THE DATA THAT YOU WANT TO PLOT
 % Calculate the total height (total number of neurons)
-total_height = sum(sum_activated);
-% total_height = sum(sum_inhibited);
+% total_height = sum(sum_activated);
+total_height = sum(sum_inhibited);
 
 
 % UN-COMMENT THE DATA THAT YOU WANT TO PLOT
 % Calculate the percentages for each section
-percentage_co_activated = (co_activated_sum / total_height) * 100;
-percentage_exclusive_activated = (exclusive_activated_sum / total_height) * 100;
-percentage_remaining = 100 - (percentage_co_activated + percentage_exclusive_activated);
+% percentage_co_activated = (co_activated_sum / total_height) * 100;
+% percentage_exclusive_activated = (exclusive_activated_sum / total_height) * 100;
+% percentage_remaining = 100 - (percentage_co_activated + percentage_exclusive_activated);
 
 % UN-COMMENT THE DATA THAT YOU WANT TO PLOT
 % Calculate the percentages for each section
-% percentage_co_inhibited = (co_inhibited_sum / total_height) * 100;
-% percentage_exclusive_inhibited = (exclusive_inhibited_sum / total_height) * 100;
-% percentage_remaining = 100 - (percentage_co_inhibited + percentage_exclusive_inhibited);
+percentage_co_inhibited = (co_inhibited_sum / total_height) * 100;
+percentage_exclusive_inhibited = (exclusive_inhibited_sum / total_height) * 100;
+percentage_remaining = 100 - (percentage_co_inhibited + percentage_exclusive_inhibited);
 
 % UN-COMMENT THE DATA THAT YOU WANT TO PLOT
 % Create a matrix for the bar plot data
-stacked_plot_data = [percentage_co_activated, percentage_exclusive_activated, percentage_remaining];
-% stacked_plot_data = [percentage_co_inhibited, percentage_exclusive_inhibited, percentage_remaining];
+% stacked_plot_data = [percentage_co_activated, percentage_exclusive_activated, percentage_remaining];
+stacked_plot_data = [percentage_co_inhibited, percentage_exclusive_inhibited, percentage_remaining];
 
 figure;
 % Create a vector for the x-axis values
@@ -314,24 +366,24 @@ legend('Co', 'Exclusive', 'Remaining');
 
 
 %%
-Block_1_activated = respClass_all(1,:) == 1;
+Block_1_activated = respClass_all_array{1,1} == 1;
 Block_1_activated_sum = sum(Block_1_activated);
-Block_2_consistent_activated = Block_1_activated & respClass_all(2,:) == 1;
+Block_2_consistent_activated = Block_1_activated & respClass_all_array{1,2} == 1;
 disp(sum(Block_2_consistent_activated));
-Block_3_consistent_activated = Block_1_activated & respClass_all(3,:) == 1;
+Block_3_consistent_activated = Block_1_activated & respClass_all_array{1,3} == 1;
 disp(sum(Block_3_consistent_activated));
 
-Block_1_responsive = respClass_all(1,:) == 1 | respClass_all(1,:) == 2;
+Block_1_responsive = respClass_all_array{1,1} == 1 | respClass_all_array{1,2} == 2;
 disp(sum(Block_1_responsive));
-Block_2_consistent_responsive = (respClass_all(1,:) == 1 & respClass_all(2,:) == 1) | (respClass_all(1,:) == 2 & respClass_all(2,:) == 2);
+Block_2_consistent_responsive = (respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 1) | (respClass_all_array{1,1} == 2 & respClass_all_array{1,2} == 2);
 disp(sum(Block_2_consistent_responsive));
-Block_3_consistent_responsive = (respClass_all(1,:) == 1 & respClass_all(2,:) == 1) & respClass_all(3,:) == 1 | (respClass_all(1,:) == 2 & respClass_all(2,:) == 2) & respClass_all(3,:) == 2;
+Block_3_consistent_responsive = (respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 1) & respClass_all_array{1,3} == 1 | (respClass_all_array{1,1} == 2 & respClass_all_array{1,2} == 2) & respClass_all_array{1,3} == 2;
 disp(sum(Block_3_consistent_responsive));
 
 
-Block_2_large_to_small = (respClass_all(2,:) ~= Block_2_consistent_responsive) & (respClass_all(1,:) == 1 & respClass_all(3,:) == 1) | (respClass_all(1,:) == 2 & respClass_all(3,:) == 2);
+Block_2_large_to_small = (respClass_all_array{1,2} ~= Block_2_consistent_responsive) & (respClass_all_array{1,1} == 1 & respClass_all_array{1,3} == 1) | (respClass_all_array{1,2} == 2 & respClass_all_array{1,3} == 2);
 disp(sum(Block_2_large_to_small));
-Block_3_large_to_small = (respClass_all(2,:) ~= Block_2_consistent_responsive) & (respClass_all(1,:) == 1 & respClass_all(4,:) == 1) | (respClass_all(1,:) == 2 & respClass_all(4,:) == 2);
+Block_3_large_to_small = (respClass_all_array{1,2} ~= Block_2_consistent_responsive) & (respClass_all_array{1,1} == 1 & respClass_all_array{1,4} == 1) | (respClass_all_array{1,2} == 2 & respClass_all_array{1,4} == 2);
 disp(sum(Block_3_large_to_small));
 
 % this is the start of checking if neurons are MORE active than during
@@ -348,11 +400,11 @@ end
 
 sig_increase_shk_from_large = co_activated_indices(p < 0.05 & mean_diff < 0);
 sig_increase_shk_from_large_sum = numel(sig_increase_shk_from_large);
-sig_increase_shk_from_large_ind = zeros(1, size(respClass_all, 2));
+sig_increase_shk_from_large_ind = zeros(1, size(respClass_all_array{1,2}, 2));
 
 sig_increase_shk_from_large_ind(:, sig_increase_shk_from_large) = 1;
 
-shk_activated = respClass_all(2,:) == exclusive_activated |  respClass_all(2, :) == sig_increase_shk_from_large_ind;
+shk_activated = respClass_all_array{1,2} == exclusive_activated |  respClass_all_array{1,2} == sig_increase_shk_from_large_ind;
 shk_activated_sum = sum(shk_activated);
 
 figure; plot(ts1, mean(neuron_mean_array{1, 2}(shk_activated,:))); hold on; plot(ts1,  mean(neuron_mean_array{1, 1}(Block_1_activated,:)));
@@ -439,15 +491,15 @@ end
 
 
 
-large_pre_and_shock_post = (respClass_all(1,:) == 1 & shk_activated == 1);
+large_pre_and_shock_post = (respClass_all_array{1,1} == 1 & shk_activated == 1);
 large_pre_and_shock_post_sum = sum(large_pre_and_shock_post)
-large_pre_to_small_pre = (respClass_all(1,:) == 1 & respClass_all(3,:) == 1);
+large_pre_to_small_pre = (respClass_all_array{1,1} == 1 & respClass_all_array{1,3} == 1);
 large_pre_to_small_pre_sum = sum(large_pre_to_small_pre)
 
 overlap = large_pre_and_shock_post == 1 & large_pre_to_small_pre == 1; 
 overlap_sum = sum(overlap)
 
-large_responsive_sum = sum(respClass_all(1,:) == 1);
+large_responsive_sum = sum(respClass_all_array{1,1} == 1);
 
 
 total_modulated = [(large_pre_and_shock_post_sum/large_responsive_sum)*100 (large_pre_to_small_pre_sum/large_responsive_sum)*100];
@@ -466,11 +518,11 @@ end
 
 %% calculates RESPONSIVE neuron percents for a series of filtering steps. dependent on what filters are used, so beware! 
 
-large_pre_and_shock_post = (respClass_all(1,:) == 1 | respClass_all(1,:) == 2) & (shk_activated == 1);
+large_pre_and_shock_post = (respClass_all_array{1,1} == 1 | rrespClass_all_array{1,1} == 2) & (shk_activated == 1);
 large_pre_and_shock_post_sum = sum(large_pre_and_shock_post)
-large_pre_to_small_pre = (respClass_all(1,:) == 1 | respClass_all(1,:) == 2) & (respClass_all(3,:) == 1 | respClass_all(3,:) == 2);
+large_pre_to_small_pre = (respClass_all_array{1,1} == 1 | respClass_all_array{1,1} == 2) & (respClass_all_array{1,3} == 1 | respClass_all_array{1,3} == 2);
 large_pre_to_small_pre_sum = sum(large_pre_to_small_pre)
-large_pre_still_large_pre = (respClass_all(1,:) == 1) & (respClass_all(4,:) == 1);
+large_pre_still_large_pre = (respClass_all_array{1,1} == 1) & (respClass_all_array{1,4} == 1);
 large_pre_still_large_sum = sum(large_pre_still_large_pre)
 
 
@@ -486,7 +538,7 @@ overlap_small_large_sum = sum(overlap_small_large)
 overlap_all = large_pre_to_small_pre == 1 & large_pre_still_large_pre == 1 & large_pre_and_shock_post == 1; 
 overlap_all_sum = sum(overlap_all)
 
-large_responsive_sum = sum(respClass_all(1,:) == 1 | respClass_all(1,:) == 2)
+large_responsive_sum = sum(respClass_all_array{1,1} == 1 | respClass_all_array{1,1} == 2)
 
 
 total_modulated = [(large_pre_and_shock_post_sum/large_responsive_sum)*100 (large_pre_to_small_pre_sum/large_responsive_sum)*100 (large_pre_still_large_sum/large_responsive_sum)*100];
@@ -507,11 +559,44 @@ end
 %%
 figure;
 hold on; 
-shadedErrorBar(ts1, mean(neuron_mean(respClass_all(iter,:) == 1,:)), mean(neuron_sem(respClass_all(iter,:) == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
-shadedErrorBar(ts1, mean(neuron_mean(respClass_all(iter,:) == 2,:)), mean(neuron_sem(respClass_all(iter,:) == 2,:)), 'lineProps', {'color', batlowW(iter,:)});
-shadedErrorBar(ts1, mean(neuron_mean(respClass_all(iter,:) == 3,:)), mean(neuron_sem(respClass_all(iter,:) == 3,:)), 'lineProps', {'color', batlowW(iter,:)});
+shadedErrorBar(ts1, mean(neuron_mean(respClass_all_array{:,iter} == 1,:)), mean(neuron_sem(respClass_all_array{:,iter} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+shadedErrorBar(ts1, mean(neuron_mean(respClass_all_array{:,iter} == 2,:)), mean(neuron_sem(respClass_all_array{:,iter} == 2,:)), 'lineProps', {'color', batlowW(iter,:)});
+shadedErrorBar(ts1, mean(neuron_mean(respClass_all_array{:,iter} == 3,:)), mean(neuron_sem(respClass_all_array{:,iter} == 3,:)), 'lineProps', {'color', batlowW(iter,:)});
 
 %%
 
-pun_responsive_B1_large_to_B2_null = (respClass_all(1,:) == 1 & respClass_all(1,:) == shk_activated) & respClass_all(3,:) == 2;
+pun_responsive_B1_large_to_B2_null = (respClass_all_array{1,1} == 1 & respClass_all_array{1,1} == shk_activated) & respClass_all_array{1,3} == 2;
 sum(pun_responsive_B1_large_to_B2_null)
+
+%% Use this code to plot heatmaps for each individual cell, across trials
+
+
+
+for ii = 1:size(zall_array, 2)
+    figure;
+    % Generate the heatmap
+    
+    imagesc(ts1, 1, zall_array{iter, ii});
+    hold on;
+    title("Cell from " + strrep(mouse_cells{iter,ii},'_', '-')  + " classified as " + respClass_all_array{iter}(ii))
+    
+    % Find the row index in animalIDs that matches mouse_cells{iter,ii}
+    isMatch = find(ismember(animalIDs, mouse_cells{iter, ii}));
+    
+    
+    if ~isempty(isMatch)
+        % Assuming that isMatch will be a vector of indices (it may be empty if there's no match)
+        % Access behav_tbl_iter using the first index (assuming there's only one match)
+        behav_tbl = behav_tbl_iter{1, 1}{isMatch};
+        isMatch = find(ismember(mouse_cells{iter, ii}, animalIDs));
+        time2Collect = behav_tbl.collectionTime(:)-behav_tbl.choiceTime(:);
+        trialStartTime = behav_tbl.stTime(:) - behav_tbl.choiceTime(:);
+        [numTrials,~]=size(behav_tbl.collectionTime(:));
+        Tris=[1:numTrials]';
+        scatter(time2Collect,Tris,'Marker','p','MarkerFaceColor','w')
+        scatter(trialStartTime,Tris,'Marker','s','MarkerFaceColor','k')
+        plot(zeros(numTrials,1),Tris)
+    end
+    hold off;
+    clear time2Collect trialStartTime numTrials Tris behav_tbl
+end

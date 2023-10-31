@@ -130,9 +130,9 @@ figure;
 hold on; 
 ylim([-0.8 0.8])
 xticks([-10 -5 0 5 10])
-shadedErrorBar(ts1, mean(concatenated_means_session_1(respClass_all(1,:) == 1,:)), mean(concatenated_sems_session_1(respClass_all(1,:) == 1,:)), 'lineProps', {'color', batlowW(1,:)});
-shadedErrorBar(ts1, mean(concatenated_means_session_2(respClass_all(2,:) == 1,:)), mean(concatenated_sems_session_2(respClass_all(2,:) == 1,:)), 'lineProps', {'color', batlowW(100,:)});
-shadedErrorBar(ts1, mean(concatenated_means_session_3(respClass_all(3,:) == 1,:)), mean(concatenated_sems_session_3(respClass_all(3,:) == 1,:)), 'lineProps', {'color', batlowW(200,:)});
+shadedErrorBar(ts1, mean(concatenated_means_session_1(respClass_all_array{1,1} == 1,:)), mean(concatenated_sems_session_1(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(1,:)});
+shadedErrorBar(ts1, mean(concatenated_means_session_2(respClass_all_array{1,2} == 1,:)), mean(concatenated_sems_session_2(respClass_all_array{1,2} == 1,:)), 'lineProps', {'color', batlowW(100,:)});
+shadedErrorBar(ts1, mean(concatenated_means_session_3(respClass_all_array{1,3} == 1,:)), mean(concatenated_sems_session_3(respClass_all_array{1,3} == 1,:)), 'lineProps', {'color', batlowW(200,:)});
 hold off
 
 

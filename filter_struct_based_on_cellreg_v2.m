@@ -2,9 +2,13 @@
 % load_data_4_cellreg.m and will loop through the sessions & CellReg files
 % to create or add to the cellreg_struct data structure. 
 
-load('BLA_panneuronal_Risk_2023_07_06.mat') %Load completely unmatched dataset - BLA panneuronal
+% load('BLA_panneuronal_Risk_2023_07_06.mat') %Load completely unmatched dataset - BLA panneuronal
 
-load('BLA_panneuronal_Risk_MATCHED_04232023.mat') %Load matched dataset (to be added to)
+load('BLA-NAcShell_Risk_2023_09_15.mat') %Load completely unmatched dataset - BLA-NAcSh
+
+% load('BLA_panneuronal_Risk_MATCHED_04232023.mat') %Load matched dataset (to be added to)
+
+load('BLA-NAcSh_Risk_MATCHED_10262023.mat') %Load matched dataset (to be added to)
 
 %%
 
@@ -59,3 +63,5 @@ for qq = 1:size(paired_sessions, 1)
     end
     clear cell_registered_struct column1 column2 sorted_column1 sort_indices sorted_column2 sorted_map nonzero_rows filtered_map
 end
+
+disp('added %s to the matched dataset', current_animal)

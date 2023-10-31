@@ -5,7 +5,7 @@
 final = struct();
 
 % Extract the "Pre_RDT_RM_vs_RDT_D1" field from cellreg_struct
-preRDTField = cellreg_struct.RM_D1_vs_Pre_RDT_RM;
+preRDTField = cellreg_struct.RDT_D1_vs_RDT_D2;
 
 % Copy the data from preRDTField and its subfields into final
 final = preRDTField;

@@ -5,7 +5,7 @@ uv.dt = 0.1; %what is your frame rate
 uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
 % Define the directory path you want to start with
-startDirectory = 'I:\MATLAB\Sean CNMFe\BLA-NAcSh\BLA-Insc-19';
+startDirectory = 'I:\MATLAB\Sean CNMFe\RG-Insc\RG-Insc-1';
 
 % Use the dir function to get a list of subfolders
 subfolders = dir(startDirectory);
