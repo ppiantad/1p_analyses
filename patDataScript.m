@@ -3,7 +3,7 @@
 %shock-responsive neurons from multiple sessions for multiple mice
 uv.evtWin = [-10 10]; %what time do you want to look at around each event [-10 10] [-5 35]
 uv.BLper = [-10 -5]; %what baseline period do you want for z-score [-10 -5] [-5 0]
-uv.dt = 0.2; %what is your frame rate (check neuron.Fs to be sure) 0.2 0.1
+uv.dt = 0.1; %what is your frame rate (check neuron.Fs to be sure) 0.2 0.1
 uv.behav = 'choiceTime'; %which behavior/timestamp to look at choiceTime stTime
 
 [BehavData,ABETfile,Descriptives, block_end]=ABET2TableFn_Chamber_A_v5('BLA-Insc-19 02042022 ABET.csv',[]);
@@ -16,7 +16,7 @@ ABET_removeheader = ABETfile(2:end,:);
 tbl_ABET = cell2table(ABET_removeheader);
 tbl_ABET.Properties.VariableNames = ABETfile(1,:);
 
-gpio_tbl = readtable('Session-20220204-114235_BLA-INSC-19_RDT_D3_GPIO.csv');
+gpio_tbl = readtable('2023-01-04-10-06-20_video_green_gpio.csv');
 
 shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
 

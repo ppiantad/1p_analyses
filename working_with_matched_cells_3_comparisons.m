@@ -1,7 +1,7 @@
 %%
 
 %% Create a scatterplot to show relationship between session 1 and session 2 activity
-start_time = -8; % sub-window start time
+start_time = -5; % sub-window start time
 end_time = 0; % sub-window end time
 
 % Find the indices in ts1 that correspond to the sub-window
@@ -10,9 +10,9 @@ sub_window_idx = ts1 >= start_time & ts1 <= end_time;
 % Extract the corresponding columns from neuron_mean
 
 
-sub_window_activity_session_1 = concatenated_means_session_1(:, sub_window_idx);
-sub_window_activity_session_2 = concatenated_means_session_2(:, sub_window_idx);
-sub_window_activity_session_3 = concatenated_means_session_3(:, sub_window_idx);
+sub_window_activity_session_1 = neuron_mean_array{1, 1}(:, sub_window_idx);
+sub_window_activity_session_2 = neuron_mean_array{1, 2}(:, sub_window_idx);
+sub_window_activity_session_3 = neuron_mean_array{1, 3}(:, sub_window_idx);
 
 mean_sub_window_activity_session_1 = mean(sub_window_activity_session_1, 2);
 mean_sub_window_activity_session_2 = mean(sub_window_activity_session_2, 2);
@@ -43,9 +43,9 @@ for ii = 1:size(sub_window_activity_session_1, 1)
     coeff_session_2(ii,:) = polyfit(ts1(sub_window_idx), sub_window_activity_session_2(ii,:), 1);
     coeff_session_3(ii,:) = polyfit(ts1(sub_window_idx), sub_window_activity_session_3(ii,:), 1);
 end
-coeff_session_1 = polyfit(ts1(sub_window_idx), sub_window_activity_session_1, 1);
-coeff_session_2 = polyfit(ts1(sub_window_idx), sub_window_activity_session_2, 1);
-coeff_session_3 = polyfit(ts1(sub_window_idx), sub_window_activity_session_3, 1);
+% coeff_session_1 = polyfit(ts1(sub_window_idx), sub_window_activity_session_1, 1);
+% coeff_session_2 = polyfit(ts1(sub_window_idx), sub_window_activity_session_2, 1);
+% coeff_session_3 = polyfit(ts1(sub_window_idx), sub_window_activity_session_3, 1);
 
 % Extract the slope (coefficient) values
 slope_session_1 = coeff_session_1(:,1);
@@ -56,9 +56,9 @@ slope_session_3 = coeff_session_3(:,1);
 alpha = 0.05; % Set your significance level
 
 % For example, you can use a t-test to compare slopes between sessions.
-[p_value_12, ~, stats_12] = ttest2(slope_session_1, slope_session_2, 'Alpha', alpha);
-[p_value_13, ~, stats_13] = ttest2(slope_session_1, slope_session_3, 'Alpha', alpha);
-[p_value_23, ~, stats_23] = ttest2(slope_session_2, slope_session_3, 'Alpha', alpha);
+[h_12,p_value_12,ci_12,stats_12] = ttest2(slope_session_1, slope_session_2, 'Alpha', alpha);
+[h_13,p_value_13,ci_13,stats_13] = ttest2(slope_session_1, slope_session_3, 'Alpha', alpha);
+[h_23,p_value_23,ci_23,stats_23] = ttest2(slope_session_2, slope_session_3, 'Alpha', alpha);
 
 % Check if any of the comparisons are statistically significant
 if p_value_12 < alpha
@@ -101,7 +101,7 @@ grid on;
 %%
 
 load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.ch/colourmaps.php)
-colormap(batlowW); % c1 = colorbar; 
+% colormap(batlowW); % c1 = colorbar; 
 % Create label vector y (corresponding to trial blocks)
 numNeuronsPerCondition = neuron_num;
 % change depending on the number of behaviors to decode!
@@ -153,6 +153,31 @@ xticks([-10 -5 0 5 10])
 shadedErrorBar(ts1, mean(concatenated_means_session_1(respClass_all(1,:) == 3,:)), mean(concatenated_sems_session_1(respClass_all(1,:) == 3,:)), 'lineProps', {'color', batlowW(1,:)});
 shadedErrorBar(ts1, mean(concatenated_means_session_2(respClass_all(2,:) == 3,:)), mean(concatenated_sems_session_2(respClass_all(2,:) == 3,:)), 'lineProps', {'color', batlowW(100,:)});
 shadedErrorBar(ts1, mean(concatenated_means_session_3(respClass_all(3,:) == 3,:)), mean(concatenated_sems_session_3(respClass_all(3,:) == 3,:)), 'lineProps', {'color', batlowW(200,:)});
+hold off
+
+
+
+%%
+figure;
+hold on; 
+ylim([-0.8 0.8])
+xticks([-10 -5 0 5 10])
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 1}(respClass_all_array{1,1} == 1,:)), mean(neuron_sem_array{1, 1}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(1,:)});
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:)), mean(neuron_sem_array{1, 2}(respClass_all_array{1,2} == 1,:)), 'lineProps', {'color', batlowW(100,:)});
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 3}(respClass_all_array{1,3} == 1,:)), mean(neuron_sem_array{1, 3}(respClass_all_array{1,3} == 1,:)), 'lineProps', {'color', batlowW(200,:)});
+hold off
+
+
+% plot a comparison where you filter on 3 different events, but you want to
+% look at how the activity pattern in the first comparison looks based on
+% data from the 2nd and 3rd comparison
+figure;
+hold on; 
+ylim([-0.8 0.8])
+xticks([-10 -5 0 5 10])
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 1}(respClass_all_array{1,1} == 1,:)), mean(neuron_sem_array{1, 1}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(1,:)});
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 2}(respClass_all_array{1,1} == 1,:)), mean(neuron_sem_array{1, 2}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(100,:)});
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), mean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(200,:)});
 hold off
 
 

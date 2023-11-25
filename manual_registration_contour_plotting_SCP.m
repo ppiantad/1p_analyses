@@ -12,19 +12,6 @@ figure;
 imagesc(CnD2) %only one session will look good here typically
 
 %%
-figure
-hold on
-imagesc(neuron.Cn) %only one session will look good here typically
-for m = 1:length(CoorD1)
-    fill(CoorD1{m, 1}(1,:), CoorD1{m, 1}(end,:),'blue')
-    text(CoorD1{m,1}(1,1), CoorD1{m, 1}(end,1),['Sess1' ' ' num2str(m)],'FontSize',16)
-end
- % imagesc(neuron.Cn)
-for m = 1:length(CoorD2)
-    fill(CoorD2{m, 1}(1,:), CoorD2{m, 1}(end,:),'red')
-    text(CoorD2{m,1}(1,1), CoorD2{m, 1}(end,1),['Sess2' ' ' num2str(m)], 'FontSize',16)
-end
-
 cell_registered_struct_temp = struct;
 
 cell_registered_struct_temp.cell_to_index_map = (1:length(CoorD1(:,1)))';
@@ -33,6 +20,34 @@ cell_registered_struct_temp.cell_to_index_map = [cell_registered_struct_temp.cel
 
 cell_registered_struct_temp.cell_to_index_map(:, 2) = zeros(size(cell_registered_struct_temp.cell_to_index_map, 1), 1);
 
+%%
+
+
+
+% Assuming you have already plotted the neurons as described in your code
+
+% Create a figure
+figure;
+hold on;
+imagesc(neuron.Cn) %only one session will look good here typically
+
+% Initialize variables to store clicked cell indices
+selectedCellSession1 = [];
+selectedCellSession2 = [];
+% Plot Session 1 cells
+for m = 1:length(CoorD1)
+    h_fill1(m) = fill(CoorD1{m, 1}(1,:), CoorD1{m, 1}(end,:), 'blue');
+    text(CoorD1{m,1}(1,1), CoorD1{m, 1}(end,1), ['Sess1' ' ' num2str(m)], 'FontSize', 16);
+    set(h_fill1(m), 'ButtonDownFcn', @(src, event) cellClickCallback(src, event, m, CoorD1, 'Session1'));
+end
+
+% Plot Session 2 cells
+for m = 1:length(CoorD2)
+    h_fill2(m) = fill(CoorD2{m, 1}(1,:), CoorD2{m, 1}(end,:), 'red');
+    text(CoorD2{m,1}(1,1), CoorD2{m, 1}(end,1), ['Sess2' ' ' num2str(m)], 'FontSize', 16);
+    set(h_fill2(m), 'ButtonDownFcn', @(src, event) cellClickCallback(src, event, m, CoorD2, 'Session2'));
+end
+
 
 
 %%
@@ -40,7 +55,10 @@ cell_registered_struct_temp.cell_to_index_map(:, 2) = zeros(size(cell_registered
 % Change the value in (this spot, 2) according to map and update = this spot
 cell_registered_struct_temp.cell_to_index_map(6, 2) = 4;
 
-
+%%
+% use the below line if you want to try clicking on the cells using the UI,
+% still a work in progress
+cell_registered_struct_temp.cell_to_index_map(selectedCellSession1, 2) = selectedCellSession2;
 
 %% set the rest of the cells that aren't matched to the 0 spots that were created in Column 1 (Session 1)
 

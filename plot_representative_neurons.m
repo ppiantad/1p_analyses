@@ -1,5 +1,8 @@
-window_sz = (0:.1:20);
-ts1 = (-10:.1:10);
+
+respClass_all = respClass_all_array{iter, 1};
+
+window_sz = (0:.1:20-0.1);
+ts1 = (-10:.1:10-0.1);
 
 % Define the categories
 category_1 = 1;
@@ -9,7 +12,7 @@ category_3 = 3;
 % Define the time window of interest
 
 start_time = 0; % sub-window start time
-end_time = 3; % sub-window end time
+end_time = 2; % sub-window end time
 
 % Find the indices in ts1 that correspond to the sub-window
 sub_window_idx = ts1 >= start_time & ts1 <= end_time;

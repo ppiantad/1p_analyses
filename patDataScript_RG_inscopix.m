@@ -3,11 +3,12 @@
 %shock-responsive neurons from multiple sessions for multiple mice
 uv.evtWin = [-10 10]; %what time do you want to look at around each event [-10 10] [-5 35]
 uv.BLper = [-10 -5]; %what baseline period do you want for z-score [-10 -5] [-5 0]
-uv.dt = 0.2; %what is your frame rate (check neuron.Fs to be sure) 0.2 0.1
+uv.dt = 0.1; %what is your frame rate (check neuron.Fs to be sure) 0.2 0.1
 uv.behav = 'choiceTime'; %which behavior/timestamp to look at choiceTime stTime
 
-[BehavData,ABETfile,Descriptives, block_end]=ABET2TableFn_Chamber_A_v5('RG-Insc-1 03122022.csv',[]);
-
+load('BLA_INSC_25_PRERDT_RM_2023-01-04-10-06-20_video_green_motion_corrected.CNMF_final.mat');
+[BehavData,ABETfile,Descriptives, block_end]=ABET2TableFn_Chamber_A_v5('BLA-INSC-25 01042023 ABET.csv',[]);
+gpio_tbl = readtable('2023-01-04-10-06-20_video_green_gpio.csv');
 % [BehavData,ABETfile]=ABET2TableFn_ShockTest('BLA-Insc-3 01272021.csv');
 
 
@@ -16,12 +17,14 @@ ABET_removeheader = ABETfile(2:end,:);
 tbl_ABET = cell2table(ABET_removeheader);
 tbl_ABET.Properties.VariableNames = ABETfile(1,:);
 
-gpio_tbl = readtable('RG-Insc-1_2022-03-12_RDT_D1_GPIO.csv');
+
 
 shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
 
 
 stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
+
+
 
 frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
 frames_test = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output'));
@@ -73,7 +76,7 @@ BehavData=TrialFilter(BehavData,'REW',1.2);
 
 
 
-load('RG-Insc-1_2022-03-12_RDT_D1.CNMF_final.mat');
+
 % ts1 = uv.dt:uv.dt:length(neuron.C_raw)*uv.dt;
 
 %create array of FRAMES for aligning
@@ -82,8 +85,8 @@ load('RG-Insc-1_2022-03-12_RDT_D1.CNMF_final.mat');
 length_ca_trace = size(neuron.C,2);
 trim_frames = size(frames(1:2:end),1)-length_ca_trace;
 
-frames3 = frames(1:4:end-2); % frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
-frames3 = frames_test_2(1:4:end);
+frames3 = frames(1:2:end-2); % frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
+% frames3 = frames_test_2(1:4:end);
 
 
 
@@ -96,6 +99,7 @@ frames3 = frames_test_2(1:4:end);
 for i = 1 %could loop through multiple mice like this if you had it
     eTS = BehavData.(uv.behav); %get time stamps
     ca = neuron.C_raw; %get calcium
+    % session_frames = 0.1:1:size(ca,2); %this was intended to align based on frames, but for some reason this introduces a large amount of drift? sticking with aligning based on the actual GPIO frames seems best still! 
 %     ca = neuron.S; %get binarized calcium
     caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
     
@@ -113,12 +117,17 @@ for i = 1 %could loop through multiple mice like this if you had it
         for t = 1:size(eTS,1)
             %% set each trial's temporal boundaries
             timeWin = [eTS(t)+uv.evtWin(1,1):uv.dt:eTS(t)+uv.evtWin(1,2)];  %calculate time window around each event
+            % timeWin = timeWin*10;
             BL_win = [eTS(t)+uv.BLper(1,1):uv.dt:eTS(t)+uv.BLper(1,2)];
+            % BL_win = BL_win*10
             if min(timeWin) > min(frames3) & max(timeWin) < max(frames3)    %if the beginning and end of the time window around the event occurred during the recording period. if not, the time window is out of range %if min(timeWin) > min(caTime) & max(timeWin) < max(caTime)
+            % if min(timeWin) > min(session_frames) & max(timeWin) < max(session_frames)    %if the beginning and end of the time window around the event occurred during the recording period. if not, the time window is out of range %if min(timeWin) > min(caTime) & max(timeWin) < max(caTime)
                 %% get unit event counts in trials
                 %% get unit ca traces in trials
+                % idx = session_frames > min(timeWin) & session_frames < max(timeWin);
                 idx = frames3 > min(timeWin) & frames3 < max(timeWin);      %logical index of time window around each behavioral event time  %idx = caTime > min(timeWin) & caTime < max(timeWin);
                 bl_idx = frames3 > min(BL_win) & frames3 < max(BL_win);
+                % bl_idx = session_frames > min(BL_win) & session_frames < max(BL_win);
                 %caTraceTrials(t,1:sum(idx)) = unitTrace(idx);               %store the evoked calcium trace around each event   (see below, comment out if dont want normalized to whole trace)
                 caTraceTrials(t,1:sum(idx)) = unitTrace(idx);
                 zb(t,:) = mean(unitTrace(bl_idx)); %baseline mean
@@ -176,7 +185,7 @@ window_ts3 = uv.evtWin(1):uv.dt:uv.evtWin(2);
 
 
 figure
-imagesc(window_ts3, 1, final.unitAVG.caTraces);hold on;
+imagesc(window_ts2, 1, final.unitAVG.caTraces);hold on;
 
 for ii = 1:size(final.unitXTrials,2)
     for jj = 1:size(final.unitXTrials(ii).zall)
@@ -185,7 +194,7 @@ for ii = 1:size(final.unitXTrials,2)
 end
     
  figure
-imagesc(window_ts3, 1, final.unitAVG.zscored_caTraces);hold on;   
+imagesc(window_ts2, 1, final.unitAVG.zscored_caTraces);hold on;   
     
 % B = sortrows(final.unitAVG.zscored_caTraces,[50:80]);
 % 
@@ -196,7 +205,7 @@ imagesc(window_ts3, 1, final.unitAVG.zscored_caTraces);hold on;
 
 
 
-animalID_select = 1;
+animalID_select = 10;
 
 
 figure
@@ -267,15 +276,17 @@ for b = 1:length(eTS)
 end
 
 %%
+
+plot_cell = 6
 figure(3);
 % Fill band values for second subplot. Doing here to scale onset bar
 % correctly
 XX = [window_ts3, fliplr(window_ts3)];
-YY = [final.unitAVG.caTraces(7)-final.unitSEM.caTraces(7), fliplr(final.unitAVG.caTraces(7)+final.unitSEM.caTraces(7))];
+YY = [final.unitAVG.caTraces(plot_cell,:)-final.unitSEM.caTraces(plot_cell,:), fliplr(final.unitAVG.caTraces(plot_cell,:)+final.unitSEM.caTraces(plot_cell,:))];
 
 % subplot(4,1,3)
 
-plot(window_ts3, final.unitAVG.caTraces(7), 'color',[0.8500, 0.3250, 0.0980], 'LineWidth', 3); hold on;
+plot(window_ts3, final.unitAVG.caTraces(plot_cell,:), 'color',[0.8500, 0.3250, 0.0980], 'LineWidth', 3); hold on;
 line([0 0], [min(YY), max(YY)], 'Color', [.7 .7 .7], 'LineWidth', 2)
 
 

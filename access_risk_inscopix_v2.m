@@ -1,19 +1,22 @@
-% load('BLA_Risk_Data_struct_01222023.mat')
 
 % load('BLA-NAcShell_Risk_2023_09_15.mat')
 
 % load('BLA_panneuronal_Risk_2023_07_06.mat')
 
-% load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
+% load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
+
+load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
 
 % load('BLA_panneuronal_Risk_matched_RM_D1_vs_Pre_RDT_RM.mat')
 
-load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
+% load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
+
+
 
 
 %%
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'SHOCK_TEST';
 epoc_to_align = 'choiceTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
@@ -28,7 +31,7 @@ neuron_sem_concat = [];
 
 iter = 0;
 
-clear neuron_mean neuron_sem neuron_num zall_array zall_to_BL_array zsd_array trials ii 
+clear neuron_mean neuron_sem neuron_num zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized
 
 %%
 
@@ -44,7 +47,7 @@ for ii = 1:size(fieldnames(final),1)
     
    
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials,varargin] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2, 'BLOCK', 1);
+        [data,trials,varargin] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'SHK', 1);
         behav_tbl_temp{ii,:} = data;
         trials = cell2mat(trials);
     
@@ -104,26 +107,26 @@ clear behav_tbl_temp
 
 %USE THIS VERSION FOR PCA FOR NOW - STILL NEED TO FIGURE OUT HOW TO GET THE
 %VERSION BELOW TO WORK WITH PCA
-% if iter == 1
-%     neuron_mean_concat = [neuron_mean];
-%     neuron_mean_unnorm_concat = [neuron_mean_unnormalized];
-%     neuron_sem_concat = [neuron_sem];
-% elseif iter > 1
-%     neuron_mean_concat = [neuron_mean_concat, neuron_mean];
-%     neuron_mean_unnorm_concat = [neuron_mean_unnorm_concat, neuron_mean_unnormalized];
-%     neuron_sem_concat = [neuron_sem_concat, neuron_sem];
-% end
-
-
 if iter == 1
     neuron_mean_concat = [neuron_mean];
     neuron_mean_unnorm_concat = [neuron_mean_unnormalized];
     neuron_sem_concat = [neuron_sem];
 elseif iter > 1
-    neuron_mean_concat = [neuron_mean_concat; neuron_mean];
-    neuron_mean_unnorm_concat = [neuron_mean_unnorm_concat; neuron_mean_unnormalized];
-    neuron_sem_concat = [neuron_sem_concat; neuron_sem];
+    neuron_mean_concat = [neuron_mean_concat, neuron_mean];
+    neuron_mean_unnorm_concat = [neuron_mean_unnorm_concat, neuron_mean_unnormalized];
+    neuron_sem_concat = [neuron_sem_concat, neuron_sem];
 end
+
+
+% if iter == 1
+%     neuron_mean_concat = [neuron_mean];
+%     neuron_mean_unnorm_concat = [neuron_mean_unnormalized];
+%     neuron_sem_concat = [neuron_sem];
+% elseif iter > 1
+%     neuron_mean_concat = [neuron_mean_concat; neuron_mean];
+%     neuron_mean_unnorm_concat = [neuron_mean_unnorm_concat; neuron_mean_unnormalized];
+%     neuron_sem_concat = [neuron_sem_concat; neuron_sem];
+% end
 % 
 %%
 % get the behavioral data corresponding to each block & stack them on top
@@ -167,7 +170,7 @@ median_collect_time_block_3 = median(concatenatedTable.collectionTime(concatenat
 
 %%
 start_time = 0; % sub-window start time
-end_time = 3; % sub-window end time
+end_time = 4; % sub-window end time
 
 % Find the indices in ts1 that correspond to the sub-window
 sub_window_idx = ts1 >= start_time & ts1 <= end_time;
