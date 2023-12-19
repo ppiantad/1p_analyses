@@ -42,9 +42,9 @@ function [data, ABETdata, Descriptives, block_end, largeRewSide, smallRewSide] =
 [~,~,ABETdata]=xlsread(filename);
 
 Headers={'Trial','Block','ForceFree','bigSmall','RewSelection','TrialPossible','stTime','choiceTime'...
-    'collectionTime','shock','omission','omissionALL','WL','WSLScode','win_stay','lose_shift','lose_omit','smallRew','bigRew'};
-data=table(zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1));
-data.Properties.VariableNames([1:19])=Headers;
+    'collectionTime','shock','omission','omissionALL','WL','WSLScode','win_stay','lose_shift','lose_omit','lose_stay','smallRew','bigRew'};
+data=table(zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1),zeros(80,1));
+data.Properties.VariableNames([1:20])=Headers;
 
 %%
 %add ABET data to table
@@ -290,6 +290,8 @@ for jj=1: numel(data.Trial)
                 data.WSLScode(jj)=4; %loss+1 trial
                if data.bigSmall(jj) == 0.3 && data.ForceFree(jj)==0 %if data.bigSmall(jj)==0.3 && data.ForceFree(jj)==0
                    data.lose_shift(jj)=1;
+               elseif data.bigSmall(jj) == 1.2 && data.ForceFree(jj)==0 %if data.bigSmall(jj)==0.3 && data.ForceFree(jj)==0
+                   data.lose_stay(jj)=1;
                elseif data.omissionALL(jj)==1
                    data.lose_omit(jj)=1;
                end
@@ -299,8 +301,7 @@ for jj=1: numel(data.Trial)
         
         
     end
-    
-%Last row of data table is garbage, so delete this row. Double check & change this if the last row ends up being usable! 
+
 
 
 
@@ -311,6 +312,16 @@ for jj=1: numel(data.Trial)
 % TotalLoseShift =sum(data.lose_shift(:)==1);
 % WinStayPercent = TotalWinStay / TotalWins;
 % LoseShiftPercent = TotalLoseShift / TotalLosses;
+end
+% added 10/21/2023    
+% Sometimes garbage columns get added at the end with no Trial #. Delete these columns 
+% Find the index of the first occurrence of 0 in the 'Trial' column
+% Find the indices where 'Trial' is 0
+zero_indices = find(data.Trial == 0);
+% 
+if ~isempty(zero_indices)
+    % Remove the rows where 'Trial' is 0
+    data(zero_indices, :) = [];
 end
 
 collect_lat_b1 = [];
@@ -340,12 +351,14 @@ Descriptives.RiskPercent = (sum(data.bigRew(:)==1)/(sum(data.bigRew)+(sum(data.s
 Descriptives.TotalWinStay = sum(data.win_stay(:)==1);
 Descriptives.TotalLoseShift = sum(data.lose_shift(:)==1);
 Descriptives.TotalLoseOmit = sum(data.lose_omit(:)==1);
+Descriptives.TotalLoseStay = sum(data.lose_stay(:)==1);
 Descriptives.Block2_3_Wins = sum(data.WL(block2_3_ind)==1);
 Descriptives.Block2_3_WinStay = sum(data.win_stay(block2_3_ind)==1);
 Descriptives.Block2_3_WinStayPercent = Descriptives.Block2_3_WinStay / Descriptives.Block2_3_Wins;
 Descriptives.WinStayPercent = Descriptives.TotalWinStay / Descriptives.TotalWins;
 Descriptives.LoseShiftPercent = Descriptives.TotalLoseShift / Descriptives.TotalLosses;
 Descriptives.LoseOmitPercent = Descriptives.TotalLoseOmit / Descriptives.TotalLosses;
+Descriptives.LoseStaytPercent = Descriptives.TotalLoseStay / Descriptives.TotalLosses;
 Descriptives.B1_Collect_Lat = mean(collect_lat_b1);
 Descriptives.B2_Collect_Lat = mean(collect_lat_b2);
 Descriptives.B3_Collect_Lat = mean(collect_lat_b3);

@@ -6,7 +6,19 @@ uv.BLper = [-10 -5]; %what baseline period do you want for z-score [-10 -5] [-5 
 uv.dt = 0.1; %what is your frame rate (check neuron.Fs to be sure) 0.2 0.1
 uv.behav = 'choiceTime'; %which behavior/timestamp to look at choiceTime stTime
 
-[BehavData,ABETfile,Descriptives, block_end]=ABET2TableFn_Chamber_A_v5('BLA-Insc-19 02042022 ABET.csv',[]);
+
+load('BLA-Insc-40_RDT_D1_2023-05-17-14-32-20_video_green_motion_corrected.CNMF_final.mat');
+[BehavData,ABETfile,Descriptives, block_end]=ABET2TableFn_Chamber_A_v6('BLA-Insc-40 05172023 ABET.csv',[]);
+gpio_tbl = readtable('2023-05-17-14-32-20_video_green_gpio.csv');
+
+SLEAP_data = readtable('BLA-Insc-40_RDT D1_body_sleap_data.csv');
+%EDIT FOR EACH MOUSE AS NECESSARY
+SLEAP_time_range_adjustment =  []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; 
+
+
+
+
+
 
 % [BehavData,ABETfile]=ABET2TableFn_ShockTest('BLA-Insc-3 01272021.csv');
 
@@ -16,7 +28,7 @@ ABET_removeheader = ABETfile(2:end,:);
 tbl_ABET = cell2table(ABET_removeheader);
 tbl_ABET.Properties.VariableNames = ABETfile(1,:);
 
-gpio_tbl = readtable('2023-01-04-10-06-20_video_green_gpio.csv');
+
 
 shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
 
@@ -69,11 +81,37 @@ BehavData.choTime3 = BehavData.Insc_TTL+BehavData.choTime2;
 
 %filter based on TrialFilter inputs (see TrialFilter.m for full list of
 %possibilities)
-BehavData=TrialFilter(BehavData,'REW',1.2);
+BehavData=TrialFilter(BehavData,'ALL',1);
+
+
+% BehavData_for_SLEAP = BehavData;
+% BehavData_for_SLEAP.TrialPossible(:)=BehavData_for_SLEAP.TrialPossible(:)-stTime(1);
+% BehavData_for_SLEAP.choiceTime(:)=BehavData_for_SLEAP.choiceTime(:)-stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+7.39500000000000;
+% BehavData_for_SLEAP.collectionTime(:)=BehavData_for_SLEAP.collectionTime(:)-stTime(1);
+% BehavData_for_SLEAP.stTime(:)=BehavData_for_SLEAP.stTime(:)-stTime(1);
+% adjust SLEAP timestamps because Inscopix is started first (with the start
+% time indicated in stTime(1)
+% SLEAP_data.idx_time(:) = SLEAP_data.idx_time(:) + stTime(1);
+
+% % Assuming 'Timestamp' is the timestamp variable in your table
+% timestamps = SLEAP_data.idx_time;
+% 
+% % Specify the original and target sampling rates
+% originalSamplingRate = 30; % Hz
+% targetSamplingRate = 10;    % Hz
+% 
+% % Calculate the downsampled indices
+% downsampledIndices = round(linspace(1, height(SLEAP_data), height(SLEAP_data) / (originalSamplingRate / targetSamplingRate)));
+% 
+% % Downsample the table
+% SLEAP_downsampled_data = SLEAP_data(downsampledIndices, :);
+% 
+% SLEAP_data = SLEAP_downsampled_data;
+% 
 
 
 
-load('BLA-Insc-19_Session-20220204-114235_BLA-INSC-19_RDT_D3.CNMF_final.mat');
+
 % ts1 = uv.dt:uv.dt:length(neuron.C_raw)*uv.dt;
 
 %create array of FRAMES for aligning
@@ -82,7 +120,7 @@ load('BLA-Insc-19_Session-20220204-114235_BLA-INSC-19_RDT_D3.CNMF_final.mat');
 length_ca_trace = size(neuron.C,2);
 trim_frames = size(frames(1:2:end),1)-length_ca_trace;
 
-frames3 = frames(1:4:end-2); % frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
+frames3 = frames(1:2:end-2); % frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
 % frames3 = frames_test_2(1:4:end);
 
 
@@ -121,8 +159,12 @@ for i = 1 %could loop through multiple mice like this if you had it
                 bl_idx = frames3 > min(BL_win) & frames3 < max(BL_win);
                 %caTraceTrials(t,1:sum(idx)) = unitTrace(idx);               %store the evoked calcium trace around each event   (see below, comment out if dont want normalized to whole trace)
                 caTraceTrials(t,1:sum(idx)) = unitTrace(idx);
-                zb(t,:) = mean(unitTrace(bl_idx)); %baseline mean
-                zsd(t,:) = std(unitTrace(bl_idx)); %baseline std
+                % zb(t,:) = mean(unitTrace(bl_idx)); %baseline mean
+                % zsd(t,:) = std(unitTrace(bl_idx)); %baseline std
+                zb(t,:) = mean(caTraceTrials(t,:)); %baseline mean
+                zsd(t,:) = std(caTraceTrials(t,:)); %baseline std
+
+
                 tmp = 0;
                 for j = 1:size(caTraceTrials,2)
                     tmp = tmp+1;
@@ -196,7 +238,7 @@ imagesc(window_ts3, 1, final.unitAVG.zscored_caTraces);hold on;
 
 
 
-animalID_select = 1;
+animalID_select = 10
 
 
 figure
@@ -217,22 +259,22 @@ plot(window_ts3, final.unitAVG.zscored_caTraces(animalID_select,:));
 title('Z-scored Ca Traces (normalized)')
 
 
-figure
-imagesc(window_ts2, 1, final.unitXTrials(animalID_select).caTraces);hold on;
-scatter(time2Collect,Tris,'Marker','p','MarkerFaceColor','w')
-plot(zeros(numTrials,1),Tris)
-% xticklabels = (final.uv.evtWin(1,1)):5:(final.uv.evtWin(1,2));
-% xticks = linspace(1, length(final.unitAVG.caTraces), numel(xticklabels));
-% set(gca, 'XTick', xticks, 'XTickLabel', xticklabels)
-% set(gca,'FontName','Arial','FontSize',16)
-xlabel('Time from Large Rew Choice (s)','FontSize',22)
-ylabel('Trial number','FontSize',22)
-title('Ca Traces (not normalized)')
-
-
-figure;
-plot(window_ts3, final.unitAVG.caTraces(animalID_select,:));
-title('Ca Traces (not normalized)')
+% figure
+% imagesc(window_ts2, 1, final.unitXTrials(animalID_select).caTraces);hold on;
+% scatter(time2Collect,Tris,'Marker','p','MarkerFaceColor','w')
+% plot(zeros(numTrials,1),Tris)
+% % xticklabels = (final.uv.evtWin(1,1)):5:(final.uv.evtWin(1,2));
+% % xticks = linspace(1, length(final.unitAVG.caTraces), numel(xticklabels));
+% % set(gca, 'XTick', xticks, 'XTickLabel', xticklabels)
+% % set(gca,'FontName','Arial','FontSize',16)
+% xlabel('Time from Large Rew Choice (s)','FontSize',22)
+% ylabel('Trial number','FontSize',22)
+% title('Ca Traces (not normalized)')
+% 
+% 
+% figure;
+% plot(window_ts3, final.unitAVG.caTraces(animalID_select,:));
+% title('Ca Traces (not normalized)')
 
 
 

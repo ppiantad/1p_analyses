@@ -18,7 +18,7 @@ load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
 
 %%
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 epoc_to_align = 'choiceTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
@@ -31,11 +31,7 @@ neuron_mean_unnorm_concat = [];
 neuron_sem_concat = [];
 
 
-if exist('iter', 'var') == 1
-   
-elseif exist('iter', 'var') == 0
-    iter = 0;
-end
+
 
 clear neuron_mean neuron_sem neuron_num zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized
 
@@ -54,7 +50,7 @@ for ii = 1:size(fieldnames(final),1)
     
    
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials,varargin] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 0.3);
+        [data,trials,varargin] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2, 'BLOCK', 3, 'SHK', 0);
         behav_tbl_temp{ii,:} = data;
         trials = cell2mat(trials);
         trials_per_mouse{ii, iter+1} = trials;
@@ -64,7 +60,21 @@ for ii = 1:size(fieldnames(final),1)
         numMeasurements = round(evtWinSpan/final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.dt); %need to round due to odd frame rate
         
         for qq = 1:size(final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials,2)
-            neuron_num = neuron_num+1; 
+            if isempty(caTraceTrials)
+                %NEED TO EDIT ALL THIS TO SKIP MICE THAT DONT HAVE CERTAIN
+                %TRIALS, AND REMOVE DATA FROM PRIOR ITER IF THEY EXISTED
+                %THERE! 
+                respClass.(identity_classification_str).(filter_args).activated(neuron_num,1) = 0;
+                respClass.(identity_classification_str).(filter_args).inhibited(neuron_num,1) = 0;
+                respClass.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) = 0;
+                respClass.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = 0;
+                respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = 0;
+                neuron_mean(neuron_num,:) = nan;
+                neuron_sem(neuron_num,:) = nan;
+            elseif ~isempty(caTraceTrials)
+
+
+                neuron_num = neuron_num+1;
 
                 caTraceTrials = final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials(qq).caTraces(trials,1:numMeasurements);
                 for h = 1:size(caTraceTrials,1)
@@ -85,7 +95,6 @@ for ii = 1:size(fieldnames(final),1)
                 zsd_array(neuron_num) = {zsd};
                 zall_to_BL_array(neuron_num) = {final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials(qq).zall(trials,:)};
                 zall_mouse{ii, iter+1}(qq) = {zall};
-                caTraceTrials_mouse{ii, iter+1}(qq) = {caTraceTrials};
                 neuron_mean_mouse{ii, iter+1}(qq,: ) = mean(zall, 1);
                 neuron_sem_mouse{ii, iter+1}(qq,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
                 %uncomment if you want to save any of the data to the
@@ -93,7 +102,7 @@ for ii = 1:size(fieldnames(final),1)
                 %recommend doing this if filtering behavior by 'ALL,1, so that
                 %you capture all trials
                 %             final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials(qq).zall_window = zall;
-           
+            end
         clear zall caTraceTrials zb zsd;
             processed_data = struct;
             

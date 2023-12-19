@@ -8,12 +8,15 @@ concatenated_sem_data = cell(12, 1);
 for i = 1:size(neuron_mean_mouse, 1)
     % Extract the data from the current row for columns {1,1}, {1,2}, and {1,3}
     current_row_data = neuron_mean_mouse{i, 1};
-    current_row_data = vertcat(current_row_data, neuron_mean_mouse{i, 2});
-    current_row_data = vertcat(current_row_data, neuron_mean_mouse{i, 3});
-    
-    % Store the concatenated data in the result cell array
-    concatenated_data{i} = current_row_data;
-    neurons_per_mouse(i) = size(neuron_mean_mouse{i, 1}, 1);
+    for q = 1:iter-1
+        % current_row_data = neuron_mean_mouse{i, q};
+        current_row_data = vertcat(current_row_data, neuron_mean_mouse{i, q+1});
+        
+
+        % Store the concatenated data in the result cell array
+        concatenated_data{i} = current_row_data;
+        neurons_per_mouse(i) = size(neuron_mean_mouse{i, 1}, 1);
+    end
 end
 %%
 % select the # animal to decode
@@ -191,7 +194,7 @@ hold off;
 % Create label vector y (corresponding to trial blocks)
 numNeuronsPerCondition = neuron_num;
 % change depending on the number of behaviors to decode!
-numConditions = size(neuron_mean_concat, 2)/numMeasurements;
+numConditions = size(neuron_mean_concat, 1)/numMeasurements;
 
 
 

@@ -20,7 +20,7 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 
 % load('BLA_panneuronal_Risk_matched_RM_D1_vs_Pre_RDT_RM.mat')
 
-% load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
+load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
 
 % load('BLA_panneuronal_Risk_matched_RDT_D1_vs_RDT_D2.mat')
 
@@ -30,14 +30,14 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 
 % load('BLA_NAcSh_Risk_matched_RM_D1_vs_Pre_RDT_RM.mat');
 
-load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
+% load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
 
 % load('BLA_NAcSh_Risk_matched_RDT_D1_vs_RDT_D2.mat')
 
 %%
 
-session_to_analyze = 'RDT_D1';
-epoc_to_align = 'collectionTime';
+session_to_analyze = 'Pre_RDT_RM';
+epoc_to_align = 'choiceTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
 window_sz = (0:.1:20-0.1);
@@ -47,11 +47,13 @@ ts1 = (-10:.1:10-0.1);
 %% %user selected variables
 clear neuron_mean neuron_sem neuron_num trials
 uv.chooseFluoresenceOrRate = 1;                                             %set to 1 to classify fluoresence response; set to 2 to classify firing rate responses
-uv.sigma = 1.5;                                                               %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
+uv.sigma = 2;                                                               %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
-% uv.evtSigWin.outcome = [-4 0];                                       %period within time window that response is classified on (sec relative to event)
-% uv.evtSigWin.outcome = [0 4]; %for REW
-uv.evtSigWin.outcome = [0 2]; %for SHK
+% uv.evtSigWin.outcome = [-3 0]; %for trial start
+uv.evtSigWin.outcome = [-4 0]; %for pre-choice                                     %period within time window that response is classified on (sec relative to event)
+% uv.evtSigWin.outcome = [1 3]; %for REW
+
+% uv.evtSigWin.outcome = [0 1]; %for SHK
 % uv.evtSigWin.groomingStop = [-.5 3];
 % uv.evtSigWin.faceGroomingStart = [-.5 2];
 % uv.evtSigWin.faceGroomingStop = [-.5 2];
@@ -85,7 +87,7 @@ neuron_num = 0;
 for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2, 'BLOCK', 1);
+        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2);
         
         if ~strcmp('stTime',data.Properties.VariableNames)
             data.stTime = data.TrialPossible - 5;
@@ -136,17 +138,25 @@ for ii = 1:size(fieldnames(final),1)
                     for j = 1:size(caTraceTrials(1:length(window_sz)),2)
                         tmp = tmp+1;
                         zall(h,tmp) = (caTraceTrials(h,tmp) - zb(h))/zsd(h);
+                        
                     end
-                    
+                    % zall(h,:) = sgolayfilt(zall(h,:), 9, 21);
 %                     zall_to_BL_array(iter, neuron_num) = {final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials(qq).zall(trials,:)};
+                end
+
+                % Loop through each row of zall
+                for z = 1:size(zall, 1)
+                    % Apply Savitzky-Golay filter to each row
+                    zall(z, :) = sgolayfilt(zall(z, :), 9, 21);
                 end
                 mouse_cells(iter, neuron_num) = {currentanimal};
                 zall_array(iter, neuron_num) = {zall};
-                neuron_mean(neuron_num,:) = sgolayfilt((mean(zall,1)), 9, 21);
+                % neuron_mean(neuron_num,:) = sgolayfilt((mean(zall,1)), 9, 21);
+                neuron_mean(neuron_num,:) = (mean(zall,1));
                 if size(zall, 1) == 1
                     neuron_sem(neuron_num,:) = zeros(1, size(neuron_sem, 2));
                 else
-                    neuron_sem(neuron_num,:) = sgolayfilt(nanstd(zall,1)/(sqrt(size(zall, 1))), 9, 21);
+                    neuron_sem(neuron_num,:) = nanstd(zall,1)/(sqrt(size(zall, 1)));
                 end
                 zsd_array(iter, neuron_num) = {zsd};
 
@@ -286,7 +296,7 @@ for ii = 1:size(zall_array, 2)
         localMinHeatmap = min(zall_array{qq, ii}(:));
         globalMaxHeatmap = max(globalMaxHeatmap, localMaxHeatmap);
         globalMinHeatmap = min(globalMinHeatmap, localMinHeatmap);
-
+  
         % Find the row index in animalIDs that matches mouse_cells{qq, ii}
         isMatch = find(ismember(animalIDs,       mouse_cells{qq, ii}));
 
@@ -324,7 +334,7 @@ for ii = 1:size(zall_array, 2)
         % Update global max and min for line graph
         localMaxYLine = max(zall_array{qq, ii}, [], "all");
         localMinYLine = min(zall_array{qq, ii}, [], "all");
-        globalMaxYLine = max(globalMaxYLine, localMa xYLine);
+        globalMaxYLine = max(globalMaxYLine, localMaxYLine);
         globalMinYLine = min(globalMinYLine, localMinYLine);
         
         hold off;        
@@ -351,6 +361,7 @@ end
 excited_to_excited = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 1;
 inhibited_to_inhibited = respClass_all_array{1,1} == 2 & respClass_all_array{1,2} == 2;
 excited_to_excited_sum = sum(excited_to_excited);
+indices_excited_to_excited = find(excited_to_excited == 1);
 inhibited_to_inhibited_sum = sum(inhibited_to_inhibited);
 
 excited_to_inhibited = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 2;
@@ -412,13 +423,13 @@ exclusive_inhibited = respClass_all_array{1,1} ~= 2 & respClass_all_array{1,2} =
 
 % UN-COMMENT THE DATA THAT YOU WANT TO PLOT
 % Calculate the total height of the stacked bar
-% total_height = sum(total_activated_possible)-excited_to_excited_sum;
-total_height = sum(total_inhibited_possible)-inhibited_to_inhibited_sum;
+total_height = sum(total_activated_possible)-excited_to_excited_sum;
+% total_height = sum(total_inhibited_possible)-inhibited_to_inhibited_sum;
 
 % UN-COMMENT THE DATA THAT YOU WANT TO PLOT
 % Create a matrix for the bar plot data
-% stacked_plot_data = [excited_to_excited_sum, excited_to_inhibited_sum, excited_to_neutral_sum, neutral_to_excited_sum, inhibited_to_excited_sum];
-stacked_plot_data = [inhibited_to_inhibited_sum, inhibited_to_excited_sum, inhibited_to_neutral_sum, neutral_to_inhibited_sum, excited_to_inhibited_sum];
+stacked_plot_data = [excited_to_excited_sum, excited_to_inhibited_sum, excited_to_neutral_sum, neutral_to_excited_sum, inhibited_to_excited_sum];
+% stacked_plot_data = [inhibited_to_inhibited_sum, inhibited_to_excited_sum, inhibited_to_neutral_sum, neutral_to_inhibited_sum, excited_to_inhibited_sum];
 
 
 % Calculate the remaining portion
@@ -441,8 +452,8 @@ ylim([0, total_height]);
 
 % Add labels and a legend
 % ylabel('Total Activation');
-% legend('Co-Excited', 'Excited to Inhibited', 'Excited to Neutral', 'Neutral to Excited', 'Inhibited to Excited');
-legend('Co-Inhibited', 'Inhibited to Excited', 'Inhibited to Neutral', 'Neutral to Inhibited', 'Excited to Inhibited');
+legend('Co-Excited', 'Excited to Inhibited', 'Excited to Neutral', 'Neutral to Excited', 'Inhibited to Excited');
+% legend('Co-Inhibited', 'Inhibited to Excited', 'Inhibited to Neutral', 'Neutral to Inhibited', 'Excited to Inhibited');
 
 %%
 %CREATE A STACKED BAR PLOT TO SHOW THE PROPORTION OF MODULATED neurons
@@ -617,7 +628,7 @@ end
 
 
 A = (sum_activated/neuron_num)*100;
-I = (co_activated_sum/neuron_num)*100;
+I = (excited_to_excited_sum/neuron_num)*100;
 K = [A I];
 figure; 
 [H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
@@ -627,7 +638,7 @@ end
 
 
 A = (sum_activated(iter)/sum_activated(iter-1))*100;
-I = (co_activated_sum/neuron_num)*100;
+I = (excited_to_excited_sum/neuron_num)*100;
 K = [A I];
 figure; 
 [H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
@@ -735,35 +746,3 @@ shadedErrorBar(ts1, mean(neuron_mean(respClass_all_array{:,iter} == 3,:)), mean(
 pun_responsive_B1_large_to_B2_null = (respClass_all_array{1,1} == 1 & respClass_all_array{1,1} == shk_activated) & respClass_all_array{1,3} == 2;
 sum(pun_responsive_B1_large_to_B2_null)
 
-%% Use this code to plot heatmaps for each individual cell, across trials
-
-
-
-for ii = 1:size(zall_array, 2)
-    figure;
-    % Generate the heatmap
-    
-    imagesc(ts1, 1, zall_array{iter, ii});
-    hold on;
-    title("Cell from " + strrep(mouse_cells{iter,ii},'_', '-')  + " classified as " + respClass_all_array{iter}(ii))
-    
-    % Find the row index in animalIDs that matches mouse_cells{iter,ii}
-    isMatch = find(ismember(animalIDs, mouse_cells{iter, ii}));
-    
-    
-    if ~isempty(isMatch)
-        % Assuming that isMatch will be a vector of indices (it may be empty if there's no match)
-        % Access behav_tbl_iter using the first index (assuming there's only one match)
-        behav_tbl = behav_tbl_iter{1, 1}{isMatch};
-        isMatch = find(ismember(mouse_cells{iter, ii}, animalIDs));
-        time2Collect = behav_tbl.collectionTime(:)-behav_tbl.choiceTime(:);
-        trialStartTime = behav_tbl.stTime(:) - behav_tbl.choiceTime(:);
-        [numTrials,~]=size(behav_tbl.collectionTime(:));
-        Tris=[1:numTrials]';
-        scatter(time2Collect,Tris,'Marker','p','MarkerFaceColor','w')
-        scatter(trialStartTime,Tris,'Marker','s','MarkerFaceColor','k')
-        plot(zeros(numTrials,1),Tris)
-    end
-    hold off;
-    clear time2Collect trialStartTime numTrials Tris behav_tbl
-end

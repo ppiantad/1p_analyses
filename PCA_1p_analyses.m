@@ -1,5 +1,7 @@
 
 
+neuron_mean_concat = neuron_mean_concat_PCA;
+
 %% PCA on data that was zscored prior to inputting in to PCA
 % Load your data if not already loaded
 % load('neuron_mean_concat.mat');

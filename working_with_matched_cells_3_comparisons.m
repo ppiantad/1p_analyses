@@ -181,3 +181,75 @@ shadedErrorBar(ts1, mean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:
 hold off
 
 
+% use if you want to plot data aligned to diff events based on 1 timeseries
+% (e.g., trial start neurons, pre-choice neurons, consumption neurons. if
+% you want to have the figure aligned to CHOICE, use the 2nd
+% neuron_mean_array, if TrialFilter was used in the above order!)
+figure;
+hold on; 
+ylim([-0.8 0.8])
+xticks([-10 -5 0 5 10])
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 2}(respClass_all_array{1,1} == 1,:)), mean(neuron_sem_array{1, 2}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(1,:)});
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:)), mean(neuron_sem_array{1, 2}(respClass_all_array{1,2} == 1,:)), 'lineProps', {'color', batlowW(100,:)});
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 2}(respClass_all_array{1,3} == 1,:)), mean(neuron_sem_array{1, 2}(respClass_all_array{1,3} == 1,:)), 'lineProps', {'color', batlowW(200,:)});
+hold off
+
+start_active = neuron_mean_array{1, 2}(respClass_all_array{1,1} == 1, :);
+choice_active = neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:);
+consumption_active = neuron_mean_array{1, 2}(respClass_all_array{1,3} == 1,:);
+
+
+start_time = -3; % sub-window start time
+end_time = 0; % sub-window end time
+
+% Find the indices in ts1 that correspond to the sub-window
+sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+
+% Extract the corresponding columns from neuron_mean
+sub_window_activity = start_active(:, sub_window_idx);
+mean_activity = mean(sub_window_activity, 2);
+
+[~, sorted_idx] = sort(mean_activity, 'ascend');
+
+% Sort neuron_mean based on the sorted indices
+start_ranked_neurons = start_active(sorted_idx, :);
+figure;
+% Generate the heatmap
+imagesc(ts1, 1, start_ranked_neurons);
+
+% Add a colorbar and axis labels
+colorbar;
+xlabel('Time (s)');
+ylabel('Neuron');
+
+% Reverse the y-axis so that the highest mean activity is at the top
+% set(gca, 'YDir', 'reverse');
+
+
+start_time = -3; % sub-window start time
+end_time = 0; % sub-window end time
+
+% Find the indices in ts1 that correspond to the sub-window
+sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+
+% Extract the corresponding columns from neuron_mean
+sub_window_activity = start_active(:, sub_window_idx);
+mean_activity = mean(sub_window_activity, 2);
+
+[~, sorted_idx] = sort(mean_activity, 'ascend');
+
+% Sort neuron_mean based on the sorted indices
+start_ranked_neurons = start_active(sorted_idx, :);
+figure;
+% Generate the heatmap
+imagesc(ts1, 1, start_ranked_neurons);
+
+% Add a colorbar and axis labels
+colorbar;
+xlabel('Time (s)');
+ylabel('Neuron');
+
+
+
+
+array_for_heatmap = [neuron_mean_array{1, 2}(respClass_all_array{1,1} == 1,:); neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:); neuron_mean_array{1, 2}(respClass_all_array{1,3} == 1,:)]
