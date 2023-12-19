@@ -125,7 +125,7 @@ overallTotalSamples = 0;
 % Loop over folds
 for fold = 1:numFolds
     % Create indices for the current fold
-    cvIdx = crossvalind('Kfold', size(neuron_mean_concat_PCA_redo, 2), numFolds);
+        
     
     % Extract training and testing sets for the current fold
     XTrain = neuron_mean_concat_PCA_redo(cvIdx ~= fold, :);
