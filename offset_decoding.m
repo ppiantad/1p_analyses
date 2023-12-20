@@ -67,6 +67,7 @@ for p = 1:size(trimmed_concatenatedColumns_offsets, 1)
         accuracy(p, fold) = correctPredictions / totalSamples;
         predictions_array(:,p) = predictions;
     end
+    
     final_accuracy(p) = mean(accuracy(p,: ));
     
 

@@ -54,7 +54,7 @@ for ii = 1:size(fieldnames(final),1)
     
    
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials,varargin] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 0.3);
+        [data,trials,varargin] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2, 'BLOCK', 3);
         behav_tbl_temp{ii,:} = data;
         trials = cell2mat(trials);
         trials_per_mouse{ii, iter+1} = trials;

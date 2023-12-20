@@ -40,6 +40,17 @@ end
 % Initialize an empty cell array to store the concatenated columns
 concatenatedColumns = cell(1, size(columnArray_all, 2));
 
+% get the events (based on the number of iters - which corresponds to the
+% trial filtering done in access_risk_inscopix) into an array
+
+for col = 1:size(columnArray_all, 2)
+    for z = 1:iter
+        event{z} = ones(size(trialArray_all{z, col}, 1), 1)*z;
+    end
+    concatenatedEvents{col} = vertcat(event{:});
+    
+end 
+
 % Loop over columns
 for col = 1:size(columnArray_all, 2)
     % Extract the current column
@@ -52,7 +63,7 @@ for col = 1:size(columnArray_all, 2)
     concatenatedColumns{col} = vertcat(currentColumn{:});
     concatenatedColumns_trials{col} = vertcat(currentColumn_trials{:});
     concatenatedColumns_time{col} = vertcat(currentColumn_time{:});
-    concatenatedEvents{col} = vertcat(event_1, event_2);
+    
 end
 
 
@@ -65,19 +76,32 @@ end
 max_values_event1 = zeros(1, size(concatenatedColumns_trials, 2));
 max_values_event2 = zeros(1, size(concatenatedColumns_trials, 2));
 
+
+for col = 1:iter
+    event{col} = ones(size(currentColumn{col, 1}, 1), 1)*col; 
+end
+
+
+
+
 % Loop through each column
 for col = 1:size(concatenatedColumns_trials, 2)
-    % Extract cell arrays for the current column
-    values_event1 = concatenatedColumns_trials{1, col}(concatenatedEvents{1, col} == 1);
-    values_event2 = concatenatedColumns_trials{1, col}(concatenatedEvents{1, col} == 2);
-    
-    % Calculate the maximum values for each case
-    max_values_event1(col) = max(values_event1);
-    max_values_event2(col) = max(values_event2);
+
+    for iters = 1:iter
+        % Extract cell arrays for the current column
+        values = concatenatedColumns_trials{1, col}(concatenatedEvents{1, col} == iters);
+        
+
+        % Calculate the maximum values for each case
+        
+
+    end
+    max_values(col) = max(values);
+    clear values
 end
 
 % Find the minimum value present in either array
-min_value = min(min([max_values_event1; max_values_event2]));
+min_value = min(max_values);
 
 %% trim arrays to only include data from the mouse with the fewest of a given trial type.
 % given that we have so many more large reward trials, this will be limited
