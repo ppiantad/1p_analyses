@@ -60,8 +60,8 @@ for col = 1:size(columnArray_all, 2)
     currentColumn = columnArray_all(:, col);
     currentColumn_trials = trialArray_all(:,col); 
     currentColumn_time = time_seriesArray_all(:,col);
-    event_1 = ones(size(currentColumn{1, 1}, 1), 1);
-    event_2 = ones(size(currentColumn{2, 1}, 1), 1)*2;
+    % event_1 = ones(size(currentColumn{1, 1}, 1), 1);
+    % event_2 = ones(size(currentColumn{2, 1}, 1), 1)*2;
     % Vertically concatenate the rows of the current column
     concatenatedColumns{col} = vertcat(currentColumn{:});
     concatenatedColumns_trials{col} = vertcat(currentColumn_trials{:});
@@ -72,19 +72,6 @@ end
 
 
 %% get minimum event numbers across mice
-
-% Assuming concatenatedColumns_trials and concatenatedEvents are already defined
-
-% Initialize arrays to store maximum values for each case
-max_values_event1 = zeros(1, size(concatenatedColumns_trials, 2));
-max_values_event2 = zeros(1, size(concatenatedColumns_trials, 2));
-
-
-for col = 1:iter
-    event{col} = ones(size(currentColumn{col, 1}, 1), 1)*col; 
-end
-
-
 
 %this needs to keep track of max for each event and choose the LOWEST VALUE
 % and keep that conistent across events! edit me!!
@@ -114,9 +101,6 @@ min_value = min(min(max_values));
 % better to randomly select large rew. trials up to the minimum # of small
 % reward trials, but for now im just selecting the first bunch of them
 
-
-% Initialize a new cell array to store the trimmed data
-trimmed_data = cell(size(concatenatedColumns_trials));
 
 % Loop through each column
 for col = 1:size(concatenatedColumns_trials, 2)
