@@ -1,3 +1,6 @@
+
+caTraceTrials_mouse = caTraceTrials_mouse(1,:);
+
 %% This code takes as input filtered, un-normalized data from access_risk_inscopix. For example, large rew choice and small rew choice, with each being associated with 1 column of caTraceTrials_mouse
 
 
@@ -83,25 +86,26 @@ end
 
 
 
-
+%this needs to keep track of max for each event and choose the LOWEST VALUE
+% and keep that conistent across events! edit me!!
 % Loop through each column
 for col = 1:size(concatenatedColumns_trials, 2)
 
     for iters = 1:iter
         % Extract cell arrays for the current column
-        values = concatenatedColumns_trials{1, col}(concatenatedEvents{1, col} == iters);
-        
-
+        values = concatenatedColumns_trials{1, col}(concatenatedEvents{1, col} == iters)';
+        max_values(iters, col) = max(values);
+        values_array{iters} = values; 
         % Calculate the maximum values for each case
         
 
     end
-    max_values(col) = max(values);
-    clear values
+    % max_values(:, col) = max(values);
+    
 end
 
 % Find the minimum value present in either array
-min_value = min(max_values);
+min_value = min(min(max_values));
 
 %% trim arrays to only include data from the mouse with the fewest of a given trial type.
 % given that we have so many more large reward trials, this will be limited
