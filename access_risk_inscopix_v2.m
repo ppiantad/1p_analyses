@@ -18,7 +18,7 @@ load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
 
 %%
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 epoc_to_align = 'choiceTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 

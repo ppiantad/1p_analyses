@@ -14,13 +14,13 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 
 % load('BLA-NAcShell_Risk_2023_09_15.mat')
 
-% load('BLA_panneuronal_Risk_2023_07_06.mat')
+load('BLA_panneuronal_Risk_2023_07_06.mat')
 
 % load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 
 % load('BLA_panneuronal_Risk_matched_RM_D1_vs_Pre_RDT_RM.mat')
 
-load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
+% load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
 
 % load('BLA_panneuronal_Risk_matched_RDT_D1_vs_RDT_D2.mat')
 
@@ -36,7 +36,7 @@ load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
 
 %%
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 epoc_to_align = 'choiceTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
@@ -87,7 +87,7 @@ neuron_num = 0;
 for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2);
+        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2, 'BLOCK', 3);
         
         if ~strcmp('stTime',data.Properties.VariableNames)
             data.stTime = data.TrialPossible - 5;
