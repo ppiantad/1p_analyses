@@ -14,7 +14,9 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 
 % load('BLA-NAcShell_Risk_2023_09_15.mat')
 
-load('BLA_panneuronal_Risk_2023_07_06.mat')
+% load('BLA_panneuronal_Risk_2023_07_06.mat')
+
+load('BLA_panneuronal_Risk_2023_11_15.mat')
 
 % load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 
@@ -36,7 +38,7 @@ load('BLA_panneuronal_Risk_2023_07_06.mat')
 
 %%
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 epoc_to_align = 'choiceTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
@@ -87,7 +89,7 @@ neuron_num = 0;
 for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2, 'BLOCK', 3);
+        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2);
         
         if ~strcmp('stTime',data.Properties.VariableNames)
             data.stTime = data.TrialPossible - 5;
@@ -159,7 +161,10 @@ for ii = 1:size(fieldnames(final),1)
                     neuron_sem(neuron_num,:) = nanstd(zall,1)/(sqrt(size(zall, 1)));
                 end
                 zsd_array(iter, neuron_num) = {zsd};
-
+                zall_mouse{ii, iter+1}(qq) = {zall};
+                caTraceTrials_mouse{ii, iter+1}(qq) = {caTraceTrials};
+                neuron_mean_mouse{ii, iter+1}(qq,: ) = mean(zall, 1);
+                neuron_sem_mouse{ii, iter+1}(qq,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
                 caTraceTrials = zall;
                 clear zall zb zsd;
                 
@@ -180,7 +185,7 @@ for ii = 1:size(fieldnames(final),1)
                     nullDistTrace(g,:) = nanmean(shuffledTrace);                    %calculate the NaN mean of the shuffled traces
                     %     nullDistEvtRate(g,:) = nanmean(shuffledEvtRate);                %calculate the NaN mean of the shuffled event rates
                 end
-                clear shuffled* g t trialCt
+                clear shuffled* g t trialCt 
 
                 %% choose to classify fluoresence or event rates
                 if uv.chooseFluoresenceOrRate == 1                                  %if user selected to classify the fluoresence

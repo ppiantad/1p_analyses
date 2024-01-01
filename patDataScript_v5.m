@@ -268,7 +268,7 @@ for ii = 1:size(folder_list, 1)
             final.(current_animal).(current_session).(alignment_event).unitSEM = unitSEM;
             final.(current_animal).(current_session).(alignment_event).uv.BehavData = BehavData;
             final.(current_animal).(current_session).neuron = neuron;
-
+            
             clear unitTS unitTrace unitXTrials unitAVG unitSEM i zall zb zsd zb_window zsd_window zall_window zb_session zsd_session zall_session neuron
 
         else

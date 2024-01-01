@@ -1,5 +1,5 @@
-test = [neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)]
-test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :)]
+test = [neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)];
+test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :)];
 
 %%
 data = test;
