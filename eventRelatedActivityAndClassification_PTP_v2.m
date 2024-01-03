@@ -14,11 +14,13 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 
 % load('BLA-NAcShell_Risk_2023_09_15.mat')
 
+% load('BLA-NAcShell_Risk_2023_11_20.mat')
+
 % load('BLA_panneuronal_Risk_2023_07_06.mat')
 
-load('BLA_panneuronal_Risk_2023_11_15.mat')
+% load('BLA_panneuronal_Risk_2023_11_15.mat')
 
-% load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
+load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 
 % load('BLA_panneuronal_Risk_matched_RM_D1_vs_Pre_RDT_RM.mat')
 
@@ -39,7 +41,7 @@ load('BLA_panneuronal_Risk_2023_11_15.mat')
 %%
 
 session_to_analyze = 'Pre_RDT_RM';
-epoc_to_align = 'choiceTime';
+epoc_to_align = 'collectionTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
 window_sz = (0:.1:20-0.1);
@@ -52,10 +54,11 @@ uv.chooseFluoresenceOrRate = 1;                                             %set
 uv.sigma = 2;                                                               %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % uv.evtSigWin.outcome = [-3 0]; %for trial start
-uv.evtSigWin.outcome = [-4 0]; %for pre-choice                                     %period within time window that response is classified on (sec relative to event)
-% uv.evtSigWin.outcome = [1 3]; %for REW
-
+% uv.evtSigWin.outcome = [-4 0]; %for pre-choice                                     %period within time window that response is classified on (sec relative to event)
+uv.evtSigWin.outcome = [1 3]; %for REW collection
 % uv.evtSigWin.outcome = [0 1]; %for SHK
+
+
 % uv.evtSigWin.groomingStop = [-.5 3];
 % uv.evtSigWin.faceGroomingStart = [-.5 2];
 % uv.evtSigWin.faceGroomingStop = [-.5 2];
