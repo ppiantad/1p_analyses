@@ -12,6 +12,8 @@ load('BLA_panneuronal_Risk_MATCHED_07142023.mat') %Load matched dataset (to be a
 
 %%
 
+clearvars -except final cellreg_struct cell_reg_data paired_sessions current_animal uv
+
 % cellreg_struct = struct;
 
 neuron_data_to_collect = {'C', 'C_raw', 'S', 'Coor'};
@@ -39,13 +41,14 @@ for qq = 1:size(paired_sessions, 1)
 
     for zz = 1:size(paired_sessions(qq,:), 2)
         paired_sessions_current = paired_sessions{qq, zz};
-        cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).neuron = final.(current_animal).(paired_sessions_current).neuron;
+
+        % cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).neuron = final.(current_animal).(paired_sessions_current).neuron;
         for nn = 1:size(neuron_data_to_collect, 2)
-            temp_data = final.(current_animal).(paired_sessions_current).neuron.(neuron_data_to_collect{nn});
+            temp_data = final.(current_animal).(paired_sessions_current).CNMFe_data.(neuron_data_to_collect{nn});
             cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).CNMFe_data.(neuron_data_to_collect{nn}) = temp_data(filtered_map(:,zz),:);
             clear temp_data
         end
-        cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).CNMFe_data.Cn = final.(current_animal).(paired_sessions_current).neuron.Cn;
+        cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).CNMFe_data.Cn = final.(current_animal).(paired_sessions_current).CNMFe_data.Cn;
         % for i = 1:length(uv.behav)
 
             % alignment_event = char(uv.behav(i));

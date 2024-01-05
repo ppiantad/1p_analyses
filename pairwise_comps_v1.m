@@ -2,6 +2,13 @@ test = [neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)];
 test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :)];
 
 
+% % tabulate how neurons assigned to neuron_mean_array for the 1st event
+% % change across subsequent events
+% test = [neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)];
+% test = [test; neuron_mean_array{1, 2}(respClass_all_array{1, 1}==1, :)];
+% test = [test; neuron_mean_array{1, 3}(respClass_all_array{1, 1}==1, :)];
+
+
 piechart_data = [sum_activated_percent 100-sum(sum_activated_percent)];
 figure; piechart(piechart_data)
 
@@ -80,8 +87,8 @@ median_collect_time_from_choice = median(concatenatedTable.collectionTime - conc
 
 %%
 
-figure; plot(ts1, mean(neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)), 'color', "#D95319")
-hold on; plot(ts1, mean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :)), 'color',  "blue")
+figure; plot(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)), 'color', "#D95319")
+hold on; plot(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :)), 'color',  "blue")
 xline(median_collect_time_from_choice, '--r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
 legend({'pre-choice active', 'consumption active'}, 'Location','northwest')
