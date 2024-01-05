@@ -1,6 +1,6 @@
 %% Run eventRelatedActivity first for whatever events you want to identify responsive neurons for
 
-select_mouse = 'BLA_Insc_24';
+select_mouse = 'BLA_Insc_25';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
@@ -20,10 +20,11 @@ for h = 1:size(caTraceTrials,1)
     for j = 1:size(caTraceTrials,2)
         tmp = tmp+1;
         zall(h,tmp) = (caTraceTrials(h,tmp) - zb(h))/zsd(h);
+        % Bound the normalized values between -1 and 1
+        % zall(h,tmp) = max(-1, min(1, zall(h,tmp)));
 
     end
-    % zall(h,:) = sgolayfilt(zall(h,:), 9, 21);
-    %                     zall_to_BL_array(iter, neuron_num) = {final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials(qq).zall(trials,:)};
+
 end
 for z = 1:size(zall, 1)
     % Apply Savitzky-Golay filter to each row
@@ -41,10 +42,10 @@ for h = 1:size(caTraceTrials,1)
     for j = 1:size(caTraceTrials,2)
         tmp = tmp+1;
         zall(h,tmp) = (caTraceTrials(h,tmp) - zb(h))/zsd(h);
-
+        % Bound the normalized values between -1 and 1
+        % zall(h,tmp) = max(-1, min(1, zall(h,tmp)));
     end
-    % zall(h,:) = sgolayfilt(zall(h,:), 9, 21);
-    %                     zall_to_BL_array(iter, neuron_num) = {final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials(qq).zall(trials,:)};
+
 end
 for z = 1:size(zall, 1)
     % Apply Savitzky-Golay filter to each row
@@ -77,8 +78,10 @@ time_array = (0:(num_samples-1)) / sampling_frequency;
 %chosing a random mouse
 figure; plot(time_array, mean(zall_first_event))
 hold on; plot(time_array, mean(zall_second_event))
+xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
 xline(BehavData.choiceTime(BehavData.bigSmall == 1.2), '--r')
 xline(BehavData.collectionTime(BehavData.bigSmall == 1.2), '--k')
+
 
 
 
