@@ -40,7 +40,7 @@ load('BLA_panneuronal_matched_Pre_RDT_RM_vs_RDT_D1_01042024.mat')
 
 %%
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 epoc_to_align = 'collectionTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
@@ -53,7 +53,7 @@ clear neuron_mean neuron_sem neuron_num trials
 uv.chooseFluoresenceOrRate = 1;                                             %set to 1 to classify fluoresence response; set to 2 to classify firing rate responses
 uv.sigma = 2;                                                               %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
-% uv.evtSigWin.outcome = [-3 0]; %for trial start
+% % uv.evtSigWin.outcome = [-3 0]; %for trial start
 % uv.evtSigWin.outcome = [-4 0]; %for pre-choice                                     %period within time window that response is classified on (sec relative to event)
 uv.evtSigWin.outcome = [1 3]; %for REW collection
 % uv.evtSigWin.outcome = [0 1]; %for SHK
@@ -94,7 +94,7 @@ neuron_num = 0;
 for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2, 'BLOCK', 1);
+        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2);
         
         if ~strcmp('stTime',data.Properties.VariableNames)
             data.stTime = data.TrialPossible - 5;
