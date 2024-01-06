@@ -258,7 +258,7 @@ for zz = 1:size(metafolder_list, 1)
                         tic
                         for i = 1 %could loop through multiple mice like this if you had it
                             % eTS = BehavData.(uv.behav); %get time stamps
-                            velocity_trace =  zscored_SLEAP_data_vel_filtered_session;
+                            velocity_trace =  SLEAP_data_vel_filtered_session;
                             %     ca = neuron.S; %get binarized calcium
                             velocity_time = SLEAP_data.idx_time';
 
@@ -425,7 +425,7 @@ for zz = 1:size(metafolder_list, 1)
                             tic
                             for i = 1 %could loop through multiple mice like this if you had it
                                 % eTS = BehavData.(uv.behav); %get time stamps
-                                velocity_trace =  zscored_SLEAP_data_vel_filtered_session;
+                                velocity_trace =  SLEAP_data_vel_filtered_session;
                                 %     ca = neuron.S; %get binarized calcium
                                 velocity_time = SLEAP_data.idx_time';
 
