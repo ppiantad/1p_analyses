@@ -1,13 +1,16 @@
 %% Run eventRelatedActivity first for whatever events you want to identify responsive neurons for
 
-select_mouse = 'BLA_Insc_25';
+select_mouse = 'BLA_Insc_27';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
+first_session = 'RM_D1';
 
-action_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).Pre_RDT_RM.choiceTime.Outcome_Minus_4to0.REW_Large.activated== 1, :);
-consumption_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 3}(respClass_mouse.(select_mouse).Pre_RDT_RM.collectionTime.Outcome_1to3.REW_Large.activated == 1, :);
-velocity_data = final_SLEAP.(select_mouse).Pre_RDT_RM.choiceTime.unitXTrials.velocity_trace_trials(final_SLEAP.BLA_Insc_25.Pre_RDT_RM.BehavData.bigSmall == 1.2, :);
+second_session = 'RM_D1';
+
+action_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.REW_Large.activated== 1, :);
+consumption_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 3}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large.activated == 1, :);
+velocity_data = final_SLEAP.(select_mouse).(first_session).choiceTime.unitXTrials.velocity_trace_trials(final_SLEAP.(select_mouse).(first_session).BehavData.bigSmall == 1.2, :);
 
 
 test_data = [action_activated_data(:, 1:end-1); consumption_activated_data(:, 1:end-1); velocity_data];
@@ -15,18 +18,17 @@ test_data = [action_activated_data(:, 1:end-1); consumption_activated_data(:, 1:
 zscore_data = zscore(test_data, 0 , 2);
 
 
-action_activated_data_normalized = mean(normalized_data(1:11, :));
 
 
-figure; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 2}(respClass_mouse.(select_mouse).Pre_RDT_RM.choiceTime.Outcome_Minus_4to0.REW_Large.activated== 1, :)))
-hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 3}(respClass_mouse.(select_mouse).Pre_RDT_RM.collectionTime.Outcome_1to3.REW_Large.activated == 1, :)))
-hold on; plot(ts1, mean(final_SLEAP.(select_mouse).Pre_RDT_RM.choiceTime.unitXTrials.zall_motion(final_SLEAP.BLA_Insc_25.Pre_RDT_RM.BehavData.bigSmall == 1.2, :)))
+figure; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.REW_Large.activated== 1, :)))
+hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 3}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large.activated == 1, :)))
+hold on; plot(ts1, mean(final_SLEAP.(select_mouse).(first_session).choiceTime.unitXTrials.zall_motion(final_SLEAP.(select_mouse).(first_session).BehavData.bigSmall == 1.2, :)))
 
 
 %% organize data - lots of this is manual due to need to specify which events have been previously filtered
 
 
-caTraceTrials = final.(select_mouse).Pre_RDT_RM.CNMFe_data.C_raw(respClass_mouse.(select_mouse).Pre_RDT_RM.choiceTime.Outcome_Minus_4to0.REW_Large.activated== 1, :);
+caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.REW_Large.activated== 1, :);
 
 for h = 1:size(caTraceTrials,1)
     zb(h) = mean(caTraceTrials(h,:)); %baseline mean
@@ -48,7 +50,7 @@ end
 zall_first_event = zall; 
 clear zall caTraceTrials
 
-caTraceTrials = final.(select_mouse).Pre_RDT_RM.CNMFe_data.C_raw(respClass_mouse.(select_mouse).Pre_RDT_RM.collectionTime.Outcome_1to3.REW_Large.activated== 1, :);
+caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large.activated== 1, :);
 
 for h = 1:size(caTraceTrials,1)
     zb(h) = mean(caTraceTrials(h,:)); %baseline mean
@@ -69,7 +71,7 @@ end
 zall_second_event = zall;
 clear zall caTraceTrials
 
-caTraceTrials = final_SLEAP.(select_mouse).Pre_RDT_RM.SLEAP_data.vel_cm_s';
+caTraceTrials = final_SLEAP.(select_mouse).(first_session).SLEAP_data.vel_cm_s';
 
 
 zb= mean(caTraceTrials); %baseline mean
@@ -95,7 +97,7 @@ clear zall caTraceTrials
 % some of the columns of BehavData. e.g., see below - but make sure to
 % update the session etc as necessary! 
 
-BehavData = final.(select_mouse).Pre_RDT_RM.choiceTime.uv.BehavData;
+BehavData = final.(select_mouse).(first_session).choiceTime.uv.BehavData;
 % because the first trial possible is ALWAYS 60 seconds after ABET is
 % issued, you can determine what adjustment has been made to this column
 % (adding time to account for calcium recording starting first) by
@@ -104,14 +106,14 @@ stTime = BehavData.TrialPossible(1)-60;
 
 %%
 num_samples = size(zall_second_event, 2)
-sampling_frequency = (final.(select_mouse).Pre_RDT_RM.choiceTime.uv.dt)*100;
+sampling_frequency = (final.(select_mouse).(first_session).choiceTime.uv.dt)*100;
 % Create a time array
 time_array = (0:(num_samples-1)) / sampling_frequency;
 
 time_columns_to_add = (0:(num_samples-1)) / sampling_frequency;
 
 
-trim_length = size(final_SLEAP.(select_mouse).Pre_RDT_RM.zscored_SLEAP_data_velocity, 2);
+trim_length = size(final_SLEAP.(select_mouse).(first_session).zscored_SLEAP_data_velocity, 2);
 
 time_array = time_array(:, 1:trim_length);
 
