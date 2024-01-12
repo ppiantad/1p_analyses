@@ -1,8 +1,15 @@
-
-caTraceTrials_mouse_decoding = caTraceTrials_mouse(1,:);
-
 %% This code takes as input filtered, un-normalized data from access_risk_inscopix. For example, large rew choice and small rew choice, with each being associated with 1 column of caTraceTrials_mouse
 
+select_mouse = 'BLA_Insc_26';
+
+select_mouse_index = find(strcmp(animalIDs, select_mouse));
+
+caTraceTrials_mouse_decoding = caTraceTrials_mouse(select_mouse_index,:);
+
+trials_per_mouse_decoding = trials_per_mouse(select_mouse_index,:);
+
+
+%%
 
 
 columnArray = [];
@@ -94,6 +101,25 @@ end
 % Find the minimum value present in either array
 min_value = min(min(max_values));
 
+figure;
+
+for qq = 1:size(caTraceTrials_mouse_decoding, 1)
+    for z = 1:size(cells, 2)
+        nestedCellArray = cells{1, z};
+        for k = 1:size(nestedCellArray, 2)
+            ca_data{z, k} = nestedCellArray{1, k}(1:min_value, :);
+            ca_data_means{z}(k,:) = mean(nestedCellArray{1, k}(1:min_value, :));
+        end
+        event_mean(z,:) = mean(ca_data_means{1, z});
+    end
+end
+
+figure;
+for means = 1:size(event_mean, 1)
+    hold on;
+    plot(ts1, event_mean(means,:))
+
+end
 %% trim arrays to only include data from the mouse with the fewest of a given trial type.
 % given that we have so many more large reward trials, this will be limited
 % by the small rew trials in nearly every case. this could get a bit
@@ -115,6 +141,7 @@ for col = 1:size(concatenatedColumns_trials, 2)
     % trimmed_data{1, col} = concatenatedColumns_trials{1, col}(indices_to_keep);
 end
 
+
 %% Get cell arrays that correspond to each time bin
 
 for col = 1:size(concatenatedColumns_time, 2)
@@ -129,3 +156,20 @@ for col = 1:size(concatenatedColumns_time, 2)
 
     end
 end
+
+
+%% Uncomment this section if you do not want to use the "trimmed" array to decode, but beware that depending on the event, the # of trials may differ dramatically!  
+% Get cell arrays that correspond to each time bin 
+
+% for col = 1:size(concatenatedColumns_time, 2)
+% 
+%     for zz = 1:size(ts1, 2)
+%         current_step = ts1(zz);
+%         indices_to_keep = find(concatenatedColumns_time{1, col} == current_step);
+%         trimmed_concatenatedColumns_offsets{zz, col} = concatenatedColumns{1, col}(indices_to_keep);
+%         trimmed_concatenatedColumns_time_offsets{zz, col} = concatenatedColumns_time{1, col}(indices_to_keep);
+%         trimmed_concatenatedColumns_trials_offsets{zz, col} = concatenatedColumns_trials{1, col}(indices_to_keep);
+%         trimmed_concatenatedEvents_offsets{zz, col} = concatenatedEvents{1, col}(indices_to_keep);
+% 
+%     end
+% end
