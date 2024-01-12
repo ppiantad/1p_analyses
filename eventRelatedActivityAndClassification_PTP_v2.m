@@ -18,13 +18,13 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 
 % load('BLA_panneuronal_Risk_2023_07_06.mat')
 
-load('BLA_panneuronal_Risk_2024_01_04.mat')
+% load('BLA_panneuronal_Risk_2024_01_04.mat')
 
 % load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 
 % load('BLA_panneuronal_matched_RM_D1_vs_Pre_RDT_RM_01042024.mat')
 
-% load('BLA_panneuronal_matched_Pre_RDT_RM_vs_RDT_D1_01042024.mat')
+load('BLA_panneuronal_matched_Pre_RDT_RM_vs_RDT_D1_01042024.mat')
 
 % load('BLA_panneuronal_Risk_matched_RDT_D1_vs_RDT_D2.mat')
 
@@ -40,8 +40,8 @@ load('BLA_panneuronal_Risk_2024_01_04.mat')
 
 %%
 
-session_to_analyze = 'Pre_RDT_RM';
-epoc_to_align = 'collectionTime';
+session_to_analyze = 'RDT_D1';
+epoc_to_align = 'choiceTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
 window_sz = (0:.1:20-0.1);
@@ -51,11 +51,11 @@ ts1 = (-10:.1:10-0.1);
 %% %user selected variables
 clear neuron_mean neuron_sem neuron_num trials
 uv.chooseFluoresenceOrRate = 1;                                             %set to 1 to classify fluoresence response; set to 2 to classify firing rate responses
-uv.sigma = 2;                                                               %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
+uv.sigma = 1.5;                                                               %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
-% uv.evtSigWin.outcome = [-4 0]; %for pre-choice                                     %period within time window that response is classified on (sec relative to event)
-uv.evtSigWin.outcome = [1 3]; %for REW collection
+uv.evtSigWin.outcome = [-4 0]; %for pre-choice                                     %period within time window that response is classified on (sec relative to event)
+% uv.evtSigWin.outcome = [1 3]; %for REW collection
 % uv.evtSigWin.outcome = [0 1]; %for SHK
 
 
@@ -93,8 +93,10 @@ neuron_num = 0;
 
 for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
+    session_string{iter} = session_to_analyze;
+    event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2);
+        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2, 'BLOCK', 1);
         
         if ~strcmp('stTime',data.Properties.VariableNames)
             data.stTime = data.TrialPossible - 5;
@@ -244,7 +246,16 @@ for ii = 1:size(fieldnames(final),1)
 end
 varargin_list{iter,:} = varargin_identity_class;
 behav_tbl_iter{iter, :} = behav_tbl_temp;
+
+
 clear behav_tbl_temp
+
+epoc_to_align_all{iter,:} = epoc_to_align;
+identity_class_string_all{iter,:} = identity_classification_str;
+all_filter_args{iter,:} = filter_args;
+
+full_filter_string{iter} = strcat(epoc_to_align_all{iter,:}, '.', identity_class_string_all{iter,:}, '.', all_filter_args{iter,:});
+
 
 sum_activated(iter) = sum(respClass_all == 1);
 sum_inhibited(iter) = sum(respClass_all == 2);
@@ -285,7 +296,7 @@ figure; shadedErrorBar(ts1, nanmean(neuron_mean(respClass_all_array{:,iter} == 3
 %% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
 % **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
 
-for ii = 1:size(zall_array, 2)
+for ii = 636:size(zall_array, 2)
     figure;
     % Initialize variables to store global max and min for heatmap and line graph
     globalMaxHeatmap = -inf;
@@ -319,8 +330,8 @@ for ii = 1:size(zall_array, 2)
             trialStartTime = behav_tbl.stTime(:) - behav_tbl.choiceTime(:);
             [numTrials, ~] = size(behav_tbl.collectionTime(:));
             Tris = [1:numTrials]';
-            scatter(time2Collect, Tris               , 'Marker', 'p', 'MarkerFaceColor', 'w')
-            scatter(trialStartTime, Tris, 'Marker', 's', 'MarkerFaceColor', 'k')
+            % scatter(time2Collect, Tris               , 'Marker', 'p', 'MarkerFaceColor', 'w', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 0.7)
+            % scatter(trialStartTime, Tris, 'Marker', 's', 'MarkerFaceColor', 'k', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 0.7)
             plot(zeros(numTrials, 1), Tris, 'LineWidth', 3, 'LineStyle', "--", 'Color', 'w')
         end     
         colorbar;
@@ -368,6 +379,115 @@ for ii = 1:size(zall_array, 2)
     hold
     close
 end
+
+
+%% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
+% **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
+
+
+% Define spacing and line thickness
+row_spacing = 1; % Adjust as needed
+line_thickness = 1.0; % Adjust as needed
+
+
+for ii = 1:size(zall_array, 2)
+    figure;
+    % Initialize variables to store global max and min for heatmap and line graph
+    globalMaxHeatmap = -inf;
+    globalMinHeatmap = inf;
+    globalMaxYLine = -inf;
+    globalMinYLine = inf;
+    for qq = 1:iter
+        
+        % Create subplot with 1 row and 2 columns
+        num_columns_plot = iter;
+        subplot(2, num_columns_plot, qq);
+        isMatch = find(ismember(animalIDs,       mouse_cells{qq, ii}));
+        if ~isempty(isMatch)
+            % Access beha     v_tbl_iter using the first index (assuming there's only one match)
+            behav_tbl = behav_tbl_iter{qq, 1}{isMatch, 1};
+            time2Collect = behav_tbl.collectionTime(:) - behav_tbl.choiceTime(:);
+            trialStartTime = behav_tbl.stTime(:) - behav_tbl.choiceTime(:);
+            [numTrials, ~] = size(behav_tbl.collectionTime(:));
+            Tris = [1:numTrials]';
+            % scatter(time2Collect, Tris               , 'Marker', 'p', 'MarkerFaceColor', 'w')
+            % scatter(trialStartTime, Tris, 'Marker', 's', 'MarkerFaceColor', 'k')
+            % plot(zeros(numTrials, 1), Tris, 'LineWidth', 3, 'LineStyle', "--", 'Color', 'w')
+        end     
+        figure; 
+        for i = 1:3:size(zall_array{qq, ii}, 1)
+            if behav_tbl.bigSmall(i) == 1.2
+                neuron_activity =  zall_array{qq, ii}(i,:);
+
+                % Calculate the y-coordinate for the current neuron's plot
+                y_coordinate = (i - 1) * row_spacing;
+
+                % Plot the neural activity with the specified x and y coordinates
+                plot(ts1, neuron_activity + y_coordinate, 'k', 'LineWidth', line_thickness);
+
+                hold on; % To overlay all plots on the same figure
+            end
+        end
+        hold on;
+        title({"Cell from " + strrep(mouse_cells{qq, ii}, '_', '-'), "Classified as " + respClass_all_array{qq}(ii), "(Overall cell number = " + (ii) + ")"}, 'FontSize', 9)
+        
+        % Update global max and min for heatmap
+        localMaxHeatmap = max(zall_array{qq, ii}(:));
+        localMinHeatmap = min(zall_array{qq, ii}(:));
+        globalMaxHeatmap = max(globalMaxHeatmap, localMaxHeatmap);
+        globalMinHeatmap = min(globalMinHeatmap, localMinHeatmap);
+  
+        % Find the row index in animalIDs that matches mouse_cells{qq, ii}
+        isMatch = find(ismember(animalIDs,       mouse_cells{qq, ii}));
+
+
+        colorbar;
+        
+        hold off;
+        clear time2Collect trialStartTime numTrials Tris behav_tbl
+
+        % Create subplot for the mean and raw data
+        subplot(2, num_columns_plot, iter + qq);
+
+        % Plot the mean as a thick black line
+        meanData = mean(zall_array{qq, ii});
+        plot(ts1, meanData, 'k', 'LineWidth', 2);
+        hold on;
+
+        % Plot the raw data in grey with transparency
+        for trial = 1:size(zall_array{qq, ii}, 1)
+            plot(ts1, zall_array{qq, ii}(trial, :), 'Color', [0.1, 0.1, 0.1, 0.1]);
+            hold on;
+        end
+
+        title("Mean and Raw Data", 'FontSize', 9)
+        % Update global max and min for line graph
+        localMaxYLine = max(zall_array{qq, ii}, [], "all");
+        localMinYLine = min(zall_array{qq, ii}, [], "all");
+        globalMaxYLine = max(globalMaxYLine, localMaxYLine);
+        globalMinYLine = min(globalMinYLine, localMinYLine);
+        
+        hold off;        
+    end
+    % Set the same colorbar scale for all heatmap subplots
+    for qq = 1:iter
+        subplot(2, num_columns_plot, qq);
+        clim([globalMinHeatmap, globalMaxHeatmap]);
+        colorbar;
+    end
+
+    % Set the same Y-axis scale for all line graph subplots
+    for qq = 1:iter
+        subplot(2, num_columns_plot, iter + qq);
+        ylim([globalMinYLine, globalMaxYLine]);
+    end
+
+    pause
+    hold
+    close
+end
+
+
 
 %%
 excited_to_excited = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 1;
@@ -747,14 +867,20 @@ end
 
 
 %%
+[median_choice_time_block_1, median_choice_time_block_2, median_choice_time_block_3, median_collect_time_block_1, median_collect_time_block_2, median_collect_time_block_3, median_collect_time_from_choice] = get_median_choice_and_collect_fn(behav_tbl_iter);
+
 figure;
 hold on; 
 shadedErrorBar(ts1, mean(neuron_mean(respClass_all_array{:,iter} == 1,:)), mean(neuron_sem(respClass_all_array{:,iter} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
 shadedErrorBar(ts1, mean(neuron_mean(respClass_all_array{:,iter} == 2,:)), mean(neuron_sem(respClass_all_array{:,iter} == 2,:)), 'lineProps', {'color', batlowW(iter,:)});
 shadedErrorBar(ts1, mean(neuron_mean(respClass_all_array{:,iter} == 3,:)), mean(neuron_sem(respClass_all_array{:,iter} == 3,:)), 'lineProps', {'color', batlowW(iter,:)});
-
+xline(median_collect_time_from_choice, '--r', {'Median', 'collect', 'latency'})
 %%
 
 pun_responsive_B1_large_to_B2_null = (respClass_all_array{1,1} == 1 & respClass_all_array{1,1} == shk_activated) & respClass_all_array{1,3} == 2;
 sum(pun_responsive_B1_large_to_B2_null)
 
+%%
+consistent_increase = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} == 1 & respClass_all_array{1, 3} == 1;
+consumption_encoding_lost = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} ~= 1 & respClass_all_array{1, 3} ~= 1;
+consumption_encoding_gained = respClass_all_array{1, 1} ~= 1 & respClass_all_array{1, 2} == 1 & respClass_all_array{1, 3} == 1;

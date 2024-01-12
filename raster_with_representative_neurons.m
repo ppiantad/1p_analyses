@@ -4,9 +4,9 @@ select_mouse = 'BLA_Insc_27';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-first_session = 'RM_D1';
+first_session = 'Pre_RDT_RM';
 
-second_session = 'RM_D1';
+second_session = 'Pre_RDT_RM';
 
 action_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.REW_Large.activated== 1, :);
 consumption_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 3}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large.activated == 1, :);
@@ -130,11 +130,68 @@ zall_motion = [buffer_to_SLEAP zall_motion]
 
 figure; plot(time_array, mean(zall_first_event(:, 1:trim_length)))
 hold on; plot(time_array, mean(zall_second_event(:, 1:trim_length)))
-hold on; plot(time_array, zall_motion(:, 1:trim_length))
+% hold on; plot(time_array, zall_motion(:, 1:trim_length))
 xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
-xline(BehavData.choiceTime(BehavData.bigSmall == 1.2), '--r')
-xline(BehavData.collectionTime(BehavData.bigSmall == 1.2), '--k')
+xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
+xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
+xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
+
+%%
+% Assuming zall_first_event and zall_second_event are your 22x19903 arrays
+[row_count_first, column_count_first] = size(zall_first_event);
+[row_count_second, column_count_second] = size(zall_second_event);
+
+% Select 6 neurons from each array
+neurons_to_plot = 6;
+selected_neurons_first = zall_first_event(1:neurons_to_plot, 1:trim_length);
+selected_neurons_second = zall_second_event(1:neurons_to_plot, 1:trim_length);
+
+% Combine selected neurons into one array
+combined_neurons = [selected_neurons_first; selected_neurons_second];
+
+% Define spacing and line thickness
+row_spacing = 5; % Adjust as needed
+line_thickness = 1.0; % Adjust as needed
+
+% Create a figure
+figure;
+
+% Loop through each row and plot the neural activity for the combined neurons
+for i = 1:size(combined_neurons, 1)
+    % Extract neural activity for the current neuron
+    neuron_activity = combined_neurons(i, :);
+    
+    % Calculate the y-coordinate for the current neuron's plot
+    y_coordinate = (i - 1) * row_spacing;
+    
+    % Plot the neural activity with the specified x and y coordinates
+    plot(time_array, neuron_activity + y_coordinate, 'k', 'LineWidth', line_thickness);
+    
+    hold on; % To overlay all plots on the same figure
+end
+
+% Customize the plot
+title('Neural Activity of Selected Neurons');
+xlabel('Time'); % Change as per your time unit
+ylabel('Neuron #'); % Customize y-axis title
+
+grid off; % Add grid lines
+
+% Remove ticks and labels on the top and right axes
+set(gca, 'TickDir', 'out');
+set(gca, 'Box', 'off');
+ax = gca;
 
 
+% Show legend or additional information (if needed)
+
+% Hold off to stop overlaying subsequent plots on the same figure
+hold off;
 
 
+%%
+for mm = 1:size(final.BLA_Insc_27.Pre_RDT_RM.choiceTime.unitXTrials, 2)
+    large_rew_mean(mm,:) =  mean(final.BLA_Insc_27.Pre_RDT_RM.choiceTime.unitXTrials(respClass_mouse.BLA_Insc_27.Pre_RDT_RM.choiceTime.Outcome_Minus_4to0.OMITALL_0_BLANK_TOUCH_0.activated == 1).caTraces(respClass_mouse.BLA_Insc_27.Pre_RDT_RM.choiceTime.Outcome_Minus_4to0.OMITALL_0_BLANK_TOUCH_0.activated  == 1, :))  
+    
+
+end

@@ -92,3 +92,11 @@ hold on; plot(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1,
 xline(median_collect_time_from_choice, '--r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
 legend({'pre-choice active', 'consumption active'}, 'Location','northwest')
+
+%%
+figure;
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 1}==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 2}==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+xline(median_collect_time_from_choice, '--r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'consumption active'}, 'Location','northwest')

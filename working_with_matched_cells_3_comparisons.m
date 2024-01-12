@@ -1,7 +1,7 @@
 %%
 
 %% Create a scatterplot to show relationship between session 1 and session 2 activity
-start_time = -5; % sub-window start time
+start_time = -4; % sub-window start time
 end_time = 0; % sub-window end time
 
 % Find the indices in ts1 that correspond to the sub-window
@@ -162,9 +162,9 @@ figure;
 hold on; 
 ylim([-0.8 0.8])
 xticks([-10 -5 0 5 10])
-shadedErrorBar(ts1, mean(neuron_mean_array{1, 1}(respClass_all_array{1,1} == 1,:)), mean(neuron_sem_array{1, 1}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(1,:)});
-shadedErrorBar(ts1, mean(neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:)), mean(neuron_sem_array{1, 2}(respClass_all_array{1,2} == 1,:)), 'lineProps', {'color', batlowW(100,:)});
-shadedErrorBar(ts1, mean(neuron_mean_array{1, 3}(respClass_all_array{1,3} == 1,:)), mean(neuron_sem_array{1, 3}(respClass_all_array{1,3} == 1,:)), 'lineProps', {'color', batlowW(200,:)});
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(1,:)});
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:)), nanmean(neuron_sem_array{1, 2}(respClass_all_array{1,2} == 1,:)), 'lineProps', {'color', batlowW(100,:)});
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,3} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,3} == 1,:)), 'lineProps', {'color', batlowW(200,:)});
 hold off
 
 
@@ -175,9 +175,9 @@ figure;
 hold on; 
 ylim([-0.8 0.8])
 xticks([-10 -5 0 5 10])
-shadedErrorBar(ts1, mean(neuron_mean_array{1, 1}(respClass_all_array{1,1} == 1,:)), mean(neuron_sem_array{1, 1}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(1,:)});
-shadedErrorBar(ts1, mean(neuron_mean_array{1, 2}(respClass_all_array{1,1} == 1,:)), mean(neuron_sem_array{1, 2}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(100,:)});
-shadedErrorBar(ts1, mean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), mean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(200,:)});
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 1}(respClass_all_array{1,1} == 1,:), "omitnan"), mean(neuron_sem_array{1, 1}(respClass_all_array{1,1} == 1,:),"omitnan"), 'lineProps', {'color', batlowW(1,:)});
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 2}(respClass_all_array{1,1} == 1,:), "omitnan"), mean(neuron_sem_array{1, 2}(respClass_all_array{1,1} == 1,:), "omitnan"), 'lineProps', {'color', batlowW(100,:)});
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:), "omitnan"), mean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:), "omitnan"), 'lineProps', {'color', batlowW(200,:)});
 hold off
 
 
