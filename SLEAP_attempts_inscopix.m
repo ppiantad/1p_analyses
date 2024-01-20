@@ -110,25 +110,60 @@ for i = 1 %could loop through multiple mice like this if you had it
     end
 end
 
+
+time2Collect = BehavData.collectionTime(:) - BehavData.choiceTime(:);
+trialStartTime = BehavData.stTime(:) - BehavData.choiceTime(:);
+
 figure
-imagesc(window_ts3, 1, velocity_trace_trials);hold on;   
+imagesc(window_ts3, 1, zall_motion);hold on;  
+
+[numTrials, ~] = size(BehavData.collectionTime(:));
+Tris = [1:numTrials]';
+scatter(time2Collect, Tris               , 'Marker', 'p', 'MarkerFaceColor', 'w', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha',1)
+scatter(trialStartTime, Tris, 'Marker', 's', 'MarkerFaceColor', 'k', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 1)
+plot(zeros(numTrials, 1), Tris, 'LineWidth', 3, 'LineStyle', "--", 'Color', 'w')
+yline(30.5,'--',{'Block 2', 'begins'},'LineWidth',3);
+yline(60.5,'--',{'Block 3', 'begins'},'LineWidth',3);
+colorbar;
+hold off;
+
 figure;
 plot(window_ts2, velocity_trace_trials);
 
 
+for qq = 1:3
+    block_mean(qq,:) = mean(zall_motion(BehavData.Block == qq, :));
+    block_sem(qq,:) = nansem(zall_motion(BehavData.Block == qq, :));
+    block_time2Collect_median(qq,:) = median(time2Collect(BehavData.Block == qq, :));
+    block_trialStartTime_median(qq,:) = median(trialStartTime(BehavData.Block == qq, :));
 
-% toc
-% %     final(i).name = mouseData(i).mouseID;
-% %     final(i).day = i;
-% final(i).time = frames3; %final(i).time = caTime;
-% final(i).unitAVG = unitAVG;
-% final(i).unitXTrials = unitXTrials;
-% final(i).uv = uv;
-% final(i).unitSEM = unitSEM;
-% final(i).uv.BehavData = BehavData;
-% 
-% 
-% clear unitTS unitTrace unitXTrials unitAVG unitSEM i zall zb zsd
+end
 
 
+%%
+figure;
+subplot('Position', [0.1, 0.45, 0.8, 0.50]);
+imagesc(window_ts3, 1, zall_motion);hold on;  
+time2Collect = BehavData.collectionTime(:) - BehavData.choiceTime(:);
+trialStartTime = BehavData.stTime(:) - BehavData.choiceTime(:);
+[numTrials, ~] = size(BehavData.collectionTime(:));
+Tris = [1:numTrials]';
+scatter(time2Collect, Tris               , 'Marker', 'p', 'MarkerFaceColor', 'w', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha',1)
+scatter(trialStartTime, Tris, 'Marker', 's', 'MarkerFaceColor', 'k', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 1)
+plot(zeros(numTrials, 1), Tris, 'LineWidth', 3, 'LineStyle', "-", 'Color', 'w')
+yline(30.5,'-',{'Block 2', 'begins'},'LineWidth',3);
+yline(60.5,'-',{'Block 3', 'begins'},'LineWidth',3);
+colorbar;
 
+
+subplot('Position', [0.1, 0.1, 0.69, 0.25]); %[left of figure, bottom, right of figure, top]
+shadedErrorBar(window_ts2, block_mean(1,:), block_sem(1,:));
+hold on;
+shadedErrorBar(window_ts2, block_mean(2,:), block_sem(2,:),'lineProps', '-b');
+hold on;
+shadedErrorBar(window_ts2, block_mean(3,:), block_sem(3,:),'lineProps', '-r');
+
+xline(0, 'Color', 'k', 'LineStyle','-', 'LineWidth', 2);
+xline(block_trialStartTime_median, 'Color', 'b', 'LineStyle','-', 'LineWidth', 1);
+xline(block_time2Collect_median, 'Color', 'r', 'LineStyle', '-', 'LineWidth', 1);
+legend('block 1 (0%)','block 2 (50%)', 'block 3 (75%)')

@@ -7,16 +7,17 @@ uv.dt = 0.1; %what is your frame rate (check neuron.Fs to be sure) 0.2 0.1
 uv.behav = 'choiceTime'; %which behavior/timestamp to look at choiceTime stTime
 
 
-load('BLA-Insc-40_RDT_D1_2023-05-17-14-32-20_video_green_motion_corrected.CNMF_final.mat');
-[BehavData,ABETfile,Descriptives, block_end]=ABET2TableFn_Chamber_A_v6('BLA-Insc-40 05172023 ABET.csv',[]);
-gpio_tbl = readtable('2023-05-17-14-32-20_video_green_gpio.csv');
+load('BLA-Insc-27_RDT_D1_2023-01-02-10-56-17_video_green_motion_corrected.CNMF_final.mat');
+[BehavData,ABETfile,Descriptives, block_end, largeRewSide, smallRewSide]=ABET2TableFn_Chamber_A_v6('BLA-INSC-27 01022023 ABET.csv',[]);
+gpio_tbl = readtable('2023-01-02-10-56-17_video_green_gpio.csv');
 
-SLEAP_data = readtable('BLA-Insc-40_RDT D1_body_sleap_data.csv');
+SLEAP_data = readtable('BLA-Insc-27_RDT D1_body_sleap_data.csv');
 %EDIT FOR EACH MOUSE AS NECESSARY
 SLEAP_time_range_adjustment =  []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; 
 
+boris_file = 'BLA-Insc-27_RDT_D1.csv';
 
-
+[BehavData, boris_Extract_tbl] = boris_to_table(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment);
 
 
 
@@ -81,7 +82,7 @@ BehavData.choTime3 = BehavData.Insc_TTL+BehavData.choTime2;
 
 %filter based on TrialFilter inputs (see TrialFilter.m for full list of
 %possibilities)
-BehavData=TrialFilter(BehavData,'ALL',1);
+BehavData=TrialFilter(BehavData,'OMITALL',0, 'BLANK_TOUCH', 0);
 
 
 % BehavData_for_SLEAP = BehavData;
@@ -132,7 +133,7 @@ frames3 = frames(1:2:end-2); % frames3 = frames(1:2:end-2);  %frames3 = frames(1
 
 %%
 for i = 1 %could loop through multiple mice like this if you had it
-    eTS = BehavData.(uv.behav); %get time stamps
+    eTS = BehavData.(uv.behav); %periods_with_low_velocity; %BehavData.(uv.behav); %get time stamps
     ca = neuron.C_raw; %get calcium
 %     ca = neuron.S; %get binarized calcium
     caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
@@ -156,6 +157,7 @@ for i = 1 %could loop through multiple mice like this if you had it
                 %% get unit event counts in trials
                 %% get unit ca traces in trials
                 idx = frames3 > min(timeWin) & frames3 < max(timeWin);      %logical index of time window around each behavioral event time  %idx = caTime > min(timeWin) & caTime < max(timeWin);
+                sum(idx)
                 bl_idx = frames3 > min(BL_win) & frames3 < max(BL_win);
                 %caTraceTrials(t,1:sum(idx)) = unitTrace(idx);               %store the evoked calcium trace around each event   (see below, comment out if dont want normalized to whole trace)
                 caTraceTrials(t,1:sum(idx)) = unitTrace(idx);
@@ -171,7 +173,7 @@ for i = 1 %could loop through multiple mice like this if you had it
                     zall(t,tmp) = (caTraceTrials(t,j) - zb(t))/zsd(t); 
                 end
                 clear j;
-
+            
              
                 
             end
@@ -233,16 +235,117 @@ imagesc(window_ts3, 1, final.unitAVG.zscored_caTraces);hold on;
 % 
 %  figure
 % imagesc(window_ts3, 1, B);hold on; 
+
+
+%% rank order traces for heatmap based on some subwindow of larger window
+% set an ind to get a particular subwindow
+ind_zero_to_two = window_ts3 > 0 & window_ts3 < 2;
+% get mean of this subwindow
+mean_zero_to_two = mean(final.unitAVG.zscored_caTraces(:,ind_zero_to_two),2);
+% add mean to the zscored data (temporarily)
+add_mean_to_zscored_data = [mean_zero_to_two final.unitAVG.zscored_caTraces];
+% rank order by the mean column, which is column 1
+rank_by_c1 = sortrows(add_mean_to_zscored_data, 1);
+% get rid of mean column
+rank_ordered_mean_zscore = rank_by_c1(:,2:end);
+
+figure
+imagesc(window_ts3, 1, rank_ordered_mean_zscore);hold on;
+
+
+
+%% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
+% **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
+
+% for ii = 1:size(final.unitXTrials, 2)
+%     figure;
+%     % Initialize variables to store global max and min for heatmap and line graph
+%     globalMaxHeatmap = -inf;
+%     globalMinHeatmap = inf;
+%     globalMaxYLine = -inf;
+%     globalMinYLine = inf;
+% 
+%     % Create subplot with 1 row and 2 columns
+%     num_columns_plot = 1;
+%     subplot(2, num_columns_plot, 1);
+% 
+%     % Generate the heatmap
+%     imagesc(ts1, 1, final.unitXTrials(ii).zall);
+%     hold on;
+%     % title({"Cell from " + strrep(mouse_cells{qq, ii}, '_', '-'), "Classified as " + respClass_all_array{qq}(ii), "(Overall cell number = " + (ii) + ")"}, 'FontSize', 9)
+% 
+%     % Update global max and min for heatmap
+%     localMaxHeatmap = max(final.unitXTrials(ii).zall);
+%     localMinHeatmap = min(final.unitXTrials(ii).zall);
+%     globalMaxHeatmap = max(globalMaxHeatmap, localMaxHeatmap);
+%     globalMinHeatmap = min(globalMinHeatmap, localMinHeatmap);
+% 
+% 
+%     time2Collect = BehavData.collectionTime(:) - BehavData.choiceTime(:);
+%     trialStartTime = BehavData.stTime(:) - BehavData.choiceTime(:);
+%     [numTrials, ~] = size(BehavData.collectionTime(:));
+%     Tris = [1:numTrials]';
+%     % scatter(time2Collect, Tris               , 'Marker', 'p', 'MarkerFaceColor', 'w', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 0.7)
+%     % scatter(trialStartTime, Tris, 'Marker', 's', 'MarkerFaceColor', 'k', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 0.7)
+%     plot(zeros(numTrials, 1), Tris, 'LineWidth', 3, 'LineStyle', "--", 'Color', 'w')
+% 
+% colorbar;
+% 
+% hold off;
+% clear time2Collect trialStartTime numTrials Tris behav_tbl
+% 
+% % Create subplot for the mean and raw data
+% subplot(2, num_columns_plot, 1);
+% 
+% % Plot the mean as a thick black line
+% meanData = mean(final.unitXTrials(ii).zall);
+% plot(ts1, meanData(:, 1:end-1), 'k', 'LineWidth', 2);
+% hold on;
+% 
+% % Plot the raw data in grey with transparency
+% for trial = 1:size(final.unitXTrials(ii).zall, 1)
+%     plot(ts1, final.unitXTrials(ii).zall(trial, :), 'Color', [0.1, 0.1, 0.1, 0.1]);
+%     hold on;
+% end
+% 
+% title("Mean and Raw Data", 'FontSize', 9)
+% % Update global max and min for line graph
+% localMaxYLine = max(final.unitXTrials(ii).zall, [], "all");
+% localMinYLine = min(final.unitXTrials(ii).zall, [], "all");
+% globalMaxYLine = max(globalMaxYLine, localMaxYLine);
+% globalMinYLine = min(globalMinYLine, localMinYLine);
+% 
+% hold off;
+% 
+% % Set the same colorbar scale for all heatmap subplots
+% for qq = 1:iter
+%     subplot(2, num_columns_plot, 1);
+%     clim([globalMinHeatmap, globalMaxHeatmap]);
+%     colorbar;
+% end
+% 
+% % Set the same Y-axis scale for all line graph subplots
+% for qq = 1:iter
+%     subplot(2, num_columns_plot, 1+1);
+%     ylim([globalMinYLine, globalMaxYLine]);
+% 
+% 
+%     pause
+%     hold
+%     close
+% end
+
+
+
 %%
 
 
 
-
-animalID_select = 10
+cell_select = 5
 
 
 figure
-imagesc(window_ts2, 1, final.unitXTrials(animalID_select).zall);hold on;
+imagesc(window_ts2, 1, final.unitXTrials(cell_select).zall);hold on;
 scatter(time2Collect,Tris,'Marker','p','MarkerFaceColor','w')
 plot(zeros(numTrials,1),Tris)
 % xticklabels = (final.uv.evtWin(1,1)):5:(final.uv.evtWin(1,2));
@@ -255,7 +358,7 @@ title('Z-scored Ca Traces (normalized)')
 
 
 figure;
-plot(window_ts3, final.unitAVG.zscored_caTraces(animalID_select,:));
+plot(window_ts3, final.unitAVG.zscored_caTraces(cell_select,:));
 title('Z-scored Ca Traces (normalized)')
 
 
@@ -299,28 +402,6 @@ title('Z-scored Ca Traces (normalized)')
 %     xline(0,'--')
 %     pause
 % end
-%% Generate a continuous behavior trace of
-behavTrace = zeros(1,length(caTime));
-for b = 1:length(eTS)
-    startTS(b,:) = eTS(b,1);
-    [idxPoint idxPoint] = min(abs(caTime-startTS(b))); %grab the index for when the current grooming bout starts
-    behavTrace(idxPoint) = 1;
-    clear idxPoint
-end
-
-%%
-figure(3);
-% Fill band values for second subplot. Doing here to scale onset bar
-% correctly
-XX = [window_ts3, fliplr(window_ts3)];
-YY = [final.unitAVG.caTraces(7)-final.unitSEM.caTraces(7), fliplr(final.unitAVG.caTraces(7)+final.unitSEM.caTraces(7))];
-
-% subplot(4,1,3)
-
-plot(window_ts3, final.unitAVG.caTraces(7), 'color',[0.8500, 0.3250, 0.0980], 'LineWidth', 3); hold on;
-line([0 0], [min(YY), max(YY)], 'Color', [.7 .7 .7], 'LineWidth', 2)
-
-
 
 
 %% organizing data for PCA
@@ -347,17 +428,6 @@ for ii = 1:length(final.unitXTrials)
 end
 
 
-%% rank order traces for heatmap based on some subwindow of larger window
-% set an ind to get a particular subwindow
-ind_zero_to_two = window_ts3 > 0 & window_ts3 < 2;
-% get mean of this subwindow
-mean_zero_to_two = mean(final.unitAVG.zscored_caTraces(:,ind_zero_to_two),2);
-% add mean to the zscored data (temporarily)
-add_mean_to_zscored_data = [mean_zero_to_two final.unitAVG.zscored_caTraces];
-% rank order by the mean column, which is column 1
-rank_by_c1 = sortrows(add_mean_to_zscored_data, 1);
-% get rid of mean column
-rank_ordered_mean_zscore = rank_by_c1(:,2:end);
 
 B1_large_mean = mean(B1_large_rew_mean);
 B2_large_mean = mean(B2_large_rew_mean);
@@ -368,8 +438,7 @@ B2_large_SEM = nanstd(B2_large_rew_mean,1)/(sqrt(size(B2_large_rew_mean, 1)));
 B3_large_SEM = nanstd(B3_large_rew_mean,1)/(sqrt(size(B3_large_rew_mean, 1)));
 
 
- figure
-imagesc(window_ts3, 1, rank_ordered_mean_zscore);hold on;  
+
 
  figure
 imagesc(window_ts3, 1, B1_large_rew_mean);hold on;  

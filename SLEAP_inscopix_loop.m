@@ -1,13 +1,15 @@
+%% Use this code to create a meta-structure 'final_SLEAP' that stores movement-related data
+
 %% Edit these uservariables with what you want to look at
 uv.evtWin = [-10 10]; %what time do you want to look at around each event
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
-ts1 = (-10:.1:10-0.1);
+ts1 = (-10:(uv.dt):10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA';
+metaDirectory = 'I:\MATLAB\Sean CNMFe\BLA-NAcSh';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -17,19 +19,11 @@ for i = 1:length(metaDirectory_subfolders)
     % Check if the item in subfolders is a directory (not "." or "..") or
     % one of the sets of files that I haven't analyzed yet (PR currently)
     if metaDirectory_subfolders(i).isdir && ~strcmp(metaDirectory_subfolders(i).name, '.') && ~strcmp(metaDirectory_subfolders(i).name, '..') && ~contains(metaDirectory_subfolders(i).name, 'PR') && ~contains(metaDirectory_subfolders(i).name, 'not in final dataset')
-        % if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..') && ~contains(lower(subfolders(i).name), 'shock')
-        % if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..')
         % Get the full path of the subfolder
         metasubfolderPath = fullfile(metaDirectory, metaDirectory_subfolders(i).name);
-
         % Create a cell array for the subfolder path and append it
         % vertically to folder_list
         metafolder_list = vertcat(metafolder_list, {metasubfolderPath});
-
-
-
-        % Add your analysis code here
-
     end
 end
 
@@ -38,30 +32,18 @@ for zz = 1:size(metafolder_list, 1)
     % Use the dir function to get a list of subfolders
     startDirectory = metafolder_list{zz};
     subfolders = dir(startDirectory);
-
-
     % Initialize folder_list as an empty cell array
     folder_list = {};
-
-
     % Loop through the list of subfolders
     for i = 1:length(subfolders)
         % Check if the item in subfolders is a directory (not "." or "..") or
         % one of the sets of files that I haven't analyzed yet (PR currently)
         if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..') && ~contains(subfolders(i).name, 'PR')
-            % if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..') && ~contains(lower(subfolders(i).name), 'shock')
-            % if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..')
             % Get the full path of the subfolder
             subfolderPath = fullfile(startDirectory, subfolders(i).name);
-
             % Create a cell array for the subfolder path and append it
             % vertically to folder_list
             folder_list = vertcat(folder_list, {subfolderPath});
-
-
-
-            % Add your analysis code here
-
         end
     end
     
@@ -84,7 +66,6 @@ for zz = 1:size(metafolder_list, 1)
         clear folderMask
 
 
-
         idx = ~cellfun('isempty',strfind({files.name},'.csv')); %find the instances of .xlsx in the file list.
         %This command converts the name field into a cell array and searches
         %the cell array with strfind
@@ -102,6 +83,13 @@ for zz = 1:size(metafolder_list, 1)
                 disp(['ABET File = ', csv_names{mm}])
                 ABET_file = strcat(folder_list{ii}, '\', csv_names{mm});
             end
+
+            % if ~contains(csv_names{mm}, 'ABET') | ~contains(lower(csv_names{mm}), '_gpio')
+            %     disp('BLANK folder was not analyzed due to missing files! Check contents and try again');
+            % 
+            %     % Skip the rest of the loop for this folder
+            %     continue;
+            % end
         end
 
         folder_to_analyze = find(strcmpi(strrep(strrep(list_folder_names, ' ', ''), '-', ''), modifiedString));
@@ -132,16 +120,11 @@ for zz = 1:size(metafolder_list, 1)
                 list = dir(sleap_folder_list{sleap_folder});%grab a directory of the foldercontents
                 disp(['Analyzing subfolder: ' sleap_folder_list{sleap_folder}]);
 
-                % Initialize a flag to check if files were found in this folder
-                filesFound = false;
-
                 folderMask = ~[list.isdir]; %find all of the folders in the directory and remove them from the list
                 files = list(folderMask);  %now we have only files to work with
                 clear folderMask list
 
-
-
-                idx = ~cellfun('isempty',strfind({files.name},'sleap_data.csv')); %find the instances of .xlsx in the file list.
+                idx = ~cellfun('isempty',strfind({files.name},'body_sleap_data.csv')); %find the instances of .xlsx in the file list.
                 %This command converts the name field into a cell array and searches
                 %the cell array with strfind
                 csvFiles = files(idx); %build a mat file index
@@ -149,17 +132,15 @@ for zz = 1:size(metafolder_list, 1)
 
 
                 if isempty(csvFiles)
-                    disp('Missing .csv file, skipping folder');
+                    disp('Missing body_sleap_data.csv file, skipping folder');
+                    continue
                 else
-                    filesFound = true; % Set the flag to true since .mat files were found
+                    SLEAP_csv = strcat(sleap_folder_list{sleap_folder}, '\', csvFiles.name);
 
                 end
-                % Check the filesFound flag and print the final message
-                if filesFound
-                    disp('Folder analyzed successfully');
-
-                    SLEAP_csv = strcat(sleap_folder_list{sleap_folder}, '\', csvFiles.name);
-                    
+                % Check if all required files exist, if not, skip
+                if exist('SLEAP_csv','var') && exist('ABET_file','var') && exist('GPIO_file','var')
+                    disp('Required files found, analyzing...');                           
                     if strcmp(current_session, 'SHOCK_TEST')
                         alignment_event = 'choiceTime';
                         [BehavData,ABETfile]=ABET2TableFn_ShockTest(ABET_file);
@@ -504,31 +485,15 @@ for zz = 1:size(metafolder_list, 1)
                         end
                     end
                 else
-                    disp('Remember: BLANK folder was not analyzed due to missing files! Check contents and try again');
+                    disp('Remember: folder was not analyzed due to missing files! Check contents and try again');
 
                     % Skip the rest of the loop for this folder
                     continue;
                 end
+                
             end
+            clear ABET_file SLEAP_csv GPIO_file
             % clearvars -except final
     end
 end
-%%
-% for c = 1:size(ca,2)
-%     subplot(121)
-%     imagesc(final.unitXTrials(c).caTraces)
-%     xticklabels = (final.uv.evtWin(1,1)):5:(final.uv.evtWin(1,2));
-%     xticks = linspace(1, length(final.unitAVG.caTraces), numel(xticklabels));
-%     set(gca, 'XTick', xticks, 'XTickLabel', xticklabels)
-%     set(gca,'FontName','Arial','FontSize',16)
-%     xlabel('Time from(s)','FontSize',22)
-%     ylabel('Trial number','FontSize',22)
-%     subplot(122)
-%     trialTime = uv.evtWin(1,1):uv.dt:uv.evtWin(1,2)-uv.dt;
-%     plot(trialTime,final.unitAVG.caTraces(c,:))
-%     set(gca,'FontName','Arial','FontSize',16)
-%     xlabel('Time from  (s)','FontSize',22)
-%     xlim([uv.evtWin(1,1) uv.evtWin(1,2)])
-%     xline(0,'--')
-%     pause
-% end
+
