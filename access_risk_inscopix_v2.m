@@ -3,11 +3,11 @@ iter = 0;
 %%
 % load('BLA-NAcShell_Risk_2023_09_15.mat')
 
-% load('BLA_panneuronal_Risk_2023_07_06.mat')
+% load('BLA_panneuronal_Risk_2024_01_04.mat')
 
 % load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 
-load('BLA_panneuronal_Risk_matched_PreRDTRM_RDT_D1.mat')
+load('BLA_panneuronal_matched_Pre_RDT_RM_vs_RDT_D1_01042024.mat')
 
 % load('BLA_panneuronal_Risk_matched_RM_D1_vs_Pre_RDT_RM.mat')
 

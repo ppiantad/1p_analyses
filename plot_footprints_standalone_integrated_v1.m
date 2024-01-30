@@ -5,14 +5,14 @@
 
 
 % String to compare
-targetAnimal = 'BLA_Insc_27';
+targetAnimal = 'BLA_Insc_24';
 
 % Perform element-wise comparison
 animal_index_to_plot = find(strcmp(animalIDs, targetAnimal));
 
 
 
-Coor = final.(targetAnimal).(session_to_analyze).neuron.Coor;  
+Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
 
 activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated;
 inhibited = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited;
@@ -206,7 +206,7 @@ animalIDs = (fieldnames(final));
 Coor_all_mice = {};
 for qq = 1:size(fieldnames(final),1)
     animal = animalIDs{qq};
-    Coor_indiv = final.(animal).(session_to_analyze).neuron.Coor;
+    Coor_indiv = final.(animal).(session_to_analyze).CNMFe_data.Coor;
     Coor_all_mice = [Coor_all_mice; Coor_indiv ];
 end
 

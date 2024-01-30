@@ -1,6 +1,6 @@
 %% This code takes as input filtered, un-normalized data from access_risk_inscopix. For example, large rew choice and small rew choice, with each being associated with 1 column of caTraceTrials_mouse
 
-select_mouse = 'BLA_Insc_26';
+select_mouse = 'BLA_Insc_40';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 

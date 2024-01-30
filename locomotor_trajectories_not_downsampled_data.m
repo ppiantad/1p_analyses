@@ -1,39 +1,39 @@
-%% 
-
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'BLA_Insc_27';
+select_mouse = 'BLA_Insc_24';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 
 % Specify the path to your video file
-videoPath = 'd:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-27\RDT D1\RDT D1\BLA-Insc-27_RDT_D1_2023-01-02T12_28_19.avi';
+videoPath = 'i:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24\Pre-RDT RM\PRE-RDT RM\BLA-Insc-24_PRE-RDT_RM2022-08-08T14_40_29.avi';
 
 
 onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
 choice_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.choiceTime';
 offset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.collectionTime';
-fs_cam = 10; %set sampling rate according to camera, this is hard coded for now
+fs_cam = 30; %set sampling rate according to camera, this is hard coded for now
 time_ranges_trials = [onset_trials; choice_trials; offset_trials];
+
 
 % gcamp_samples = 1:1:size(Y_dF_all_session, 2);
 
 % gcamp_time = (0:length(F405_downsampled_data)-1)/fs_cam;
 
+SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data_raw;
 
-velocity_data = final_SLEAP.(select_mouse).(session_to_analyze).zscored_SLEAP_data_velocity';
+% velocity_data = final_SLEAP.(select_mouse).(session_to_analyze).zscored_SLEAP_data_velocity';
 
-% velocity_data = zscore(SLEAP_data.vel_cm_s)';
+velocity_data = zscore(SLEAP_data.vel_cm_s)';
 
-SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data;
+% SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data;
 
 
 BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
 adjusted_start_time = BehavData.TrialPossible(1)-60;
-% SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
+SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
 % gcamp_normalized = ((Y_dF_all_session)-mean(Y_dF_all_session))/std(Y_dF_all_session);
 % SLEAP_data_vel_filtered_session_normalized = ((SLEAP_data_vel_filtered_session)-mean(SLEAP_data_vel_filtered_session))/std(SLEAP_data_vel_filtered_session);
 

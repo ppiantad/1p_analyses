@@ -9,7 +9,7 @@ ts1 = (-10:(uv.dt):10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\Sean CNMFe\BLA-NAcSh';
+metaDirectory = 'D:\MATLAB\Sean CNMFe\pan-neuronal BLA';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -195,6 +195,12 @@ for zz = 1:size(metafolder_list, 1)
                         eTS = BehavData.(alignment_event); %get time stamps
 
                         SLEAP_data = readtable(SLEAP_csv);
+                        
+                        % save non-downsampled table as well - for various
+                        % analyses where we don't need to get on the same
+                        % timescale
+                        final_SLEAP.(current_animal).(current_session).SLEAP_data_raw = SLEAP_data;
+
                         % Assuming 'Timestamp' is the timestamp variable in your table
                         timestamps = SLEAP_data.idx_time;
 
@@ -362,6 +368,12 @@ for zz = 1:size(metafolder_list, 1)
                             eTS = BehavData.(alignment_event); %get time stamps
 
                             SLEAP_data = readtable(SLEAP_csv);
+
+                            % save non-downsampled table as well - for various
+                            % analyses where we don't need to get on the same
+                            % timescale
+                            final_SLEAP.(current_animal).(current_session).SLEAP_data_raw = SLEAP_data;
+
                             % Assuming 'Timestamp' is the timestamp variable in your table
                             timestamps = SLEAP_data.idx_time;
 

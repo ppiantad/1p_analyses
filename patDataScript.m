@@ -13,9 +13,9 @@ gpio_tbl = readtable('2023-01-02-10-56-17_video_green_gpio.csv');
 
 SLEAP_data = readtable('BLA-Insc-27_RDT D1_body_sleap_data.csv');
 %EDIT FOR EACH MOUSE AS NECESSARY
-SLEAP_time_range_adjustment =  []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; 
+SLEAP_time_range_adjustment = []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; -1.23;
 
-boris_file = 'BLA-Insc-27_RDT_D1.csv';
+boris_file = 'BLA-Insc-27_RDT_D1 BORIS.csv'; %'BLA-Insc-27_RDT_D1.csv';
 
 [BehavData, boris_Extract_tbl] = boris_to_table(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment);
 
@@ -82,7 +82,7 @@ BehavData.choTime3 = BehavData.Insc_TTL+BehavData.choTime2;
 
 %filter based on TrialFilter inputs (see TrialFilter.m for full list of
 %possibilities)
-BehavData=TrialFilter(BehavData,'OMITALL',0, 'BLANK_TOUCH', 0);
+BehavData=TrialFilter(BehavData,'OMITALL',0, 'BLANK_TOUCH', 0); %BehavData=TrialFilter(BehavData,'OMITALL',0, 'BLANK_TOUCH', 0);
 
 
 % BehavData_for_SLEAP = BehavData;
@@ -218,9 +218,6 @@ Tris=[1:numTrials]';
 window_ts2 = uv.evtWin(1):uv.dt:uv.evtWin(2)-uv.dt;
 window_ts3 = uv.evtWin(1):uv.dt:uv.evtWin(2);
 
-
-figure
-imagesc(window_ts3, 1, final.unitAVG.caTraces);hold on;
 
 for ii = 1:size(final.unitXTrials,2)
     for jj = 1:size(final.unitXTrials(ii).zall)

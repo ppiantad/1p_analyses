@@ -189,7 +189,7 @@ for zz = 1:size(metafolder_list, 1)
 
                 load(currentMatFile);
                 % load(currentMatFile);
-                % ts1 = uv.dt:uv.dt:length(neuron.C_raw)*uv.dt;
+                % ts1 = uv.dt:uv.dt:length(neuron.C)*uv.dt;
 
                 %create array of FRAMES for aligning
                 %NEED TO FIGURE OUT HOW TO MAKE THE FRAMES AUTOMATICALLY = THE SAME SIZE AS
@@ -210,13 +210,13 @@ for zz = 1:size(metafolder_list, 1)
 
 
                 %for testing frames vs. ts1
-                % figure; plot(ts1, neuron.C_raw(2,:))
-                % figure; plot(frames3, neuron.C_raw(2,:))
+                % figure; plot(ts1, neuron.C(2,:))
+                % figure; plot(frames3, neuron.C(2,:))
                 % BehavData.choiceTime = BehavData.choiceTime-1;
                 %%
 
                 eTS = BehavData.(alignment_event); %get time stamps
-                ca = neuron.C_raw; %get calcium
+                ca = neuron.C; %get calcium
                 zb_session = mean(ca,2);
                 zsd_session = std(ca,[],2);
                 caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
@@ -299,7 +299,7 @@ for zz = 1:size(metafolder_list, 1)
                 %Because the "neuron" data type is a pain in the ass to
                 %work with, we will instead save some of the variables
                 final.(current_animal).(current_session).CNMFe_data.C = neuron.C;
-                final.(current_animal).(current_session).CNMFe_data.C_raw = neuron.C_raw;
+                final.(current_animal).(current_session).CNMFe_data.C_raw = neuron.C;
                 final.(current_animal).(current_session).CNMFe_data.S = neuron.S;
                 final.(current_animal).(current_session).CNMFe_data.Coor = neuron.Coor;
                 final.(current_animal).(current_session).CNMFe_data.Cn = neuron.Cn;
@@ -368,7 +368,7 @@ for zz = 1:size(metafolder_list, 1)
 
                     load(currentMatFile);
                     % load(currentMatFile);
-                    % ts1 = uv.dt:uv.dt:length(neuron.C_raw)*uv.dt;
+                    % ts1 = uv.dt:uv.dt:length(neuron.C)*uv.dt;
 
                     %create array of FRAMES for aligning
                     %NEED TO FIGURE OUT HOW TO MAKE THE FRAMES AUTOMATICALLY = THE SAME SIZE AS
@@ -389,14 +389,14 @@ for zz = 1:size(metafolder_list, 1)
 
 
                     %for testing frames vs. ts1
-                    % figure; plot(ts1, neuron.C_raw(2,:))
-                    % figure; plot(frames3, neuron.C_raw(2,:))
+                    % figure; plot(ts1, neuron.C(2,:))
+                    % figure; plot(frames3, neuron.C(2,:))
                     % BehavData.choiceTime = BehavData.choiceTime-1;
 
                     %%
 
                     eTS = BehavData.(alignment_event); %get time stamps
-                    ca = neuron.C_raw; %get calcium
+                    ca = neuron.C; %get calcium
                     zb_session = mean(ca,2);
                     zsd_session = std(ca,[],2);
                     caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
@@ -479,7 +479,7 @@ for zz = 1:size(metafolder_list, 1)
                     %Because the "neuron" data type is a pain in the ass to
                     %work with, we will instead save some of the variables
                     final.(current_animal).(current_session).CNMFe_data.C = neuron.C;
-                    final.(current_animal).(current_session).CNMFe_data.C_raw = neuron.C_raw;
+                    final.(current_animal).(current_session).CNMFe_data.C_raw = neuron.C;
                     final.(current_animal).(current_session).CNMFe_data.S = neuron.S;
                     final.(current_animal).(current_session).CNMFe_data.Coor = neuron.Coor;
                     final.(current_animal).(current_session).CNMFe_data.Cn = neuron.Cn;

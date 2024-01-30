@@ -38,15 +38,21 @@ SLEAP_time = uv.dt:uv.dt:height(SLEAP_data)*uv.dt; %generate time trace
 %starts first (stTime(1);
 SLEAP_time = SLEAP_time + stTime(1);
 
+if ~isempty(SLEAP_time_range_adjustment)
+    SLEAP_time = SLEAP_time-SLEAP_time_range_adjustment;
+end
+
 SLEAP_data.idx_time = SLEAP_time';
 
-if ~isempty(SLEAP_time_range_adjustment)
-    time_ranges = time_ranges-SLEAP_time_range_adjustment;
-end
 
 SLEAP_data_vel_filtered_session = SLEAP_data.vel_filtered_2';
 
 zscored_SLEAP_data_vel_filtered_session =(SLEAP_data_vel_filtered_session-mean(SLEAP_data_vel_filtered_session)./std(SLEAP_data_vel_filtered_session));
+
+block_2_trial = find(BehavData.Block == 2);
+block_2_trial = block_2_trial(1)
+block_3_trial = find(BehavData.Block == 3);
+block_3_trial = block_3_trial(1)
 
 %%
 %%
@@ -81,8 +87,8 @@ for i = 1 %could loop through multiple mice like this if you had it
                 velocity_trace_trials(t,1:sum(idx)) = velocity_unitTrace(idx);
                 % zb(t,:) = mean(unitTrace(bl_idx)); %baseline mean
                 % zsd(t,:) = std(unitTrace(bl_idx)); %baseline std
-                velocity_zb(t,:) = mean(velocity_trace_trials(t,:)); %baseline mean
-                velocity_zsd(t,:) = std(velocity_trace_trials(t,:)); %baseline std
+                velocity_zb(t,:) = mean(velocity_trace_trials(t,:), 1, "omitmissing"); %baseline mean
+                velocity_zsd(t,:) = std(velocity_trace_trials(t,:), 1, "omitmissing"); %baseline std
 
 
                 tmp = 0;
@@ -111,9 +117,13 @@ for i = 1 %could loop through multiple mice like this if you had it
 end
 
 
-time2Collect = BehavData.collectionTime(:) - BehavData.choiceTime(:);
-trialStartTime = BehavData.stTime(:) - BehavData.choiceTime(:);
-
+if strcmp(uv.behav, 'choiceTime')
+    time2Collect = BehavData.collectionTime(:) - BehavData.choiceTime(:);
+    trialStartTime = BehavData.stTime(:) - BehavData.choiceTime(:);
+elseif strcmp(uv.behav, 'collectionTime')
+    time2Collect = BehavData.choiceTime(:) - BehavData.collectionTime(:);
+    trialStartTime = BehavData.stTime(:) - BehavData.collectionTime(:);
+end
 figure
 imagesc(window_ts3, 1, zall_motion);hold on;  
 
@@ -141,18 +151,19 @@ end
 
 
 %%
-figure;
+h1=figure;
 subplot('Position', [0.1, 0.45, 0.8, 0.50]);
 imagesc(window_ts3, 1, zall_motion);hold on;  
-time2Collect = BehavData.collectionTime(:) - BehavData.choiceTime(:);
-trialStartTime = BehavData.stTime(:) - BehavData.choiceTime(:);
+
 [numTrials, ~] = size(BehavData.collectionTime(:));
 Tris = [1:numTrials]';
-scatter(time2Collect, Tris               , 'Marker', 'p', 'MarkerFaceColor', 'w', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha',1)
-scatter(trialStartTime, Tris, 'Marker', 's', 'MarkerFaceColor', 'k', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 1)
+scatter(time2Collect(BehavData.bigSmall == 1.2), Tris(BehavData.bigSmall == 1.2), 'Marker', 'p', 'MarkerEdgeColor','w')
+scatter(trialStartTime(BehavData.bigSmall == 1.2), Tris(BehavData.bigSmall == 1.2), 'Marker', 's',  'MarkerEdgeColor', 'w')
+scatter(time2Collect(BehavData.bigSmall == 0.3), Tris(BehavData.bigSmall == 0.3), 'Marker', 'p',  'MarkerEdgeColor','r')
+scatter(trialStartTime(BehavData.bigSmall == 0.3), Tris(BehavData.bigSmall == 0.3), 'Marker', 's', 'MarkerEdgeColor', 'r')
 plot(zeros(numTrials, 1), Tris, 'LineWidth', 3, 'LineStyle', "-", 'Color', 'w')
-yline(30.5,'-',{'Block 2', 'begins'},'LineWidth',3);
-yline(60.5,'-',{'Block 3', 'begins'},'LineWidth',3);
+yline(block_2_trial,'-',{'Block 2', 'begins'},'LineWidth',3);
+yline(block_3_trial,'-',{'Block 3', 'begins'},'LineWidth',3);
 colorbar;
 
 
@@ -167,3 +178,4 @@ xline(0, 'Color', 'k', 'LineStyle','-', 'LineWidth', 2);
 xline(block_trialStartTime_median, 'Color', 'b', 'LineStyle','-', 'LineWidth', 1);
 xline(block_time2Collect_median, 'Color', 'r', 'LineStyle', '-', 'LineWidth', 1);
 legend('block 1 (0%)','block 2 (50%)', 'block 3 (75%)')
+set(h1,'Position',[10 10 400 500])

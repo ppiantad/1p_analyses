@@ -1,4 +1,5 @@
-function plot_line(filtered_motion, normalized_velocity_bounded, plot_index, title_str)
+function plot_line(loop_num, colors, choice_times, filtered_motion, normalized_velocity_bounded, plot_index, title_str)
+
     % Extract X-Y coordinates
     x = filtered_motion{plot_index}(1, :);
     y = filtered_motion{plot_index}(2, :);
@@ -15,10 +16,13 @@ function plot_line(filtered_motion, normalized_velocity_bounded, plot_index, tit
 
     % Plot the line using scatter with varying marker colors
     scatter(x, y, 50, marker_colors_mapped, 'filled');
-    plot(x, y, 'Color', 'k');
+    plot(x, y, 'Color', colors(loop_num,:), 'LineWidth', 1, 'LineStyle', '-');
 
     % Add a black square at the start of the line
     scatter(x(1), y(1), 200, 'k', 's', 'filled');
+
+    % Add a black circke at the choice time
+    scatter(choice_times(1), choice_times(2), 200, 'k', 'o', 'filled');
 
     % Add a black triangle at the end of the line
     scatter(x(end), y(end), 200, 'k', '^', 'filled');
