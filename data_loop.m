@@ -1,12 +1,25 @@
 iter = 0
 
+%%
+% load('BLA-NAcShell_Risk_2023_09_15.mat')
+
+load('BLA_panneuronal_Risk_2024_01_04.mat')
+
+% load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
+
+% load('BLA_panneuronal_matched_Pre_RDT_RM_vs_RDT_D1_01042024.mat')
+
+% load('BLA_panneuronal_Risk_matched_RM_D1_vs_Pre_RDT_RM.mat')
+
+% load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
+
 %% Edit these uservariables with what you want to look at
 uv.evtWin = [-2 8]; %what time do you want to look at around each event
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 epoc_to_align = 'collectionTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
@@ -15,17 +28,13 @@ neuron_num = 0;
 clear neuron_mean neuron_sem neuron_num zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized
 
 
-%%
+%% FILTER TO GET UN-SHUFFLED DATA
 
 neuron_num = 0;
 for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
-    
-
-
-    
     BehavData = final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData;
-    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW',1.2, 'BLOCK', 1);
+    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW',1.2);
     trials = cell2mat(trials);
     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.C_raw;
 
@@ -37,7 +46,7 @@ for ii = 1:size(fieldnames(final),1)
 
     zb_session = mean(ca,2);
     zsd_session = std(ca,[],2);
-    caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
+    % caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
 
 
     %calculate time windows for each event
@@ -95,17 +104,13 @@ end
 
 iter = iter+1;
 
-%% SHUFFLE CA DATA
+%% FILTER TO GET, ALIGNED SHUFFLED CA DATA
 
 neuron_num = 0;
 for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
-    
-
-
-    
     BehavData = final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData;
-    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW',1.2, 'BLOCK', 1);
+    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW',1.2);
     trials = cell2mat(trials);
     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.C_raw;
 
@@ -130,7 +135,7 @@ for ii = 1:size(fieldnames(final),1)
 
     zb_session = mean(ca,2);
     zsd_session = std(ca,[],2);
-    caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
+    % caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
 
 
     %calculate time windows for each event

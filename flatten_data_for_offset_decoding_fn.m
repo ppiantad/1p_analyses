@@ -1,12 +1,11 @@
-%% This code takes as input filtered, un-normalized data from access_risk_inscopix. For example, large rew choice and small rew choice, with each being associated with 1 column of caTraceTrials_mouse
+function [trimmed_concatenatedColumns_offsets,...
+    trimmed_concatenatedColumns_time_offsets,...
+    trimmed_concatenatedColumns_trials_offsets,...
+    trimmed_concatenatedEvents_offsets]...
+    = flatten_data_for_offset_decoding_fn(caTraceTrials_mouse_decoding, ts1, iter)
 
-select_mouse = 'BLA_Insc_40';
 
-select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-caTraceTrials_mouse_decoding = caTraceTrials_mouse(select_mouse_index,:);
-
-trials_per_mouse_decoding = trials_per_mouse(select_mouse_index,:);
 
 
 %%
@@ -101,7 +100,6 @@ end
 % Find the minimum value present in either array
 min_value = min(min(max_values));
 
-
 for qq = 1:size(caTraceTrials_mouse_decoding, 1)
     for z = 1:size(cells, 2)
         nestedCellArray = cells{1, z};
@@ -113,12 +111,12 @@ for qq = 1:size(caTraceTrials_mouse_decoding, 1)
     end
 end
 
-figure;
-for means = 1:size(event_mean, 1)
-    hold on;
-    plot(ts1, event_mean(means,:))
-
-end
+% figure;
+% for means = 1:size(event_mean, 1)
+%     hold on;
+%     plot(ts1, event_mean(means,:))
+% 
+% end
 %% trim arrays to only include data from the mouse with the fewest of a given trial type.
 % given that we have so many more large reward trials, this will be limited
 % by the small rew trials in nearly every case. this could get a bit

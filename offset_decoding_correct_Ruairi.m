@@ -1,3 +1,24 @@
+
+
+%% This code takes as input filtered, un-normalized data from data_loop.m (or access_risk_inscopix_v2.m)
+% For example, large rew choice and small rew choice, with each being associated with 1 column of caTraceTrials_mouse
+
+select_mouse = 'BLA_Insc_40';
+
+select_mouse_index = find(strcmp(animalIDs, select_mouse));
+
+
+caTraceTrials_mouse_decoding = caTraceTrials_mouse(select_mouse_index,:);
+
+trials_per_mouse_decoding = trials_per_mouse(select_mouse_index,:);
+%%
+[trimmed_concatenatedColumns_offsets,...
+    trimmed_concatenatedColumns_time_offsets,...
+    trimmed_concatenatedColumns_trials_offsets,...
+    trimmed_concatenatedEvents_offsets]...
+    = flatten_data_for_offset_decoding_fn(caTraceTrials_mouse_decoding, ts1, iter);
+
+
 %% first flatten data using flatten_data_for_offset_decoding, ensure that resulting arrays are correct! 
 
 % offset_to_decode = 2; 
