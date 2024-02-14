@@ -40,8 +40,8 @@ load('BLA_panneuronal_Risk_2024_01_04.mat')
 
 %%
 
-session_to_analyze = 'Pre_RDT_RM';
-epoc_to_align = 'collectionTime';
+session_to_analyze = 'RDT_D1';
+epoc_to_align = 'choiceTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
 window_sz = (0:.1:20-0.1);
@@ -55,8 +55,8 @@ uv.sigma = 1.5;                                                               %t
 uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
 % uv.evtSigWin.outcome = [-4 0]; %for pre-choice                                     %period within time window that response is classified on (sec relative to event)
-uv.evtSigWin.outcome = [1 3]; %for REW collection
-% uv.evtSigWin.outcome = [0 1]; %for SHK
+% uv.evtSigWin.outcome = [1 3]; %for REW collection
+uv.evtSigWin.outcome = [0 2]; %for SHK
 
 
 % uv.evtSigWin.groomingStop = [-.5 3];
@@ -96,7 +96,7 @@ for ii = 1:size(fieldnames(final),1)
     session_string{iter} = session_to_analyze;
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 0.3);
+        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'SHK', 1);
         num_trials = num_trials+sum(numel(trials));
         if ~strcmp('stTime',data.Properties.VariableNames)
             data.stTime = data.TrialPossible - 5;
@@ -789,7 +789,7 @@ sig_increase_shk_from_large_ind = zeros(1, size(respClass_all_array{1,2}, 2));
 sig_increase_shk_from_large_ind(:, sig_increase_shk_from_large) = 1;
 
 shk_activated = respClass_all_array{1,2} == exclusive_activated_session_2 |  respClass_all_array{1,2} == sig_increase_shk_from_large_ind;
-shk_activated_sum = sum(shk_activated);
+shk_activated_sum = sum(shk_activated)
 
 figure; plot(ts1, mean(neuron_mean_array{1, 2}(shk_activated,:))); hold on; plot(ts1,  mean(neuron_mean_array{1, 1}(Block_1_activated,:)));
 

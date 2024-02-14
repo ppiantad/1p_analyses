@@ -1,11 +1,22 @@
 
+
+
 %%
 
 for uu = 1:size(caTraceTrials_mouse_iterations, 2)
     caTraceTrials_current = caTraceTrials_mouse_iterations{:,uu};
+    % caTraceTrials_current(all(cellfun(@isempty,caTraceTrials_current),2), : ) = [];
+    % check if there are mice with no data - delete these & the
+    % corresponding related arrays
+    empty_rows_indices = find(cellfun(@isempty, caTraceTrials_current(:,1)));
+    caTraceTrials_current(empty_rows_indices, :) = [];
+    % animalIDs(empty_rows_indices,:) = [];
+    % trials_per_mouse(empty_rows_indices, :) = [];
+    zall_mouse(empty_rows_indices, :) = [];
     fprintf('The current iteration is: %d\n', uu);
     for bb = 1:size(caTraceTrials_current, 1)
         caTraceTrials_mouse_decoding = caTraceTrials_current(bb,:);
+        % disp('The current mouse being decoded is:' + string(animalIDs(bb)))
         fprintf('The current mouse being decoded is: %d\n', bb);
         [trimmed_concatenatedColumns_offsets,...
             trimmed_concatenatedColumns_time_offsets,...
@@ -24,12 +35,12 @@ for uu = 1:size(caTraceTrials_mouse_iterations, 2)
             offset_1_time_offset = cell2mat(trimmed_concatenatedColumns_time_offsets(p,:));
 
             y = offset_1_events_offset(:,1);
-            y = y -1;
+            y = y -1; %values need to be 0 or 1 for fitcnb
             X = offset_1_GCAMP;
             X = zscore(X);
             idx = randperm(size(X, 1));
             X = X(idx, :);
-            y = y(idx,:);
+            y = y(idx, :);
             cv = cvpartition(size(X, 1),"KFold", k);
 
 

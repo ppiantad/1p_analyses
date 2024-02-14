@@ -194,7 +194,7 @@ for zz = 1:size(metafolder_list, 1)
                 %create array of FRAMES for aligning
                 %NEED TO FIGURE OUT HOW TO MAKE THE FRAMES AUTOMATICALLY = THE SAME SIZE AS
                 %THE neuron.C_ ARRAY LENGTH
-                length_ca_trace = size(neuron.C,2);
+                length_ca_trace = size(neuron.S,2);
                 trim_frames = size(frames(1:2:end),1)-length_ca_trace;
 
                 frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
@@ -216,7 +216,7 @@ for zz = 1:size(metafolder_list, 1)
                 %%
 
                 eTS = BehavData.(alignment_event); %get time stamps
-                ca = neuron.C; %get calcium
+                ca = neuron.S %get calcium
                 zb_session = mean(ca,2);
                 zsd_session = std(ca,[],2);
                 caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
@@ -299,7 +299,7 @@ for zz = 1:size(metafolder_list, 1)
                 %Because the "neuron" data type is a pain in the ass to
                 %work with, we will instead save some of the variables
                 final.(current_animal).(current_session).CNMFe_data.C = neuron.C;
-                final.(current_animal).(current_session).CNMFe_data.C_raw = neuron.C;
+                final.(current_animal).(current_session).CNMFe_data.C_raw = neuron.C_raw;
                 final.(current_animal).(current_session).CNMFe_data.S = neuron.S;
                 final.(current_animal).(current_session).CNMFe_data.Coor = neuron.Coor;
                 final.(current_animal).(current_session).CNMFe_data.Cn = neuron.Cn;
@@ -373,7 +373,7 @@ for zz = 1:size(metafolder_list, 1)
                     %create array of FRAMES for aligning
                     %NEED TO FIGURE OUT HOW TO MAKE THE FRAMES AUTOMATICALLY = THE SAME SIZE AS
                     %THE neuron.C_ ARRAY LENGTH
-                    length_ca_trace = size(neuron.C,2);
+                    length_ca_trace = size(neuron.S,2);
                     trim_frames = size(frames(1:2:end),1)-length_ca_trace;
 
                     frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
@@ -396,7 +396,7 @@ for zz = 1:size(metafolder_list, 1)
                     %%
 
                     eTS = BehavData.(alignment_event); %get time stamps
-                    ca = neuron.C; %get calcium
+                    ca = neuron.S; %get calcium
                     zb_session = mean(ca,2);
                     zsd_session = std(ca,[],2);
                     caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
@@ -479,7 +479,7 @@ for zz = 1:size(metafolder_list, 1)
                     %Because the "neuron" data type is a pain in the ass to
                     %work with, we will instead save some of the variables
                     final.(current_animal).(current_session).CNMFe_data.C = neuron.C;
-                    final.(current_animal).(current_session).CNMFe_data.C_raw = neuron.C;
+                    final.(current_animal).(current_session).CNMFe_data.C_raw = neuron.C_raw;
                     final.(current_animal).(current_session).CNMFe_data.S = neuron.S;
                     final.(current_animal).(current_session).CNMFe_data.Coor = neuron.Coor;
                     final.(current_animal).(current_session).CNMFe_data.Cn = neuron.Cn;
