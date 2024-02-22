@@ -4,8 +4,10 @@
 % get cell activity indices, then plot the FOV and color code accordingly. 
 
 
+
+
 % String to compare
-targetAnimal = 'BLA_Insc_24';
+targetAnimal = 'BLA_Insc_25';
 
 % Perform element-wise comparison
 animal_index_to_plot = find(strcmp(animalIDs, targetAnimal));

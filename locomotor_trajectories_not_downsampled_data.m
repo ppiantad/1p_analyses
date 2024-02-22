@@ -1,14 +1,14 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'BLA_Insc_24';
+select_mouse = 'BLA_Insc_26';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
 % Specify the path to your video file
-videoPath = 'i:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24\Pre-RDT RM\PRE-RDT RM\BLA-Insc-24_PRE-RDT_RM2022-08-08T14_40_29.avi';
+videoPath = 'E:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-26\RDT D1\RDT D1\BLA-Insc-26_RDT_D1_2023-01-16T12_20_15.avi';
 
 
 onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
@@ -643,4 +643,141 @@ hold off;
 title('Small Block 3');
 xlim([x_min_all, x_max_all]);
 ylim([y_min_all, y_max_all]);
+
+%%
+%%
+% Loop through each line and plot
+figure;
+for j = 1:size(large_block_1_true_indices , 1) %num_lines
+    plot_index = large_block_1_true_indices (j);
+    x = [];
+    y = [];
+    % figure; %comment me out if you want everything plotted on the same fig! 
+    
+    % Extract X-Y coordinates
+    x = filtered_motion{plot_index}(1, :);
+    y = filtered_motion{plot_index}(2, :);
+    
+
+    % Plot the line using scatter with varying marker colors
+    % scatter(x, y, 50, ">", 'filled');
+    hold on;
+    plot(x, y, 'Color', 'b');
+    % % Add a black square at the start of the line
+    scatter(x(1), y(1), 200, 'b', 's');
+
+    % Add a black circke at the choice time
+    scatter(choice_times{1, large_block_1_true_indices(j)}(1), choice_times{1, large_block_1_true_indices(j)}(2), 200, 'b', 'o');
+
+
+    % Add a black triangle at the end of the line
+    scatter(x(end), y(end), 200, 'b', '^');
+end
+
+
+
+
+viscircles(circleData{1, 1}.Center,circleData{1, 1}.Radius);
+viscircles(circleData{2, 1}.Center,circleData{2, 1}.Radius);
+viscircles(circleData{3, 1}.Center,circleData{3, 1}.Radius);
+
+hold on;
+for j = 1:size(small_block_1_true_indices , 1) %num_lines
+    plot_index = small_block_1_true_indices (j);
+    x = [];
+    y = [];
+    % figure; %comment me out if you want everything plotted on the same fig! 
+    
+    % Extract X-Y coordinates
+    x = filtered_motion{plot_index}(1, :);
+    y = filtered_motion{plot_index}(2, :);
+    
+
+
+    % % Plot the line using scatter with varying marker colors
+    % scatter(x, y, 50, marker_colors_mapped, 'filled');
+    hold on;
+    plot(x, y, 'Color', 'r');
+    % Add a black square at the start of the line
+    scatter(x(1), y(1), 200, 'r', 's');
+
+    % Add a black circke at the choice time
+    scatter(choice_times{1, small_block_1_true_indices(j)}(1), choice_times{1, small_block_1_true_indices(j)}(2), 200, 'r', 'o');
+
+
+    % Add a black triangle at the end of the line
+    scatter(x(end), y(end), 200, 'r', '^');
+end
+
+
+hold off
+
+
+
+%%
+% Loop through each line and plot
+figure;
+for j = 1:size(large_block_3_true_indices , 1) %num_lines
+    plot_index = large_block_3_true_indices (j);
+    x = [];
+    y = [];
+    % figure; %comment me out if you want everything plotted on the same fig! 
+    
+    % Extract X-Y coordinates
+    x = filtered_motion{plot_index}(1, :);
+    y = filtered_motion{plot_index}(2, :);
+    
+
+    % Plot the line using scatter with varying marker colors
+    % scatter(x, y, 50, ">", 'filled');
+    hold on;
+    plot(x, y, 'Color', 'b');
+    % % Add a black square at the start of the line
+    scatter(x(1), y(1), 200, 'b', 's');
+
+    % Add a black circke at the choice time
+    scatter(choice_times{1, large_block_3_true_indices(j)}(1), choice_times{1, large_block_3_true_indices(j)}(2), 200, 'b', 'o');
+
+
+    % Add a black triangle at the end of the line
+    scatter(x(end), y(end), 200, 'b', '^');
+end
+
+
+
+
+viscircles(circleData{1, 1}.Center,circleData{1, 1}.Radius);
+viscircles(circleData{2, 1}.Center,circleData{2, 1}.Radius);
+viscircles(circleData{3, 1}.Center,circleData{3, 1}.Radius);
+
+hold on;
+for j = 1:size(small_block_3_true_indices , 1) %num_lines
+    plot_index = small_block_3_true_indices (j);
+    x = [];
+    y = [];
+    % figure; %comment me out if you want everything plotted on the same fig! 
+    
+    % Extract X-Y coordinates
+    x = filtered_motion{plot_index}(1, :);
+    y = filtered_motion{plot_index}(2, :);
+    
+
+
+    % % Plot the line using scatter with varying marker colors
+    % scatter(x, y, 50, marker_colors_mapped, 'filled');
+    hold on;
+    plot(x, y, 'Color', 'r');
+    % Add a black square at the start of the line
+    scatter(x(1), y(1), 200, 'r', 's');
+
+    % Add a black circke at the choice time
+    scatter(choice_times{1, small_block_3_true_indices(j)}(1), choice_times{1, small_block_3_true_indices(j)}(2), 200, 'r', 'o');
+
+
+    % Add a black triangle at the end of the line
+    scatter(x(end), y(end), 200, 'r', '^');
+end
+
+
+hold off
 

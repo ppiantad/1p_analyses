@@ -10,7 +10,7 @@ select_mouse_index = find(strcmp(animalIDs, select_mouse));
 session_to_analyze = 'RDT_D1';
 
 % Specify the path to your video file
-videoPath = 'd:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-27\RDT D1\RDT D1\BLA-Insc-27_RDT_D1_2023-01-02T12_28_19.avi';
+videoPath = 'e:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-27\RDT D1\RDT D1\BLA-Insc-27_RDT_D1_2023-01-02T12_28_19.avi';
 
 
 onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';

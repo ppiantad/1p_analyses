@@ -19,10 +19,11 @@ uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-ca_data_type = "C_raw"; % C % C_raw
-% CNMFe_data.S = inferred spikes
-% CNMFe_data.C = denoised traces
-% CNMFe_data.C_raw = CNMFe data
+ca_data_type = "S"; % C % C_raw %S
+% CNMFe_data.C_raw: CNMFe traces
+% CNMFe_data.C: denoised CNMFe traces
+% CNMFe_data.S: inferred spikes
+
 session_to_analyze = 'Pre_RDT_RM';
 epoc_to_align = 'collectionTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -48,7 +49,8 @@ for ii = 1:size(fieldnames(final),1)
         end
         num_samples = size(ca, 2);
         sampling_frequency = (final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.dt)*100;
-        time_array = (0:(num_samples-1)) / sampling_frequency;
+        time_array = final.(currentanimal).(session_to_analyze).(epoc_to_align).time;
+        % time_array = (0:(num_samples-1)) / sampling_frequency;
         eTS = BehavData.(epoc_to_align); %get time stamps
 
         zb_session = mean(ca,2);
@@ -99,6 +101,7 @@ for ii = 1:size(fieldnames(final),1)
 
                 end
             end
+            zall_array_session{neuron_num} = zall_session; 
             zall_array{neuron_num} = zall;
             zall_mouse{ii, iter+1}(u) = {zall};
             caTraceTrials_mouse{ii, iter+1}(u) = {caTraceTrials};

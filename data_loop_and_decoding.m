@@ -9,9 +9,9 @@ counts = 0;
 num_comparisons = 2; 
 
 ca_data_type = "C_raw"; % C % C_raw
-% CNMFe_data.S = inferred spikes
-% CNMFe_data.C = denoised traces
-% CNMFe_data.C_raw = CNMFe data
+% CNMFe_data.C_raw: CNMFe traces
+% CNMFe_data.C: denoised CNMFe traces
+% CNMFe_data.S: inferred spikes
 %%
 for num_iteration = 1:num_iterations
     fprintf('The current iteration is: %d\n', num_iteration);
@@ -51,7 +51,7 @@ for num_iteration = 1:num_iterations
 
                     num_samples = size(ca, 2);
                     sampling_frequency = (final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.dt)*100;
-                    time_array = (0:(num_samples-1)) / sampling_frequency;
+                    time_array = final.(currentanimal).(session_to_analyze).(epoc_to_align).time;
                     eTS = BehavData.(epoc_to_align); %get time stamps
 
                     zb_session = mean(ca,2);
@@ -137,7 +137,7 @@ for num_iteration = 1:num_iterations
 
                     num_samples = size(ca, 2);
                     sampling_frequency = (final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.dt)*100;
-                    time_array = (0:(num_samples-1)) / sampling_frequency;
+                    time_array = final.(currentanimal).(session_to_analyze).(epoc_to_align).time;
                     eTS = BehavData.(epoc_to_align); %get time stamps
 
                     zb_session = mean(ca,2);

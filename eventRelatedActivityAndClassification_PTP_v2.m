@@ -40,8 +40,8 @@ load('BLA_panneuronal_Risk_2024_01_04.mat')
 
 %%
 
-session_to_analyze = 'RDT_D1';
-epoc_to_align = 'choiceTime';
+session_to_analyze = 'Pre_RDT_RM';
+epoc_to_align = 'collectionTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
 window_sz = (0:.1:20-0.1);
@@ -55,8 +55,8 @@ uv.sigma = 1.5;                                                               %t
 uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
 % uv.evtSigWin.outcome = [-4 0]; %for pre-choice                                     %period within time window that response is classified on (sec relative to event)
-% uv.evtSigWin.outcome = [1 3]; %for REW collection
-uv.evtSigWin.outcome = [0 2]; %for SHK
+uv.evtSigWin.outcome = [1 3]; %for REW collection
+% uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice
 
 
 % uv.evtSigWin.groomingStop = [-.5 3];
@@ -96,7 +96,7 @@ for ii = 1:size(fieldnames(final),1)
     session_string{iter} = session_to_analyze;
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'SHK', 1);
+        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData,  'REW', 1.2);
         num_trials = num_trials+sum(numel(trials));
         if ~strcmp('stTime',data.Properties.VariableNames)
             data.stTime = data.TrialPossible - 5;
@@ -137,12 +137,13 @@ for ii = 1:size(fieldnames(final),1)
             % another method?
             if isempty(caTraceTrials) || size(caTraceTrials, 1) == 1
                 respClass_all(neuron_num) = 0;
-                respClass.(session_to_analyze).(identity_classification_str).(filter_args).activated(neuron_num,1) = 0;     
-                respClass.(session_to_analyze).(identity_classification_str).(filter_args).inhibited(neuron_num,1) = 0;
-                respClass.(session_to_analyze).(identity_classification_str).(filter_args).neutral(neuron_num,1) = 0;
-                respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) = 0;
-                respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = 0;
-                respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = 0;
+                % respClass.(session_to_analyze).(identity_classification_str).(filter_args).activated(neuron_num,1) = 0;     
+                % respClass.(session_to_analyze).(identity_classification_str).(filter_args).inhibited(neuron_num,1) = 0;
+                % respClass.(session_to_analyze).(identity_classification_str).(filter_args).neutral(neuron_num,1) = 0;
+                respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(qq,1) = 0;
+                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) = 0;
+                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = 0;
+                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = 0;
                 neuron_mean(neuron_num,:) = nan;
                 neuron_sem(neuron_num,:) = nan; 
             elseif ~isempty(caTraceTrials) && size(caTraceTrials, 1) > 1
@@ -222,18 +223,21 @@ for ii = 1:size(fieldnames(final),1)
                 lowerSD = nanmean(nullDist(:)) - (uv.sigma*sdNull);                    %calculate lower limit of interval around the mean
                 clear sdNull nullDist
                 %%
-                respClass.(session_to_analyze).(identity_classification_str).(filter_args).activated(neuron_num,1) = empiricalWinAvg > upperSD;     %classify as activated if empirical response exceeds upper limit
-                respClass.(session_to_analyze).(identity_classification_str).(filter_args).inhibited(neuron_num,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
-                respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) = empiricalWinAvg > upperSD;     %classify as activated if empirical response exceeds upper limit
-                respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
-                respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) == 0 & respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) == 0;
+                % respClass.(session_to_analyze).(identity_classification_str).(filter_args).activated(neuron_num,1) = empiricalWinAvg > upperSD;     %classify as activated if empirical response exceeds upper limit
+                % respClass.(session_to_analyze).(identity_classification_str).(filter_args).inhibited(neuron_num,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
+                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) = empiricalWinAvg > upperSD;     %classify as activated if empirical response exceeds upper limit
+                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
+                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) == 0 & respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) == 0;
                 if empiricalWinAvg > upperSD
                     respClass_all(neuron_num) = 1;
+                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(qq,1) = 1;
                 elseif empiricalWinAvg < lowerSD
                     respClass_all(neuron_num) = 2;
+                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(qq,1) = 2;
                 else 
                     respClass_all(neuron_num) = 3;
-                    respClass.(session_to_analyze).(identity_classification_str).(filter_args).neutral(neuron_num,1) = 1;
+                    % respClass.(session_to_analyze).(identity_classification_str).(filter_args).neutral(neuron_num,1) = 1;
+                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(qq,1) = 3;
                 end
                 clear upperSD lowerSD empiricalWinAvg 
                 %             %% store trial by trial data
@@ -587,8 +591,8 @@ outer_pie = [(exclusive_activated_session_1_sum+exclusive_inhibited_session_1_su
             (excited_to_excited_sum+inhibited_to_inhibited_sum+excited_to_inhibited_sum+inhibited_to_excited_sum)/neuron_num,...
             (neutral_to_neutral_sum/neuron_num)];
 C = {...
-    inner_pie,... % Inner to outer layer
-    outer_pie};
+    outer_pie,... % Inner to outer layer
+    inner_pie};
 
 % Custom colors
 inner_colors = [...
@@ -607,13 +611,14 @@ outer_colors = [...
     0 1 0;...
     0.8 0.8 0.8];
 wedge_colors = {...
-    inner_colors,...
-    outer_colors};
+    outer_colors,...
+    inner_colors};
 
 % Spider plot
 nested_pie(C,...
-    'WedgeColors', wedge_colors, ...
-    'RhoLower', 0.7);
+    'WedgeColors', wedge_colors,...
+    'LegendOrder', [1, 2],...
+    'RhoLower', 0.5);
 
 % Title
 title('Nested Pie Chart');
@@ -629,13 +634,13 @@ figure; pie(inner_pie)
 
 % UN-COMMENT THE DATA THAT YOU WANT TO PLOT
 % Calculate the total height of the stacked bar
-% total_height = sum(total_activated_possible)-excited_to_excited_sum;
-total_height = sum(total_inhibited_possible)-inhibited_to_inhibited_sum;
+total_height = sum(total_activated_possible)-excited_to_excited_sum;
+% total_height = sum(total_inhibited_possible)-inhibited_to_inhibited_sum;
 
 % UN-COMMENT THE DATA THAT YOU WANT TO PLOT
 % Create a matrix for the bar plot data
-% stacked_plot_data = [excited_to_excited_sum, excited_to_inhibited_sum, excited_to_neutral_sum, neutral_to_excited_sum, inhibited_to_excited_sum];
-stacked_plot_data = [inhibited_to_inhibited_sum, inhibited_to_excited_sum, inhibited_to_neutral_sum, neutral_to_inhibited_sum, excited_to_inhibited_sum];
+stacked_plot_data = [excited_to_excited_sum, excited_to_inhibited_sum, excited_to_neutral_sum, neutral_to_excited_sum, inhibited_to_excited_sum];
+% stacked_plot_data = [inhibited_to_inhibited_sum, inhibited_to_excited_sum, inhibited_to_neutral_sum, neutral_to_inhibited_sum, excited_to_inhibited_sum];
 
 
 % Calculate the remaining portion
@@ -658,8 +663,8 @@ ylim([0, total_height]);
 
 % Add labels and a legend
 % ylabel('Total Activation');
-% legend('Co-Excited', 'Excited to Inhibited', 'Excited to Neutral', 'Neutral to Excited', 'Inhibited to Excited');
-legend('Co-Inhibited', 'Inhibited to Excited', 'Inhibited to Neutral', 'Neutral to Inhibited', 'Excited to Inhibited');
+legend('Co-Excited', 'Excited to Inhibited', 'Excited to Neutral', 'Neutral to Excited', 'Inhibited to Excited');
+% legend('Co-Inhibited', 'Inhibited to Excited', 'Inhibited to Neutral', 'Neutral to Inhibited', 'Excited to Inhibited');
 
 %%
 %CREATE A STACKED BAR PLOT TO SHOW THE PROPORTION OF MODULATED neurons
