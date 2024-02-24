@@ -1,14 +1,14 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'BLA_Insc_26';
+select_mouse = 'BLA_Insc_25';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
 session_to_analyze = 'RDT_D1';
 
 % Specify the path to your video file
-videoPath = 'E:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-26\RDT D1\RDT D1\BLA-Insc-26_RDT_D1_2023-01-16T12_20_15.avi';
+videoPath = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-25\RDT D1\RDT D1\BLA-Insc-25_RDT_D1_2023-01-05T11_34_02.avi';
 
 
 onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
@@ -45,9 +45,24 @@ SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
 % Create a VideoReader object
 videoObj = VideoReader(videoPath);
 
-% Read a random frame from the video
-randomFrameIndex = randi([1, videoObj.NumFrames]);
-randomFrame = read(videoObj, randomFrameIndex);
+% Define brightness threshold
+brightnessThreshold = 50; % Adjust this threshold as needed
+
+while true
+    % Read a random frame from the video
+    randomFrameIndex = randi([1, videoObj.NumFrames]);
+    randomFrame = read(videoObj, randomFrameIndex);
+
+    % Calculate average brightness of the frame
+    avgBrightness = mean(randomFrame(:));
+
+    % Check if frame is bright enough
+    if avgBrightness >= brightnessThreshold
+        break; % Exit the loop if frame is bright enough
+    else
+        disp('Selected frame is too dark. Selecting a different frame...');
+    end
+end
 
 % Display the image
 figure;
@@ -114,64 +129,99 @@ figure;
 imshow(randomFrame);
 title('Drag and drop circles for reward_receptacle, left_screen, and right_screen');
 
-% Initialize arrays to store circle data
-circleData = cell(3, 1);
+% Initialize arrays to store shape data
+shapeData = cell(3, 1);
 
-% Loop to create and extract data for each circle
+% Loop to create and extract data for each shape
 for i = 1:3
-    % Prompt user to drag and drop a circle
-    h = drawcircle;
-        
-    % Prompt user to type "yes" when done with the current circle
-    userResponse = input(['Type "yes" when done with ' num2str(i) '-th circle: '], 's');
-    
-    % Extract data for the current circle
-    circleData{i}.Center = h.Center;
-    circleData{i}.Radius = h.Radius;
-    
-    % Delete the current circle to allow drawing the next one
-    delete(h);
-
+    if i == 1
+        % Prompt user to drag and drop a circle
+        h = drawcircle;
+        % Prompt user to type "yes" when done with the current shape
+        userResponse = input(['Type "yes" when done with circle at food cup: '], 's');
+        % Extract data for the circle
+        shapeData{i}.Type = 'Circle';
+        shapeData{i}.Location = 'reward';
+        shapeData{i}.Center = h.Center;
+        shapeData{i}.Radius = h.Radius;
+        shapeData{i}.BoundingBox = [h.Center - h.Radius, 2 * h.Radius, 2 * h.Radius];
+        % Delete the current shape to allow drawing the next one
+        % delete(h);
+    elseif i == 2
+        % Draw a square
+        h_square = drawrectangle('Rotatable', true);
+        % Prompt user to type "yes" when done with the current square
+        userResponse = input(['Type "yes" when done with square at left screen: '], 's');
+        square_center = h_square.Position(1:2) + h_square.Position(3:4) / 2;
+        square_size = h_square.Position(3:4);
+        % Store square data
+        shapeData{i}.Type = 'Square';
+        shapeData{i}.Location = 'left screen';
+        shapeData{i}.Center = square_center;
+        shapeData{i}.Size = square_size;
+        shapeData{i}.BoundingBox = [h_square.Position(1:2), h_square.Position(3:4)];
+        % Delete the square after drawing
+        % delete(h_square);
+    elseif i == 3
+        % Draw a square
+        h_square = drawrectangle('Position', h_square.Position, 'RotationAngle',h_square.RotationAngle);
+        % h_square = drawrectangle('Rotatable', true);
+        % Prompt user to type "yes" when done with the current square
+        userResponse = input(['Type "yes" when done with square at right screen: '], 's');
+        square_center = h_square.Position(1:2) + h_square.Position(3:4) / 2;
+        square_size = h_square.Position(3:4);
+        % Store square data
+        shapeData{i}.Type = 'Square';
+        shapeData{i}.Location = 'right screen';
+        shapeData{i}.Center = square_center;
+        shapeData{i}.Size = square_size;
+        shapeData{i}.BoundingBox = [h_square.Position(1:2), h_square.Position(3:4)];
+        % Delete the square after drawing
+        % delete(h_square);
+    end
     
     % Check user response to decide whether to proceed
     if ~strcmpi(userResponse, 'yes')
         disp('User did not type "yes". Exiting.');
-        break;
+        return;
     end
 end
 
-
-% Iterate through each circle in circleData
-for i = 1:numel(circleData)
-    % Scale the Center coordinates separately for X and Y
-    scaledCenterX = circleData{i}.Center(1) * (scaleFactor * focalLength);
-    scaledCenterY = circleData{i}.Center(2) * (scaleFactor * focalLength);
-
-    % Apply rotation to the scaled Center coordinates
-    rotatedCenter = rotationMatrix * [scaledCenterX; scaledCenterY];
-
-    % Update the Center coordinates in circleData
-    circleData{i}.Center = rotatedCenter';
-
-    % Scale the Radius and correct for focal length
-    circleData{i}.Radius = circleData{i}.Radius * (scaleFactor * focalLength);
+% Iterate through each shape in shapeData
+for i = 1:numel(shapeData)
+    if strcmp(shapeData{i}.Type, 'Circle')
+        % Scale the Center coordinates separately for X and Y
+        scaledCenterX = shapeData{i}.Center(1) * (scaleFactor * focalLength);
+        scaledCenterY = shapeData{i}.Center(2) * (scaleFactor * focalLength);
+        % Apply rotation to the scaled Center coordinates (for circle, no rotation needed)
+        rotatedCenter = rotationMatrix * [scaledCenterX; scaledCenterY];
+        % Update the Center coordinates in shapeData
+        shapeData{i}.Center = rotatedCenter';
+        % Scale the Radius and correct for focal length
+        shapeData{i}.Radius = shapeData{i}.Radius * (scaleFactor * focalLength);
+        shapeData{i}.BoundingBox = shapeData{i}.BoundingBox * (scaleFactor * focalLength);
+    else % For squares
+        % Apply rotation to the square centers
+        % Scale the center coordinates separately for X and Y
+        scaledCenterX = shapeData{i}.Center(1) * (scaleFactor * focalLength);
+        scaledCenterY = shapeData{i}.Center(2) * (scaleFactor * focalLength);
+        % Apply rotation to the scaled center coordinates
+        rotatedCenter = rotationMatrix * [scaledCenterX; scaledCenterY];
+        % Update the center coordinates in shapeData
+        shapeData{i}.Center = rotatedCenter';
+        % Scale the size of squares and correct for focal length
+        shapeData{i}.Size = shapeData{i}.Size * (scaleFactor * focalLength);
+        shapeData{i}.BoundingBox = shapeData{i}.BoundingBox * (scaleFactor * focalLength);
+    end
 end
 
 % Display the extracted data
-reward_receptacle = circleData{1};
-left_screen = circleData{2};
-right_screen = circleData{3};
+disp('Data for shapes:');
+for i = 1:numel(shapeData)
+    disp(['Data for ' shapeData{i}.Type ':']);
+    disp(shapeData{i});
+end
 
-disp('Data for reward_receptacle:');
-disp(reward_receptacle);
-
-disp('Data for left_screen:');
-disp(left_screen);
-
-disp('Data for right_screen:');
-disp(right_screen);
-disp('X Y data for right_screen:');
-disp(right_screen);
 %%
 % FILTER ALL EXISTING DATA ON THESE TIME RANGES
 % filter streams
@@ -390,10 +440,24 @@ end
 
 
 
-
-viscircles(circleData{1, 1}.Center,circleData{1, 1}.Radius);
-viscircles(circleData{2, 1}.Center,circleData{2, 1}.Radius);
-viscircles(circleData{3, 1}.Center,circleData{3, 1}.Radius);
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
 
 hold on;
 for j = 1:size(small_block_1_true_indices , 1) %num_lines
@@ -495,9 +559,24 @@ for j = 1:length(large_block_1_selected_indices)
     plot_line(loop_num,  colors, choice_times{large_block_1_selected_indices(j)}, filtered_motion, normalized_velocity_bounded, large_block_1_selected_indices(j), 'Large Block 1');
     loop_num = loop_num+1;
 end
-viscircles(circleData{1, 1}.Center,circleData{1, 1}.Radius);
-viscircles(circleData{2, 1}.Center,circleData{2, 1}.Radius);
-viscircles(circleData{3, 1}.Center,circleData{3, 1}.Radius);
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
 hold off;
 title('Large Block 1');
 xlim([x_min_all, x_max_all]);
@@ -511,9 +590,24 @@ for j = 1:length(large_block_2_selected_indices)
     plot_line(loop_num,  colors, choice_times{large_block_2_selected_indices(j)}, filtered_motion, normalized_velocity_bounded, large_block_2_selected_indices(j), 'Large Block 2');
     loop_num = loop_num+1;
 end
-viscircles(circleData{1, 1}.Center,circleData{1, 1}.Radius);
-viscircles(circleData{2, 1}.Center,circleData{2, 1}.Radius);
-viscircles(circleData{3, 1}.Center,circleData{3, 1}.Radius);
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
 hold off;
 title('Large Block 2');
 xlim([x_min_all, x_max_all]);
@@ -527,9 +621,24 @@ for j = 1:length(large_block_3_selected_indices)
     plot_line(loop_num,  colors, choice_times{large_block_3_selected_indices(j)}, filtered_motion, normalized_velocity_bounded, large_block_3_selected_indices(j), 'Large Block 3');
     loop_num = loop_num+1;
 end
-viscircles(circleData{1, 1}.Center,circleData{1, 1}.Radius);
-viscircles(circleData{2, 1}.Center,circleData{2, 1}.Radius);
-viscircles(circleData{3, 1}.Center,circleData{3, 1}.Radius);
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
 hold off;
 title('Large Block 3');
 xlim([x_min_all, x_max_all]);
@@ -604,9 +713,24 @@ for j = 1:length(small_block_1_selected_indices)
     plot_line(loop_num,  colors, choice_times{small_block_1_selected_indices(j)}, filtered_motion, normalized_velocity_bounded, small_block_1_selected_indices(j), 'Small Block 1');
     loop_num = loop_num+1;
 end
-viscircles(circleData{1, 1}.Center,circleData{1, 1}.Radius);
-viscircles(circleData{2, 1}.Center,circleData{2, 1}.Radius);
-viscircles(circleData{3, 1}.Center,circleData{3, 1}.Radius);
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
 hold off;
 title('Small Block 1');
 xlim([x_min_all, x_max_all]);
@@ -620,9 +744,24 @@ for j = 1:length(small_block_2_selected_indices)
     plot_line(loop_num,  colors, choice_times{small_block_2_selected_indices(j)}, filtered_motion, normalized_velocity_bounded, small_block_2_selected_indices(j), 'Small Block 2');
     loop_num = loop_num+1;
 end
-viscircles(circleData{1, 1}.Center,circleData{1, 1}.Radius);
-viscircles(circleData{2, 1}.Center,circleData{2, 1}.Radius);
-viscircles(circleData{3, 1}.Center,circleData{3, 1}.Radius);
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
 hold off;
 title('Small Block 2');
 xlim([x_min_all, x_max_all]);
@@ -636,15 +775,30 @@ for j = 1:length(small_block_3_selected_indices)
     plot_line(loop_num,  colors, choice_times{small_block_3_selected_indices(j)}, filtered_motion, normalized_velocity_bounded, small_block_3_selected_indices(j), 'Small Block 3');
     loop_num = loop_num+1;
 end
-viscircles(circleData{1, 1}.Center,circleData{1, 1}.Radius);
-viscircles(circleData{2, 1}.Center,circleData{2, 1}.Radius);
-viscircles(circleData{3, 1}.Center,circleData{3, 1}.Radius);
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
 hold off;
 title('Small Block 3');
 xlim([x_min_all, x_max_all]);
 ylim([y_min_all, y_max_all]);
 
-%%
+
 %%
 % Loop through each line and plot
 figure;
@@ -676,10 +830,24 @@ end
 
 
 
-
-viscircles(circleData{1, 1}.Center,circleData{1, 1}.Radius);
-viscircles(circleData{2, 1}.Center,circleData{2, 1}.Radius);
-viscircles(circleData{3, 1}.Center,circleData{3, 1}.Radius);
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
 
 hold on;
 for j = 1:size(small_block_1_true_indices , 1) %num_lines
@@ -745,10 +913,24 @@ end
 
 
 
-
-viscircles(circleData{1, 1}.Center,circleData{1, 1}.Radius);
-viscircles(circleData{2, 1}.Center,circleData{2, 1}.Radius);
-viscircles(circleData{3, 1}.Center,circleData{3, 1}.Radius);
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
 
 hold on;
 for j = 1:size(small_block_3_true_indices , 1) %num_lines

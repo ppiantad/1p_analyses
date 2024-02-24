@@ -1,5 +1,6 @@
 test = [neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)];
 test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :)];
+test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 2}==3 & respClass_all_array{1, 1}==3, :)]
 
 
 % % tabulate how neurons assigned to neuron_mean_array for the 1st event

@@ -183,6 +183,8 @@ buffer_to_SLEAP = zeros(1, num_columns_added_to_SLEAP);
 zall_motion = [buffer_to_SLEAP zall_motion]
 
 
+
+
 figure; plot(time_array, mean(zall_first_event(:, 1:trim_length)))
 hold on; plot(time_array, mean(zall_second_event(:, 1:trim_length)))
 hold on; plot(time_array, mean(zall_third_event(:, 1:trim_length)))

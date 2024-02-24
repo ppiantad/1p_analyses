@@ -3,7 +3,7 @@
 % averaging across the prior 5 frames
 
 % Initialize variables
-jump_threshold = 20; % Set your threshold for defining a jump
+jump_threshold = 10; % Set your threshold for defining a jump
 % fixedX = correctedX; % Initialize a copy of correctedX for modifications
 fixedX = SLEAP_data.x_pix; 
 
@@ -40,7 +40,7 @@ SLEAP_data.x_pix = fixedX;
 %%
 
 % Initialize variables
-jump_threshold = 20; % Set your threshold for defining a jump
+jump_threshold = 10; % Set your threshold for defining a jump
 % fixedX = correctedX; % Initialize a copy of correctedX for modifications
 fixedY = SLEAP_data.y_pix; 
 

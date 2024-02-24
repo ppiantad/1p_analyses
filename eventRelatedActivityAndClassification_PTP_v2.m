@@ -40,7 +40,7 @@ load('BLA_panneuronal_Risk_2024_01_04.mat')
 
 %%
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 epoc_to_align = 'collectionTime';
 event_to_analyze = {'BLOCK',1,'REW',1.2};
 
@@ -54,7 +54,7 @@ uv.chooseFluoresenceOrRate = 1;                                             %set
 uv.sigma = 1.5;                                                               %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
-% uv.evtSigWin.outcome = [-4 0]; %for pre-choice                                     %period within time window that response is classified on (sec relative to event)
+% uv.evtSigWin.outcome = [-4 1]; %for pre-choice                                     %period within time window that response is classified on (sec relative to event)
 uv.evtSigWin.outcome = [1 3]; %for REW collection
 % uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice
 
@@ -96,7 +96,7 @@ for ii = 1:size(fieldnames(final),1)
     session_string{iter} = session_to_analyze;
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData,  'REW', 1.2);
+        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2, 'BLOCK', 1);
         num_trials = num_trials+sum(numel(trials));
         if ~strcmp('stTime',data.Properties.VariableNames)
             data.stTime = data.TrialPossible - 5;
@@ -311,7 +311,7 @@ figure; shadedErrorBar(ts1, nanmean(neuron_mean(respClass_all_array{:,iter} == 3
 %% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
 % **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
 
-for ii = 11:size(zall_array, 2)
+for ii = 46:size(zall_array, 2)
     figure;
     % Initialize variables to store global max and min for heatmap and line graph
     globalMaxHeatmap = -inf;
@@ -380,7 +380,9 @@ for ii = 11:size(zall_array, 2)
     % Set the same colorbar scale for all heatmap subplots
     for qq = 1:iter
         subplot(2, num_columns_plot, qq);
-        clim([globalMinHeatmap, globalMaxHeatmap]);
+        %set limits for the heatmap, use a flat value to exaggerate diffs,
+        %or set based on the max and min of the range
+        clim([-1, 1]); %clim([globalMinHeatmap-1, globalMaxHeatmap-1]);
         colorbar;
     end
 

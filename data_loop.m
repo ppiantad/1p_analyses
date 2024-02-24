@@ -14,23 +14,23 @@ load('BLA_panneuronal_Risk_2024_01_04.mat')
 % load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
 
 %% Edit these uservariables with what you want to look at
-uv.evtWin = [-2 8]; %what time do you want to look at around each event
+uv.evtWin = [-10 5]; %what time do you want to look at around each event [-2 8]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-ca_data_type = "S"; % C % C_raw %S
+ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 
 session_to_analyze = 'Pre_RDT_RM';
-epoc_to_align = 'collectionTime';
+epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
 neuron_num = 0;
 
-clear neuron_mean neuron_sem neuron_num zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized
+clear neuron_mean neuron_sem neuron_num zall_mean zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized sem_all zall_mean_all 
 
 
 %% FILTER TO GET UN-SHUFFLED DATA
@@ -40,7 +40,7 @@ for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData;
-        [BehavData,trials,varargin]=TrialFilter(BehavData,'REW',1.2);
+        [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 0.3);
         trials = cell2mat(trials);
         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
         if strcmp(ca_data_type, 'S')
@@ -101,13 +101,16 @@ for ii = 1:size(fieldnames(final),1)
 
                 end
             end
-            zall_array_session{neuron_num} = zall_session; 
-            zall_array{neuron_num} = zall;
-            zall_mouse{ii, iter+1}(u) = {zall};
-            caTraceTrials_mouse{ii, iter+1}(u) = {caTraceTrials};
-            zall_mean(neuron_num,:) = mean(zall);
+            zall_array_session{neuron_num} = zall_session(:, 1:size(ts1, 2)); 
+            zall_array{neuron_num} = zall(:, 1:size(ts1, 2));
+            zall_mouse{ii, iter+1}(u) = {zall(:, 1:size(ts1, 2))};
+            sem_mouse{ii, iter+1}(u) = {nanstd(zall,1)/(sqrt(size(zall, 1)))};
+            caTraceTrials_mouse{ii, iter+1}(u) = {caTraceTrials(:, 1:size(ts1, 2))};
+            zall_mean_all(neuron_num,:) = mean(zall(:, 1:size(ts1, 2)));
+            sem_temp = nanstd(zall,1)/(sqrt(size(zall, 1)));
+            sem_all(neuron_num,:) = sem_temp(:, 1:size(ts1, 2));
             trials_per_mouse{ii, iter+1} = trials;
-            clear zall caTraceTrials zb zsd;
+            clear zall caTraceTrials zb zsd sem_temp;
 
         end
     end
@@ -195,12 +198,13 @@ for ii = 1:size(fieldnames(final),1)
 
             end
         end
-        zall_array{neuron_num} = zall;
-        zall_mouse{ii, iter+1}(u) = {zall};
-        caTraceTrials_mouse{ii, iter+1}(u) = {caTraceTrials};
-        zall_mean(neuron_num,:) = mean(zall);
+        zall_array_session{neuron_num} = zall_session(:, 1:size(ts1, 2));
+        zall_array{neuron_num} = zall(:, 1:size(ts1, 2));
+        zall_mouse{ii, iter+1}(u) = {zall(:, 1:size(ts1, 2))};
+        caTraceTrials_mouse{ii, iter+1}(u) = {caTraceTrials(:, 1:size(ts1, 2))};
+        zall_mean(neuron_num,:) = mean(zall(:, 1:size(ts1, 2)));
         trials_per_mouse{ii, iter+1} = trials;
-        clear zall caTraceTrials zb zsd; 
+        clear zall caTraceTrials zb zsd;
 
     end
 end
