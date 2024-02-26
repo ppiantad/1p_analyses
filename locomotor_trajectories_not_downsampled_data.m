@@ -1,14 +1,14 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'BLA_Insc_25';
+select_mouse = 'BLA_Insc_24';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 
 % Specify the path to your video file
-videoPath = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-25\RDT D1\RDT D1\BLA-Insc-25_RDT_D1_2023-01-05T11_34_02.avi';
+videoPath = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24\Pre-RDT RM\PRE-RDT RM\BLA-Insc-24_PRE-RDT_RM2022-08-08T14_40_29.avi';
 
 
 onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
@@ -46,11 +46,13 @@ SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
 videoObj = VideoReader(videoPath);
 
 % Define brightness threshold
-brightnessThreshold = 50; % Adjust this threshold as needed
+brightnessThreshold = 70; % Adjust this threshold as needed
 
 while true
-    % Read a random frame from the video
-    randomFrameIndex = randi([1, videoObj.NumFrames]);
+    % Read a random frame from the video. get frame from only
+    % the 1st half of the vid to avoid getting a frame from
+    % after when the mouse was taken out or something odd
+    randomFrameIndex = randi([1, videoObj.NumFrames/2]);
     randomFrame = read(videoObj, randomFrameIndex);
 
     % Calculate average brightness of the frame
