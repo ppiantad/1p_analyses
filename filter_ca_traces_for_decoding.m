@@ -1,3 +1,19 @@
+% This code takes respClass data, for example, to try to decode Large Rew
+% == 1 from those data shuffled
+
+animalIDs = (fieldnames(respClass_mouse));
+
+for qq = 1:size(caTraceTrials_mouse, 1)
+    currentanimal = char(animalIDs(qq));
+    ca_data = caTraceTrials_mouse{qq};
+    filtered_ca_data = ca_data(:, respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args) == 1);
+    caTraceTraceTrials_mouse_filtered(qq,:) = {filtered_ca_data};
+
+
+end
+
+clear caTraceTrials_mouse
+%%
 num_iterations = 1; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 iter = 0;
@@ -17,7 +33,7 @@ for num_iteration = 1:num_iterations
     fprintf('The current iteration is: %d\n', num_iteration);
 
     session_to_analyze = 'Pre_RDT_RM';
-    epoc_to_align = 'collectionTime';
+    epoc_to_align = 'choiceTime';
     event_to_analyze = {'BLOCK',1,'REW',1.2};
 
     if exist('iter', 'var') == 1
@@ -44,9 +60,9 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 0.3);
                     trials = cell2mat(trials);
-                    ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
+                    ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type)(respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args) == 1, :);
 
 
                     num_samples = size(ca, 2);
@@ -90,10 +106,10 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 0.3);
                     trials = cell2mat(trials);
 
-                    ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
+                    ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type)(respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args) == 1, :);
                     % shuffle data for comparison
                     [num_cells, num_samples] = size(ca);
                     shuffled_data = zeros(num_cells, num_samples); % Preallocate matrix for efficiency
@@ -145,7 +161,6 @@ for num_iteration = 1:num_iterations
     zall_mouse_iterations(1, num_iteration) = {zall_mouse};
 
 end
-
 
 
 %%
@@ -211,68 +226,4 @@ for uu = 1:size(caTraceTrials_mouse_iterations, 2)
     accuracy_per_iteration(uu) = {accuracy_at_loop};
     cross_mouse_accuracy_per_iteration(:, uu) = mean(accuracy_at_loop, 2);
     clear accuracy_at_loop
-end
-
-
-
-
-%% old - for one mouse. likely to delete once decoding_all_beta is finished
-select_mouse = 'BLA_Insc_28';
-
-select_mouse_index = find(strcmp(animalIDs, select_mouse));
-
-
-
-
-trials_per_mouse_decoding = trials_per_mouse(select_mouse_index,:);
-
-
-
-for uu = 1:size(caTraceTrials_mouse_iterations, 2)
-    caTraceTrials_mouse_current = caTraceTrials_mouse_iterations{:,uu};
-    caTraceTrials_mouse_decoding = caTraceTrials_mouse_current(select_mouse_index,:);
-    
-    [trimmed_concatenatedColumns_offsets,...
-        trimmed_concatenatedColumns_time_offsets,...
-        trimmed_concatenatedColumns_trials_offsets,...
-        trimmed_concatenatedEvents_offsets]...
-        = flatten_data_for_offset_decoding_fn(caTraceTrials_mouse_decoding, ts1, num_comparisons);
-
-    % additions from Ruairi 01/12/2024
-    k = 10;
-    accuracy_by_offset = zeros(size(trimmed_concatenatedColumns_offsets, 1), 1);
-    numTrees = 100; % Number of decision trees in the forest
-    for p = 1:size(trimmed_concatenatedColumns_offsets, 1)
-        offset_1_GCAMP = cell2mat(trimmed_concatenatedColumns_offsets(p,:));
-        offset_1_events_offset = cell2mat(trimmed_concatenatedEvents_offsets(p,:));
-        offset_1_trials_offset = cell2mat(trimmed_concatenatedColumns_trials_offsets(p,:));
-        offset_1_time_offset = cell2mat(trimmed_concatenatedColumns_time_offsets(p,:));
-
-        y = offset_1_events_offset(:,1);
-        y = y -1;
-        X = offset_1_GCAMP;
-        X = zscore(X);
-        idx = randperm(size(X, 1));
-        X = X(idx, :);
-        y = y(idx,:);
-        cv = cvpartition(size(X, 1),"KFold", k);
-
-
-        for i = 1:k
-            xTrain = X(cv.training(i),:);
-            yTrain = y(cv.training(i),:);
-            xTest = X(cv.test(i), :);
-            yTest = y(cv.test(i), :);
-            % model = TreeBagger(numTrees, xTrain, yTrain, 'Method', 'classification');
-            % model = fitglm(xTrain, yTrain, 'Distribution', 'binomial' , 'Link', 'logit');
-            model = fitcnb(xTrain, yTrain);
-            yPred = predict(model,xTest);
-            accuracy(i) = sum(yPred == yTest)/numel(yTest);
-        end
-        accuracy_by_offset(p) = mean(accuracy);
-    end
-
-    figure; plot(ts1, accuracy_by_offset);
-    accuracy_at_loop(:, uu) = accuracy_by_offset;
-
 end

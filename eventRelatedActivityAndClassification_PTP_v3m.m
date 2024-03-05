@@ -38,21 +38,32 @@ load('BLA_panneuronal_Risk_2024_01_04.mat')
 
 % load('BLA_NAcSh_Risk_matched_RDT_D1_vs_RDT_D2.mat')
 
-%%
+
+%% Edit these uservariables with what you want to look at
+uv.evtWin = [-10 5]; %what time do you want to look at around each event [-2 8] [-10 5]
+uv.BLper = [-10 -5];
+uv.dt = 0.1; %what is your frame rate
+% uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
+
+ca_data_type = "C_raw"; % C % C_raw %S
+% CNMFe_data.C_raw: CNMFe traces
+% CNMFe_data.C: denoised CNMFe traces
+% CNMFe_data.S: inferred spikes
 
 session_to_analyze = 'Pre_RDT_RM';
 epoc_to_align = 'choiceTime';
-event_to_analyze = {'BLOCK',1,'REW',1.2};
+ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
+animalIDs = (fieldnames(final));
+neuron_num = 0;
 
-window_sz = (0:.1:20-0.1);
-ts1 = (-10:.1:10-0.1);
+clear neuron_mean neuron_sem neuron_num zall_mean zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized sem_all zall_mean_all 
 
 
 %% %user selected variables
 clear neuron_mean neuron_sem neuron_num trials
 uv.chooseFluoresenceOrRate = 1;                                             %set to 1 to classify fluoresence response; set to 2 to classify firing rate responses
 uv.sigma = 1.5;                                                               %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
-uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
+% uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
 uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
 % uv.evtSigWin.outcome = [1 3]; %for REW collection
@@ -62,12 +73,9 @@ uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]               
 % uv.evtSigWin.groomingStop = [-.5 3];
 % uv.evtSigWin.faceGroomingStart = [-.5 2];
 % uv.evtSigWin.faceGroomingStop = [-.5 2];
-uv.dt = 0.1;                                                                %time step size (sec)
 uv.resamples = 100                                                         %number of resamples to use in shuffle analysis 1000
 
 sub_window_idx = ts1 >= uv.evtSigWin.outcome(1) & ts1 <= uv.evtSigWin.outcome(2);
-% neuron_sem = zeros(1, size(ts1, 2));
-% neuron_mean = [];
 
 identity_classification_win = 'Outcome';
 identity_classification_str = join(string(uv.evtSigWin.outcome), 'to');
@@ -96,35 +104,52 @@ for ii = 1:size(fieldnames(final),1)
     session_string{iter} = session_to_analyze;
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
-        [data,trials, varargin_identity_class] = TrialFilter(final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData, 'REW', 1.2);
+        BehavData = final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData;
+        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData,'REW', 1.2);
+
         num_trials = num_trials+sum(numel(trials));
-        if ~strcmp('stTime',data.Properties.VariableNames)
-            data.stTime = data.TrialPossible - 5;
+        if ~strcmp('stTime',BehavData.Properties.VariableNames)
+            BehavData.stTime = BehavData.TrialPossible - 5;
         end
-        if ~strcmp('collectionTime',data.Properties.VariableNames)
-            data.collectionTime = data.choiceTime + 5;
+        if ~strcmp('collectionTime',BehavData.Properties.VariableNames)
+            BehavData.collectionTime = BehavData.choiceTime + 5;
         end
-        behav_tbl_temp{ii,:} = data;
+        behav_tbl_temp{ii,:} = BehavData;
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');
         filter_args = strjoin(varargin_strings,'_');
         
         trials = cell2mat(trials);
-        
-        for qq = 1:size(final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials,2)
+        ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
+        if strcmp(ca_data_type, 'S')
+            ca = full(ca);
+
+        end
+        num_samples = size(ca, 2);
+        sampling_frequency = (final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.dt)*100;
+        time_array = final.(currentanimal).(session_to_analyze).(epoc_to_align).time;
+        % time_array = (0:(num_samples-1)) / sampling_frequency;
+        eTS = BehavData.(epoc_to_align); %get time stamps
+
+        zb_session = mean(ca,2);
+        zsd_session = std(ca,[],2);
+        % caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
+
+
+        %calculate time windows for each event
+        evtWinSpan = max(uv.evtWin) - min(uv.evtWin);
+        numMeasurements = round(evtWinSpan/uv.dt); %need to round due to odd frame rate
+
+        for u = 1:size(ca,1)
             neuron_num = neuron_num+1; 
-           
-%           caTraceTrials = final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials(qq).caTraces(trials,:);
-            %zall is currently the hardcoded z-score which is taken from
-            %-10 to -5; should update this so that the zscore used is maybe
-            %to the entire session?
+
+            caTraceTrials = NaN(size(eTS,1),numMeasurements); %
+            unitTrace = ca(u,:); %get trace           
+            [zall_baselined, zall_window, zall_session, caTraceTrials] = align_and_zscore(unitTrace, eTS, uv, time_array, zb_session, zsd_session, u);
             
-            % IF Z-SCORE TO WINDOW, UNCOMMENT BELOW
-%             caTraceTrials = final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials(qq).zall_window(trials,:);
-            %IF Z-SCORE TO A BASELINE, UNCOMMENT BELOW
-            caTraceTrials = final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials(qq).caTraces(trials,1:end-1);
-            
+            caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+            zall = zall_session(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
 
             % for some events, the mice have no trials, therefore there are
             % no traces. this line basically skips those neurons (adding 0
@@ -140,25 +165,13 @@ for ii = 1:size(fieldnames(final),1)
                 % respClass.(session_to_analyze).(identity_classification_str).(filter_args).activated(neuron_num,1) = 0;     
                 % respClass.(session_to_analyze).(identity_classification_str).(filter_args).inhibited(neuron_num,1) = 0;
                 % respClass.(session_to_analyze).(identity_classification_str).(filter_args).neutral(neuron_num,1) = 0;
-                respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(qq,1) = 0;
+                respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 0;
                 % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) = 0;
                 % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = 0;
                 % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = 0;
                 neuron_mean(neuron_num,:) = nan;
                 neuron_sem(neuron_num,:) = nan; 
             elseif ~isempty(caTraceTrials) && size(caTraceTrials, 1) > 1
-                for h = 1:size(caTraceTrials,1)
-                    zb(h) = mean(caTraceTrials(h,:)); %baseline mean
-                    zsd(h) = std(caTraceTrials(h,:)); %baseline std
-                    tmp = 0;
-                    for j = 1:size(caTraceTrials(1:length(window_sz)),2)
-                        tmp = tmp+1;
-                        zall(h,tmp) = (caTraceTrials(h,tmp) - zb(h))/zsd(h);
-                        
-                    end
-                    % zall(h,:) = sgolayfilt(zall(h,:), 9, 21);
-%                     zall_to_BL_array(iter, neuron_num) = {final.(currentanimal).(session_to_analyze).(epoc_to_align).unitXTrials(qq).zall(trials,:)};
-                end
 
                 % Loop through each row of zall
                 for z = 1:size(zall, 1)
@@ -174,20 +187,20 @@ for ii = 1:size(fieldnames(final),1)
                 else
                     neuron_sem(neuron_num,:) = nanstd(zall,1)/(sqrt(size(zall, 1)));
                 end
-                zsd_array(iter, neuron_num) = {zsd};
-                zall_mouse{ii, iter}(qq) = {zall};
-                caTraceTrials_mouse{ii, iter}(qq) = {caTraceTrials};
-                neuron_mean_mouse_unnormalized{ii, iter}(qq,: ) = mean(caTraceTrials, 1);
-                neuron_sem_mouse_unnormalized{ii, iter}(qq,: ) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
-                neuron_mean_mouse{ii, iter}(qq,: ) = mean(zall, 1);
-                neuron_sem_mouse{ii, iter}(qq,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
+                zall_mouse{ii, iter}(u) = {zall};
+                caTraceTrials_mouse{ii, iter}(u) = {caTraceTrials};
+                neuron_mean_mouse_unnormalized{ii, iter}(u,: ) = mean(caTraceTrials, 1);
+                neuron_sem_mouse_unnormalized{ii, iter}(u,: ) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
+                neuron_mean_mouse{ii, iter}(u,: ) = mean(zall, 1);
+                neuron_sem_mouse{ii, iter}(u,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
                 caTraceTrials_unnormalized_array(iter, neuron_num) = {caTraceTrials};
+                trials_per_mouse{ii, iter+1} = trials;
                 caTraceTrials = zall;
-                clear zall zb zsd;
+                clear zall zb zsd zall_baselined zall_window zall_session;
                 
                 trialCt = size(caTraceTrials,1);                                    %number of trials for currently analyzed event
 
-                for e = 1:size(data,1)                                                      %for each event
+                for e = 1:size(BehavData,1)                                                      %for each event
                     evtWinIdx = ts1 >= uv.evtSigWin.outcome(1,1) &...          %calculate logical index for each event period
                         ts1 <= uv.evtSigWin.outcome(1,2);
                 end
@@ -230,14 +243,14 @@ for ii = 1:size(fieldnames(final),1)
                 % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) == 0 & respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) == 0;
                 if empiricalWinAvg > upperSD
                     respClass_all(neuron_num) = 1;
-                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(qq,1) = 1;
+                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 1;
                 elseif empiricalWinAvg < lowerSD
                     respClass_all(neuron_num) = 2;
-                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(qq,1) = 2;
+                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 2;
                 else 
                     respClass_all(neuron_num) = 3;
                     % respClass.(session_to_analyze).(identity_classification_str).(filter_args).neutral(neuron_num,1) = 1;
-                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(qq,1) = 3;
+                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 3;
                 end
                 clear upperSD lowerSD empiricalWinAvg 
                 %             %% store trial by trial data
@@ -253,7 +266,7 @@ for ii = 1:size(fieldnames(final),1)
             clear caTraceTrials;
         end
     end
-
+    clear ca BehavData
 
 end
 varargin_list{iter,:} = varargin_identity_class;

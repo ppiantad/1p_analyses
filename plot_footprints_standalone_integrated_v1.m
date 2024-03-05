@@ -16,16 +16,17 @@ animal_index_to_plot = find(strcmp(animalIDs, targetAnimal));
 
 Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
 
-activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated;
-inhibited = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited;
-neutral = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral;
+% these variables need to be customized based on what you want to plot
+peri_choice_activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1;
+consumption_activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
+neutral = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) ~= 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) ~= 1;
 
 % Create a combined array
-Identity = zeros(size(activated));
+Identity = zeros(size(Coor));
 
 % Assign values based on conditions
-Identity(activated) = 1;
-Identity(inhibited) = 2;
+Identity(peri_choice_activated) = 1;
+Identity(consumption_activated) = 2;
 Identity(neutral) = 3;
 
 
@@ -50,15 +51,13 @@ for i = 1:numel(Coor)
     % Store centroid in the array
     centroids(i, :) = round(centroid);
     
-    % currently need to load a mouse's data, and select these filters etc.
-    % manually. can probably integrate with the
-    % eventRelatedActivitAndClassification script to make it more automatic
+
     if evalin( 'base', 'exist(''respClass_mouse'', ''var'') == 1')
-        if respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(i) == 1
+        if peri_choice_activated(i) == 1
             plot_color = "red";
-        elseif respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(i) == 1
+        elseif consumption_activated(i) == 1
             plot_color = "blue";
-        elseif respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(i) == 1
+        elseif neutral(i) == 1
             plot_color = "black";
         end
     else
@@ -238,9 +237,9 @@ for i = 1:numel(Coor_all_mice)
     if evalin( 'base', 'exist(''respClass_mouse'', ''var'') == 1')
         if respClass_all_array{1, 1}(1, i) == 1
             plot_color = "red";
-        elseif respClass_all_array{1, 1}(1, i) == 2
+        elseif respClass_all_array{1, 2}(1, i) == 2
             plot_color = "blue";
-        elseif respClass_all_array{1, 1}(1, i) == 3
+        elseif respClass_all_array{1, 1}(1, i) ~= 1 & respClass_all_array{1, 2}(1, i) ~= 1
             plot_color = "black";
         end
     else

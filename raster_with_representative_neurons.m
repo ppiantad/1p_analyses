@@ -4,35 +4,35 @@ select_mouse = 'BLA_Insc_25';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-first_session = 'RDT_D1';
+first_session = 'Pre_RDT_RM';
 
-second_session = 'RDT_D1';
+second_session = 'Pre_RDT_RM';
 
-action_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to1.REW_Large == 1, :);
+action_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.REW_Large == 1, :);
 consumption_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large == 1, :);
-neutral_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to1.REW_Large == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large == 3, :);
+neutral_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.REW_Large == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large == 3, :);
 velocity_data = final_SLEAP.(select_mouse).(first_session).choiceTime.unitXTrials.velocity_trace_trials(final_SLEAP.(select_mouse).(first_session).BehavData.bigSmall == 1.2, :);
 
 
 
 
-test_data = [action_activated_data(:, 1:end-1); consumption_activated_data(:, 1:end-1); velocity_data];
+test_data = [action_activated_data; consumption_activated_data; velocity_data];
 
 zscore_data = zscore(test_data, 0 , 2);
 
 
 
 
-figure; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to1.REW_Large == 1, :)))
+figure; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.REW_Large == 1, :)))
 hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large == 1, :)))
-hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to1.REW_Large == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large == 3, :)));
+hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.REW_Large == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large == 3, :)));
 hold on; plot(ts1, mean(final_SLEAP.(select_mouse).(first_session).choiceTime.unitXTrials.zall_motion(final_SLEAP.(select_mouse).(first_session).BehavData.bigSmall == 1.2, :)))
 
 
 %% organize data - lots of this is manual due to need to specify which events have been previously filtered
 
 
-caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to1.REW_Large == 1, :);
+caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.REW_Large == 1, :);
 
 for h = 1:size(caTraceTrials,1)
     zb(h) = mean(caTraceTrials(h,:)); %baseline mean
@@ -78,7 +78,7 @@ sem_second_event = nanstd(zall,1)/(sqrt(size(zall, 1)));
 clear zall caTraceTrials
 
 
-caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to1.REW_Large == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large == 3, :);
+caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.REW_Large == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.REW_Large == 3, :);
 
 for h = 1:size(caTraceTrials,1)
     zb(h) = mean(caTraceTrials(h,:)); %baseline mean
@@ -170,7 +170,7 @@ figure;
 
 shadedErrorBar(time_array, nanmean(zall_first_event(:, 1:trim_length)), sem_first_event(:, 1:trim_length));
 hold on; shadedErrorBar(time_array, nanmean(zall_second_event(:, 1:trim_length)), sem_second_event(:, 1:trim_length));
-hold on; shadedErrorBar(time_array, nanmean(zall_neutral_event(:, 1:trim_length)), sem_neutral_event(:, 1:trim_length));
+% hold on; shadedErrorBar(time_array, nanmean(zall_neutral_event(:, 1:trim_length)), sem_neutral_event(:, 1:trim_length));
 % hold on; plot(time_array, zall_motion(:, 1:trim_length))
 xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
 xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
@@ -184,13 +184,16 @@ xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall ==
 
 % Select 6 neurons from each array
 neurons_to_plot = 3;
-selected_neurons_first = zall_first_event(1:neurons_to_plot, 1:trim_length);
-selected_neurons_second = zall_second_event(1:neurons_to_plot, 1:trim_length);
-selected_neurons_third = zall_neutral_event(1:neurons_to_plot, 1:trim_length);
+rand_first = randi([1 size(zall_first_event, 1)], 3, 1)
+rand_second = randi([1 size(zall_second_event, 1)], 3, 1)
+rand_third = randi([1 size(zall_neutral_event, 1)], 3, 1)
+selected_neurons_first = zall_first_event(rand_first, 1:trim_length);
+selected_neurons_second = zall_second_event(rand_second, 1:trim_length);
+% selected_neurons_third = zall_neutral_event(1:neurons_to_plot, 1:trim_length);
 
 % Combine selected neurons into one array
-combined_neurons = [selected_neurons_first; selected_neurons_second; selected_neurons_third];
-
+% combined_neurons = [selected_neurons_first; selected_neurons_second; selected_neurons_third];
+combined_neurons = [selected_neurons_first; selected_neurons_second];
 
 % Calculate the mean and standard deviation of the combined neurons
 mean_neurons = mean(combined_neurons(:));
@@ -237,7 +240,7 @@ grid off; % Add grid lines
 % Remove ticks and labels on the top and right axes
 set(gca, 'TickDir', 'out');
 set(gca, 'Box', 'off');
-axis off; % Turn off axes and borders
+% axis off; % Turn off axes and borders
 
 % Add vertical line representing 1 z-score
 plot([max(time_array), max(time_array)], [-one_z_score_value, one_z_score_value], 'b');

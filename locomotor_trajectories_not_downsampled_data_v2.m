@@ -1,15 +1,13 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'BLA_Insc_24';
+select_mouse = 'BLA_Insc_26';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
 session_to_analyze = 'RDT_D1';
 
-% Specify the path to your video file
-% videoPath = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24\Pre-RDT RM\PRE-RDT RM\BLA-Insc-24_PRE-RDT_RM2022-08-08T14_40_29.avi';
-
+shapeData = final_SLEAP.(select_mouse).(session_to_analyze).shapeData;
 
 onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
 choice_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.choiceTime';
@@ -18,11 +16,11 @@ fs_cam = 30; %set sampling rate according to camera, this is hard coded for now
 time_ranges_trials = [onset_trials; choice_trials; offset_trials];
 
 
-% gcamp_samples = 1:1:size(Y_dF_all_session, 2);
-
-% gcamp_time = (0:length(F405_downsampled_data)-1)/fs_cam;
 
 SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data_raw;
+
+X_data = SLEAP_data.corrected_x_pix;
+Y_data = SLEAP_data.corrected_y_pix;
 
 % velocity_data = final_SLEAP.(select_mouse).(session_to_analyze).zscored_SLEAP_data_velocity';
 
@@ -41,274 +39,54 @@ SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
 % trial_starts_array = BehavData.stTime-BehavData.choiceTime;
 % trial_ends_array = BehavData.collectionTime - BehavData.choiceTime;
 
-%% Get random frame from video (if it is dark - re-run this line), draw a line at food cup which will be 4.6 cm
-% Create a VideoReader object
-videoObj = VideoReader(videoPath);
-
-% Define brightness threshold
-brightnessThreshold = 70; % Adjust this threshold as needed
-
-while true
-    % Read a random frame from the video. get frame from only
-    % the 1st half of the vid to avoid getting a frame from
-    % after when the mouse was taken out or something odd
-    randomFrameIndex = randi([1, videoObj.NumFrames/2]);
-    randomFrame = read(videoObj, randomFrameIndex);
-
-    % Calculate average brightness of the frame
-    avgBrightness = mean(randomFrame(:));
-
-    % Check if frame is bright enough
-    if avgBrightness >= brightnessThreshold
-        break; % Exit the loop if frame is bright enough
-    else
-        disp('Selected frame is too dark. Selecting a different frame...');
-    end
-end
-
-% Display the image
-figure;
-imshow(randomFrame);
-title('Draw a line on a known distance in the image');
-
-% Allow the user to draw a line
-lineObj = imline;
-position = wait(lineObj);
-
-% Prompt the user to input the real-world length of the drawn line
-prompt = 'Enter the real-world length of the drawn line (e.g., in cm): '; %4.6 cm at feeder
-realWorldLength = input(prompt);
-
-% Get the pixel length of the drawn line
-pixelLength = norm(position(2, :) - position(1, :));
-
-% Close the figure
-close;
 
 
-%% Correct for slight angle of camera
-
-% User-defined variables
-cameraAngleDegrees = 30;  % Replace with your measured camera angle in degrees
-focalLength = 8;         % Replace with your camera's focal length in millimeters 50
-% arenaWidth = 100;         % Replace with your arena width in the same units as X coordinates
-% arenaHeight = 75;         % Replace with your arena height in the same units as Y coordinates
-
-% Load your X and Y data from the table (replace this with your actual table)
-X = SLEAP_data.x_pix;
-Y = SLEAP_data.y_pix;
-
-% Convert camera angle to radians
-cameraAngleRadians = deg2rad(cameraAngleDegrees);
-
-% Define transformation matrix for rotation
-rotationMatrix = [cos(cameraAngleRadians), -sin(cameraAngleRadians);
-                  sin(cameraAngleRadians), cos(cameraAngleRadians)];
-
-% Apply rotation to X and Y coordinates
-rotatedCoordinates = rotationMatrix * [X'; Y'];
 
 
-% Apply correction for focal length and pixel-to-real-world conversion
-scaleFactor = realWorldLength / pixelLength;
-correctedX = (rotatedCoordinates(1, :) * (focalLength * scaleFactor))';
-correctedY = (rotatedCoordinates(2, :) * (focalLength * scaleFactor))';
+ %%
+        % FILTER ALL EXISTING DATA ON THESE TIME RANGES
+        % filter streams
+        if ~isempty(SLEAP_data)
+            filtered_motion = [];
+            max_ind = SLEAP_data.idx_frame(end);
+            idx_frame_redo = 1:1:size(SLEAP_data, 1);
+            good_index = 1;
+            for j = 1:size(time_ranges_trials,2)
+                onset = round(time_ranges_trials(1,j)*fs_cam)+1;
+                choice = round(time_ranges_trials(2,j)*fs_cam)+1;
+                offset = round(time_ranges_trials(3,j)*fs_cam)+1;
 
-SLEAP_data.x_pix = correctedX;
-SLEAP_data.y_pix = correctedY;
-
-% % Display the corrected X and Y coordinates
-% disp('Corrected X Coordinates:');
-% disp(correctedX');
-% 
-% disp('Corrected Y Coordinates:');
-% disp(correctedY');
-
-
-%% Draw relevant touchscreen elements on video frame that was generated above
-% Display the image
-figure;
-imshow(randomFrame);
-title('Drag and drop circles for reward_receptacle, left_screen, and right_screen');
-
-% Initialize arrays to store shape data
-shapeData = cell(3, 1);
-
-% Loop to create and extract data for each shape
-for i = 1:3
-    if i == 1
-        % Prompt user to drag and drop a circle
-        h = drawcircle;
-        % Prompt user to type "yes" when done with the current shape
-        userResponse = input(['Type "yes" when done with circle at food cup: '], 's');
-        % Extract data for the circle
-        shapeData{i}.Type = 'Circle';
-        shapeData{i}.Location = 'reward';
-        shapeData{i}.Center = h.Center;
-        shapeData{i}.Radius = h.Radius;
-        shapeData{i}.BoundingBox = [h.Center - h.Radius, 2 * h.Radius, 2 * h.Radius];
-        % Delete the current shape to allow drawing the next one
-        % delete(h);
-    elseif i == 2
-        % Draw a square
-        h_square = drawrectangle('Rotatable', true);
-        % Prompt user to type "yes" when done with the current square
-        userResponse = input(['Type "yes" when done with square at left screen: '], 's');
-        square_center = h_square.Position(1:2) + h_square.Position(3:4) / 2;
-        square_size = h_square.Position(3:4);
-        % Store square data
-        shapeData{i}.Type = 'Square';
-        shapeData{i}.Location = 'left screen';
-        shapeData{i}.Center = square_center;
-        shapeData{i}.Size = square_size;
-        shapeData{i}.BoundingBox = [h_square.Position(1:2), h_square.Position(3:4)];
-        % Delete the square after drawing
-        % delete(h_square);
-    elseif i == 3
-        % Draw a square
-        h_square = drawrectangle('Position', h_square.Position, 'RotationAngle',h_square.RotationAngle);
-        % h_square = drawrectangle('Rotatable', true);
-        % Prompt user to type "yes" when done with the current square
-        userResponse = input(['Type "yes" when done with square at right screen: '], 's');
-        square_center = h_square.Position(1:2) + h_square.Position(3:4) / 2;
-        square_size = h_square.Position(3:4);
-        % Store square data
-        shapeData{i}.Type = 'Square';
-        shapeData{i}.Location = 'right screen';
-        shapeData{i}.Center = square_center;
-        shapeData{i}.Size = square_size;
-        shapeData{i}.BoundingBox = [h_square.Position(1:2), h_square.Position(3:4)];
-        % Delete the square after drawing
-        % delete(h_square);
-    end
-    
-    % Check user response to decide whether to proceed
-    if ~strcmpi(userResponse, 'yes')
-        disp('User did not type "yes". Exiting.');
-        return;
-    end
-end
-
-% Iterate through each shape in shapeData
-for i = 1:numel(shapeData)
-    if strcmp(shapeData{i}.Type, 'Circle')
-        % Scale the Center coordinates separately for X and Y
-        scaledCenterX = shapeData{i}.Center(1) * (scaleFactor * focalLength);
-        scaledCenterY = shapeData{i}.Center(2) * (scaleFactor * focalLength);
-        % Apply rotation to the scaled Center coordinates (for circle, no rotation needed)
-        rotatedCenter = rotationMatrix * [scaledCenterX; scaledCenterY];
-        % Update the Center coordinates in shapeData
-        shapeData{i}.Center = rotatedCenter';
-        % Scale the Radius and correct for focal length
-        shapeData{i}.Radius = shapeData{i}.Radius * (scaleFactor * focalLength);
-        shapeData{i}.BoundingBox = shapeData{i}.BoundingBox * (scaleFactor * focalLength);
-    else % For squares
-        % Apply rotation to the square centers
-        % Scale the center coordinates separately for X and Y
-        scaledCenterX = shapeData{i}.Center(1) * (scaleFactor * focalLength);
-        scaledCenterY = shapeData{i}.Center(2) * (scaleFactor * focalLength);
-        % Apply rotation to the scaled center coordinates
-        rotatedCenter = rotationMatrix * [scaledCenterX; scaledCenterY];
-        % Update the center coordinates in shapeData
-        shapeData{i}.Center = rotatedCenter';
-        % Scale the size of squares and correct for focal length
-        shapeData{i}.Size = shapeData{i}.Size * (scaleFactor * focalLength);
-        shapeData{i}.BoundingBox = shapeData{i}.BoundingBox * (scaleFactor * focalLength);
-    end
-end
-
-% Display the extracted data
-disp('Data for shapes:');
-for i = 1:numel(shapeData)
-    disp(['Data for ' shapeData{i}.Type ':']);
-    disp(shapeData{i});
-end
-
-%%
-% FILTER ALL EXISTING DATA ON THESE TIME RANGES
-% filter streams
-if ~isempty(SLEAP_data)
-    filtered_motion = [];
-    max_ind = SLEAP_data.idx_frame(end);
-    idx_frame_redo = 1:1:size(SLEAP_data, 1);
-    good_index = 1;
-    for j = 1:size(time_ranges_trials,2)
-        onset = round(time_ranges_trials(1,j)*fs_cam)+1;
-        choice = round(time_ranges_trials(2,j)*fs_cam)+1;
-        offset = round(time_ranges_trials(3,j)*fs_cam)+1;
-
-        % throw it away if onset or offset extends beyond recording window
-        if isinf(offset)
-            if onset <= max_ind && onset > 0
-                filtered_motion{good_index} = SLEAP_data(onset:end);
-                break %return
+                % throw it away if onset or offset extends beyond recording window
+                if isinf(offset)
+                    if onset <= max_ind && onset > 0
+                        filtered_motion{good_index} = SLEAP_data(onset:end);
+                        break %return
+                    end
+                else
+                    if offset <= max_ind && offset > 0 && onset <= max_ind && onset > 0
+                        % buffering this by adding +1 to the end time for now, for
+                        % some reason the array seems too short without?
+                        % after some extensive checking, it seems like the
+                        % strangeness where the body @ start and @ end does not
+                        % overlap often comes from the fact that the mouse's tail
+                        % can trigger the IR beam in the food cup on a non-trivial
+                        % # of trials
+                        filtered_motion{j}= [X_data(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j))'; Y_data(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j))']; %SLEAP_data.vel_cm_s(SLEAP_data.idx_frame(onset:offset));
+                        choice_times{j} = [X_data(interp1(SLEAP_data.idx_time, 1:numel(SLEAP_data.idx_time), time_ranges_trials(2,j), 'nearest'))'; Y_data(interp1(SLEAP_data.idx_time, 1:numel(SLEAP_data.idx_time), time_ranges_trials(2,j), 'nearest'))'];
+                        filtered_velocity{j}= velocity_data(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j));
+                        % filtered_gcamp{j}= Y_dF_all_session(gcamp_samples(onset:offset));
+                        % filtered{j} = Y_data_filtered(SLEAP_data.idx_frame(onset:offset))'; %SLEAP_data.vel_cm_s(SLEAP_data.idx_frame(onset:offset));
+                        good_index = good_index + 1;
+                    end
+                end
             end
-        else
-            if offset <= max_ind && offset > 0 && onset <= max_ind && onset > 0
-                % buffering this by adding +1 to the end time for now, for
-                % some reason the array seems too short without?
-                % after some extensive checking, it seems like the
-                % strangeness where the body @ start and @ end does not
-                % overlap often comes from the fact that the mouse's tail
-                % can trigger the IR beam in the food cup on a non-trivial
-                % # of trials
-                filtered_motion{j}= [SLEAP_data.x_pix(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j))'; SLEAP_data.y_pix(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j))']; %SLEAP_data.vel_cm_s(SLEAP_data.idx_frame(onset:offset));
-                choice_times{j} = [SLEAP_data.x_pix(interp1(SLEAP_data.idx_time, 1:numel(SLEAP_data.idx_time), time_ranges_trials(2,j), 'nearest'))'; SLEAP_data.y_pix(interp1(SLEAP_data.idx_time, 1:numel(SLEAP_data.idx_time), time_ranges_trials(2,j), 'nearest'))'];
-                filtered_velocity{j}= velocity_data(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j));
-                % filtered_gcamp{j}= Y_dF_all_session(gcamp_samples(onset:offset));
-                % filtered{j} = SLEAP_data.y_pix_filtered(SLEAP_data.idx_frame(onset:offset))'; %SLEAP_data.vel_cm_s(SLEAP_data.idx_frame(onset:offset));
-                good_index = good_index + 1;
-            end
+            % if KEEPDATA
+            %     data.streams.Motion.filtered = filtered;
+            % else
+            %     data.streams.Motion.data = filtered;
+            %     data.streams.Motion.filtered = [];
+            % end
         end
-    end
-    % if KEEPDATA
-    %     data.streams.Motion.filtered = filtered;
-    % else
-    %     data.streams.Motion.data = filtered;
-    %     data.streams.Motion.filtered = [];
-    % end
-end
-
-% for i = 1:size(filtered_gcamp,2)
-% %     BL_shifted(pp,:)=[BASELINE_PER(1)+time2EPOC(i) BASELINE_PER(2)+time2EPOC(i)]; %BL_shifted(pp,:)=[BASELINE_PER(1)+(-1*time2Collect(i)) BASELINE_PER(2)+time2Collect(i)];
-% %     ind = ts2(1,:) < BL_shifted(pp,2) & ts2(1,:) > BL_shifted(pp,1);
-%     ind = ts2(1,:) < BASELINE_PER(2) & ts2(1,:) > BASELINE_PER(1);
-% 
-%     %use if you want to take the Z-score using the entire window mean
-%     zb_gcamp = mean(filtered_gcamp{i}); % baseline period mean
-%     zsd_gcamp = std(filtered_gcamp{i}); % baseline period stdev
-%     zb_motion = mean(filtered_velocity{i}); % baseline period mean
-%     zsd_motion = std(filtered_velocity{i}); % baseline period stdev    
-%     %use if you want to calculate the Z-score using your specified baseline
-% %     zb = mean(Y_dF_all(i,ind)); % baseline period mean
-% %     zbmedian = median(Y_dF_all(i,length(ts1)));
-% %     zsd = std(Y_dF_all(i,ind)); % baseline period stdev
-%     array_sz = size(filtered_gcamp{i}, 2);
-% 
-% 
-%     tmp = 0;
-%     pp=pp+1;
-%     for j = 1:array_sz % Z score per bin
-%         tmp = tmp + 1;
-%         zall_gcamp{i}(1, tmp)=(filtered_gcamp{1,i}(j) - zb_gcamp)/zsd_gcamp;
-%         % zall_velocity{i}(1,tmp)=(filtered_velocity{1,i}(j) - zb_motion)/zsd_motion;
-%     end
-%     tmp=0;
-% 
-%     original_array = filtered_velocity{1,i};
-%     if ~isempty(original_array)
-%         % Assuming filtered_gcamp{1,1} is your array
-% 
-%         % Normalize the array to be between 0 and 1
-%         min_value = min(original_array(:));
-%         max_value = max(original_array(:));
-%         normalized_velocity_bounded{i} = (original_array - min_value) / (max_value - min_value);
-%         clear original_array min_value max_value
-%     elseif isempty(original_array)
-%         normalized_velocity_bounded{i} = [];
-%         disp('The array is empty. Skipping normalization.');
-%     end
-% end
 
 %%
 figure;
@@ -851,7 +629,9 @@ for k = 1:numel(shapeData)
     end
 end
 
-hold on;
+hold off;
+
+figure;
 for j = 1:size(small_block_1_true_indices , 1) %num_lines
     plot_index = small_block_1_true_indices (j);
     x = [];
@@ -878,7 +658,24 @@ for j = 1:size(small_block_1_true_indices , 1) %num_lines
     % Add a black triangle at the end of the line
     scatter(x(end), y(end), 200, 'r', '^');
 end
-
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
 
 hold off
 
@@ -934,6 +731,11 @@ for k = 1:numel(shapeData)
     end
 end
 
+hold off;
+
+
+figure
+
 hold on;
 for j = 1:size(small_block_3_true_indices , 1) %num_lines
     plot_index = small_block_3_true_indices (j);
@@ -962,6 +764,27 @@ for j = 1:size(small_block_3_true_indices , 1) %num_lines
     scatter(x(end), y(end), 200, 'r', '^');
 end
 
+
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
+
+xlim([-20 120])
 
 hold off
 
