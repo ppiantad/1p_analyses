@@ -18,7 +18,9 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 
 % load('BLA_panneuronal_Risk_2023_07_06.mat')
 
-load('BLA_panneuronal_Risk_2024_01_04.mat')
+% load('BLA_panneuronal_Risk_2024_01_04.mat')
+
+load('BLA_panneuronal_Risk_2024_03_06_just_CNMFe_and_BehavData.mat')
 
 % load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 
@@ -40,7 +42,7 @@ load('BLA_panneuronal_Risk_2024_01_04.mat')
 
 
 %% Edit these uservariables with what you want to look at
-uv.evtWin = [-10 5]; %what time do you want to look at around each event [-2 8] [-10 5]
+uv.evtWin = [-10 10]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
@@ -50,7 +52,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
@@ -104,8 +106,8 @@ for ii = 1:size(fieldnames(final),1)
     session_string{iter} = session_to_analyze;
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
-        BehavData = final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData;
-        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData,'REW', 1.2);
+        BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
+        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData,'AA', 1);
 
         num_trials = num_trials+sum(numel(trials));
         if ~strcmp('stTime',BehavData.Properties.VariableNames)
@@ -127,8 +129,8 @@ for ii = 1:size(fieldnames(final),1)
 
         end
         num_samples = size(ca, 2);
-        sampling_frequency = (final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.dt)*100;
-        time_array = final.(currentanimal).(session_to_analyze).(epoc_to_align).time;
+        sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.dt)*100;
+        time_array = final.(currentanimal).(session_to_analyze).time;
         % time_array = (0:(num_samples-1)) / sampling_frequency;
         eTS = BehavData.(epoc_to_align); %get time stamps
 

@@ -311,7 +311,8 @@ for zz = 1:size(metafolder_list, 1)
 
 
                     alignment_event = char(uv.behav(i));
-                    [BehavData,ABETfile,Descriptives, block_end]=ABET2TableFn_Chamber_A_v6(ABET_file,[]);
+                    
+                    [BehavData,ABETfile,Descriptives, block_end, largeRewSide, smallRewSide, forced_trial_start, free_trial_start]=ABET2TableFn_Chamber_A_v6(ABET_file,[]);
                     ABET_removeheader = ABETfile(2:end,:);
                     tbl_ABET = cell2table(ABET_removeheader);
                     tbl_ABET.Properties.VariableNames = ABETfile(1,:);

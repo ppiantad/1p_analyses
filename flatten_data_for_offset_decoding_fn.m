@@ -123,7 +123,7 @@ end
 % challenging when conducting things across trial block etc. It could be
 % better to randomly select large rew. trials up to the minimum # of small
 % reward trials, but for now im just selecting the first bunch of them
-
+% min_value = 13;
 
 % Loop through each column
 for col = 1:size(concatenatedColumns_trials, 2)

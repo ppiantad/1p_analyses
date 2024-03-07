@@ -3,7 +3,9 @@ iter = 0
 %%
 % load('BLA-NAcShell_Risk_2024_01_04.mat')
 
-load('BLA_panneuronal_Risk_2024_01_04.mat')
+% load('BLA_panneuronal_Risk_2024_01_04.mat')
+
+load('BLA_panneuronal_Risk_2024_03_06_just_CNMFe_and_BehavData.mat')
 
 % load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 
@@ -24,7 +26,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
@@ -39,8 +41,8 @@ neuron_num = 0;
 for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
-        BehavData = final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData;
-        [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2);
+        BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
+        [BehavData,trials,varargin]=TrialFilter(BehavData,'AA', 1);
         trials = cell2mat(trials);
         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
         if strcmp(ca_data_type, 'S')
@@ -48,8 +50,8 @@ for ii = 1:size(fieldnames(final),1)
 
         end
         num_samples = size(ca, 2);
-        sampling_frequency = (final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.dt)*100;
-        time_array = final.(currentanimal).(session_to_analyze).(epoc_to_align).time;
+        sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.dt)*100;
+        time_array = final.(currentanimal).(session_to_analyze).time;
         % time_array = (0:(num_samples-1)) / sampling_frequency;
         eTS = BehavData.(epoc_to_align); %get time stamps
 
@@ -92,7 +94,7 @@ iter = iter+1;
 neuron_num = 0;
 for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
-    BehavData = final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData;
+    BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
     [BehavData,trials,varargin]=TrialFilter(BehavData,'REW',1.2);
     trials = cell2mat(trials);
     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -111,7 +113,7 @@ for ii = 1:size(fieldnames(final),1)
 
     end
     num_samples = size(ca, 2);
-    sampling_frequency = (final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.dt)*100;
+    sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.dt)*100;
     time_array = (0:(num_samples-1)) / sampling_frequency;
     eTS = BehavData.(epoc_to_align); %get time stamps
 

@@ -17,7 +17,7 @@ clear caTraceTrials_mouse
 num_iterations = 1; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 iter = 0;
-uv.evtWin = [-10 5]; %what time do you want to look at around each event [-2 8] [-10 5]
+uv.evtWin = [-2 8]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -33,7 +33,7 @@ for num_iteration = 1:num_iterations
     fprintf('The current iteration is: %d\n', num_iteration);
 
     session_to_analyze = 'Pre_RDT_RM';
-    epoc_to_align = 'choiceTime';
+    epoc_to_align = 'collectionTime';
     event_to_analyze = {'BLOCK',1,'REW',1.2};
 
     if exist('iter', 'var') == 1
@@ -60,7 +60,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 0.3);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2);
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type)(respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args) == 1, :);
 
@@ -100,13 +100,13 @@ for num_iteration = 1:num_iterations
 
             iter = iter+1;
             % disp(['iter = ' string(iter)])
-        elseif num_comparison == 2 %num_comparison == 2 %num_comparison == 2 || num_comparison == 1
+        elseif num_comparison == 2   %num_comparison == 2 %num_comparison == 2 || num_comparison == 1
             neuron_num = 0;
             for ii = 1:size(fieldnames(final),1)
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).(epoc_to_align).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 0.3);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type)(respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args) == 1, :);
