@@ -7,63 +7,145 @@
 
 
 % String to compare
-targetAnimal = 'BLA_Insc_25';
+targetAnimal = 'BLA_Insc_37';
 
 % Perform element-wise comparison
 animal_index_to_plot = find(strcmp(animalIDs, targetAnimal));
+
+session_to_analyze = 'RDT_D1';
+
+% Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
+% 
+% % these variables need to be customized based on what you want to plot
+% peri_choice_activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1;
+% consumption_activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
+% neutral = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) ~= 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) ~= 1;
+% 
+% % Create a combined array
+% Identity = zeros(size(Coor));
+% 
+% % Assign values based on conditions
+% Identity(peri_choice_activated) = 1;
+% Identity(consumption_activated) = 2;
+% Identity(neutral) = 3;
+
+% 
+% Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
+% 
+% % these variables need to be customized based on what you want to plot
+% post_choice_reward = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1;
+% post_choice_reward_shk = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
+% both = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
+% neutral = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) ~= 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) ~= 1;
+% 
+% % Create a combined array
+% Identity = zeros(size(Coor));
+% 
+% % Assign values based on conditions
+% Identity(post_choice_reward) = 1;
+% Identity(post_choice_reward_shk) = 2;
+% Identity(both) = 3;
+% Identity(neutral) = 4;
+% 
+% Cn_data = final.(targetAnimal).(session_to_analyze).CNMFe_data.Cn;
+% figure;
+% imagesc(Cn_data) %only one session will look good here typically
 
 
 
 Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
 
 % these variables need to be customized based on what you want to plot
-peri_choice_activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1;
-consumption_activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
+post_choice_reward = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1;
+post_choice_reward_shk = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
+both = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
 neutral = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) ~= 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) ~= 1;
 
 % Create a combined array
 Identity = zeros(size(Coor));
 
 % Assign values based on conditions
-Identity(peri_choice_activated) = 1;
-Identity(consumption_activated) = 2;
-Identity(neutral) = 3;
+Identity(post_choice_reward) = 1;
+Identity(post_choice_reward_shk) = 2;
+Identity(both) = 3;
+Identity(neutral) = 4;
+
+Cn_data = final.(targetAnimal).(session_to_analyze).CNMFe_data.Cn;
+figure;
+imagesc(Cn_data) %only one session will look good here typically
+
+
 
 
 
 %%
 figure;
+imagesc(Cn_data) %only one session will look good here typically
+colormap gray;
 hold on;
+% Calculate the minimum and maximum values in the data
+min_val = min(Cn_data(:));
+max_val = max(Cn_data(:));
+
+% Define the desired range for the color axis
+new_min = .3;  % Set the minimum value you want to display
+new_max = 1.1;  % Set the maximum value you want to display
+
+% Update the color axis scaling
+caxis([new_min, new_max]);
 
 
 
 for i = 1:numel(Coor)
     % Get the coordinates of the current circle
     circleCoords = Coor{i};
-    
+    %
     % Extract x and y coordinates
-    y = circleCoords(1, :);
-    x = circleCoords(2, :);
+    x = circleCoords(1, :);
+    y = circleCoords(2, :);
 
     % Calculate centroid
     centroid = [mean(x), mean(y)];
 
-    % Store centroid in the array
-    centroids(i, :) = round(centroid);
-    
+    % % Store centroid in the array
+    % centroids(i, :) = round(centroid);
 
-    if evalin( 'base', 'exist(''respClass_mouse'', ''var'') == 1')
-        if peri_choice_activated(i) == 1
-            plot_color = "red";
-        elseif consumption_activated(i) == 1
-            plot_color = "blue";
-        elseif neutral(i) == 1
-            plot_color = "black";
-        end
-    else
+
+    % if post_choice_reward(i) == 1
+    %     plot_color = "red";
+    % end
+    % if post_choice_reward_shk(i) == 1
+    %     plot_color = "blue";
+    % end
+    % if both(i) == 1
+    %     plot_color = "green";
+    % end
+    % if neutral(i) == 1
+    %     plot_color = "black";
+    % end
+
+
+    if Identity(i) == 1
+        plot_color = "red";
+    elseif Identity(i) == 2
+        plot_color = "blue";
+    elseif Identity(i) == 3
+        plot_color = "green";
+    elseif Identity(i) == 4
+        plot_color = "black";
     end
+
+
     % Plot the circle
-    plot(x, y, 'Color', plot_color);
+    fill(x, y, plot_color);
+
+
+    % Add text next to circles #42, #46, and #54
+    if i == 79 || i == 46 || i == 54
+        text(centroid(1), centroid(2), num2str(i), 'Color', 'white', 'FontSize', 12, 'HorizontalAlignment', 'center');
+    end
+
+
 end
 
 hold off;
@@ -367,3 +449,103 @@ xlabel('Mean Pairwise Distance');
 ylabel('Cumulative Probability');
 legend('Location', 'best');
 grid on;
+
+%% USE THIS IF YOU WANT TO PLOT "EXAMPLE" NEURONS ON FIGURE WITHOUT CIRCLING EVERY OTHER NEURON
+
+
+animalIDs = (fieldnames(final));
+% String to compare
+targetAnimal = 'BLA_Insc_37';
+
+% Perform element-wise comparison
+animal_index_to_plot = find(strcmp(animalIDs, targetAnimal));
+
+session_to_analyze = 'RDT_D1';
+
+
+Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
+Cn_data = final.(targetAnimal).(session_to_analyze).CNMFe_data.Cn;
+
+
+
+figure;
+imagesc(Cn_data) %only one session will look good here typically
+colormap gray;
+hold on;
+% Calculate the minimum and maximum values in the data
+min_val = min(Cn_data(:));
+max_val = max(Cn_data(:));
+
+% Define the desired range for the color axis
+new_min = .8;  % Set the minimum value you want to display
+new_max = 1;  % Set the maximum value you want to display
+
+% Update the color axis scaling
+caxis([new_min, new_max]);
+
+
+
+for i = 1:numel(Coor)
+    % Get the coordinates of the current circle
+    circleCoords = Coor{i};
+    %
+    % Extract x and y coordinates
+    x = circleCoords(1, :);
+    y = circleCoords(2, :);
+
+    % Calculate centroid
+    centroid = [mean(x), mean(y)];
+
+    % % Store centroid in the array
+    % centroids(i, :) = round(centroid);
+
+
+    % if post_choice_reward(i) == 1
+    %     plot_color = "red";
+    % end
+    % if post_choice_reward_shk(i) == 1
+    %     plot_color = "blue";
+    % end
+    % if both(i) == 1
+    %     plot_color = "green";
+    % end
+    % if neutral(i) == 1
+    %     plot_color = "black";
+    % end
+
+
+    % if Identity(i) == 1
+    %     plot_color = "red";
+    % elseif Identity(i) == 2
+    %     plot_color = "blue";
+    % elseif Identity(i) == 3
+    %     plot_color = "green";
+    % elseif Identity(i) == 4
+    %     plot_color = "black";
+    % end
+    % Add text next to circles and plot - these neurons must be picked
+    % manually
+    if i == 38 || i == 57 || i == 66 || i == 81
+        text(centroid(1), centroid(2), num2str(i), 'Color', 'black', 'FontSize', 12, 'HorizontalAlignment', 'center');
+        plot_color = "black";
+        fill(x, y, plot_color);
+    end
+
+
+    % Plot the circle
+    
+
+
+
+
+end
+
+hold off;
+
+% Add labels and title
+xlabel('X');
+ylabel('Y');
+% title('Plot of Circles');
+
+% Adjust the aspect ratio if needed
+axis equal;

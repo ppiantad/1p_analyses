@@ -1,7 +1,7 @@
 num_iterations = 1; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 iter = 0;
-uv.evtWin = [-8 1]; %what time do you want to look at around each event [-2 8] [-10 5]
+uv.evtWin = [-10 5]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -49,7 +49,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2, 'BLOCK', 1);
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
 
@@ -72,7 +72,7 @@ for num_iteration = 1:num_iterations
                         % initialize trial matrices
                         caTraceTrials = NaN(size(eTS,1),numMeasurements); %
                         unitTrace = ca(u,:); %get trace
-                        [zall_baselined, zall_window, zall_session, caTraceTrials] = align_and_zscore(unitTrace, eTS, uv, time_array, zb_session, zsd_session, u);
+                        [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u);
 
                         caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                         zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
@@ -95,19 +95,19 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2, 'BLOCK', 2);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
-                    % shuffle data for comparison
-                    [num_cells, num_samples] = size(ca);
-                    shuffled_data = zeros(num_cells, num_samples); % Preallocate matrix for efficiency
-                    shift_val = randi(num_samples); % Generate a random shift value for each signal RUAIRI RECOMMENDED KEEPING THE SAME SHIFT VAL, rather than randomizing per neuron. this is because then you keep the overall correlation b/w the neurons, but disrupt the relationship to the event timestamps
-                    for i = 1:num_cells
-                        % shift_val = randi(num_signals); % Generate a random shift value for each signal
-                        shuffled_data(i,:) = circshift(ca(i,:), shift_val,2); % Perform the circular shuffle
-                    end
-                    ca = shuffled_data;
+                    % % shuffle data for comparison
+                    % [num_cells, num_samples] = size(ca);
+                    % shuffled_data = zeros(num_cells, num_samples); % Preallocate matrix for efficiency
+                    % shift_val = randi(num_samples); % Generate a random shift value for each signal RUAIRI RECOMMENDED KEEPING THE SAME SHIFT VAL, rather than randomizing per neuron. this is because then you keep the overall correlation b/w the neurons, but disrupt the relationship to the event timestamps
+                    % for i = 1:num_cells
+                    %     % shift_val = randi(num_signals); % Generate a random shift value for each signal
+                    %     shuffled_data(i,:) = circshift(ca(i,:), shift_val,2); % Perform the circular shuffle
+                    % end
+                    % ca = shuffled_data;
 
                     num_samples = size(ca, 2);
                     sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.dt)*100;
@@ -127,7 +127,7 @@ for num_iteration = 1:num_iterations
                         % initialize trial matrices
                         caTraceTrials = NaN(size(eTS,1),numMeasurements); %
                         unitTrace = ca(u,:); %get trace
-                        [zall_baselined, zall_window, zall_session, caTraceTrials] = align_and_zscore(unitTrace, eTS, uv, time_array, zb_session, zsd_session, u);
+                        [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u);
 
                         caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                         zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
@@ -177,7 +177,7 @@ for uu = 1:size(caTraceTrials_mouse_iterations, 2)
             = flatten_data_for_offset_decoding_fn(caTraceTrials_mouse_decoding, ts1, num_comparisons);
 
         % additions from Ruairi 01/12/2024
-        k = 10;
+        k = 5; %set number of cross validation folks. 10
         accuracy_by_offset = zeros(size(trimmed_concatenatedColumns_offsets, 1), 1);
         numTrees = 100; % Number of decision trees in the forest
         for p = 1:size(trimmed_concatenatedColumns_offsets, 1)

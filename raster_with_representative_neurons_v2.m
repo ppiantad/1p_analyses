@@ -1,22 +1,23 @@
 %% Run eventRelatedActivity first for whatever events you want to identify responsive neurons for
-clear zall_first_event zall_second_event zall_neutral_event sem_first_event sem_second_event sem_neutral_event
+clear zall_first_event zall_second_event zall_third_event sem_first_event sem_second_event sem_third_event
 select_mouse = 'BLA_Insc_37';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-first_session = 'Pre_RDT_RM';
+first_session = 'RDT_D1';
 
-second_session = 'Pre_RDT_RM';
+second_session = 'RDT_D1';
 
-action_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 1, :);
-consumption_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{2, 1}) == 1, :);
-neutral_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{2, 1}) == 3, :);
-velocity_data = final_SLEAP.(select_mouse).(first_session).choiceTime.unitXTrials.velocity_trace_trials(final_SLEAP.(select_mouse).(first_session).BehavData.bigSmall == 1.2, :);
+pre_choice_data = neuron_mean_mouse_unnormalized{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 1, :);
+post_choice_data = neuron_mean_mouse_unnormalized{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{2, 1}) == 1, :);
+consumption_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{3, 1}) == 1, :);
+% neutral_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{2, 1}) == 3, :);
+% velocity_data = final_SLEAP.(select_mouse).(first_session).choiceTime.unitXTrials.velocity_trace_trials(final_SLEAP.(select_mouse).(first_session).BehavData.bigSmall == 1.2, :);
 
 
 
 
-test_data = [action_activated_data; consumption_activated_data; velocity_data];
+test_data = [pre_choice_data; post_choice_data; consumption_activated_data];
 
 zscore_data = zscore(test_data, 0 , 2);
 
@@ -24,9 +25,9 @@ zscore_data = zscore(test_data, 0 , 2);
 
 
 figure; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 1, :)))
-hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{2, 1}) == 1, :)))
-hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{2, 1}) == 3, :)));
-hold on; plot(ts1, mean(final_SLEAP.(select_mouse).(first_session).choiceTime.unitXTrials.zall_motion(final_SLEAP.(select_mouse).(first_session).BehavData.bigSmall == 1.2, :)))
+hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{2, 1}) == 1, :)));
+hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{3, 1}) == 1, :)));
+% hold on; plot(ts1, mean(final_SLEAP.(select_mouse).(first_session).choiceTime.unitXTrials.zall_motion(final_SLEAP.(select_mouse).(first_session).BehavData.bigSmall == 1.2, :)))
 
 
 
@@ -56,7 +57,7 @@ zall_first_event = zall;
 sem_first_event = nanstd(zall,1)/(sqrt(size(zall, 1)))
 clear zall caTraceTrials
 
-caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{2, 1}) == 1, :);
+caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{2, 1}) == 1, :);
 
 for h = 1:size(caTraceTrials,1)
     zb(h) = mean(caTraceTrials(h,:)); %baseline mean
@@ -79,7 +80,7 @@ sem_second_event = nanstd(zall,1)/(sqrt(size(zall, 1)));
 clear zall caTraceTrials
 
 
-caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{2, 1}) == 3, :);
+caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{3, 1}) == 1, :);
 
 for h = 1:size(caTraceTrials,1)
     zb(h) = mean(caTraceTrials(h,:)); %baseline mean
@@ -97,8 +98,8 @@ for z = 1:size(zall, 1)
     % Apply Savitzky-Golay filter to each row
     zall(z, :) = sgolayfilt(zall(z, :), 9, 21);
 end
-zall_neutral_event = zall;
-sem_neutral_event = nanstd(zall,1)/(sqrt(size(zall, 1)));
+zall_third_event = zall;
+sem_third_event = nanstd(zall,1)/(sqrt(size(zall, 1)));
 clear zall caTraceTrials
 
 
@@ -143,7 +144,7 @@ BehavData = final.(select_mouse).(first_session).uv.BehavData;
 stTime = BehavData.TrialPossible(1)-60; 
 
 %%
-num_samples = size(zall_second_event, 2)
+num_samples = size(zall_first_event, 2)
 % sampling_frequency = (final.(select_mouse).(first_session).choiceTime.uv.dt)*100;
 sampling_frequency = (final.(select_mouse).(first_session).uv.dt)*100;
 % Create a time array
@@ -173,6 +174,7 @@ figure;
 
 shadedErrorBar(time_array, nanmean(zall_first_event(:, 1:trim_length)), sem_first_event(:, 1:trim_length));
 hold on; shadedErrorBar(time_array, nanmean(zall_second_event(:, 1:trim_length)), sem_second_event(:, 1:trim_length));
+hold on; shadedErrorBar(time_array, nanmean(zall_third_event(:, 1:trim_length)), sem_third_event(:, 1:trim_length));
 % hold on; shadedErrorBar(time_array, nanmean(zall_neutral_event(:, 1:trim_length)), sem_neutral_event(:, 1:trim_length));
 % hold on; plot(time_array, zall_motion(:, 1:trim_length))
 xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
@@ -184,19 +186,21 @@ xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall ==
 % Assuming zall_first_event and zall_second_event are your 22x19903 arrays
 [row_count_first, column_count_first] = size(zall_first_event);
 [row_count_second, column_count_second] = size(zall_second_event);
+[row_count_third, column_count_third] = size(zall_third_event);
 
 % Select 6 neurons from each array
 neurons_to_plot = 3;
 rand_first = randi([1 size(zall_first_event, 1)], 3, 1)
 rand_second = randi([1 size(zall_second_event, 1)], 3, 1)
-rand_third = randi([1 size(zall_neutral_event, 1)], 3, 1)
+rand_third = randi([1 size(zall_third_event, 1)], 3, 1)
 selected_neurons_first = zall_first_event([4 2 5], 1:trim_length);
-selected_neurons_second = zall_second_event([10 8 3], 1:trim_length);
+selected_neurons_second = zall_second_event(1:neurons_to_plot, 1:trim_length);
+selected_neurons_third = zall_third_event([10 8 3], 1:trim_length);
 % selected_neurons_third = zall_neutral_event(1:neurons_to_plot, 1:trim_length);
 
 % Combine selected neurons into one array
 % combined_neurons = [selected_neurons_first; selected_neurons_second; selected_neurons_third];
-combined_neurons = [selected_neurons_first; selected_neurons_second];
+combined_neurons = [selected_neurons_first; selected_neurons_second; selected_neurons_third];
 
 % Calculate the mean and standard deviation of the combined neurons
 mean_neurons = mean(combined_neurons(:));

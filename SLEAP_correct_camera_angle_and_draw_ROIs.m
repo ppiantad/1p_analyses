@@ -3,7 +3,7 @@
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'i:\MATLAB\Sean CNMFe\pan-neuronal BLA';
+metaDirectory = 'I:\MATLAB\Sean CNMFe\RG-Insc';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 p = get(0, "MonitorPositions");

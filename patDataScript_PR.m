@@ -4,20 +4,20 @@
 uv.evtWin = [-10 10]; %what time do you want to look at around each event [-10 10] [-5 35]
 uv.BLper = [-10 -5]; %what baseline period do you want for z-score [-10 -5] [-5 0]
 uv.dt = 0.1; %what is your frame rate (check neuron.Fs to be sure) 0.2 0.1
-uv.behav = 'choiceTime'; %which behavior/timestamp to look at choiceTime stTime
+uv.behav = 'collectionTime'; %which behavior/timestamp to look at choiceTime stTime
 
 
-load('bla_insc_39_rdt_d1_2023-05-11-12-58-22_video_green_motion_corrected.CNMF_final.mat');
-[BehavData,ABETfile,Descriptives, block_end, largeRewSide, smallRewSide]=ABET2TableFn_Chamber_A_v6('BLA-INSC-39 05112023 ABET.csv',[]);
-gpio_tbl = readtable('2023-05-11-12-58-22_video_green_gpio.csv');
+load('BLA_Insc_24_PR_D1_2022-09-07-13-07-18_video_green_motion_corrected.CNMF_final.mat');
+[BehavData,ABETfile,largeRewSide, smallRewSide]=ABET2TableFn_PR('BLA-Insc-24 09072022 ABET.csv',[]);
+gpio_tbl = readtable('2022-09-07-13-07-18_video_green_gpio.csv');
 
-SLEAP_data = readtable('BLA-Insc-39_RDT D1_body_sleap_data.csv');
+SLEAP_data = readtable('BLA-Insc-24_PR D1_body_sleap_data.csv');
 %EDIT FOR EACH MOUSE AS NECESSARY
 SLEAP_time_range_adjustment = []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; -1.23;
 
-boris_file = []; 'BLA-Insc-39_RDT_D1_2023-05-11T14_32_33.avi. BORIS.csv'; %'BLA-Insc-27_RDT_D1.csv';
-
-[BehavData, boris_Extract_tbl] = boris_to_table(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment);
+% boris_file = []; %'BLA-Insc-27_RDT_D1 BORIS.csv'; %'BLA-Insc-27_RDT_D1.csv';
+% 
+% [BehavData, boris_Extract_tbl] = boris_to_table(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment);
 
 
 
@@ -55,34 +55,34 @@ end
 ttl_filtered = ttl_filtered';      
 
 %Add TTL times received by Inscopix to data table, skipping omitted trials
-%which do not have a corresponding TTL due to a quirk in the behavioral
-%program
-BehavData.Insc_TTL = zeros(length(BehavData.TrialPossible),1);
-dd = 2;
-for cc = 1:size(BehavData, 1)
-    if BehavData.TrialPossible(cc) > stTime(1)
-        BehavData.Insc_TTL(cc) = ttl_filtered(dd);
-        dd = dd+1;
-    elseif BehavData.TrialPossible(cc) <= stTime(1)
-        BehavData.Insc_TTL(cc) = 0;
-    end
-end
-
-BehavData.TrialPossible(:)=BehavData.TrialPossible(:)+stTime(1);
-BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+7.39500000000000;
+% %which do not have a corresponding TTL due to a quirk in the behavioral
+% %program
+% BehavData.Insc_TTL = zeros(length(BehavData.TrialPossible),1);
+% dd = 2;
+% for cc = 1:size(BehavData, 1)
+%     if BehavData.TrialPossible(cc) > stTime(1)
+%         BehavData.Insc_TTL(cc) = ttl_filtered(dd);
+%         dd = dd+1;
+%     elseif BehavData.TrialPossible(cc) <= stTime(1)
+%         BehavData.Insc_TTL(cc) = 0;
+%     end
+% end
+% 
+% BehavData.TrialPossible(:)=BehavData.TrialPossible(:)+stTime(1);
+BehavData.PressTime(:)=BehavData.PressTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+7.39500000000000;
+BehavData.rewDeliveryTime(:)=BehavData.rewDeliveryTime(:)+stTime(1);
 BehavData.collectionTime(:)=BehavData.collectionTime(:)+stTime(1);
-BehavData.stTime(:)=BehavData.stTime(:)+stTime(1);
 
 
 
 % shk_times(:)=shk_times(:)+stTime(1);
 
-BehavData.choTime2 = BehavData.choiceTime-BehavData.TrialPossible;
-BehavData.choTime3 = BehavData.Insc_TTL+BehavData.choTime2;
+% BehavData.choTime2 = BehavData.choiceTime-BehavData.TrialPossible;
+% BehavData.choTime3 = BehavData.Insc_TTL+BehavData.choTime2;
 
 %filter based on TrialFilter inputs (see TrialFilter.m for full list of
 %possibilities)
-BehavData=TrialFilter(BehavData,'ALL',1); %BehavData=TrialFilter(BehavData,'OMITALL',0, 'BLANK_TOUCH', 0);
+BehavData=TrialFilter_PR(BehavData,'COLLECT',1); %BehavData=TrialFilter(BehavData,'OMITALL',0, 'BLANK_TOUCH', 0);
 
 
 % BehavData_for_SLEAP = BehavData;
@@ -208,7 +208,7 @@ clear unitTS unitTrace unitXTrials unitAVG unitSEM i zall zb zsd
 
 
 %%
-time2Collect = BehavData.collectionTime(:)-BehavData.choiceTime(:);
+% time2Collect = BehavData.collectionTime(:)-BehavData.choiceTime(:);
 
 [numTrials,~]=size(BehavData.collectionTime(:));
 Tris=[1:numTrials]';
@@ -338,12 +338,12 @@ imagesc(window_ts3, 1, rank_ordered_mean_zscore);hold on;
 
 
 
-cell_select = 5
+cell_select = 36
 
 
 figure
 imagesc(window_ts2, 1, final.unitXTrials(cell_select).zall);hold on;
-scatter(time2Collect,Tris,'Marker','p','MarkerFaceColor','w')
+% scatter(time2Collect,Tris,'Marker','p','MarkerFaceColor','w')
 plot(zeros(numTrials,1),Tris)
 % xticklabels = (final.uv.evtWin(1,1)):5:(final.uv.evtWin(1,2));
 % xticks = linspace(1, length(final.unitAVG.caTraces), numel(xticklabels));

@@ -14,13 +14,13 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 
 % load('BLA-NAcShell_Risk_2023_09_15.mat')
 
-% load('BLA-NAcShell_Risk_2024_01_04.mat')
+load('BLA-NAcShell_Risk_2024_03_14.mat')
 
 % load('BLA_panneuronal_Risk_2023_07_06.mat')
 
 % load('BLA_panneuronal_Risk_2024_01_04.mat')
 
-load('BLA_panneuronal_Risk_2024_03_07_just_CNMFe_and_BehavData.mat')
+% load('BLA_panneuronal_Risk_2024_03_07_just_CNMFe_and_BehavData.mat')
 
 % load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 
@@ -52,12 +52,12 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 
-session_to_analyze = 'Pre_RDT_RM';
-epoc_to_align = 'collectionTime';
+session_to_analyze = 'RDT_D2';
+epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
 neuron_num = 0;
-
+use_normalized_time = 0;
 clear neuron_mean neuron_sem neuron_num zall_mean zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized sem_all zall_mean_all 
 
 
@@ -68,8 +68,11 @@ uv.sigma = 1.5;  %1.5                                                           
 % uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
 % uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
-uv.evtSigWin.outcome = [1 3]; %for REW collection
-% uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice
+uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice
+% uv.evtSigWin.outcome = [1 3]; %for REW collection
+
+
+
 
 
 % uv.evtSigWin.groomingStop = [-.5 3];
@@ -107,7 +110,16 @@ for ii = 1:size(fieldnames(final),1)
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0);
+        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'SHK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
+        % BehavData = BehavData(BehavData.shockIntensity >= 0.08 & BehavData.shockIntensity <= 0.13, :);
+        % trials = trials(BehavData.shockIntensity >= 0.08 & BehavData.shockIntensity <= 0.13, :);
+        % 
+        % % Create a logical index array based on your conditions
+        % logical_index = BehavData.stTime - BehavData.TrialPossible >= 10 & BehavData.stTime - BehavData.TrialPossible <= 50;
+        % 
+        % % Use the logical index array to subset BehavData
+        % BehavData = BehavData(logical_index,: );
+        % trials = trials(logical_index);
 
         num_trials = num_trials+sum(numel(trials));
         if ~strcmp('stTime',BehavData.Properties.VariableNames)
@@ -132,12 +144,27 @@ for ii = 1:size(fieldnames(final),1)
         sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.dt)*100;
         time_array = final.(currentanimal).(session_to_analyze).time;
         % time_array = (0:(num_samples-1)) / sampling_frequency;
-        eTS = BehavData.(epoc_to_align); %get time stamps
+        
         for e = 1:size(BehavData,1)                                                      %for each event
             evtWinIdx = ts1 >= uv.evtSigWin.outcome(1,1) &...          %calculate logical index for each event period
                 ts1 <= uv.evtSigWin.outcome(1,2);
+
         end
         clear evtWinSpan e
+        eTS = BehavData.(epoc_to_align); %get time stamps
+        eTS_collection = BehavData.collectionTime; %get time stamps
+        if strcmp(epoc_to_align, 'choiceTime') & uv.evtSigWin.outcome == [-4 0] %for REW collection
+            other_evtWinIdx1 = ts1 >= 1 & ts1 <= 3; %ts1 >= 0 & ts1 <= 2;
+            other_evtWinIdx2 = ts1 >= 1 & ts1 <= 3;
+        elseif strcmp(epoc_to_align, 'choiceTime') & uv.evtSigWin.outcome == [0 2] %for SHK or immediate post-choice
+            other_evtWinIdx1 = ts1 >= -1 & ts1 <= 0;
+            other_evtWinIdx2 = ts1 >= 7 & ts1 <= 8; %might not need this one? ts1 >= 2 & ts1 <= 4
+            % other_evtWinIdx2 = other_evtWinIdx1; 
+        elseif strcmp(epoc_to_align, 'collectionTime') & uv.evtSigWin.outcome == [1 3] %for SHK or immediate post-choice
+            other_evtWinIdx1 = ts1 >= -4 & ts1 <= 0;
+            other_evtWinIdx2 = ts1 >= -2 & ts1 <= 0;
+        end
+
         zb_session = mean(ca,2);
         zsd_session = std(ca,[],2);
         % caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
@@ -148,124 +175,167 @@ for ii = 1:size(fieldnames(final),1)
         numMeasurements = round(evtWinSpan/uv.dt); %need to round due to odd frame rate
 
         for u = 1:size(ca,1)
-            neuron_num = neuron_num+1; 
+            neuron_num = neuron_num+1;
 
             caTraceTrials = NaN(size(eTS,1),numMeasurements); %
-            unitTrace = ca(u,:); %get trace           
-            [zall_baselined, zall_window, zall_session, caTraceTrials] = align_and_zscore(unitTrace, eTS, uv, time_array, zb_session, zsd_session, u);
-            
-            caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-            zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-
-            % for some events, the mice have no trials, therefore there are
-            % no traces. this line basically skips those neurons (adding 0
-            % to the respClass struct), to maintain the same total # of
-            % cells throughout (for easy filtering if wanting to check the
-            % mean of the respClass.activated = 1 neurons, for example
-            % also made it so that if the mouse only has 1 trial, add 0,
-            % because these trials have a SEM of 0 and the shuffling method
-            % does not work. potentially possible to address this with
-            % another method?
-            if isempty(caTraceTrials) || size(caTraceTrials, 1) == 1
-                respClass_all(neuron_num) = 0;
-                % respClass.(session_to_analyze).(identity_classification_str).(filter_args).activated(neuron_num,1) = 0;     
-                % respClass.(session_to_analyze).(identity_classification_str).(filter_args).inhibited(neuron_num,1) = 0;
-                % respClass.(session_to_analyze).(identity_classification_str).(filter_args).neutral(neuron_num,1) = 0;
-                respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 0;
-                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) = 0;
-                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = 0;
-                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = 0;
-                neuron_mean(neuron_num,:) = nan;
-                neuron_sem(neuron_num,:) = nan; 
-            elseif ~isempty(caTraceTrials) && size(caTraceTrials, 1) > 1
-
-                % Loop through each row of zall
-                for z = 1:size(zall, 1)
-                    % Apply Savitzky-Golay filter to each row
-                    zall(z, :) = sgolayfilt(zall(z, :), 9, 21);
-                end
-                mouse_cells(iter, neuron_num) = {currentanimal};
-                zall_array(iter, neuron_num) = {zall};
-                % neuron_mean(neuron_num,:) = sgolayfilt((mean(zall,1)), 9, 21);
-                neuron_mean(neuron_num,:) = (mean(zall,1));
-                if size(zall, 1) == 1
-                    neuron_sem(neuron_num,:) = zeros(1, size(zall, 2));
-                else
-                    neuron_sem(neuron_num,:) = nanstd(zall,1)/(sqrt(size(zall, 1)));
-                end
-                zall_mouse{ii, iter}(u) = {zall};
-                caTraceTrials_mouse{ii, iter}(u) = {caTraceTrials};
-                neuron_mean_mouse_unnormalized{ii, iter}(u,: ) = mean(caTraceTrials, 1);
-                neuron_sem_mouse_unnormalized{ii, iter}(u,: ) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
-                neuron_mean_mouse{ii, iter}(u,: ) = mean(zall, 1);
-                neuron_sem_mouse{ii, iter}(u,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
-                caTraceTrials_unnormalized_array(iter, neuron_num) = {caTraceTrials};
-                trials_per_mouse{ii, iter+1} = trials;
-                caTraceTrials = zall;
-                clear zall zb zsd zall_baselined zall_window zall_session;
+            unitTrace = ca(u,:); %get trace
+            if isempty(eTS)
+                caTraceTrials(1, 1:size(ts1, 2)) = NaN;
+                zall(1, 1:size(ts1, 2)) = NaN;
+            else
+                [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 
-                trialCt = size(caTraceTrials,1);                                    %number of trials for currently analyzed event
+                caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
 
+                % for some events, the mice have no trials, therefore there are
+                % no traces. this line basically skips those neurons (adding 0
+                % to the respClass struct), to maintain the same total # of
+                % cells throughout (for easy filtering if wanting to check the
+                % mean of the respClass.activated = 1 neurons, for example
+                % also made it so that if the mouse only has 1 trial, add 0,
+                % because these trials have a SEM of 0 and the shuffling method
+                % does not work. potentially possible to address this with
+                % another method?
+                if isempty(caTraceTrials) || size(caTraceTrials, 1) == 1
+                    respClass_all(neuron_num) = 0;
+                    % respClass.(session_to_analyze).(identity_classification_str).(filter_args).activated(neuron_num,1) = 0;
+                    % respClass.(session_to_analyze).(identity_classification_str).(filter_args).inhibited(neuron_num,1) = 0;
+                    % respClass.(session_to_analyze).(identity_classification_str).(filter_args).neutral(neuron_num,1) = 0;
+                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 0;
+                    % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) = 0;
+                    % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = 0;
+                    % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = 0;
+                    neuron_mean(neuron_num,:) = nan;
+                    neuron_sem(neuron_num,:) = nan;
+                elseif ~isempty(caTraceTrials) && size(caTraceTrials, 1) > 1
 
-                for g = 1:uv.resamples                                              %for each resampling of the data
-                    [~,shuffledIDX] = sort(randi...                                 %generate a matrix of random integers from 1 to the number of measurements in each time window (not each number is generated/some are repeated)
-                        (numMeasurements,trialCt,numMeasurements),2);               %sort the data index to create a new list of indices
-                    for t = 1:trialCt                                               %for each trial
-                        shuffledTrace(t,:) = caTraceTrials(t,shuffledIDX(t,:));     %shuffle the calcium trace
-                        %         shuffledEvtRate(t,:) = caEvtRateTrials(t,shuffledIDX(t,:)); %shuffle the event rate
+                    % Loop through each row of zall
+                    for z = 1:size(zall, 1)
+                        % Apply Savitzky-Golay filter to each row
+                        zall(z, :) = sgolayfilt(zall(z, :), 9, 21);
                     end
-                    nullDistTrace(g,:) = nanmean(shuffledTrace);                    %calculate the NaN mean of the shuffled traces
-                    %     nullDistEvtRate(g,:) = nanmean(shuffledEvtRate);                %calculate the NaN mean of the shuffled event rates
-                end
-                clear shuffled* g t trialCt 
+                    mouse_cells(iter, neuron_num) = {currentanimal};
+                    zall_array(iter, neuron_num) = {zall};
+                    % neuron_mean(neuron_num,:) = sgolayfilt((mean(zall,1)), 9, 21);
+                    neuron_mean(neuron_num,:) = (mean(zall,1));
+                    if size(zall, 1) == 1
+                        neuron_sem(neuron_num,:) = zeros(1, size(zall, 2));
+                    else
+                        neuron_sem(neuron_num,:) = nanstd(zall,1)/(sqrt(size(zall, 1)));
+                    end
+                    zall_mouse{ii, iter}(u) = {zall};
+                    caTraceTrials_mouse{ii, iter}(u) = {caTraceTrials};
+                    neuron_mean_mouse_unnormalized{ii, iter}(u,: ) = mean(caTraceTrials, 1);
+                    neuron_sem_mouse_unnormalized{ii, iter}(u,: ) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
+                    neuron_mean_mouse{ii, iter}(u,: ) = mean(zall, 1);
+                    neuron_sem_mouse{ii, iter}(u,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
+                    caTraceTrials_unnormalized_array(iter, neuron_num) = {caTraceTrials};
+                    trials_per_mouse{ii, iter+1} = trials;
+                    caTraceTrials = zall;
+                    clear zall zb zsd zall_baselined zall_window zall_session;
 
-                %% choose to classify fluoresence or event rates
-                if uv.chooseFluoresenceOrRate == 1                                  %if user selected to classify the fluoresence
-                    nullDist = nullDistTrace;                                       %direct transfer
-                    empiricalTrialWin = nanmean...
-                        (caTraceTrials(:,evtWinIdx));                   %NaN mean of the fluorescent response across trials, within the time window. this gets the within trial mean.
-                    empiricalWinAvg = nanmean(empiricalTrialWin);                   %across trial mean
-                elseif uv.chooseFluoresenceOrRate == 2                              %if user selected to classify the event rates
-                    nullDist = nullDistEvtRate;                                     %direct transfer
-                    empiricalTrialWin = nanmean...
-                        (caEvtRateTrials(:,evtWinIdx.(evts{e})),2);                 %within trial average
-                    empiricalWinAvg = nanmean(empiricalTrialWin);                   %across trial mean
+                    trialCt = size(caTraceTrials,1);                                    %number of trials for currently analyzed event
+
+
+
+                    for g = 1:uv.resamples                                              %for each resampling of the data
+                        [~,shuffledIDX] = sort(randi...                                 %generate a matrix of random integers from 1 to the number of measurements in each time window (not each number is generated/some are repeated)
+                            (numMeasurements,trialCt,numMeasurements),2);               %sort the data index to create a new list of indices
+                        for t = 1:trialCt                                               %for each trial
+                            shuffledTrace(t,:) = caTraceTrials(t,shuffledIDX(t,:));     %shuffle the calcium trace
+                            %         shuffledEvtRate(t,:) = caEvtRateTrials(t,shuffledIDX(t,:)); %shuffle the event rate
+                        end
+                        nullDistTrace(g,:) = nanmean(shuffledTrace);                    %calculate the NaN mean of the shuffled traces
+                        %     nullDistEvtRate(g,:) = nanmean(shuffledEvtRate);                %calculate the NaN mean of the shuffled event rates
+                    end
+                    clear shuffled* g t trialCt
+
+                    %% choose to classify fluoresence or event rates
+                    if uv.chooseFluoresenceOrRate == 1                                  %if user selected to classify the fluoresence
+                        nullDist = nullDistTrace;                                       %direct transfer
+                        empiricalTrialWin = nanmean...
+                            (caTraceTrials(:,evtWinIdx));                   %NaN mean of the fluorescent response across trials, within the time window. this gets the within trial mean.
+                        empiricalSEM = nansem...
+                            (caTraceTrials(:,:));
+                        otherPeriodWin = nanmean...
+                            (caTraceTrials(:, ~evtWinIdx));
+                        otherEventWin1 = nanmean...
+                            (caTraceTrials(:, other_evtWinIdx1));
+                        otherEventWin2 = nanmean...
+                            (caTraceTrials(:, other_evtWinIdx2));
+                        empiricalWinAvg = nanmean(empiricalTrialWin);                   %across trial mean
+                        empiricalSEMAvg = nanmean(empiricalSEM);                   %across trial mean
+                        otherPeriodWinAvg = nanmean(otherPeriodWin);
+                        otherEventWinAvg1 = nanmean(otherEventWin1);
+                        otherEventWinAvg2 = nanmean(otherEventWin2);
+                    elseif uv.chooseFluoresenceOrRate == 2                              %if user selected to classify the event rates
+                        nullDist = nullDistEvtRate;                                     %direct transfer
+                        empiricalTrialWin = nanmean...
+                            (caEvtRateTrials(:,evtWinIdx.(evts{e})),2);                 %within trial average
+                        empiricalWinAvg = nanmean(empiricalTrialWin);                   %across trial mean
+                    end
+                    clear empiricalTrialWin otherPeriodWin empiricalSEM otherEventWin1 ootherEventWin2
+                    %%
+                    sdNull = nanstd(nullDist(:));                                          %calculate the standard deviation of the null distribution
+                    upperSD = nanmean(nullDist(:)) + (uv.sigma*sdNull);                    %calculate upper limit of interval around the mean
+                    lowerSD = nanmean(nullDist(:)) - (uv.sigma*sdNull);                    %calculate lower limit of interval around the mean
+                    clear sdNull nullDist
+                    % Assuming you have already computed empiricalWinAvg, upperSD, lowerSD, otherPeriodWinAvg, and caTraceTrials
+
+                    % Step 1: Calculate the mean of the maxima of individual traces
+                    maxima = max(caTraceTrials, [], 2); % Find the maximum value in each row (trial)
+                    mean_maxima = mean(maxima);
+
+                    % Step 2: Calculate the standard error of the mean (SEM) of the maxima of individual traces
+                    n_trials = size(caTraceTrials, 1); % Number of trials
+                    sem_maxima = std(maxima) / sqrt(n_trials);
+
+                    % Step 3: Use Student's t distribution to determine the critical value
+                    alpha = 0.05; % Significance level (95% confidence interval)
+                    df = n_trials - 1; % Degrees of freedom
+                    critical_value = tinv(1 - alpha/2, df); % Two-tailed critical value
+
+                    % Step 4: Multiply the SEM by the critical value to obtain the margin of error
+                    margin_of_error = critical_value * sem_maxima;
+
+                    % Step 5: Construct the confidence interval around zero
+                    confidence_interval = [-margin_of_error, margin_of_error];
+                    clear margin_of_error critical_value df sem_maxima n_trials maxima mean_maxima
+
+
+                    %%
+                    % respClass.(session_to_analyze).(identity_classification_str).(filter_args).activated(neuron_num,1) = empiricalWinAvg > upperSD;     %classify as activated if empirical response exceeds upper limit
+                    % respClass.(session_to_analyze).(identity_classification_str).(filter_args).inhibited(neuron_num,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
+                    % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) = empiricalWinAvg > upperSD;     %classify as activated if empirical response exceeds upper limit
+                    % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
+                    % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) == 0 & respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) == 0;
+                    % Check if empiricalWinAvg exceeds the 95% confidence interval boundary
+                    if empiricalWinAvg > upperSD & empiricalWinAvg > otherEventWinAvg1 & empiricalWinAvg > otherEventWinAvg2
+                        respClass_all(neuron_num) = 1;
+                        respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 1;
+                    elseif empiricalWinAvg < lowerSD & empiricalWinAvg < otherPeriodWinAvg & empiricalWinAvg < otherEventWinAvg2
+                        respClass_all(neuron_num) = 2;
+                        respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 2;
+                    else
+                        respClass_all(neuron_num) = 3;
+                        respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 3;
+                    end
+                    clear upperSD lowerSD empiricalWinAvg otherPeriodWinAvg
+
+                    clear upperSD lowerSD empiricalWinAvg otherPeriodWinAvg upper_limit empiricalSEMAvg confidence_interval otherEventWinAvg1
+                    %             %% store trial by trial data
+                    %             unitXTrials(u).(evts{e}).caEvtCts = caEvtCtTrials;                  %store evoked calcium event counts over all trials
+                    %             unitXTrials(u).(evts{e}).caEvtRate = caEvtRateTrials;               %store evoked calcium event rates over all trials
+                    %             unitXTrials(u).(evts{e}).caTraces = caTraceTrials;                  %store evoked calcium traces over all trials
+                    %             %% store unit averaged data
+                    %             unitAVG.(evts{e}).caEvtCts(u,:) = nanmean(caEvtCtTrials);           %store trial averaged event counts
+                    %             unitAVG.(evts{e}).caEvtRates(u,:) = nanmean(caEvtRateTrials);       %store trial averaged event rates
+                    %             unitAVG.(evts{e}).caTraces(u,:) = nanmean(caTraceTrials);           %store trial averaged calcium traces
+                    %             clear caEvtCtTrials caTraceTrials caEvtRateTrials
                 end
-                clear empiricalTrialWin
-                %%
-                sdNull = nanstd(nullDist(:));                                          %calculate the standard deviation of the null distribution
-                upperSD = nanmean(nullDist(:)) + (uv.sigma*sdNull);                    %calculate upper limit of interval around the mean
-                lowerSD = nanmean(nullDist(:)) - (uv.sigma*sdNull);                    %calculate lower limit of interval around the mean
-                clear sdNull nullDist
-                %%
-                % respClass.(session_to_analyze).(identity_classification_str).(filter_args).activated(neuron_num,1) = empiricalWinAvg > upperSD;     %classify as activated if empirical response exceeds upper limit
-                % respClass.(session_to_analyze).(identity_classification_str).(filter_args).inhibited(neuron_num,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
-                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) = empiricalWinAvg > upperSD;     %classify as activated if empirical response exceeds upper limit
-                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
-                % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) == 0 & respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) == 0;
-                if empiricalWinAvg > upperSD
-                    respClass_all(neuron_num) = 1;
-                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 1;
-                elseif empiricalWinAvg < lowerSD
-                    respClass_all(neuron_num) = 2;
-                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 2;
-                else 
-                    respClass_all(neuron_num) = 3;
-                    % respClass.(session_to_analyze).(identity_classification_str).(filter_args).neutral(neuron_num,1) = 1;
-                    respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 3;
-                end
-                clear upperSD lowerSD empiricalWinAvg 
-                %             %% store trial by trial data
-                %             unitXTrials(u).(evts{e}).caEvtCts = caEvtCtTrials;                  %store evoked calcium event counts over all trials
-                %             unitXTrials(u).(evts{e}).caEvtRate = caEvtRateTrials;               %store evoked calcium event rates over all trials
-                %             unitXTrials(u).(evts{e}).caTraces = caTraceTrials;                  %store evoked calcium traces over all trials
-                %             %% store unit averaged data
-                %             unitAVG.(evts{e}).caEvtCts(u,:) = nanmean(caEvtCtTrials);           %store trial averaged event counts
-                %             unitAVG.(evts{e}).caEvtRates(u,:) = nanmean(caEvtRateTrials);       %store trial averaged event rates
-                %             unitAVG.(evts{e}).caTraces(u,:) = nanmean(caTraceTrials);           %store trial averaged calcium traces
-                %             clear caEvtCtTrials caTraceTrials caEvtRateTrials
+                clear caTraceTrials;
             end
-            clear caTraceTrials;
         end
     end
     clear ca BehavData
@@ -379,7 +449,7 @@ for ii = 1:size(zall_array, 2)
 
         % Plot the mean as a thick black line
         meanData = mean(zall_array{qq, ii});
-        plot(ts1, meanData, 'k', 'LineWidth', 2);
+        plot(ts1, meanData, 'r', 'LineWidth', 2);
         hold on;
 
         % Plot the raw data in grey with transparency
@@ -418,111 +488,6 @@ for ii = 1:size(zall_array, 2)
 end
 
 
-%% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
-% **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
-
-
-% Define spacing and line thickness
-row_spacing = 1; % Adjust as needed
-line_thickness = 1.0; % Adjust as needed
-
-
-for ii = 1:size(zall_array, 2)
-    figure;
-    % Initialize variables to store global max and min for heatmap and line graph
-    globalMaxHeatmap = -inf;
-    globalMinHeatmap = inf;
-    globalMaxYLine = -inf;
-    globalMinYLine = inf;
-    for qq = 1:iter
-        
-        % Create subplot with 1 row and 2 columns
-        num_columns_plot = iter;
-        subplot(2, num_columns_plot, qq);
-        isMatch = find(ismember(animalIDs,       mouse_cells{qq, ii}));
-        if ~isempty(isMatch)
-            % Access beha     v_tbl_iter using the first index (assuming there's only one match)
-            behav_tbl = behav_tbl_iter{qq, 1}{isMatch, 1};
-            time2Collect = behav_tbl.collectionTime(:) - behav_tbl.choiceTime(:);
-            trialStartTime = behav_tbl.stTime(:) - behav_tbl.choiceTime(:);
-            [numTrials, ~] = size(behav_tbl.collectionTime(:));
-            Tris = [1:numTrials]';
-            % scatter(time2Collect, Tris               , 'Marker', 'p', 'MarkerFaceColor', 'w')
-            % scatter(trialStartTime, Tris, 'Marker', 's', 'MarkerFaceColor', 'k')
-            % plot(zeros(numTrials, 1), Tris, 'LineWidth', 3, 'LineStyle', "--", 'Color', 'w')
-        end     
-        figure; 
-        for i = 1:3:size(zall_array{qq, ii}, 1)
-            if behav_tbl.bigSmall(i) == 1.2
-                neuron_activity =  zall_array{qq, ii}(i,:);
-
-                % Calculate the y-coordinate for the current neuron's plot
-                y_coordinate = (i - 1) * row_spacing;
-
-                % Plot the neural activity with the specified x and y coordinates
-                plot(ts1, neuron_activity + y_coordinate, 'k', 'LineWidth', line_thickness);
-
-                hold on; % To overlay all plots on the same figure
-            end
-        end
-        hold on;
-        title({"Cell from " + strrep(mouse_cells{qq, ii}, '_', '-'), "Classified as " + respClass_all_array{qq}(ii), "(Overall cell number = " + (ii) + ")"}, 'FontSize', 9)
-        
-        % Update global max and min for heatmap
-        localMaxHeatmap = max(zall_array{qq, ii}(:));
-        localMinHeatmap = min(zall_array{qq, ii}(:));
-        globalMaxHeatmap = max(globalMaxHeatmap, localMaxHeatmap);
-        globalMinHeatmap = min(globalMinHeatmap, localMinHeatmap);
-  
-        % Find the row index in animalIDs that matches mouse_cells{qq, ii}
-        isMatch = find(ismember(animalIDs,       mouse_cells{qq, ii}));
-
-
-        colorbar;
-        
-        hold off;
-        clear time2Collect trialStartTime numTrials Tris behav_tbl
-
-        % Create subplot for the mean and raw data
-        subplot(2, num_columns_plot, iter + qq);
-
-        % Plot the mean as a thick black line
-        meanData = mean(zall_array{qq, ii});
-        plot(ts1, meanData, 'k', 'LineWidth', 2);
-        hold on;
-
-        % Plot the raw data in grey with transparency
-        for trial = 1:size(zall_array{qq, ii}, 1)
-            plot(ts1, zall_array{qq, ii}(trial, :), 'Color', [0.1, 0.1, 0.1, 0.1]);
-            hold on;
-        end
-
-        title("Mean and Raw Data", 'FontSize', 9)
-        % Update global max and min for line graph
-        localMaxYLine = max(zall_array{qq, ii}, [], "all");
-        localMinYLine = min(zall_array{qq, ii}, [], "all");
-        globalMaxYLine = max(globalMaxYLine, localMaxYLine);
-        globalMinYLine = min(globalMinYLine, localMinYLine);
-        
-        hold off;        
-    end
-    % Set the same colorbar scale for all heatmap subplots
-    for qq = 1:iter
-        subplot(2, num_columns_plot, qq);
-        clim([globalMinHeatmap, globalMaxHeatmap]);
-        colorbar;
-    end
-
-    % Set the same Y-axis scale for all line graph subplots
-    for qq = 1:iter
-        subplot(2, num_columns_plot, iter + qq);
-        ylim([globalMinYLine, globalMaxYLine]);
-    end
-
-    pause
-    hold
-    close
-end
 
 
 
@@ -572,6 +537,10 @@ exclusive_activated_session_1 = respClass_all_array{1,1} == 1 & respClass_all_ar
 exclusive_activated_session_1_sum = sum(exclusive_activated_session_1);
 exclusive_activated_session_2 = respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 1;
 exclusive_activated_session_2_sum = sum(exclusive_activated_session_2);
+
+
+
+exclusive_activated_session_1_indices = find(exclusive_activated_session_1(1,:) == 1);
 
 
 exclusive_inhibited_session_1 = respClass_all_array{1,1} == 2 & respClass_all_array{1,2} == 3;
@@ -779,6 +748,8 @@ legend('Co', 'Exclusive', 'Remaining');
 %%
 Block_1_activated = respClass_all_array{1,1} == 1;
 Block_1_activated_sum = sum(Block_1_activated);
+Block_2_activated = respClass_all_array{1,2} == 1;
+Block_2_activated_sum = sum(Block_2_activated);
 Block_2_consistent_activated = Block_1_activated & respClass_all_array{1,2} == 1;
 disp(sum(Block_2_consistent_activated));
 Block_3_consistent_activated = Block_1_activated & respClass_all_array{1,3} == 1;
@@ -842,6 +813,29 @@ figure;
 for i = 1:size(K, 2)
     text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
 end
+
+
+
+
+total_modulated = [(Block_1_activated_sum/neuron_num)*100 (Block_2_activated_sum/neuron_num)*100];
+
+A = total_modulated;
+I = (co_activated_indices_sum/neuron_num)*100;
+K = [A I];
+figure; 
+[H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
+for i = 1:size(K, 2)
+    text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
+end
+
+
+figure;
+hold on; 
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 2}(exclusive_activated_session_2,:)), mean(neuron_sem_array{1, 2}(exclusive_activated_session_2,:)), 'lineProps', {'color', batlowW(iter,:)});
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 1}(exclusive_activated_session_1,:)), mean(neuron_sem_array{1, 1}(exclusive_activated_session_1,:)), 'lineProps', {'color', batlowW(iter,:)});
+shadedErrorBar(ts1, mean(neuron_mean_array{1, 1}(excited_to_excited,:)), mean(neuron_sem_array{1, 1}(excited_to_excited,:)), 'lineProps', {'color', batlowW(iter,:)});
+
+
 
 %%
 total_modulated = [sum_activated + sum_inhibited];

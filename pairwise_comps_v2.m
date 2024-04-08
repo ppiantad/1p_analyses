@@ -1,10 +1,12 @@
-test = [neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)];
-test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :)];
-test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 2}==3 & respClass_all_array{1, 1}==3, :)]
+test = [neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}~=1, :)];
+test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1, :)];
+test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}==1, :)];
+% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1,:)]
 
-action_index = [1:sum(respClass_all_array{1, 1}==1)];
-consumption_index = [action_index(end)+1:action_index(end)+sum(respClass_all_array{1, 2}==1)];
-neutral_index = [consumption_index(end)+1:consumption_index(end)+sum(respClass_all_array{1, 2}==3 & respClass_all_array{1, 1}==3)];
+pre_choice_index = [1:sum(respClass_all_array{1, 1}==1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}~=1)];
+post_choice_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1)];
+consumption_index = [post_choice_index(end)+1:post_choice_index(end)+sum(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}==1)];
+neutral_index = [consumption_index(end)+1:consumption_index(end)+sum(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1)];
 
 % % tabulate how neurons assigned to neuron_mean_array for the 1st event
 % % change across subsequent events
@@ -64,10 +66,10 @@ caxis([-1 1]); % Assuming correlations range from -1 to 1
 
 
 %%
-action_p_value_matrix = p_value_matrix(action_index, action_index);
-action_correl_matrix = correlation_matrix(action_index, action_index);
+action_p_value_matrix = p_value_matrix(pre_choice_index, pre_choice_index);
+action_correl_matrix = correlation_matrix(pre_choice_index, pre_choice_index);
 
-n = size(action_index, 2); % Total number of neurons
+n = size(pre_choice_index, 2); % Total number of neurons
 k = 2;   % Number of neurons chosen for pairwise combinations
 
 num_combinations = nchoosek(n, k);
@@ -227,8 +229,8 @@ xlim([0.5, 1.5]); % since we only have one set of data, we set the limits to cen
 
 
 %%
-action_consumption_p_value_matrix = p_value_matrix(action_index, consumption_index);
-action_consumption_correl_matrix = correlation_matrix(action_index, consumption_index);
+action_consumption_p_value_matrix = p_value_matrix(pre_choice_index, consumption_index);
+action_consumption_correl_matrix = correlation_matrix(pre_choice_index, consumption_index);
 
 n1 = size(action_consumption_p_value_matrix, 1); % Number of neurons in the first set
 n2 = size(action_consumption_p_value_matrix, 2); % Number of neurons in the second set
@@ -340,15 +342,15 @@ legend('Positive correlation', 'Negative correlation', 'No sig correlation');
 %These data can be used to plot the median or mean choice
 % time on a PCA graph, for example
 
-behav_tbl_iter = behav_tbl_iter(1);
+behav_tbl_iter_single = behav_tbl_iter(1);
 
 % Initialize the concatenated table
 concatenatedTable = table();
 
 % Iterate through the 3x1 cell array
-for i = 1:numel(behav_tbl_iter)
+for i = 1:numel(behav_tbl_iter_single)
     % Assuming each cell contains a 12x1 cell array of tables
-    twelveByOneCellArray = behav_tbl_iter{i};
+    twelveByOneCellArray = behav_tbl_iter_single{i};
     
     % Initialize a temporary table to store the concatenated tables for this cell
     tempTable = table();
@@ -374,6 +376,11 @@ median_collect_time_block_1 = median(concatenatedTable.collectionTime(concatenat
 median_collect_time_block_2 = median(concatenatedTable.collectionTime(concatenatedTable.Block == 2) - concatenatedTable.stTime(concatenatedTable.Block == 2));
 median_collect_time_block_3 = median(concatenatedTable.collectionTime(concatenatedTable.Block == 3) - concatenatedTable.stTime(concatenatedTable.Block == 3));
 
+
+
+
+
+median_start_time_from_choice = median(concatenatedTable.stTime - concatenatedTable.choiceTime);
 median_collect_time_from_choice = median(concatenatedTable.collectionTime - concatenatedTable.choiceTime);
 
 %%
@@ -383,16 +390,18 @@ hold on; plot(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1,
 hold on; plot(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}==3 & respClass_all_array{1, 1}==3, :)), 'color',  "black")
 xline(median_collect_time_from_choice, '--r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
-legend({'pre-choice active', 'consumption active', 'neutral'}, 'Location','northwest')
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
 
 %%
 figure;
 shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 1}==1, :)), 'lineProps', {'color', batlowW(iter,:)});
 hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 2}==1, :)), 'lineProps', {'color', batlowW(iter,:)});
-hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}==3 & respClass_all_array{1, 1}==3, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 2}==3 & respClass_all_array{1, 1}==3, :)), 'lineProps', {'color', batlowW(iter,:)});
-xline(median_collect_time_from_choice, '--r', {'Median', 'collect', 'latency'})
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 3}==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 3}==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
-legend({'pre-choice active', 'consumption active', 'neutral'}, 'Location','northwest')
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
 
 
 %% 

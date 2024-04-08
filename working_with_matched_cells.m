@@ -27,18 +27,18 @@ for ii = 1:size(neuron_mean_array, 1)
 %     concatenated_sems_session_3 = [concatenated_sems_session_3; cell_sem_data_3];
 end
 
-figure; plot(ts1, mean(concatenated_means_session_1(respClass_all(1,:) == 1,:)));
+figure; plot(ts1, mean(concatenated_means_session_1(respClass_all_array{1, 1} == 1,:)));
 ylim([-0.6 0.6])
-hold on; plot(ts1, mean(concatenated_means_session_2(respClass_all(2,:) == 1,:)));
+hold on; plot(ts1, mean(concatenated_means_session_2(respClass_all_array{1, 2} == 1,:)));
 % hold on; plot(ts1, mean(concatenated_means_session_3(respClass_all(3,:) == 1,:)));
 
-figure; plot(ts1, mean(concatenated_means_session_1(respClass_all(1,:) == 2,:)));
+figure; plot(ts1, mean(concatenated_means_session_1(respClass_all_array{1, 1} == 2,:)));
 ylim([-0.6 0.6])
-hold on; plot(ts1, mean(concatenated_means_session_2(respClass_all(2,:) == 2,:)));
+hold on; plot(ts1, mean(concatenated_means_session_2(respClass_all_array{1, 2} == 2,:)));
 
-figure; plot(ts1, mean(concatenated_means_session_1(respClass_all(1,:) == 3,:)));
+figure; plot(ts1, mean(concatenated_means_session_1(respClass_all_array{1, 1} == 3,:)));
 ylim([-0.6 0.6])
-hold on; plot(ts1, mean(concatenated_means_session_2(respClass_all(2,:) == 3,:)));
+hold on; plot(ts1, mean(concatenated_means_session_2(respClass_all_array{1, 2} == 3,:)));
 
 %% plot activated neurons
 
@@ -51,8 +51,8 @@ figure;
 hold on; 
 ylim([-0.8 0.8])
 xticks([-10 -5 0 5 10])
-shadedErrorBar(ts1, mean(concatenated_means_session_1(respClass_all(1,:) == 1,:)), mean(concatenated_sems_session_1(respClass_all(1,:) == 1,:)), 'lineProps', {'color', batlowW(1,:)});
-shadedErrorBar(ts1, mean(concatenated_means_session_2(respClass_all(2,:) == 1,:)), mean(concatenated_sems_session_2(respClass_all(2,:) == 1,:)), 'lineProps', {'color', batlowW(100,:)});
+shadedErrorBar(ts1, mean(concatenated_means_session_1(respClass_all_array{1, 1} == 1,:)), mean(concatenated_sems_session_1(respClass_all_array{1, 1} == 1,:)), 'lineProps', {'color', batlowW(1,:)});
+shadedErrorBar(ts1, mean(concatenated_means_session_2(respClass_all_array{1, 2} == 1,:)), mean(concatenated_sems_session_2(respClass_all_array{1, 2} == 1,:)), 'lineProps', {'color', batlowW(100,:)});
 % shadedErrorBar(ts1, mean(concatenated_means_session_3(respClass_all(3,:) == 1,:)), mean(concatenated_sems_session_3(respClass_all(3,:) == 1,:)), 'lineProps', {'color', batlowW(200,:)});
 hold off
 
@@ -64,16 +64,16 @@ figure;
 hold on; 
 ylim([-0.8 0.8])
 xticks([-10 -5 0 5 10])
-shadedErrorBar(ts1, mean(concatenated_means_session_1(respClass_all(1,:) == 2,:)), mean(concatenated_sems_session_1(respClass_all(1,:) == 2,:)), 'lineProps', {'color', batlowW(1,:)});
-shadedErrorBar(ts1, mean(concatenated_means_session_2(respClass_all(2,:) == 2,:)), mean(concatenated_sems_session_2(respClass_all(2,:) == 2,:)), 'lineProps', {'color', batlowW(100,:)});
+shadedErrorBar(ts1, mean(concatenated_means_session_1(respClass_all_array{1, 1} == 2,:)), mean(concatenated_sems_session_1(respClass_all_array{1, 1} == 2,:)), 'lineProps', {'color', batlowW(1,:)});
+shadedErrorBar(ts1, mean(concatenated_means_session_2(respClass_all_array{1, 2} == 2,:)), mean(concatenated_sems_session_2(respClass_all_array{1, 2} == 2,:)), 'lineProps', {'color', batlowW(100,:)});
 hold off
 
 figure;
 hold on; 
 ylim([-0.8 0.8])
 xticks([-10 -5 0 5 10])
-shadedErrorBar(ts1, mean(concatenated_means_session_1(respClass_all(1,:) == 3,:)), mean(concatenated_sems_session_1(respClass_all(1,:) == 3,:)), 'lineProps', {'color', batlowW(1,:)});
-shadedErrorBar(ts1, mean(concatenated_means_session_2(respClass_all(2,:) == 3,:)), mean(concatenated_sems_session_2(respClass_all(2,:) == 3,:)), 'lineProps', {'color', batlowW(100,:)});
+shadedErrorBar(ts1, mean(concatenated_means_session_1(respClass_all_array{1, 1} == 3,:)), mean(concatenated_sems_session_1(respClass_all_array{1, 1} == 3,:)), 'lineProps', {'color', batlowW(1,:)});
+shadedErrorBar(ts1, mean(concatenated_means_session_2(respClass_all_array{1, 2} == 3,:)), mean(concatenated_sems_session_2(respClass_all_array{1, 2} == 3,:)), 'lineProps', {'color', batlowW(100,:)});
 hold off
 
 
@@ -120,20 +120,20 @@ y = mean_sub_window_activity_session_2;
 
 % Create a scatter plot
 figure;
-
+set(gcf,'Position',[100 100 200 500])
 % Group 1: respClass_all(1,:) == 1 (Orange)
-idx_group_1 = (respClass_all(1,:) == 1);
+idx_group_1 = (respClass_all_array{1, 1} == 1);
 scatter(x(idx_group_1), y(idx_group_1), 'o', 'filled', 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k'); % Orange
 
 hold on;
 
-% Group 2: respClass_all(1,:) == 2 (Light Blue)
-idx_group_2 = (respClass_all(1,:) == 2);
-scatter(x(idx_group_2), y(idx_group_2), 'o', 'filled', 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'k'); % Light Blue
+% % Group 2: respClass_all(1,:) == 2 (Light Blue)
+% idx_group_2 = (respClass_all_array{1, 1} == 2);
+% scatter(x(idx_group_2), y(idx_group_2), 'o', 'filled', 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'k'); % Light Blue
 
-% Group 3: respClass_all(1,:) == 3 (Light Grey)
-idx_group_3 = (respClass_all(1,:) == 3);
-scatter(x(idx_group_3), y(idx_group_3), 'o', 'filled', 'MarkerFaceColor', [0.7 0.7 0.7], 'MarkerEdgeColor', 'k'); % Light Grey
+% % Group 3: respClass_all(1,:) == 3 (Light Grey)
+% idx_group_3 = (respClass_all_array{1, 1} == 3);
+% scatter(x(idx_group_3), y(idx_group_3), 'o', 'filled', 'MarkerFaceColor', [0.7 0.7 0.7], 'MarkerEdgeColor', 'k'); % Light Grey
 
 % Add a regression line (You can keep this part unchanged)
 coefficients = polyfit(x, y, 1);
@@ -204,8 +204,8 @@ category_3 = 3;
 
 % Define the time window of interest
 
-start_time = 0; % sub-window start time
-end_time = 2; % sub-window end time
+start_time = -4; % sub-window start time
+end_time = 0; % sub-window end time
 
 % Find the indices in ts1 that correspond to the sub-window
 sub_window_idx = ts1 >= start_time & ts1 <= end_time;
@@ -215,9 +215,9 @@ mean_activity = mean(concatenated_means_session_1(:,sub_window_idx), 2);
 
 
 % Find the indices of the neurons in each category
-indices_1 = find(respClass_all(1,:) == category_1);
-indices_2 = find(respClass_all(1,:) == category_2);
-indices_3 = find(respClass_all(1,:) == category_3);
+indices_1 = find(respClass_all_array{1, 1} == category_1);
+indices_2 = find(respClass_all_array{1, 1} == category_2);
+indices_3 = find(respClass_all_array{1, 1} == category_3);
 
 % Select the three most representative neurons from each category
 [~, sorted_indices_1] = sort(mean_activity(indices_1), 'descend');
@@ -296,4 +296,143 @@ xlim([-1.5 2])
 xlabel('Time (s)');
 ylabel('Activity');
 legend('Category 1', 'Category 2', 'Category 3');
+hold off;
+
+
+
+
+
+%% Create a scatterplot to show relationship between session 1 and session 2 activity
+
+
+%CREATE SCATTER PLOT BASED ON SPECIFIC EVENTS - ASSUMING THEY ARE IN PAIRS.
+%CHECK AND UPDATE START & END TIME DEPENDING ON EVENT OF INTEREST
+paired_neurons = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} == 1;
+start_time = 0; % sub-window start time
+end_time = 2; % sub-window end time
+
+% Find the indices in ts1 that correspond to the sub-window
+sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+
+% Extract the corresponding columns from neuron_mean
+
+
+sub_window_activity_session_1 = concatenated_means_session_1(paired_neurons, sub_window_idx);
+sub_window_activity_session_2 = concatenated_means_session_2(paired_neurons, sub_window_idx);
+
+mean_sub_window_activity_session_1 = mean(sub_window_activity_session_1, 2);
+mean_sub_window_activity_session_2 = mean(sub_window_activity_session_2, 2);
+
+x = mean_sub_window_activity_session_1;
+y = mean_sub_window_activity_session_2;
+
+
+% Create a scatter plot
+figure;
+set(gcf,'Position',[100 100 200 500])
+% Group 1: respClass_all(1,:) == 1 (Orange)
+% idx_group_1 = (respClass_all_array{1, 1} == 1);
+scatter(x, y, 'o', 'filled', 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k'); % Orange
+
+hold on;
+
+% % Group 2: respClass_all(1,:) == 2 (Light Blue)
+% idx_group_2 = (respClass_all_array{1, 1} == 2);
+% scatter(x(idx_group_2), y(idx_group_2), 'o', 'filled', 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'k'); % Light Blue
+
+% % Group 3: respClass_all(1,:) == 3 (Light Grey)
+% idx_group_3 = (respClass_all_array{1, 1} == 3);
+% scatter(x(idx_group_3), y(idx_group_3), 'o', 'filled', 'MarkerFaceColor', [0.7 0.7 0.7], 'MarkerEdgeColor', 'k'); % Light Grey
+
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+
+% Add labels and a legend (You can keep this part unchanged)
+% xlabel('X-axis Label');
+% ylabel('Y-axis Label');
+% title('Scatter Plot with Regression Line and R^2 Value');
+% legend('Group 1', 'Group 2', 'Group 3', 'Regression Line');
+% ylim([0 1.1])
+% xlim([0 1.1])
+hold off;
+
+%% Create a scatterplot to show relationship between session 1 and session 2 activity
+
+
+%CREATE SCATTER PLOT BASED ON SPECIFIC EVENTS - ASSUMING THEY ARE IN PAIRS.
+%CHECK AND UPDATE START & END TIME DEPENDING ON EVENT OF INTEREST
+paired_neurons = respClass_all_array{1, 1} == 1 | respClass_all_array{1, 2} == 1;
+session_1_neurons = find(respClass_all_array{1, 1} == 1);
+session_2_neurons = find(respClass_all_array{1, 2} == 1);
+both_sessions = intersect(session_1_neurons, session_2_neurons);
+start_time = -4; % sub-window start time
+end_time = 0; % sub-window end time
+
+% Find the indices in ts1 that correspond to the sub-window
+sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+
+% Extract the corresponding columns from neuron_mean
+
+
+sub_window_activity_session_1 = concatenated_means_session_1(:, sub_window_idx);
+sub_window_activity_session_2 = concatenated_means_session_2(:, sub_window_idx);
+
+mean_sub_window_activity_session_1 = mean(sub_window_activity_session_1, 2);
+mean_sub_window_activity_session_2 = mean(sub_window_activity_session_2, 2);
+
+x = mean_sub_window_activity_session_1;
+y = mean_sub_window_activity_session_2;
+
+
+% Create a scatter plot
+figure;
+set(gcf,'Position',[100 100 200 500])
+% Group 1: respClass_all(1,:) == 1 (Orange)
+idx_group_1 = session_1_neurons;
+scatter(x(idx_group_1), y(idx_group_1), 'o', 'filled', 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k'); % Orange
+
+hold on;
+
+% Group 2: respClass_all(1,:) == 2 (Light Blue)
+idx_group_2 = session_2_neurons;
+scatter(x(idx_group_2), y(idx_group_2), 'o', 'filled', 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'k'); % Light Blue
+
+% Group 3: respClass_all(1,:) == 3 (Light Grey)
+idx_group_3 = both_sessions;
+scatter(x(idx_group_3), y(idx_group_3), 'o', 'filled', 'MarkerFaceColor', [0.7 0.7 0.7], 'MarkerEdgeColor', 'k'); % Light Grey
+
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+
+% Add labels and a legend (You can keep this part unchanged)
+% xlabel('X-axis Label');
+% ylabel('Y-axis Label');
+% title('Scatter Plot with Regression Line and R^2 Value');
+% legend('Group 1', 'Group 2', 'Group 3', 'Regression Line');
+% ylim([0 1.1])
+% xlim([0 1.1])
 hold off;

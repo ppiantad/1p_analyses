@@ -7,7 +7,7 @@ ts1 = (-10:.1:10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA';
+metaDirectory = 'I:\MATLAB\Sean CNMFe\BLA-NAcSh';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -73,8 +73,6 @@ for zz = 1:size(metafolder_list, 1)
         filesFound = false;
 
 
-
-
         folderMask = ~[list.isdir]; %find all of the folders in the directory and remove them from the list
         files = list(folderMask);  %now we have only files to work with
         clear folderMask list
@@ -98,8 +96,38 @@ for zz = 1:size(metafolder_list, 1)
         %the cell array with strfind
         xlsxFiles = files(idx); %build a mat file index
         clear idx files
-        if isempty(matFiles) || isempty(csvFiles)
-            disp('Missing .mat file, skipping folder');
+
+        folder_strings = strsplit(folder_list{ii}, '\');
+        %     session_strings = strsplit(folder_strings{end}, {'-', ' '});
+        %     mat_strings = strsplit(char(matFiles.name),'_');
+        %     date_strings = strsplit(mat_strings{4}, '-');
+        csv_names = {csvFiles.name};
+        current_animal = folder_strings{5}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
+        % current_session = folder_strings{6};
+        current_animal = matlab.lang.makeValidName(current_animal);
+        current_session = char(folder_strings(end));
+
+        % Loop over each substring in the substrings array
+        for mm = 1:length(csv_names)
+            % Check if the current name contains three distinct substrings
+            if contains(lower(csv_names{mm}), '_gpio')
+                disp(['GPIO File = ', csv_names{mm}])
+                GPIO_file = strcat(folder_list{ii}, '\', csv_names{mm});
+            end
+            if contains(csv_names{mm}, 'ABET')
+                disp(['ABET File = ', csv_names{mm}])
+                ABET_file = strcat(folder_list{ii}, '\', csv_names{mm});
+            end
+            if contains(csv_names{mm}, 'BORIS')
+                disp(['boris File = ', csv_names{mm}])
+                boris_file = strcat(folder_list{ii}, '\', csv_names{mm});
+            end
+            
+        end
+
+        if isempty(matFiles) || ~exist('GPIO_file', 'var') == 1 || ~exist('ABET_file', 'var')  == 1
+            disp('Missing .mat or .csv files, skipping folder');
+            clear ABET_file GPIO_file matFiles
         else
             currentMatFile = strcat(folder_list{ii}, '\', matFiles.name);
             filesFound = true; % Set the flag to true since .mat files were found
@@ -107,38 +135,14 @@ for zz = 1:size(metafolder_list, 1)
             % Add your code to process .mat files here
 
         end
+
+
         % Check the filesFound flag and print the final message
         if filesFound
             disp('Folder analyzed successfully');
 
 
 
-            folder_strings = strsplit(folder_list{ii}, '\');
-            %     session_strings = strsplit(folder_strings{end}, {'-', ' '});
-            %     mat_strings = strsplit(char(matFiles.name),'_');
-            %     date_strings = strsplit(mat_strings{4}, '-');
-            csv_names = {csvFiles.name};
-            current_animal = folder_strings{5}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
-            % current_session = folder_strings{6};
-            current_animal = matlab.lang.makeValidName(current_animal);
-            current_session = char(folder_strings(end));
-            
-            % Loop over each substring in the substrings array
-            for mm = 1:length(csv_names)
-                % Check if the current name contains three distinct substrings
-                if contains(lower(csv_names{mm}), '_gpio')
-                    disp(['GPIO File = ', csv_names{mm}])
-                    GPIO_file = strcat(folder_list{ii}, '\', csv_names{mm});
-                end
-                if contains(csv_names{mm}, 'ABET')
-                    disp(['ABET File = ', csv_names{mm}])
-                    ABET_file = strcat(folder_list{ii}, '\', csv_names{mm});
-                end
-                if contains(csv_names{mm}, 'BORIS')
-                    disp(['boris File = ', csv_names{mm}])
-                    boris_file = strcat(folder_list{ii}, '\', csv_names{mm});
-                end
-            end
 
 
             %     ABET_file = strcat(folder_list{ii}, '\', csvFiles(1).name);
@@ -212,10 +216,20 @@ for zz = 1:size(metafolder_list, 1)
                 %     frames3 = frames(1:2:end-2);
                 % else
                 %     frames3 = frames(1:4:end-2);
-                %
+                % 
                 % end
 
-
+                % if strcmp(current_animal,'RG_Insc_1')
+                %     frames3 = frames(1:2:end-2);
+                % elseif strcmp(current_animal,'RG_Insc_2') 
+                %     if strcmp(current_session,'RM_D1')
+                %         frames3 = frames(1:4:end-2);
+                %     else
+                %         frames3 = frames(1:2:end-2);
+                %     end
+                % elseif strcmp(current_animal,'RG_Insc_2')
+                %     frames3 = frames(1:4:end-2);
+                % end
 
                 final.(current_animal).(current_session).time = frames3; %final(i).time = caTime;
 
@@ -315,7 +329,17 @@ for zz = 1:size(metafolder_list, 1)
                 %     frames3 = frames(1:4:end-2);
                 %
                 % end
-
+                % if strcmp(current_animal,'RG_Insc_1')
+                %     frames3 = frames(1:2:end-2);
+                % elseif strcmp(current_animal,'RG_Insc_3') 
+                %     if ~strcmp(current_session,'RM_D1')
+                %         frames3 = frames(1:4:end-2);
+                %     else
+                %         frames3 = frames(1:2:end-2);
+                %     end
+                % elseif strcmp(current_animal,'RG_Insc_2')
+                %     frames3 = frames(1:4:end-2);
+                % end
 
                 %for testing frames vs. ts1
                 % figure; plot(ts1, neuron.C_raw(2,:))
@@ -335,7 +359,7 @@ for zz = 1:size(metafolder_list, 1)
                 final.(current_animal).(current_session).CNMFe_data.S = neuron.S;
                 final.(current_animal).(current_session).CNMFe_data.Coor = neuron.Coor;
                 final.(current_animal).(current_session).CNMFe_data.Cn = neuron.Cn;
-                clear unitTS unitTrace unitXTrials unitAVG unitSEM i zall zb zsd zb_window zsd_window zall_window zb_session zsd_session zall_session neuron
+                clear unitTS unitTrace unitXTrials unitAVG unitSEM i zall zb zsd zb_window zsd_window zall_window zb_session zsd_session zall_session neuron boris_file ABET_file GPIO_file
             end
 
         else
@@ -344,6 +368,7 @@ for zz = 1:size(metafolder_list, 1)
             % Skip the rest of the loop for this folder
             continue;
         end
+        clear boris_file ABET_file GPIO_file
     end
     % clearvars -except final
 end

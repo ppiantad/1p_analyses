@@ -2,13 +2,13 @@
 % load_data_4_cellreg.m and will loop through the sessions & CellReg files
 % to create or add to the cellreg_struct data structure. 
 
-% load('BLA_panneuronal_Risk_2023_07_06.mat') %Load completely unmatched dataset - BLA panneuronal
+load('BLA_panneuronal_Risk_2024_03_07_just_CNMFe_and_BehavData.mat') %Load completely unmatched dataset - BLA panneuronal
 
 % load('BLA_panneuronal_Risk_2023_11_15.mat') %Load completely unmatched dataset - BLA-NAcSh
 
 % load('BLA_panneuronal_Risk_MATCHED_04232023.mat') %Load matched dataset (to be added to)
 
-load('BLA_panneuronal_Risk_MATCHED_07142023.mat') %Load matched dataset (to be added to)
+load('BLA_panneuronal_Risk_MATCHED_2024_03_07_just_CNMFe_and_BehavData.mat') %Load matched dataset (to be added to)
 
 %%
 
@@ -55,19 +55,17 @@ for qq = 1:size(paired_sessions, 1)
             for ii = 1:size(fieldnames(final),1)
 %                 current_animal = char(animalIDs(ii));
                 fieldnames_mouse = fieldnames(final.(current_animal).(paired_sessions_current));
-                valid_fields_mouse = intersect(uv.behav, fieldnames_mouse);
-                for i = 1:length(valid_fields_mouse)
-                    alignment_event = char(valid_fields_mouse(i));
+                % valid_fields_mouse = intersect(uv.behav, fieldnames_mouse);
+                for i = 1:length(fieldnames_mouse)
+                    alignment_event = char(fieldnames_mouse(i));
                     if isfield(final.(current_animal), paired_sessions_current)
                         %                     current_session = paired_sessions{1};
                         
-                        cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).(alignment_event).time = final.(current_animal).(paired_sessions_current).(alignment_event).time; %final(i).time = caTime;
-                        cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).(alignment_event).unitAVG.caTraces = final.(current_animal).(paired_sessions_current).(alignment_event).unitAVG.caTraces(filtered_map(:,zz),:);
-                        cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).(alignment_event).unitXTrials = final.(current_animal).(paired_sessions_current).(alignment_event).unitXTrials(1,filtered_map(:,zz),:);
-                        cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).(alignment_event).uv = final.(current_animal).(paired_sessions_current).(alignment_event).uv;
-                        cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).(alignment_event).unitSEM = final.(current_animal).(paired_sessions_current).(alignment_event).unitSEM.caTraces(filtered_map(:,zz),:);
-
-                        %             new_struct.(current_animal).(current_session).(alignment_event).uv = final.(current_animal).(current_session).(alignment_event).uv;
+                        cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).time = final.(current_animal).(paired_sessions_current).time; %final(i).time = caTime;
+                        
+                       
+                        cellreg_struct.(paired_sessions_struct_name).(current_animal).(paired_sessions_current).uv = final.(current_animal).(paired_sessions_current).uv;
+                        
 
 
 
