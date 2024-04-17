@@ -1,7 +1,7 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'BLA_Insc_26';
+select_mouse = 'BLA_Insc_48';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
@@ -39,7 +39,7 @@ SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
 % trial_starts_array = BehavData.stTime-BehavData.choiceTime;
 % trial_ends_array = BehavData.collectionTime - BehavData.choiceTime;
 
-
+[X_data, Y_data] = correct_XY_outliers_v1(X_data, Y_data);
 
 
 
@@ -63,21 +63,21 @@ SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
                         break %return
                     end
                 else
-                    if offset <= max_ind && offset > 0 && onset <= max_ind && onset > 0
-                        % buffering this by adding +1 to the end time for now, for
-                        % some reason the array seems too short without?
-                        % after some extensive checking, it seems like the
-                        % strangeness where the body @ start and @ end does not
-                        % overlap often comes from the fact that the mouse's tail
-                        % can trigger the IR beam in the food cup on a non-trivial
-                        % # of trials
-                        filtered_motion{j}= [X_data(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j))'; Y_data(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j))']; %SLEAP_data.vel_cm_s(SLEAP_data.idx_frame(onset:offset));
-                        choice_times{j} = [X_data(interp1(SLEAP_data.idx_time, 1:numel(SLEAP_data.idx_time), time_ranges_trials(2,j), 'nearest'))'; Y_data(interp1(SLEAP_data.idx_time, 1:numel(SLEAP_data.idx_time), time_ranges_trials(2,j), 'nearest'))'];
-                        filtered_velocity{j}= velocity_data(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j));
-                        % filtered_gcamp{j}= Y_dF_all_session(gcamp_samples(onset:offset));
-                        % filtered{j} = Y_data_filtered(SLEAP_data.idx_frame(onset:offset))'; %SLEAP_data.vel_cm_s(SLEAP_data.idx_frame(onset:offset));
-                        good_index = good_index + 1;
-                    end
+                    % if offset <= max_ind && offset > 0 && onset <= max_ind && onset > 0
+                    % buffering this by adding +1 to the end time for now, for
+                    % some reason the array seems too short without?
+                    % after some extensive checking, it seems like the
+                    % strangeness where the body @ start and @ end does not
+                    % overlap often comes from the fact that the mouse's tail
+                    % can trigger the IR beam in the food cup on a non-trivial
+                    % # of trials
+                    filtered_motion{j}= [X_data(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j))'; Y_data(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j))']; %SLEAP_data.vel_cm_s(SLEAP_data.idx_frame(onset:offset));
+                    choice_times{j} = [X_data(interp1(SLEAP_data.idx_time, 1:numel(SLEAP_data.idx_time), time_ranges_trials(2,j), 'nearest'))'; Y_data(interp1(SLEAP_data.idx_time, 1:numel(SLEAP_data.idx_time), time_ranges_trials(2,j), 'nearest'))'];
+                    filtered_velocity{j}= velocity_data(SLEAP_data.idx_time > time_ranges_trials(1,j) & SLEAP_data.idx_time < time_ranges_trials(3,j));
+                    % filtered_gcamp{j}= Y_dF_all_session(gcamp_samples(onset:offset));
+                    % filtered{j} = Y_data_filtered(SLEAP_data.idx_frame(onset:offset))'; %SLEAP_data.vel_cm_s(SLEAP_data.idx_frame(onset:offset));
+                    good_index = good_index + 1;
+                    % end
                 end
             end
             % if KEEPDATA

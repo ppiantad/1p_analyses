@@ -9,7 +9,7 @@ ts1 = (-10:(uv.dt):10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\Sean CNMFe\BLA-NAcSh';
+metaDirectory = 'I:\MATLAB\Sean CNMFe\RG-Insc';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -149,12 +149,7 @@ for zz = 1:size(metafolder_list, 1)
                         tbl_ABET.Properties.VariableNames = ABETfile(1,:);
                         gpio_tbl = readtable(GPIO_file);
                         shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
-                        % Inscopix stupidly recently updated the way the GPIO pins
-                        % are written, so the default values that I used before are
-                        % no longer valid. updated this to reflect the new way
-                        % things are written - hopefully this works!
-                        % stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
-                        stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Value > 5000);
+                        stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
                         frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
                         %check GPIO file to extract each TTL, since the TTL is 1000ms and is
                         %sampled repeatedly. This will only extract events that are separated by >
@@ -197,7 +192,7 @@ for zz = 1:size(metafolder_list, 1)
 
                         %%
                         
-                        % eTS = BehavData.(alignment_event); %get time stamps
+                        eTS = BehavData.(alignment_event); %get time stamps
 
                         SLEAP_data = readtable(SLEAP_csv);
                         
@@ -246,77 +241,77 @@ for zz = 1:size(metafolder_list, 1)
                         SLEAP_data_vel_filtered_session = SLEAP_data.vel_filtered_2';
 
                         zscored_SLEAP_data_vel_filtered_session =(SLEAP_data_vel_filtered_session-mean(SLEAP_data_vel_filtered_session)./std(SLEAP_data_vel_filtered_session));
-                        % %%
-                        % tic
-                        % for i = 1 %could loop through multiple mice like this if you had it
-                        %     % eTS = BehavData.(uv.behav); %get time stamps
-                        %     velocity_trace =  SLEAP_data_vel_filtered_session;
-                        %     %     ca = neuron.S; %get binarized calcium
-                        %     velocity_time = SLEAP_data.idx_time';
-                        % 
-                        %     % velocity_time = velocity_time + stTime(1);
-                        % 
-                        %     %calculate time windows for each event
-                        %     evtWinSpan = max(uv.evtWin) - min(uv.evtWin);
-                        %     numMeasurements = round(evtWinSpan/uv.dt); %need to round due to odd frame rate
-                        %     %%
-                        %     tic
-                        %     for u = 1:size(velocity_trace,1)
-                        %         %% initialize trial matrices
-                        %         velocity_trace_trials = NaN(size(eTS,1),numMeasurements); %
-                        %         velocity_unitTrace = velocity_trace(u,:); %get trace
-                        %         %             %%
-                        %         for t = 1:size(eTS,1)
-                        %             %% set each trial's temporal boundaries
-                        %             timeWin = [eTS(t)+uv.evtWin(1,1):uv.dt:eTS(t)+uv.evtWin(1,2)];  %calculate time window around each event
-                        %             BL_win = [eTS(t)+uv.BLper(1,1):uv.dt:eTS(t)+uv.BLper(1,2)];
-                        %             if min(timeWin) > min(velocity_time) & max(timeWin) < max(velocity_time)    %if the beginning and end of the time window around the event occurred during the recording period. if not, the time window is out of range %if min(timeWin) > min(caTime) & max(timeWin) < max(caTime)
-                        %                 %% get unit event counts in trials
-                        %                 %% get unit ca traces in trials
-                        %                 idx = velocity_time > min(timeWin) & velocity_time < max(timeWin);      %logical index of time window around each behavioral event time  %idx = caTime > min(timeWin) & caTime < max(timeWin);
-                        %                 bl_idx = velocity_time > min(BL_win) & velocity_time < max(BL_win);
-                        %                 %caTraceTrials(t,1:sum(idx)) = unitTrace(idx);               %store the evoked calcium trace around each event   (see below, comment out if dont want normalized to whole trace)
-                        %                 velocity_trace_trials(t,1:sum(idx)) = velocity_unitTrace(idx);
-                        %                 % zb(t,:) = mean(unitTrace(bl_idx)); %baseline mean
-                        %                 % zsd(t,:) = std(unitTrace(bl_idx)); %baseline std
-                        %                 velocity_zb(t,:) = mean(velocity_trace_trials(t,:)); %baseline mean
-                        %                 velocity_zsd(t,:) = std(velocity_trace_trials(t,:)); %baseline std
-                        % 
-                        % 
-                        %                 tmp = 0;
-                        %                 for j = 1:size(velocity_trace_trials,2)
-                        %                     tmp = tmp+1;
-                        %                     zall_motion(t,tmp) = (velocity_trace_trials(t,j) - velocity_zb(t))/velocity_zsd(t);
-                        %                 end
-                        %                 clear j;
-                        % 
-                        % 
-                        % 
-                        %             end
-                        %         end
-                        %         clear idx timeWin BL_win bl_idx
-                        %         %%
-                        %         unitXTrials(u).velocity_trace_trials = velocity_trace_trials;
-                        %         unitXTrials(u).velocity_zb = velocity_zb;
-                        %         unitXTrials(u).velocity_zsd = velocity_zsd;
-                        %         unitXTrials(u).zall_motion = zall_motion;
-                        % 
-                        %         %% store unit averaged data
-                        %         unitAVG.velocity_traces(u,:) = nanmean(velocity_trace_trials);           %store trial averaged calcium traces
-                        %         unitSEM.velocity_traces(u,:) = std(velocity_trace_trials,'omitnan')/sqrt(size(velocity_trace_trials,1));
-                        %         clear caEvtCtTrials caTraceTrials caEvtRateTrials unitTrace idx
-                        %     end
-                        % end
+                        %%
+                        tic
+                        for i = 1 %could loop through multiple mice like this if you had it
+                            % eTS = BehavData.(uv.behav); %get time stamps
+                            velocity_trace =  SLEAP_data_vel_filtered_session;
+                            %     ca = neuron.S; %get binarized calcium
+                            velocity_time = SLEAP_data.idx_time';
+
+                            % velocity_time = velocity_time + stTime(1);
+
+                            %calculate time windows for each event
+                            evtWinSpan = max(uv.evtWin) - min(uv.evtWin);
+                            numMeasurements = round(evtWinSpan/uv.dt); %need to round due to odd frame rate
+                            %%
+                            tic
+                            for u = 1:size(velocity_trace,1)
+                                %% initialize trial matrices
+                                velocity_trace_trials = NaN(size(eTS,1),numMeasurements); %
+                                velocity_unitTrace = velocity_trace(u,:); %get trace
+                                %             %%
+                                for t = 1:size(eTS,1)
+                                    %% set each trial's temporal boundaries
+                                    timeWin = [eTS(t)+uv.evtWin(1,1):uv.dt:eTS(t)+uv.evtWin(1,2)];  %calculate time window around each event
+                                    BL_win = [eTS(t)+uv.BLper(1,1):uv.dt:eTS(t)+uv.BLper(1,2)];
+                                    if min(timeWin) > min(velocity_time) & max(timeWin) < max(velocity_time)    %if the beginning and end of the time window around the event occurred during the recording period. if not, the time window is out of range %if min(timeWin) > min(caTime) & max(timeWin) < max(caTime)
+                                        %% get unit event counts in trials
+                                        %% get unit ca traces in trials
+                                        idx = velocity_time > min(timeWin) & velocity_time < max(timeWin);      %logical index of time window around each behavioral event time  %idx = caTime > min(timeWin) & caTime < max(timeWin);
+                                        bl_idx = velocity_time > min(BL_win) & velocity_time < max(BL_win);
+                                        %caTraceTrials(t,1:sum(idx)) = unitTrace(idx);               %store the evoked calcium trace around each event   (see below, comment out if dont want normalized to whole trace)
+                                        velocity_trace_trials(t,1:sum(idx)) = velocity_unitTrace(idx);
+                                        % zb(t,:) = mean(unitTrace(bl_idx)); %baseline mean
+                                        % zsd(t,:) = std(unitTrace(bl_idx)); %baseline std
+                                        velocity_zb(t,:) = mean(velocity_trace_trials(t,:)); %baseline mean
+                                        velocity_zsd(t,:) = std(velocity_trace_trials(t,:)); %baseline std
 
 
-                        % toc
+                                        tmp = 0;
+                                        for j = 1:size(velocity_trace_trials,2)
+                                            tmp = tmp+1;
+                                            zall_motion(t,tmp) = (velocity_trace_trials(t,j) - velocity_zb(t))/velocity_zsd(t);
+                                        end
+                                        clear j;
+
+
+
+                                    end
+                                end
+                                clear idx timeWin BL_win bl_idx
+                                %%
+                                unitXTrials(u).velocity_trace_trials = velocity_trace_trials;
+                                unitXTrials(u).velocity_zb = velocity_zb;
+                                unitXTrials(u).velocity_zsd = velocity_zsd;
+                                unitXTrials(u).zall_motion = zall_motion;
+
+                                %% store unit averaged data
+                                unitAVG.velocity_traces(u,:) = nanmean(velocity_trace_trials);           %store trial averaged calcium traces
+                                unitSEM.velocity_traces(u,:) = std(velocity_trace_trials,'omitnan')/sqrt(size(velocity_trace_trials,1));
+                                clear caEvtCtTrials caTraceTrials caEvtRateTrials unitTrace idx
+                            end
+                        end
+
+
+                        toc
                         %     final(i).name = mouseData(i).mouseID;
                         %     final(i).day = i;
-                        final_SLEAP.(current_animal).(current_session).time = SLEAP_time; %final(i).time = caTime;
-                        % final_SLEAP.(current_animal).(current_session).(alignment_event).unitAVG = unitAVG;
-                        % final_SLEAP.(current_animal).(current_session).(alignment_event).unitXTrials = unitXTrials;
-                        final_SLEAP.(current_animal).(current_session).uv = uv;
-                        % final_SLEAP.(current_animal).(current_session).(alignment_event).unitSEM = unitSEM;
+                        final_SLEAP.(current_animal).(current_session).(alignment_event).time = SLEAP_time; %final(i).time = caTime;
+                        final_SLEAP.(current_animal).(current_session).(alignment_event).unitAVG = unitAVG;
+                        final_SLEAP.(current_animal).(current_session).(alignment_event).unitXTrials = unitXTrials;
+                        final_SLEAP.(current_animal).(current_session).(alignment_event).uv = uv;
+                        final_SLEAP.(current_animal).(current_session).(alignment_event).unitSEM = unitSEM;
                         final_SLEAP.(current_animal).(current_session).BehavData = BehavData;
                         final_SLEAP.(current_animal).(current_session).SLEAP_data = SLEAP_data;
                         %Because the "neuron" data type is a pain in the ass to
@@ -328,61 +323,17 @@ for zz = 1:size(metafolder_list, 1)
                         clear unitTS unitTrace unitXTrials unitAVG unitSEM i zall zb zsd zb_window zsd_window zall_window zb_session zsd_session zall_session neuron
 
                     else
+                        for i = 1:length(uv.behav)
 
 
-
-                            % alignment_event = char(uv.behav(i));
+                            alignment_event = char(uv.behav(i));
                             [BehavData,ABETfile,Descriptives, block_end]=ABET2TableFn_Chamber_A_v6(ABET_file,[]);
                             ABET_removeheader = ABETfile(2:end,:);
                             tbl_ABET = cell2table(ABET_removeheader);
                             tbl_ABET.Properties.VariableNames = ABETfile(1,:);
                             gpio_tbl = readtable(GPIO_file);
                             shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
-
-
-
-
-
-                            % Inscopix stupidly recently updated the way the GPIO pins
-                            % are written, so the default values that I used before are
-                            % no longer valid. updated this to reflect the new way
-                            % things are written - hopefully this works!
-                            % stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
-                            stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Value > 5000);
-        
-                            % add manual adjustments based on wonky video
-                            % start times here! 
-                            if strcmp(current_session, 'Pre_RDT_RM')
-                                if strcmp(current_animal, 'BLA_Insc_09')
-                                    stTime = stTime+3.732;
-                                elseif strcmp(current_animal, 'BLA_Insc_08')
-                                    stTime = stTime+1.273;
-                             
-                                elseif strcmp(current_animal, 'BLA_Insc_11')
-                                    stTime = stTime+0.674;
-
-                                elseif strcmp(current_animal, 'BLA_Insc_13')
-                                    stTime = stTime+1.028;
-                                elseif strcmp(current_animal, 'BLA_Insc_16')
-                                    stTime = stTime+0.698;
-                                end
-                            elseif strcmp(current_session, 'RDT_D3')
-                                 if strcmp(current_animal, 'BLA_Insc_09')
-                                    stTime = stTime+1.758;
-
-                                 elseif strcmp(current_animal, 'BLA_Insc_15')
-                                    stTime = stTime+0.713;
-                                 end
-                            elseif strcmp(current_session, 'RM_D1')
-                                if strcmp(current_animal, 'BLA_Insc_15')
-                                    stTime = stTime+0.679;
-
-                                end
-                            elseif strcmp(current_session, 'RM_D2')
-                                if strcmp(current_animal, 'BLA_Insc_47')
-                                    stTime = stTime+0.647;
-                                end
-                            end
+                            stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
                             frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
 
                             %check GPIO file to extract each TTL, since the TTL is 1000ms and is
@@ -414,7 +365,7 @@ for zz = 1:size(metafolder_list, 1)
 
                             frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
 
-                            % eTS = BehavData.(alignment_event); %get time stamps
+                            eTS = BehavData.(alignment_event); %get time stamps
 
                             SLEAP_data = readtable(SLEAP_csv);
 
@@ -463,77 +414,77 @@ for zz = 1:size(metafolder_list, 1)
                             SLEAP_data_vel_filtered_session = SLEAP_data.vel_filtered_2';
 
                             zscored_SLEAP_data_vel_filtered_session =(SLEAP_data_vel_filtered_session-mean(SLEAP_data_vel_filtered_session)./std(SLEAP_data_vel_filtered_session));
-                        %     %%
-                        %     tic
-                        %     for i = 1 %could loop through multiple mice like this if you had it
-                        %         % eTS = BehavData.(uv.behav); %get time stamps
-                        %         velocity_trace =  SLEAP_data_vel_filtered_session;
-                        %         %     ca = neuron.S; %get binarized calcium
-                        %         velocity_time = SLEAP_data.idx_time';
-                        % 
-                        %         % velocity_time = velocity_time + stTime(1);
-                        % 
-                        %         %calculate time windows for each event
-                        %         evtWinSpan = max(uv.evtWin) - min(uv.evtWin);
-                        %         numMeasurements = round(evtWinSpan/uv.dt); %need to round due to odd frame rate
-                        %         %%
-                        %         tic
-                        %         for u = 1:size(velocity_trace,1)
-                        %             %% initialize trial matrices
-                        %             velocity_trace_trials = NaN(size(eTS,1),numMeasurements); %
-                        %             velocity_unitTrace = velocity_trace(u,:); %get trace
-                        %             %             %%
-                        %             for t = 1:size(eTS,1)
-                        %                 %% set each trial's temporal boundaries
-                        %                 timeWin = [eTS(t)+uv.evtWin(1,1):uv.dt:eTS(t)+uv.evtWin(1,2)];  %calculate time window around each event
-                        %                 BL_win = [eTS(t)+uv.BLper(1,1):uv.dt:eTS(t)+uv.BLper(1,2)];
-                        %                 if min(timeWin) > min(velocity_time) & max(timeWin) < max(velocity_time)    %if the beginning and end of the time window around the event occurred during the recording period. if not, the time window is out of range %if min(timeWin) > min(caTime) & max(timeWin) < max(caTime)
-                        %                     %% get unit event counts in trials
-                        %                     %% get unit ca traces in trials
-                        %                     idx = velocity_time > min(timeWin) & velocity_time < max(timeWin);      %logical index of time window around each behavioral event time  %idx = caTime > min(timeWin) & caTime < max(timeWin);
-                        %                     bl_idx = velocity_time > min(BL_win) & velocity_time < max(BL_win);
-                        %                     %caTraceTrials(t,1:sum(idx)) = unitTrace(idx);               %store the evoked calcium trace around each event   (see below, comment out if dont want normalized to whole trace)
-                        %                     velocity_trace_trials(t,1:sum(idx)) = velocity_unitTrace(idx);
-                        %                     % zb(t,:) = mean(unitTrace(bl_idx)); %baseline mean
-                        %                     % zsd(t,:) = std(unitTrace(bl_idx)); %baseline std
-                        %                     velocity_zb(t,:) = mean(velocity_trace_trials(t,:)); %baseline mean
-                        %                     velocity_zsd(t,:) = std(velocity_trace_trials(t,:)); %baseline std
-                        % 
-                        % 
-                        %                     tmp = 0;
-                        %                     for j = 1:size(velocity_trace_trials,2)
-                        %                         tmp = tmp+1;
-                        %                         zall_motion(t,tmp) = (velocity_trace_trials(t,j) - velocity_zb(t))/velocity_zsd(t);
-                        %                     end
-                        %                     clear j;
-                        % 
-                        % 
-                        % 
-                        %                 end
-                        %             end
-                        %             clear idx timeWin BL_win bl_idx
-                        %             %%
-                        %             unitXTrials(u).velocity_trace_trials = velocity_trace_trials;
-                        %             unitXTrials(u).velocity_zb = velocity_zb;
-                        %             unitXTrials(u).velocity_zsd = velocity_zsd;
-                        %             unitXTrials(u).zall_motion = zall_motion;
-                        % 
-                        %             %% store unit averaged data
-                        %             unitAVG.velocity_traces(u,:) = nanmean(velocity_trace_trials);           %store trial averaged calcium traces
-                        %             unitSEM.velocity_traces(u,:) = std(velocity_trace_trials,'omitnan')/sqrt(size(velocity_trace_trials,1));
-                        %             clear caEvtCtTrials caTraceTrials caEvtRateTrials unitTrace idx
-                        %         end
-                        %     end
-                        % 
-                        % 
-                        % toc
+                            %%
+                            tic
+                            for i = 1 %could loop through multiple mice like this if you had it
+                                % eTS = BehavData.(uv.behav); %get time stamps
+                                velocity_trace =  SLEAP_data_vel_filtered_session;
+                                %     ca = neuron.S; %get binarized calcium
+                                velocity_time = SLEAP_data.idx_time';
+
+                                % velocity_time = velocity_time + stTime(1);
+
+                                %calculate time windows for each event
+                                evtWinSpan = max(uv.evtWin) - min(uv.evtWin);
+                                numMeasurements = round(evtWinSpan/uv.dt); %need to round due to odd frame rate
+                                %%
+                                tic
+                                for u = 1:size(velocity_trace,1)
+                                    %% initialize trial matrices
+                                    velocity_trace_trials = NaN(size(eTS,1),numMeasurements); %
+                                    velocity_unitTrace = velocity_trace(u,:); %get trace
+                                    %             %%
+                                    for t = 1:size(eTS,1)
+                                        %% set each trial's temporal boundaries
+                                        timeWin = [eTS(t)+uv.evtWin(1,1):uv.dt:eTS(t)+uv.evtWin(1,2)];  %calculate time window around each event
+                                        BL_win = [eTS(t)+uv.BLper(1,1):uv.dt:eTS(t)+uv.BLper(1,2)];
+                                        if min(timeWin) > min(velocity_time) & max(timeWin) < max(velocity_time)    %if the beginning and end of the time window around the event occurred during the recording period. if not, the time window is out of range %if min(timeWin) > min(caTime) & max(timeWin) < max(caTime)
+                                            %% get unit event counts in trials
+                                            %% get unit ca traces in trials
+                                            idx = velocity_time > min(timeWin) & velocity_time < max(timeWin);      %logical index of time window around each behavioral event time  %idx = caTime > min(timeWin) & caTime < max(timeWin);
+                                            bl_idx = velocity_time > min(BL_win) & velocity_time < max(BL_win);
+                                            %caTraceTrials(t,1:sum(idx)) = unitTrace(idx);               %store the evoked calcium trace around each event   (see below, comment out if dont want normalized to whole trace)
+                                            velocity_trace_trials(t,1:sum(idx)) = velocity_unitTrace(idx);
+                                            % zb(t,:) = mean(unitTrace(bl_idx)); %baseline mean
+                                            % zsd(t,:) = std(unitTrace(bl_idx)); %baseline std
+                                            velocity_zb(t,:) = mean(velocity_trace_trials(t,:)); %baseline mean
+                                            velocity_zsd(t,:) = std(velocity_trace_trials(t,:)); %baseline std
+
+
+                                            tmp = 0;
+                                            for j = 1:size(velocity_trace_trials,2)
+                                                tmp = tmp+1;
+                                                zall_motion(t,tmp) = (velocity_trace_trials(t,j) - velocity_zb(t))/velocity_zsd(t);
+                                            end
+                                            clear j;
+
+
+
+                                        end
+                                    end
+                                    clear idx timeWin BL_win bl_idx
+                                    %%
+                                    unitXTrials(u).velocity_trace_trials = velocity_trace_trials;
+                                    unitXTrials(u).velocity_zb = velocity_zb;
+                                    unitXTrials(u).velocity_zsd = velocity_zsd;
+                                    unitXTrials(u).zall_motion = zall_motion;
+
+                                    %% store unit averaged data
+                                    unitAVG.velocity_traces(u,:) = nanmean(velocity_trace_trials);           %store trial averaged calcium traces
+                                    unitSEM.velocity_traces(u,:) = std(velocity_trace_trials,'omitnan')/sqrt(size(velocity_trace_trials,1));
+                                    clear caEvtCtTrials caTraceTrials caEvtRateTrials unitTrace idx
+                                end
+                            end
+
+
+                        toc
                         %     final(i).name = mouseData(i).mouseID;
                         %     final(i).day = i;
-                        final_SLEAP.(current_animal).(current_session).time = SLEAP_time; %final(i).time = caTime;
-                        % final_SLEAP.(current_animal).(current_session).(alignment_event).unitAVG = unitAVG;
-                        % final_SLEAP.(current_animal).(current_session).(alignment_event).unitXTrials = unitXTrials;
-                        final_SLEAP.(current_animal).(current_session).uv = uv;
-                        % final_SLEAP.(current_animal).(current_session).(alignment_event).unitSEM = unitSEM;
+                        final_SLEAP.(current_animal).(current_session).(alignment_event).time = SLEAP_time; %final(i).time = caTime;
+                        final_SLEAP.(current_animal).(current_session).(alignment_event).unitAVG = unitAVG;
+                        final_SLEAP.(current_animal).(current_session).(alignment_event).unitXTrials = unitXTrials;
+                        final_SLEAP.(current_animal).(current_session).(alignment_event).uv = uv;
+                        final_SLEAP.(current_animal).(current_session).(alignment_event).unitSEM = unitSEM;
                         final_SLEAP.(current_animal).(current_session).BehavData = BehavData;
                         final_SLEAP.(current_animal).(current_session).SLEAP_data = SLEAP_data;
                         %Because the "neuron" data type is a pain in the ass to
@@ -543,7 +494,7 @@ for zz = 1:size(metafolder_list, 1)
 
 
                         clear unitTS unitTrace unitXTrials unitAVG unitSEM i zall zb zsd zb_window zsd_window zall_window zb_session zsd_session zall_session neuron
-
+                        end
                     end
                 else
                     disp('Remember: folder was not analyzed due to missing files! Check contents and try again');

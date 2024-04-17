@@ -24,7 +24,7 @@ for dd = 1:size(animalIDs)
         SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data_raw;
         X_data = SLEAP_data.corrected_x_pix;
         Y_data = SLEAP_data.corrected_y_pix;
-
+        [X_data, Y_data] = correct_XY_outliers_v1(X_data, Y_data);
 
         onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
         choice_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.choiceTime';
@@ -72,7 +72,7 @@ for dd = 1:size(animalIDs)
                         break %return
                     end
                 else
-                    if offset <= max_ind && offset > 0 && onset <= max_ind && onset > 0
+                    % if offset <= max_ind && offset > 0 && onset <= max_ind && onset > 0
                         % buffering this by adding +1 to the end time for now, for
                         % some reason the array seems too short without?
                         % after some extensive checking, it seems like the
@@ -86,7 +86,7 @@ for dd = 1:size(animalIDs)
                         % filtered_gcamp{j}= Y_dF_all_session(gcamp_samples(onset:offset));
                         % filtered{j} = Y_data_filtered(SLEAP_data.idx_frame(onset:offset))'; %SLEAP_data.vel_cm_s(SLEAP_data.idx_frame(onset:offset));
                         good_index = good_index + 1;
-                    end
+                    % end
                 end
             end
             % if KEEPDATA

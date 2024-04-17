@@ -7,7 +7,7 @@ ts1 = (-10:.1:10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\Sean CNMFe\BLA-NAcSh';
+metaDirectory = 'D:\MATLAB\Sean CNMFe\BLA-NAcSh';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -155,7 +155,12 @@ for zz = 1:size(metafolder_list, 1)
                 tbl_ABET.Properties.VariableNames = ABETfile(1,:);
                 gpio_tbl = readtable(GPIO_file);
                 shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
-                stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
+                % Inscopix stupidly recently updated the way the GPIO pins
+                % are written, so the default values that I used before are
+                % no longer valid. updated this to reflect the new way
+                % things are written - hopefully this works! 
+                % stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
+                stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Value > 5000);
                 frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
                 %check GPIO file to extract each TTL, since the TTL is 1000ms and is
                 %sampled repeatedly. This will only extract events that are separated by >
@@ -260,7 +265,12 @@ for zz = 1:size(metafolder_list, 1)
                 tbl_ABET.Properties.VariableNames = ABETfile(1,:);
                 gpio_tbl = readtable(GPIO_file);
                 shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
-                stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
+                % Inscopix stupidly recently updated the way the GPIO pins
+                % are written, so the default values that I used before are
+                % no longer valid. updated this to reflect the new way
+                % things are written - hopefully this works! 
+                % stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
+                stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Value > 5000);
                 frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
 
                 %check GPIO file to extract each TTL, since the TTL is 1000ms and is

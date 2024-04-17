@@ -1,6 +1,6 @@
 %% Run eventRelatedActivity first for whatever events you want to identify responsive neurons for
-clear zall_first_event zall_second_event zall_third_event sem_first_event sem_second_event sem_third_event
-select_mouse = 'BLA_Insc_37';
+clear zall_first_event zall_second_event zall_third_event sem_first_event sem_second_event sem_third_event zall_fourth_event sem_fourth_event
+select_mouse = 'BLA_Insc_30';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
@@ -11,13 +11,14 @@ second_session = 'RDT_D1';
 pre_choice_data = neuron_mean_mouse_unnormalized{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 1, :);
 post_choice_data = neuron_mean_mouse_unnormalized{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{2, 1}) == 1, :);
 consumption_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{3, 1}) == 1, :);
+shock_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 4}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{4, 1}) == 1, :);
 % neutral_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{2, 1}) == 3, :);
 % velocity_data = final_SLEAP.(select_mouse).(first_session).choiceTime.unitXTrials.velocity_trace_trials(final_SLEAP.(select_mouse).(first_session).BehavData.bigSmall == 1.2, :);
 
 
 
 
-test_data = [pre_choice_data; post_choice_data; consumption_activated_data];
+test_data = [pre_choice_data; post_choice_data; consumption_activated_data; shock_activated_data];
 
 zscore_data = zscore(test_data, 0 , 2);
 
@@ -25,8 +26,9 @@ zscore_data = zscore(test_data, 0 , 2);
 
 
 figure; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 1, :)))
-hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{2, 1}) == 1, :)));
-hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{3, 1}) == 1, :)));
+hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{2, 1}) == 1, :)));
+hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{3, 1}) == 1, :)));
+hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 4}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{4, 1}) == 1, :)));
 % hold on; plot(ts1, mean(final_SLEAP.(select_mouse).(first_session).choiceTime.unitXTrials.zall_motion(final_SLEAP.(select_mouse).(first_session).BehavData.bigSmall == 1.2, :)))
 
 
@@ -104,7 +106,27 @@ clear zall caTraceTrials
 
 
 
+caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{4, 1}) == 1, :);
 
+for h = 1:size(caTraceTrials,1)
+    zb(h) = mean(caTraceTrials(h,:)); %baseline mean
+    zsd(h) = std(caTraceTrials(h,:)); %baseline std
+    tmp = 0;
+    for j = 1:size(caTraceTrials,2)
+        tmp = tmp+1;
+        zall(h,tmp) = (caTraceTrials(h,tmp) - zb(h))/zsd(h);
+        % Bound the normalized values between -1 and 1
+        % zall(h,tmp) = max(-1, min(1, zall(h,tmp)));
+    end
+
+end
+for z = 1:size(zall, 1)
+    % Apply Savitzky-Golay filter to each row
+    zall(z, :) = sgolayfilt(zall(z, :), 9, 21);
+end
+zall_fourth_event = zall;
+sem_fourth_event = nanstd(zall,1)/(sqrt(size(zall, 1)));
+clear zall caTraceTrials
 
 
 
@@ -172,15 +194,17 @@ figure;
 % plot(time_array, mean(zall_first_event(:, 1:trim_length)))
 % hold on; plot(time_array, mean(zall_second_event(:, 1:trim_length)))
 
-shadedErrorBar(time_array, nanmean(zall_first_event(:, 1:trim_length)), sem_first_event(:, 1:trim_length));
-hold on; shadedErrorBar(time_array, nanmean(zall_second_event(:, 1:trim_length)), sem_second_event(:, 1:trim_length));
-hold on; shadedErrorBar(time_array, nanmean(zall_third_event(:, 1:trim_length)), sem_third_event(:, 1:trim_length));
+shadedErrorBar(time_array, nanmean(zall_first_event(:, 1:trim_length)), sem_first_event(:, 1:trim_length), 'lineProps', {'color', 'g', 'LineWidth', 2});
+hold on; shadedErrorBar(time_array, nanmean(zall_second_event(:, 1:trim_length)), sem_second_event(:, 1:trim_length), 'lineProps', {'color', 'c', 'LineWidth', 2});
+hold on; shadedErrorBar(time_array, nanmean(zall_third_event(:, 1:trim_length)), sem_third_event(:, 1:trim_length), 'lineProps', {'color', 'b', 'LineWidth', 2});
+hold on; shadedErrorBar(time_array, nanmean(zall_fourth_event(:, 1:trim_length)), sem_fourth_event(:, 1:trim_length), 'lineProps', {'color', 'r', 'LineWidth', 2});
 % hold on; shadedErrorBar(time_array, nanmean(zall_neutral_event(:, 1:trim_length)), sem_neutral_event(:, 1:trim_length));
 % hold on; plot(time_array, zall_motion(:, 1:trim_length))
 xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
 xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
 xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
 xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
+xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
 
 %%
 % Assuming zall_first_event and zall_second_event are your 22x19903 arrays

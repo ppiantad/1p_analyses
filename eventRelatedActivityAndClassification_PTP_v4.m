@@ -14,7 +14,7 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 
 % load('BLA-NAcShell_Risk_2023_09_15.mat')
 
-load('BLA-NAcShell_Risk_2024_03_14.mat')
+load('BLA-NAcShell_Risk_2024_04_16.mat')
 
 % load('BLA_panneuronal_Risk_2023_07_06.mat')
 
@@ -41,7 +41,7 @@ load('BLA-NAcShell_Risk_2024_03_14.mat')
 % load('BLA_NAcSh_Risk_matched_RDT_D1_vs_RDT_D2.mat')
 
 
-%% Edit these uservariables with what you want to look at
+%% Edit these user variables with what you want to look at
 uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
@@ -52,7 +52,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 
-session_to_analyze = 'RDT_D2';
+session_to_analyze = 'RDT_D1';
 epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
@@ -110,11 +110,15 @@ for ii = 1:size(fieldnames(final),1)
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'SHK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
-        % BehavData = BehavData(BehavData.shockIntensity >= 0.08 & BehavData.shockIntensity <= 0.13, :);
-        % trials = trials(BehavData.shockIntensity >= 0.08 & BehavData.shockIntensity <= 0.13, :);
-        % 
-        % % Create a logical index array based on your conditions
+        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'AA',1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
+        
+        % uncomment if you want to test specifically for particular ranges
+        % during shock test
+        % shk_intensity_range = [0.42 0.50];
+        % BehavData = BehavData(round(BehavData.shockIntensity, 2) >= shk_intensity_range(1) & round(BehavData.shockIntensity, 2) <= shk_intensity_range(2), :);
+        % trials = trials(round(BehavData.shockIntensity, 2) >=  shk_intensity_range(1) & round(BehavData.shockIntensity, 2) <= shk_intensity_range(2), :);
+
+        % % Create a logi0.10cal index array based on your conditions
         % logical_index = BehavData.stTime - BehavData.TrialPossible >= 10 & BehavData.stTime - BehavData.TrialPossible <= 50;
         % 
         % % Use the logical index array to subset BehavData
@@ -183,10 +187,11 @@ for ii = 1:size(fieldnames(final),1)
                 caTraceTrials(1, 1:size(ts1, 2)) = NaN;
                 zall(1, 1:size(ts1, 2)) = NaN;
             else
-                [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
+                [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 
                 caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                 zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                % zall = zscored_caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
 
                 % for some events, the mice have no trials, therefore there are
                 % no traces. this line basically skips those neurons (adding 0

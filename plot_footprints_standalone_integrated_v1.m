@@ -7,27 +7,27 @@
 
 
 % String to compare
-targetAnimal = 'BLA_Insc_37';
+targetAnimal = 'BLA_Insc_27';
 
 % Perform element-wise comparison
 animal_index_to_plot = find(strcmp(animalIDs, targetAnimal));
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 
-% Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
-% 
-% % these variables need to be customized based on what you want to plot
-% peri_choice_activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1;
-% consumption_activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
-% neutral = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) ~= 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) ~= 1;
-% 
-% % Create a combined array
-% Identity = zeros(size(Coor));
-% 
-% % Assign values based on conditions
-% Identity(peri_choice_activated) = 1;
-% Identity(consumption_activated) = 2;
-% Identity(neutral) = 3;
+Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
+
+% these variables need to be customized based on what you want to plot
+peri_choice_activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1;
+consumption_activated = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
+neutral = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) ~= 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) ~= 1;
+
+% Create a combined array
+Identity = zeros(size(Coor));
+
+% Assign values based on conditions
+Identity(peri_choice_activated) = 1;
+Identity(consumption_activated) = 2;
+Identity(neutral) = 3;
 
 % 
 % Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
@@ -53,22 +53,22 @@ session_to_analyze = 'RDT_D1';
 
 
 
-Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
-
-% these variables need to be customized based on what you want to plot
-post_choice_reward = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1;
-post_choice_reward_shk = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
-both = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
-neutral = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) ~= 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) ~= 1;
-
-% Create a combined array
-Identity = zeros(size(Coor));
-
-% Assign values based on conditions
-Identity(post_choice_reward) = 1;
-Identity(post_choice_reward_shk) = 2;
-Identity(both) = 3;
-Identity(neutral) = 4;
+% Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
+% 
+% % these variables need to be customized based on what you want to plot
+% post_choice_reward = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1;
+% post_choice_reward_shk = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
+% both = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) == 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) == 1;
+% neutral = respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{1}).(identity_class_string_all{1}).(all_filter_args{1}) ~= 1 & respClass_mouse.(targetAnimal).(session_to_analyze).(epoc_to_align_all{2}).(identity_class_string_all{2}).(all_filter_args{2}) ~= 1;
+% 
+% % Create a combined array
+% Identity = zeros(size(Coor));
+% 
+% % Assign values based on conditions
+% Identity(post_choice_reward) = 1;
+% Identity(post_choice_reward_shk) = 2;
+% Identity(both) = 3;
+% Identity(neutral) = 4;
 
 Cn_data = final.(targetAnimal).(session_to_analyze).CNMFe_data.Cn;
 figure;
@@ -88,8 +88,8 @@ min_val = min(Cn_data(:));
 max_val = max(Cn_data(:));
 
 % Define the desired range for the color axis
-new_min = .3;  % Set the minimum value you want to display
-new_max = 1.1;  % Set the maximum value you want to display
+new_min = .6;  % Set the minimum value you want to display
+new_max = 1;  % Set the maximum value you want to display
 
 % Update the color axis scaling
 caxis([new_min, new_max]);

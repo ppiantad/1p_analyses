@@ -7,15 +7,15 @@ uv.dt = 0.1; %what is your frame rate (check neuron.Fs to be sure) 0.2 0.1
 uv.behav = 'choiceTime'; %which behavior/timestamp to look at choiceTime stTime
 
 
-load('bla_insc_39_rdt_d1_2023-05-11-12-58-22_video_green_motion_corrected.CNMF_final.mat');
-[BehavData,ABETfile,Descriptives, block_end, largeRewSide, smallRewSide]=ABET2TableFn_Chamber_A_v6('BLA-INSC-39 05112023 ABET.csv',[]);
-gpio_tbl = readtable('2023-05-11-12-58-22_video_green_gpio.csv');
+load('BLA-Insc-9_Session-20211025-100456_bla-insc-9-RM-D12.CNMF_final.mat');
+[BehavData,ABETfile,Descriptives, block_end, largeRewSide, smallRewSide]=ABET2TableFn_Chamber_A_v6('BLA-Insc-9 10252021 ABET.csv',[]);
+gpio_tbl = readtable('Session-20211025-100456_bla-insc-9-RM-D12_GPIO.csv');
 
-SLEAP_data = readtable('BLA-Insc-39_RDT D1_body_sleap_data.csv');
+SLEAP_data = readtable('BLA-Insc-9_RM D12_body_sleap_data.csv');
 %EDIT FOR EACH MOUSE AS NECESSARY
 SLEAP_time_range_adjustment = []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; -1.23;
 
-boris_file = []; 'BLA-Insc-39_RDT_D1_2023-05-11T14_32_33.avi. BORIS.csv'; %'BLA-Insc-27_RDT_D1.csv';
+boris_file = []; %'BLA-Insc-39_RDT_D1_2023-05-11T14_32_33.avi. BORIS.csv'; %'BLA-Insc-27_RDT_D1.csv';
 
 [BehavData, boris_Extract_tbl] = boris_to_table(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment);
 
@@ -33,8 +33,10 @@ tbl_ABET.Properties.VariableNames = ABETfile(1,:);
 
 shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
 
-
-stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
+% this filter needs to be set based on the parameters of the GPIO file
+% written by Inscopix. occasionally the change things, so make sure this
+% works regularly! 
+stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Value > 5000); 
 
 frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
 frames_test = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output'));
@@ -338,7 +340,7 @@ imagesc(window_ts3, 1, rank_ordered_mean_zscore);hold on;
 
 
 
-cell_select = 5
+cell_select = 10
 
 
 figure
