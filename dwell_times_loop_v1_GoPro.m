@@ -19,9 +19,10 @@ for dd = 1:size(animalIDs)
         animals_with_sessions{dd} = select_mouse;
 
         SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data_raw;
-        X_data = SLEAP_data.corrected_x_pix;
-        Y_data = SLEAP_data.corrected_y_pix;
-
+        % X_data = SLEAP_data.corrected_x_pix;
+        % Y_data = SLEAP_data.corrected_y_pix;
+        X_data = SLEAP_data.x_pix;
+        Y_data = SLEAP_data.y_pix;
 
         onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
         choice_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.choiceTime';
@@ -36,8 +37,8 @@ for dd = 1:size(animalIDs)
         velocity_data = zscore(SLEAP_data.vel_cm_s)';
 
         BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
-        adjusted_start_time = BehavData.TrialPossible(1)-60;
-        SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
+        % adjusted_start_time = BehavData.TrialPossible(1)-60;
+        % SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
 
         %%
         % FILTER ALL EXISTING DATA ON THESE TIME RANGES

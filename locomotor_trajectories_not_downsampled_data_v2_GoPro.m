@@ -1,27 +1,32 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'BLA_Insc_48';
+select_mouse = 'RRD408';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'RDT_D1_CNO';
 
 shapeData = final_SLEAP.(select_mouse).(session_to_analyze).shapeData;
 
-
+% adjusted_start_time = dataTable.ChangeTimeInSeconds(strcmp(dataTable.FileName, 'RRD399_RDT_D1_CNO_12132023_merged_resized_grayscaled.MP4'));
+%update this becasue these data have not been corrected for the interval
+%between camera being placed in and the mouse starting behavior! 
 onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
 choice_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.choiceTime';
 offset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.collectionTime';
 fs_cam = 30; %set sampling rate according to camera, this is hard coded for now
 time_ranges_trials = [onset_trials; choice_trials; offset_trials];
 
-
+first_frame = final_SLEAP.(select_mouse).(session_to_analyze).first_frame*fs_cam;
 
 SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data_raw;
 
-X_data = SLEAP_data.corrected_x_pix;
-Y_data = SLEAP_data.corrected_y_pix;
+% X_data = SLEAP_data.corrected_x_pix;
+% Y_data = SLEAP_data.corrected_y_pix;
+
+X_data = SLEAP_data.x_pix;
+Y_data = SLEAP_data.y_pix;
 
 % velocity_data = final_SLEAP.(select_mouse).(session_to_analyze).zscored_SLEAP_data_velocity';
 
@@ -31,8 +36,13 @@ velocity_data = zscore(SLEAP_data.vel_cm_s)';
 
 
 BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
-adjusted_start_time = BehavData.TrialPossible(1)-60;
-SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
+% adjusted_start_time = BehavData.TrialPossible(1)-60;
+
+% BehavData.TrialPossible(:)=BehavData.TrialPossible(:)+adjusted_start_time(1);
+% BehavData.choiceTime(:)=BehavData.choiceTime(:)+adjusted_start_time(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+7.39500000000000;
+% BehavData.collectionTime(:)=BehavData.collectionTime(:)+adjusted_start_time(1);
+% BehavData.stTime(:)=BehavData.stTime(:)+adjusted_start_time(1);
+% SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
 % gcamp_normalized = ((Y_dF_all_session)-mean(Y_dF_all_session))/std(Y_dF_all_session);
 % SLEAP_data_vel_filtered_session_normalized = ((SLEAP_data_vel_filtered_session)-mean(SLEAP_data_vel_filtered_session))/std(SLEAP_data_vel_filtered_session);
 
@@ -40,10 +50,13 @@ SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
 % trial_starts_array = BehavData.stTime-BehavData.choiceTime;
 % trial_ends_array = BehavData.collectionTime - BehavData.choiceTime;
 
-[X_data, Y_data] = correct_XY_outliers_v1(X_data, Y_data);
+[X_data, Y_data] = correct_XY_outliers_v1_GoPro(X_data, Y_data, first_frame);
+% 
+% SLEAP_data_ind = SLEAP_data.idx_frame >= first_frame;
+% SLEAP_data(:) = SLEAP_data(first_frame:end, :);
 
 
-
+% SLEAP_data = SLEAP_data(round(first_frame):end, :);
  %%
         % FILTER ALL EXISTING DATA ON THESE TIME RANGES
         % filter streams

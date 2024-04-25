@@ -1,22 +1,37 @@
-test = [neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}~=1, :)];
-test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1, :)];
-test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}==1, :)];
-% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1,:)]
+select_mouse = 'BLA_Insc_24';
 
-pre_choice_index = [1:sum(respClass_all_array{1, 1}==1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}~=1)];
-post_choice_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1)];
-consumption_index = [post_choice_index(end)+1:post_choice_index(end)+sum(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}==1)];
-neutral_index = [consumption_index(end)+1:consumption_index(end)+sum(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1)];
+select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-% % tabulate how neurons assigned to neuron_mean_array for the 1st event
+first_session = 'Pre_RDT_RM';
+
+select_mouse_cells_indices = find(strcmp(mouse_cells(1,:), select_mouse));
+% Assuming respClass_all_array_filtered is your 1x3 cell array
+respClass_all_array_filtered = cell(1, 3); % Initialize filtered array
+
+for i = 1:3
+    respClass_all_array_filtered{i} = respClass_all_array{i}(select_mouse_cells_indices);
+end
+
+
+test = [neuron_mean_mouse{select_mouse_index, 1}(respClass_all_array_filtered{1, 1}==1 & respClass_all_array_filtered{1, 2}~=1 & respClass_all_array_filtered{1, 3}~=1, :)];
+test = [test; neuron_mean_mouse{select_mouse_index, 1}(respClass_all_array_filtered{1, 1}~=1 & respClass_all_array_filtered{1, 2}==1 & respClass_all_array_filtered{1, 3}~=1, :)];
+test = [test; neuron_mean_mouse{select_mouse_index, 1}(respClass_all_array_filtered{1, 1}~=1 & respClass_all_array_filtered{1, 2}~=1 & respClass_all_array_filtered{1, 3}==1, :)];
+% test = [test; neuron_mean_mouse{1, 1}(respClass_all_array_filtered{1, 2}~=1 & respClass_all_array_filtered{1, 1}~=1 & respClass_all_array_filtered{1,3}~=1,:)]
+
+pre_choice_index = [1:sum(respClass_all_array_filtered{1, 1}==1 & respClass_all_array_filtered{1, 2}~=1 & respClass_all_array_filtered{1, 3}~=1)];
+post_choice_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(respClass_all_array_filtered{1, 1}~=1 & respClass_all_array_filtered{1, 2}==1 & respClass_all_array_filtered{1, 3}~=1)];
+consumption_index = [post_choice_index(end)+1:post_choice_index(end)+sum(respClass_all_array_filtered{1, 1}~=1 & respClass_all_array_filtered{1, 2}~=1 & respClass_all_array_filtered{1, 3}==1)];
+neutral_index = [consumption_index(end)+1:consumption_index(end)+sum(respClass_all_array_filtered{1, 2}~=1 & respClass_all_array_filtered{1, 1}~=1 & respClass_all_array_filtered{1,3}~=1)];
+
+% % tabulate how neurons assigned to neuron_mean_mouse for the 1st event
 % % change across subsequent events
-% test = [neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)];
-% test = [test; neuron_mean_array{1, 2}(respClass_all_array{1, 1}==1, :)];
-% test = [test; neuron_mean_array{1, 3}(respClass_all_array{1, 1}==1, :)];
+% test = [neuron_mean_mouse{1, 1}(respClass_all_array_filtered{1, 1}==1, :)];
+% test = [test; neuron_mean_mouse{1, 2}(respClass_all_array_filtered{1, 1}==1, :)];
+% test = [test; neuron_mean_mouse{1, 3}(respClass_all_array_filtered{1, 1}==1, :)];
 
-
-piechart_data = [sum_activated_percent 100-sum(sum_activated_percent)];
-figure; piechart(piechart_data)
+% 
+% piechart_data = [sum_activated_percent 100-sum(sum_activated_percent)];
+% figure; piechart(piechart_data)
 
 %%
 data = test;
@@ -658,18 +673,18 @@ median_collect_time_from_choice = median(concatenatedTable.collectionTime - conc
 
 %%
 
-figure; plot(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)), 'color', "#D95319")
-hold on; plot(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :)), 'color',  "blue")
-hold on; plot(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}==3 & respClass_all_array{1, 1}==3, :)), 'color',  "black")
+figure; plot(ts1, nanmean(neuron_mean_mouse{1, 1}(respClass_all_array_filtered{1, 1}==1, :)), 'color', "#D95319")
+hold on; plot(ts1, nanmean(neuron_mean_mouse{1, 1}(respClass_all_array_filtered{1, 2}==1, :)), 'color',  "blue")
+hold on; plot(ts1, nanmean(neuron_mean_mouse{1, 1}(respClass_all_array_filtered{1, 2}==3 & respClass_all_array_filtered{1, 1}==3, :)), 'color',  "black")
 xline(median_collect_time_from_choice, '--r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
 legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
 
 %%
 figure;
-shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 1}==1, :)), 'lineProps', {'color', batlowW(iter,:)});
-hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 2}==1, :)), 'lineProps', {'color', batlowW(iter,:)});
-hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 3}==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 3}==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+shadedErrorBar(ts1, nanmean(neuron_mean_mouse{1, 1}(respClass_all_array_filtered{1, 1}==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array_filtered{1, 1}==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_mouse{1, 1}(respClass_all_array_filtered{1, 2}==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array_filtered{1, 2}==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_mouse{1, 1}(respClass_all_array_filtered{1, 3}==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array_filtered{1, 3}==1, :)), 'lineProps', {'color', batlowW(iter,:)});
 xline(0);
 xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
 xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
@@ -678,9 +693,9 @@ legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Locat
 
 
 %% 
-action_matrix = neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1, :);
+action_matrix = neuron_mean_mouse{1, 1}(respClass_all_array_filtered{1, 1}==1, :);
 
-consumption_matrix = neuron_mean_array{1, 1}(respClass_all_array{1, 2}==1, :);
+consumption_matrix = neuron_mean_mouse{1, 1}(respClass_all_array_filtered{1, 2}==1, :);
 
 
 % Assuming you have action_matrix and consumption_matrix

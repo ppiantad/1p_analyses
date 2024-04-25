@@ -14,13 +14,13 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 
 % load('BLA-NAcShell_Risk_2023_09_15.mat')
 
-load('BLA-NAcShell_Risk_2024_04_16.mat')
+% load('BLA-NAcShell_Risk_2024_04_16.mat')
 
 % load('BLA_panneuronal_Risk_2023_07_06.mat')
 
 % load('BLA_panneuronal_Risk_2024_01_04.mat')
 
-% load('BLA_panneuronal_Risk_2024_03_07_just_CNMFe_and_BehavData.mat')
+load('BLA_panneuronal_Risk_2024_04_19_just_CNMFe_and_BehavData.mat')
 
 % load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 
@@ -51,6 +51,8 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
+% CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
+% (10) for spike rate
 
 session_to_analyze = 'RDT_D1';
 epoc_to_align = 'choiceTime';
@@ -67,9 +69,9 @@ uv.chooseFluoresenceOrRate = 1;                                             %set
 uv.sigma = 1.5;  %1.5                                                             %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 % uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
-% uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
-uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice
-% uv.evtSigWin.outcome = [1 3]; %for REW collection
+uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
+% uv.evtSigWin.outcome = [0 1]; %for SHK or immediate post-choice [0 2]
+% uv.evtSigWin.outcome = [1 2]; %for REW collection [1 3]
 
 
 
@@ -78,7 +80,7 @@ uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice
 % uv.evtSigWin.groomingStop = [-.5 3];
 % uv.evtSigWin.faceGroomingStart = [-.5 2];
 % uv.evtSigWin.faceGroomingStop = [-.5 2];
-uv.resamples = 100                                                         %number of resamples to use in shuffle analysis 1000
+uv.resamples = 10                                                         %number of resamples to use in shuffle analysis 1000
 
 sub_window_idx = ts1 >= uv.evtSigWin.outcome(1) & ts1 <= uv.evtSigWin.outcome(2);
 
@@ -110,7 +112,7 @@ for ii = 1:size(fieldnames(final),1)
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'AA',1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
+        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
         
         % uncomment if you want to test specifically for particular ranges
         % during shock test
@@ -160,11 +162,11 @@ for ii = 1:size(fieldnames(final),1)
         if strcmp(epoc_to_align, 'choiceTime') & uv.evtSigWin.outcome == [-4 0] %for REW collection
             other_evtWinIdx1 = ts1 >= 1 & ts1 <= 3; %ts1 >= 0 & ts1 <= 2;
             other_evtWinIdx2 = ts1 >= 1 & ts1 <= 3;
-        elseif strcmp(epoc_to_align, 'choiceTime') & uv.evtSigWin.outcome == [0 2] %for SHK or immediate post-choice
+        elseif strcmp(epoc_to_align, 'choiceTime') & uv.evtSigWin.outcome == [0 1] %for SHK or immediate post-choice [0 2]
             other_evtWinIdx1 = ts1 >= -1 & ts1 <= 0;
             other_evtWinIdx2 = ts1 >= 7 & ts1 <= 8; %might not need this one? ts1 >= 2 & ts1 <= 4
             % other_evtWinIdx2 = other_evtWinIdx1; 
-        elseif strcmp(epoc_to_align, 'collectionTime') & uv.evtSigWin.outcome == [1 3] %for SHK or immediate post-choice
+        elseif strcmp(epoc_to_align, 'collectionTime') & uv.evtSigWin.outcome == [1 2] %for SHK or immediate post-choice [1 3]
             other_evtWinIdx1 = ts1 >= -4 & ts1 <= 0;
             other_evtWinIdx2 = ts1 >= -2 & ts1 <= 0;
         end
@@ -188,7 +190,7 @@ for ii = 1:size(fieldnames(final),1)
                 zall(1, 1:size(ts1, 2)) = NaN;
             else
                 [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
-                
+                % [caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_only(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                 zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                 % zall = zscored_caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
@@ -316,10 +318,10 @@ for ii = 1:size(fieldnames(final),1)
                     % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
                     % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) == 0 & respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) == 0;
                     % Check if empiricalWinAvg exceeds the 95% confidence interval boundary
-                    if empiricalWinAvg > upperSD & empiricalWinAvg > otherEventWinAvg1 & empiricalWinAvg > otherEventWinAvg2
+                    if empiricalWinAvg > upperSD  %empiricalWinAvg > upperSD & empiricalWinAvg > otherEventWinAvg1 & empiricalWinAvg > otherEventWinAvg2
                         respClass_all(neuron_num) = 1;
                         respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 1;
-                    elseif empiricalWinAvg < lowerSD & empiricalWinAvg < otherPeriodWinAvg & empiricalWinAvg < otherEventWinAvg2
+                    elseif empiricalWinAvg < lowerSD  % empiricalWinAvg < lowerSD & empiricalWinAvg < otherPeriodWinAvg & empiricalWinAvg < otherEventWinAvg2
                         respClass_all(neuron_num) = 2;
                         respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 2;
                     else
@@ -401,7 +403,7 @@ figure; shadedErrorBar(ts1, nanmean(neuron_mean(respClass_all_array{:,iter} == 3
 %% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
 % **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
 
-for ii = 1:size(zall_array, 2)
+for ii = 31:size(zall_array, 2)
     figure;
     % Initialize variables to store global max and min for heatmap and line graph
     globalMaxHeatmap = -inf;
@@ -470,7 +472,7 @@ for ii = 1:size(zall_array, 2)
         globalMaxYLine = max(globalMaxYLine, localMaxYLine);
         globalMinYLine = min(globalMinYLine, localMinYLine);
         
-        hold off;        
+        % hold off;        
     end
     % Set the same colorbar scale for all heatmap subplots
     for qq = 1:iter
@@ -484,7 +486,8 @@ for ii = 1:size(zall_array, 2)
     % Set the same Y-axis scale for all line graph subplots
     for qq = 1:iter
         subplot(2, num_columns_plot, iter + qq);
-        ylim([globalMinYLine, globalMaxYLine]);
+        ylim([-4 4]);
+        xlim(uv.evtWin);
     end
 
     pause
