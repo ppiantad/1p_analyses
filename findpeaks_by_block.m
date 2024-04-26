@@ -20,7 +20,7 @@ iter = 0
 
 % load('BLA_panneuronal_Risk_2024_01_04.mat')
 
-load('BLA_panneuronal_Risk_2024_04_19_just_CNMFe_and_BehavData.mat')
+load('BLA_panneuronal_Risk_2024_03_07_just_CNMFe_and_BehavData.mat')
 
 % load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 
@@ -36,12 +36,10 @@ uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-ca_data_type = "S"; % C % C_raw %S
+ca_data_type = "C"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
-% CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
-% (10) for spike rate
 
 session_to_analyze = 'RDT_D1';
 epoc_to_align = 'choiceTime';
@@ -95,17 +93,14 @@ for ii = 1:size(fieldnames(final),1)
             block_1_ca = ca(dd, time_array > block_1_mouse(ii, 1) & time_array < block_1_mouse(ii, 2));
             [peaks, peak_locs] = findpeaks(block_1_ca, 'MinPeakDistance',4);
             block_1_peaks_sum(neuron_num) = sum(peaks);
-            block_1_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
             block_1_length(neuron_num) = block_1_mouse(ii, 2)-block_1_mouse(ii, 1);
             block_2_ca = ca(dd, time_array > block_2_mouse(ii, 1) & time_array < block_2_mouse(ii, 2));
             [peaks, peak_locs] = findpeaks(block_2_ca, 'MinPeakDistance',4);
             block_2_peaks_sum(neuron_num) = sum(peaks);
-            block_2_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
             block_2_length(neuron_num) = block_2_mouse(ii, 2)-block_2_mouse(ii, 1);
             block_3_ca = ca(dd, time_array > block_3_mouse(ii, 1) & time_array < block_3_mouse(ii, 2));
             [peaks, peak_locs] = findpeaks(block_3_ca, 'MinPeakDistance',4);
             block_3_peaks_sum(neuron_num) = sum(peaks);
-            block_3_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
             block_3_length(neuron_num) = block_3_mouse(ii, 2)-block_3_mouse(ii, 1);
         end
     end
@@ -115,33 +110,9 @@ block_1_peaks_per_s = block_1_peaks_sum./block_1_length;
 block_2_peaks_per_s = block_2_peaks_sum./block_2_length;
 block_3_peaks_per_s = block_3_peaks_sum./block_3_length;
 
-peaks_per_blocks_for_ANOVA = [block_1_peaks_per_s', block_2_peaks_per_s', block_3_peaks_per_s'];
-
-% [p,t,stats] = anova1(MPG,Origin);
-
-[p,t,stats] = anova1(peaks_per_blocks_for_ANOVA)
-[c,m,h,gnames] = multcompare(stats);
-
-block_1_mean_SD = [nanmean(block_1_peaks_per_s); std(block_1_peaks_per_s)/sqrt(length(block_1_peaks_per_s))]
-block_2_mean_SD = [nanmean(block_2_peaks_per_s); std(block_2_peaks_per_s)/sqrt(length(block_2_peaks_per_s))]
-block_3_mean_SD = [nanmean(block_3_peaks_per_s); std(block_3_peaks_per_s)/sqrt(length(block_3_peaks_per_s))]
-
-means = [block_1_mean_SD(1) block_2_mean_SD(1) block_3_mean_SD(1)];
-sems = [block_1_mean_SD(2) block_2_mean_SD(2) block_3_mean_SD(2)];
-
-figure;
-bar(means);
-hold on;
-er = errorbar(1:3, means, sems,'k.', 'LineWidth', 1);    
-                         
-
-figure;
-h = dabarplot(peaks_per_blocks_for_ANOVA,...
-    'scatter',1,'scattersize',15,'scatteralpha',0.5);
-
-figure;
-h = daviolinplot(peaks_per_blocks_for_ANOVA,...
-    'scatter',1,'scattersize',15,'scatteralpha',0.5);
+mean(block_1_peaks_per_s)
+mean(block_2_peaks_per_s)
+mean(block_3_peaks_per_s)
 
 block_1_peaks_per_s_nonzero = nonzeros(block_1_peaks_per_s)';
 block_2_peaks_per_s_nonzero = nonzeros(block_2_peaks_per_s)';
@@ -150,59 +121,3 @@ block_3_peaks_per_s_nonzero = nonzeros(block_3_peaks_per_s)';
 mean(block_1_peaks_per_s_nonzero)
 mean(block_2_peaks_per_s_nonzero)
 mean(block_3_peaks_per_s_nonzero)
-
-%%
-% Calculate the number of neurons
-num_neurons = size(block_1_peaks_per_s, 2);
-
-% Initialize counters for each category
-increase_count = 0;
-decrease_count = 0;
-mixed_count = 0;
-increase_then_decrease = 0;
-decrease_then_increase = 0;
-
-% Loop through each neuron
-for neuron = 1:num_neurons
-    % Extract data for the neuron from each block
-    neuron_data_block1 = block_1_peaks_per_s(:, neuron);
-    neuron_data_block2 = block_2_peaks_per_s(:, neuron);
-    neuron_data_block3 = block_3_peaks_per_s(:, neuron);
-    
-    % Check if values increase across the blocks
-    if all(diff([neuron_data_block1, neuron_data_block2, neuron_data_block3]) > 0)
-        increase_count = increase_count + 1;
-    % Check if values decrease across the blocks
-    elseif all(diff([neuron_data_block1, neuron_data_block2, neuron_data_block3]) < 0)
-        decrease_count = decrease_count + 1;
-    % Otherwise, it's mixed
-    elseif all(diff([neuron_data_block1, neuron_data_block2]) > 0 & diff([neuron_data_block2, neuron_data_block3]) < 0)
-        increase_then_decrease_count = increase_then_decrease_count + 1;
-    elseif all(diff([neuron_data_block1, neuron_data_block2]) < 0 & diff([neuron_data_block2, neuron_data_block3]) > 0)
-        decrease_then_increase_count = decrease_then_increase_count + 1;
-    end
-end
-
-% Calculate proportions
-total_neurons = num_neurons;
-proportion_increase = increase_count / total_neurons;
-proportion_decrease = decrease_count / total_neurons;
-% proportion_mixed = mixed_count / total_neurons;
-proportion_increase_then_decrease = increase_then_decrease_count / total_neurons;
-proportion_decrease_then_increase = decrease_then_increase_count / total_neurons;
-
-% Display results
-disp(['Proportion of neurons with increasing trend: ', num2str(proportion_increase)]);
-disp(['Proportion of neurons with decreasing trend: ', num2str(proportion_decrease)]);
-% disp(['Proportion of neurons with mixed trend: ', num2str(proportion_mixed)]);
-disp(['Proportion of neurons with increasing trend: ', num2str(proportion_increase_then_decrease)]);
-disp(['Proportion of neurons with decreasing trend: ', num2str(proportion_decrease_then_increase)]);
-
-% Create a pie chart
-categories = {'Increasing', 'Decreasing', 'Increase then Decrease', 'Decrease then Increase'};
-proportions = [proportion_increase, proportion_decrease, proportion_increase_then_decrease, proportion_decrease_then_increase];
-% explode = [0.1, 0.1, 0]; % Explode the "Increasing" slice for better visibility
-
-figure;
-pie(proportions, categories);
-title('Proportion of Neurons with Different Trends');

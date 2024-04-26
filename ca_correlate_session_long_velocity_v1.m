@@ -1,13 +1,11 @@
 iter = 0
 
 %%
-% load('BLA-NAcShell_Risk_2024_04_16.mat')
+load('BLA-NAcShell_Risk_2024_04_16.mat')
 
 % load('BLA_panneuronal_Risk_2024_01_04.mat')
 
-load('BLA_panneuronal_Risk_2024_04_19_just_CNMFe_and_BehavData.mat')
-
-load('BLA_panneuronal_SLEAP_data_2024_02_26_plus_XY_correction.mat')
+% load('BLA_panneuronal_Risk_2024_03_07_just_CNMFe_and_BehavData.mat')
 
 % load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 
@@ -27,8 +25,6 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
-% CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
-% (10) for spike rate
 
 session_to_analyze = 'Pre_RDT_RM';
 epoc_to_align = 'choiceTime';
@@ -168,16 +164,16 @@ for ii = 1:size(fieldnames(final),1)
             caTraceTrials = NaN(size(eTS,1),numMeasurements); %
             unitTrace = ca(u,:); %get trace
             unitTrace_trimmed = unitTrace(:,samples_to_remove_from_ca:end);
-            unitTrace_trimmed = normalize(unitTrace_trimmed); %use normalize instead of zscore in case using spike_prob, because this by default includes NaN values @ the start and the end
+            unitTrace_trimmed = zscore(unitTrace_trimmed);
             unitTrace_trimmed = sgolayfilt(unitTrace_trimmed, 9, 21);
             if length(unitTrace_trimmed) < length(zall_motion)
-                velocity_ca_correlation_neuron = corrcoef(zall_motion(:, 1:size(unitTrace_trimmed, 2)), unitTrace_trimmed, 'rows', 'complete');
+                velocity_ca_correlation_neuron = corrcoef(zall_motion(:, 1:size(unitTrace_trimmed, 2)), unitTrace_trimmed);
                 velocity_ca_correlation_neuron_array(neuron_num) = velocity_ca_correlation_neuron(1,2);
                 zall_motion = zall_motion(:, 1:size(unitTrace_trimmed, 2));
                 ca_and_velocity{neuron_num} = [unitTrace_trimmed; zall_motion];
 
             else
-                velocity_ca_correlation_neuron = corrcoef(zall_motion, unitTrace_trimmed(:, 1:size(zall_motion, 2)), 'rows', 'complete');
+                velocity_ca_correlation_neuron = corrcoef(zall_motion, unitTrace_trimmed(:, 1:size(zall_motion, 2)));
                 velocity_ca_correlation_neuron_array(neuron_num) = velocity_ca_correlation_neuron(1,2);
                 unitTrace_trimmed = unitTrace_trimmed(:, 1:size(zall_motion, 2));
                 ca_and_velocity{neuron_num} = [unitTrace_trimmed; zall_motion];
@@ -228,16 +224,6 @@ sem_all_array(iter) = {sem_all};
 varargin_list{iter,:} = varargin;
 behav_tbl_iter{iter, :} = behav_tbl_temp;
 velocity_ca_correlation_neuron_array_iter(iter) = {velocity_ca_correlation_neuron_array}; 
-
-
-
-% Plot histogram
-figure;
-histogram(velocity_ca_correlation_neuron_array, 'Normalization', 'probability');
-title('Distribution of Correlation Coefficients for Session Long Ca and Motion');
-xlabel('Correlation Coefficient');
-ylabel('Probability');
-
 
 
 clear behav_tbl_temp

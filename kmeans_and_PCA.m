@@ -1,16 +1,10 @@
 
 
-% data_for_clustering = zall_mean_all_array{1,1};
-
-data_for_clustering = neuron_mean_all_unnormalized{1,1};
-
-data_for_clustering = zscore(data_for_clustering, 0, 2);
-
-
+data_for_clustering = zall_mean_all;
 
 %% from Sean to do kmeans on traces
 
-clusters_desired =8;
+clusters_desired = 7;
 
 [idx,C,sumdist3] = kmeans(data_for_clustering,clusters_desired,'Distance','correlation','Display','final', 'Replicates', 200,'Start','uniform');
 
@@ -27,7 +21,7 @@ for ii = 1:clusters_desired
 
     plot(ts1, mean(data_for_clustering(idx == ii, :)));
     hold on;
-    legend;
+
 end
 
 %%
@@ -39,7 +33,7 @@ figure; imagesc(ts1, 1, zall_array{1, 7})
 [coeff, score, ~, ~, explained] = pca(data_for_clustering);
 
 % plot the mean activity of the main principle components
-num_pcs_to_plot = 5; % choose the number of principle components to plot
+num_pcs_to_plot = 3; % choose the number of principle components to plot
 pcs_to_plot = 1:num_pcs_to_plot;
 figure;
 hold on;
@@ -59,13 +53,7 @@ ylabel('Variance Explained (%)');
 title('Variance Explained by Principal Components');
 
 % determine which neurons are assigned to each principle component
-% I am a bit confused as to why this takes the absolute value - perhaps
-% high scores that are negative correspond to inverse relationships? When I
-% plot individual trials, high negative loadings don't seem to "look" like
-% what I expect from a given PC. It might be better to simply take the
-% HIGHEST score, nto the highest abs score
-% [~, max_scores_idx] = max(abs(score), [], 2); % find the index of the max score for each neuron
-[~, max_scores_idx] = max(score, [], 2); % find the index of the max score for each neuron
+[~, max_scores_idx] = max(abs(score), [], 2); % find the index of the max score for each neuron
 neurons_per_pc = accumarray(max_scores_idx, (1:size(data_for_clustering,1))', [], @(x) {x}); % group the neurons by principle component
 disp('Neurons assigned to each principle component:');
 for i = 1:num_pcs_to_plot

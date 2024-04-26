@@ -9,7 +9,6 @@ session_to_analyze = 'RDT_D1';
 
 shapeData = final_SLEAP.(select_mouse).(session_to_analyze).shapeData;
 
-
 onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
 choice_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.choiceTime';
 offset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.collectionTime';

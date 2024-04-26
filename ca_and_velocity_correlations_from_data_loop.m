@@ -1,6 +1,5 @@
 % run ca_correlate_session_long_velocity_v1 first! 
 
-% for a single mouse
 % Assuming zall_array{1,1} and motion_TraceTrials_mouse{1,1} are your matrices
 num_rows = size(zall_array{1,1}, 1); % Assuming both matrices have the same number of rows
 
@@ -17,43 +16,9 @@ for i = 1:num_rows
 end
 
 
-% Assuming zall_array{1,1} and motion_TraceTrials_mouse{1,1} are your matrices
-num_rows = size(zall_array{1,1}, 1); % Assuming both matrices have the same number of rows
-
-% Preallocate correlation matrix
-correlation_matrix = zeros(num_rows);
-
-for i = 1:num_rows
-    % Get the i-th row from both matrices
-    row_zall = zall_array{1,1}(i, :);
-    row_motion = motion_TraceTrials_mouse{1,1}(i, :);
-    
-    % Calculate the correlation coefficient between the two rows
-    correlation_matrix(i, :) = corr(row_zall', row_motion');
-end
-
-% % Plot heatmap
-% figure;
-% heatmap(correlation_matrix);
-% title('Correlation Matrix Heatmap');
-% xlabel('Neuron');
-% ylabel('Neuron');
-
-% Assuming correlation_coefficients contains the correlation coefficients
-
-% Plot histogram
-figure;
-histogram(correlation_coefficients, 'Normalization', 'probability');
-title('Distribution of Correlation Coefficients for Single Mouse - Trial x Trial');
-xlabel('Correlation Coefficient');
-ylabel('Probability');
-
-
 %%
 % Assuming zall_mouse is your cell array containing data for each mouse
 num_mice = size(zall_mouse, 1); % Assuming zall_mouse is a column cell array
-
-% calculate correlations for trial-based activity
 
 % Initialize a cell array to store correlation coefficients
 correlation_coefficients_mouse = cell(num_mice, 1);
@@ -110,9 +75,5 @@ for mouse_idx = 1:num_mice
     end
 end
 
-% Plot histogram
-figure;
-histogram(mean_correlation_per_cell, 'Normalization', 'probability');
-title('Distribution of Correlation Coefficients Across Mice');
-xlabel('Correlation Coefficient');
-ylabel('Probability');
+% Now mean_correlation_per_cell contains the mean correlation for each cell
+
