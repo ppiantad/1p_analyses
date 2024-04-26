@@ -9,7 +9,7 @@ ts1 = (-10:(uv.dt):10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\Sean CNMFe\RG-Insc';
+metaDirectory = 'F:\Behavior Videos\BLA hM4Di vs mCherry';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -51,9 +51,9 @@ for zz = 1:size(metafolder_list, 1)
 
     for ii = 1:size(folder_list, 1)
         folder_list_string = strsplit(folder_list{ii}, '\');
-        current_animal = folder_list_string{5}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
+        current_animal = folder_list_string{4}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
         current_animal = matlab.lang.makeValidName(current_animal);
-        current_session = folder_list_string{6};
+        current_session = folder_list_string{5};
         current_session = regexprep(current_session,{' ', '-'}, '_');
         modifiedString = lower(strrep(strrep(folder_list_string{end}, ' ', ''), '-', ''));
         
@@ -139,7 +139,7 @@ for zz = 1:size(metafolder_list, 1)
 
                 end
                 % Check if all required files exist, if not, skip
-                if exist('SLEAP_csv','var') && exist('ABET_file','var') && exist('GPIO_file','var')
+                if exist('SLEAP_csv','var') && exist('ABET_file','var')
                     disp('Required files found, analyzing...');                           
                     if strcmp(current_session, 'SHOCK_TEST')
                         alignment_event = 'choiceTime';
@@ -147,26 +147,26 @@ for zz = 1:size(metafolder_list, 1)
                         ABET_removeheader = ABETfile(2:end,:);
                         tbl_ABET = cell2table(ABET_removeheader);
                         tbl_ABET.Properties.VariableNames = ABETfile(1,:);
-                        gpio_tbl = readtable(GPIO_file);
-                        shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
-                        stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
-                        frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
+                        % gpio_tbl = readtable(GPIO_file);
+                        % shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
+                        % stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
+                        % frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
                         %check GPIO file to extract each TTL, since the TTL is 1000ms and is
                         %sampled repeatedly. This will only extract events that are separated by >
                         %8sec, so be sure to change this if the TTL or task structure changes
                         %dramatically!
-                        pp = 2;
-                        ttl_filtered = stTime(1);
-                        for kk = 1:size(stTime,1)-1
-                            if abs(stTime(kk)-stTime(kk+1)) > 8
-                                ttl_filtered(pp) = stTime(kk+1);
-                                pp=pp+1;
-                            end
-                        end
-                        ttl_filtered = ttl_filtered';
+                        % pp = 2;
+                        % ttl_filtered = stTime(1);
+                        % for kk = 1:size(stTime,1)-1
+                        %     if abs(stTime(kk)-stTime(kk+1)) > 8
+                        %         ttl_filtered(pp) = stTime(kk+1);
+                        %         pp=pp+1;
+                        %     end
+                        % end
+                        % ttl_filtered = ttl_filtered';
 
-                        BehavData.TrialPossible(:)=BehavData.TrialPossible(:)+stTime(1);
-                        BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+7.39500000000000;
+                        BehavData.TrialPossible(:)=BehavData.TrialPossible(:);
+                        BehavData.choiceTime(:)=BehavData.choiceTime(:); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+7.39500000000000;
                         % BehavData.collectionTime(:)=BehavData.collectionTime(:)+stTime(1);
                         % BehavData.stTime(:)=BehavData.stTime(:)+stTime(1);
                         % shk_times(:)=shk_times(:)+stTime(1);
@@ -178,7 +178,7 @@ for zz = 1:size(metafolder_list, 1)
                         %possibilities)
                         BehavData=TrialFilter(BehavData,'SHK',1);
 
-                        frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
+                        % frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
 
                         % use this if you have specifi sessions within the loop that have
                         % the wrong acquisition rate (10 Hz vs 20 Hz)
@@ -230,7 +230,7 @@ for zz = 1:size(metafolder_list, 1)
 
                         %adjust  time to account for the fact that Inscopix recording
                         %starts first (stTime(1);
-                        SLEAP_time = SLEAP_time + stTime(1);
+                        % SLEAP_time = SLEAP_time + stTime(1);
 
                         SLEAP_data.idx_time = SLEAP_time';
 
@@ -331,30 +331,30 @@ for zz = 1:size(metafolder_list, 1)
                             ABET_removeheader = ABETfile(2:end,:);
                             tbl_ABET = cell2table(ABET_removeheader);
                             tbl_ABET.Properties.VariableNames = ABETfile(1,:);
-                            gpio_tbl = readtable(GPIO_file);
-                            shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
-                            stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
-                            frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
+                            % gpio_tbl = readtable(GPIO_file);
+                            % shk_times = tbl_ABET.Evnt_Time(strcmp(tbl_ABET.Item_Name, 'shock_on_off') & tbl_ABET.Arg1_Value == 1);
+                            % stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
+                            % frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
 
                             %check GPIO file to extract each TTL, since the TTL is 1000ms and is
                             %sampled repeatedly. This will only extract events that are separated by >
                             %8sec, so be sure to change this if the TTL or task structure changes
                             %dramatically!
-                            pp = 2;
-                            ttl_filtered = stTime(1);
-                            for kk = 1:size(stTime,1)-1
-                                if abs(stTime(kk)-stTime(kk+1)) > 8
-                                    ttl_filtered(pp) = stTime(kk+1);
-                                    pp=pp+1;
-                                end
-                            end
-                            ttl_filtered = ttl_filtered';
+                            % pp = 2;
+                            % ttl_filtered = stTime(1);
+                            % for kk = 1:size(stTime,1)-1
+                            %     if abs(stTime(kk)-stTime(kk+1)) > 8
+                            %         ttl_filtered(pp) = stTime(kk+1);
+                            %         pp=pp+1;
+                            %     end
+                            % end
+                            % ttl_filtered = ttl_filtered';
 
 
-                            BehavData.TrialPossible(:)=BehavData.TrialPossible(:)+stTime(1);
-                            BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+7.39500000000000;
-                            BehavData.collectionTime(:)=BehavData.collectionTime(:)+stTime(1);
-                            BehavData.stTime(:)=BehavData.stTime(:)+stTime(1);
+                            BehavData.TrialPossible(:)=BehavData.TrialPossible(:);
+                            BehavData.choiceTime(:)=BehavData.choiceTime(:); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+7.39500000000000;
+                            BehavData.collectionTime(:)=BehavData.collectionTime(:);
+                            BehavData.stTime(:)=BehavData.stTime(:);
 
                             BehavData.choTime2 = BehavData.choiceTime-BehavData.TrialPossible;
                             % BehavData.choTime3 = BehavData.Insc_TTL+BehavData.choTime2;
@@ -363,7 +363,7 @@ for zz = 1:size(metafolder_list, 1)
                             %possibilities)
                             BehavData=TrialFilter(BehavData,'ALL',1);
 
-                            frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
+                            % frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
 
                             eTS = BehavData.(alignment_event); %get time stamps
 
@@ -403,7 +403,7 @@ for zz = 1:size(metafolder_list, 1)
 
                             %adjust  time to account for the fact that Inscopix recording
                             %starts first (stTime(1);
-                            SLEAP_time = SLEAP_time + stTime(1);
+                            % SLEAP_time = SLEAP_time + stTime(1);
 
                             SLEAP_data.idx_time = SLEAP_time';
 

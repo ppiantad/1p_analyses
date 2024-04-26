@@ -1,3 +1,6 @@
+% this code is for 2 separate events, and may not work completely
+% correctly!
+
 num_iterations = 1; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 iter = 0;

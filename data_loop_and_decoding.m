@@ -1,7 +1,7 @@
 num_iterations = 1; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 iter = 0;
-uv.evtWin = [-8 1]; %what time do you want to look at around each event [-2 8] [-10 5]
+uv.evtWin = [-1 8]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -13,11 +13,15 @@ ca_data_type = "C_raw"; % C % C_raw
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 
-
+use_normalized_time = 0;
 shuffle_confirm = 1; %1 if you want shuffle, 0 if you don't
 
 clear neuron_mean neuron_sem neuron_num zall_mean zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized sem_all zall_mean_all caTraceTrials_mouse caTraceTrials_current caTraceTrials_mouse_decoding
 %%
+
+animalIDs = (fieldnames(final));
+
+
 for num_iteration = 1:num_iterations
     fprintf('The current iteration is: %d\n', num_iteration);
 
@@ -35,8 +39,9 @@ for num_iteration = 1:num_iterations
 
     
 
-    animalIDs = (fieldnames(final));
+
     neuron_num = 0;
+    
 
     sum_trials_per_iter = 0;
     filter_names_idx = cellfun(@ischar,event_to_analyze);
@@ -52,7 +57,10 @@ for num_iteration = 1:num_iterations
                     [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
-
+                    % uncomment & edit me if you want to examine a subset
+                    % of neurons! make sure to do in both parts of else /
+                    % elseif statement!!
+                    ca = ca(respClass_all_array_mouse_array{1, 3}{ii, 3} == 1, :);
 
                     num_samples = size(ca, 2);
                     sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.dt)*100;
@@ -72,7 +80,7 @@ for num_iteration = 1:num_iterations
                         % initialize trial matrices
                         caTraceTrials = NaN(size(eTS,1),numMeasurements); %
                         unitTrace = ca(u,:); %get trace
-                        [zall_baselined, zall_window, zall_session, caTraceTrials] = align_and_zscore(unitTrace, eTS, uv, time_array, zb_session, zsd_session, u);
+                        [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
 
                         caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                         zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
@@ -99,6 +107,11 @@ for num_iteration = 1:num_iterations
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
+                    % uncomment & edit me if you want to examine a subset
+                    % of neurons! make sure to do in both parts of else /
+                    % elseif statement!!
+                    ca = ca(respClass_all_array_mouse_array{1, 3}{ii, 3} == 1, :);
+
                     % shuffle data for comparison
                     [num_cells, num_samples] = size(ca);
                     shuffled_data = zeros(num_cells, num_samples); % Preallocate matrix for efficiency
@@ -127,7 +140,7 @@ for num_iteration = 1:num_iterations
                         % initialize trial matrices
                         caTraceTrials = NaN(size(eTS,1),numMeasurements); %
                         unitTrace = ca(u,:); %get trace
-                        [zall_baselined, zall_window, zall_session, caTraceTrials] = align_and_zscore(unitTrace, eTS, uv, time_array, zb_session, zsd_session, u);
+                        [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
 
                         caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                         zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
