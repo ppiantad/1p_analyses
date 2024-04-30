@@ -2,7 +2,7 @@ select_mouse = 'BLA_Insc_24';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-first_session = 'Pre_RDT_RM';
+first_session = 'RDT_D1';
 
 select_mouse_cells_indices = find(strcmp(mouse_cells(1,:), select_mouse));
 % Assuming respClass_all_array_filtered is your 1x3 cell array

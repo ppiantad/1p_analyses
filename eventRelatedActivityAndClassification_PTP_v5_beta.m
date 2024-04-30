@@ -47,14 +47,14 @@ uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-ca_data_type = "C_raw"; % C % C_raw %S
+ca_data_type = "spike_prob"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'RM_D1';
 epoc_to_align = 'collectionTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
@@ -70,8 +70,8 @@ uv.sigma = 1.5;  %1.5                                                           
 % uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
 % uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
-% uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice [0 2]
-uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3]
+% uv.evtSigWin.outcome = [0 1]; %for SHK or immediate post-choice [0 2]
+uv.evtSigWin.outcome = [0.5 3]; %for REW collection [1 3]
 
 
 
@@ -80,7 +80,7 @@ uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3]
 % uv.evtSigWin.groomingStop = [-.5 3];
 % uv.evtSigWin.faceGroomingStart = [-.5 2];
 % uv.evtSigWin.faceGroomingStop = [-.5 2];
-uv.resamples = 10                                                         %number of resamples to use in shuffle analysis 1000
+uv.resamples = 100                                                         %number of resamples to use in shuffle analysis 1000
 
 sub_window_idx = ts1 >= uv.evtSigWin.outcome(1) & ts1 <= uv.evtSigWin.outcome(2);
 
@@ -112,7 +112,7 @@ for ii = 1:size(fieldnames(final),1)
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3, 'SHK', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
+        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
         
         % uncomment if you want to test specifically for particular ranges
         % during shock test
@@ -159,17 +159,17 @@ for ii = 1:size(fieldnames(final),1)
         clear evtWinSpan e
         eTS = BehavData.(epoc_to_align); %get time stamps
         eTS_collection = BehavData.collectionTime; %get time stamps
-        if strcmp(epoc_to_align, 'choiceTime') & uv.evtSigWin.outcome == [-4 0] %for REW collection
-            other_evtWinIdx1{iter,:} = ts1 >= 0 & ts1 <= 2; %ts1 >= 0 & ts1 <= 2;
-            other_evtWinIdx2{iter,:} = ts1 >= 1 & ts1 <= 3;
-        elseif strcmp(epoc_to_align, 'choiceTime') & uv.evtSigWin.outcome == [0 2] %for SHK or immediate post-choice [0 2]
-            other_evtWinIdx1{iter,:} = ts1 >= -1 & ts1 <= 0;
-            other_evtWinIdx2{iter,:} = ts1 >= -1 & ts1 <= 0; %might not need this one? ts1 >= 2 & ts1 <= 4
-            % other_evtWinIdx2 = other_evtWinIdx1; 
-        elseif strcmp(epoc_to_align, 'collectionTime') & uv.evtSigWin.outcome == [1 3] %for SHK or immediate post-choice [1 3]
-            other_evtWinIdx1{iter,:} = ts1 >= -4 & ts1 <= 0;
-            other_evtWinIdx2{iter,:} = ts1 >= -2 & ts1 <= 0;
-        end
+        % if strcmp(epoc_to_align, 'choiceTime') & uv.evtSigWin.outcome == [-4 0] %for REW collection
+        %     other_evtWinIdx1{iter,:} = ts1 >= 0 & ts1 <= 2; %ts1 >= 0 & ts1 <= 2;
+        %     other_evtWinIdx2{iter,:} = ts1 >= 1 & ts1 <= 3;
+        % elseif strcmp(epoc_to_align, 'choiceTime') & uv.evtSigWin.outcome == [0 2] %for SHK or immediate post-choice [0 2]
+        %     other_evtWinIdx1{iter,:} = ts1 >= -1 & ts1 <= 0;
+        %     other_evtWinIdx2{iter,:} = ts1 >= -1 & ts1 <= 0; %might not need this one? ts1 >= 2 & ts1 <= 4
+        %     % other_evtWinIdx2 = other_evtWinIdx1; 
+        % elseif strcmp(epoc_to_align, 'collectionTime') & uv.evtSigWin.outcome == [1 3] %for SHK or immediate post-choice [1 3]
+        %     other_evtWinIdx1{iter,:} = ts1 >= -4 & ts1 <= 0;
+        %     other_evtWinIdx2{iter,:} = ts1 >= -2 & ts1 <= 0;
+        % end
 
         zb_session = mean(ca,2);
         zsd_session = std(ca,[],2);
@@ -265,17 +265,17 @@ for ii = 1:size(fieldnames(final),1)
                             (caTraceTrials(:,evtWinIdx));                   %NaN mean of the fluorescent response across trials, within the time window. this gets the within trial mean.
                         empiricalSEM = nansem...
                             (caTraceTrials(:,:));
-                        otherPeriodWin = nanmean...
-                            (caTraceTrials(:, ~evtWinIdx));
-                        otherEventWin1 = nanmean...
-                            (caTraceTrials(:, other_evtWinIdx1{iter,:}));
-                        otherEventWin2 = nanmean...
-                            (caTraceTrials(:, other_evtWinIdx2{iter,:}));
+                        % otherPeriodWin = nanmean...
+                        %     (caTraceTrials(:, ~evtWinIdx));
+                        % otherEventWin1 = nanmean...
+                        %     (caTraceTrials(:, other_evtWinIdx1{iter,:}));
+                        % otherEventWin2 = nanmean...
+                        %     (caTraceTrials(:, other_evtWinIdx2{iter,:}));
                         empiricalWinAvg = nanmean(empiricalTrialWin);                   %across trial mean
                         empiricalSEMAvg = nanmean(empiricalSEM);                   %across trial mean
-                        otherPeriodWinAvg = nanmean(otherPeriodWin);
-                        otherEventWinAvg1 = nanmean(otherEventWin1);
-                        otherEventWinAvg2 = nanmean(otherEventWin2);
+                        % otherPeriodWinAvg = nanmean(otherPeriodWin);
+                        % otherEventWinAvg1 = nanmean(otherEventWin1);
+                        % otherEventWinAvg2 = nanmean(otherEventWin2);
                     elseif uv.chooseFluoresenceOrRate == 2                              %if user selected to classify the event rates
                         nullDist = nullDistEvtRate;                                     %direct transfer
                         empiricalTrialWin = nanmean...
@@ -318,11 +318,11 @@ for ii = 1:size(fieldnames(final),1)
                     % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
                     % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) == 0 & respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) == 0;
                     % Check if empiricalWinAvg exceeds the 95% confidence interval boundary
-                    if empiricalWinAvg > upperSD & empiricalWinAvg > otherEventWinAvg1 & empiricalWinAvg > otherEventWinAvg2 %empiricalWinAvg > upperSD & empiricalWinAvg > otherEventWinAvg1 & empiricalWinAvg > otherEventWinAvg2
+                    if empiricalWinAvg > upperSD  %empiricalWinAvg > upperSD & empiricalWinAvg > otherEventWinAvg1 & empiricalWinAvg > otherEventWinAvg2
                         respClass_all(neuron_num) = 1;
                         respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 1;
                         respClass_all_array_mouse{ii, iter}(u) = 1;
-                    elseif empiricalWinAvg < lowerSD & empiricalWinAvg < otherPeriodWinAvg & empiricalWinAvg < otherEventWinAvg2  % empiricalWinAvg < lowerSD & empiricalWinAvg < otherPeriodWinAvg & empiricalWinAvg < otherEventWinAvg2
+                    elseif empiricalWinAvg < lowerSD % empiricalWinAvg < lowerSD & empiricalWinAvg < otherPeriodWinAvg & empiricalWinAvg < otherEventWinAvg2
                         respClass_all(neuron_num) = 2;
                         respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 2;
                         respClass_all_array_mouse{ii, iter}(u) = 2;
@@ -406,7 +406,7 @@ figure; shadedErrorBar(ts1, nanmean(neuron_mean(respClass_all_array{:,iter} == 3
 %% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
 % **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
 
-for ii = 1:size(zall_array, 2)
+for ii = 800:size(zall_array, 2)
     figure;
     % Initialize variables to store global max and min for heatmap and line graph
     globalMaxHeatmap = -inf;

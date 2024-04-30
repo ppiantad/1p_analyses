@@ -160,7 +160,7 @@ no_sig_increase_shk_from_large_ind(:, no_sig_increase_shk_from_large ) = 1;
 shk_activated = respClass_all_array{1,4} == 1 & no_sig_increase_shk_from_large_ind ~= 1
 shk_activated_sum = sum(shk_activated);
 
-figure; plot(ts1, mean(neuron_mean_array{1, 4}(shk_activated,:))); hold on; plot(ts1,  mean(neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:)));
+figure; plot(ts1, nanmean(neuron_mean_array{1, 4}(shk_activated,:))); hold on; plot(ts1,  nanmean(neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:)));
 
 %%
 

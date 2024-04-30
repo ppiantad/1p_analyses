@@ -1,7 +1,11 @@
+iter = 0;
+
+
+%%
 num_iterations = 1; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
-iter = 0;
-uv.evtWin = [-1 8]; %what time do you want to look at around each event [-2 8] [-10 5]
+% iter = 0;
+uv.evtWin = [-8 1]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -21,11 +25,11 @@ clear neuron_mean neuron_sem neuron_num zall_mean zall_array zall_to_BL_array zs
 
 animalIDs = (fieldnames(final));
 
-
+iter = iter + 1;
 for num_iteration = 1:num_iterations
     fprintf('The current iteration is: %d\n', num_iteration);
 
-    session_to_analyze = 'Pre_RDT_RM';
+    session_to_analyze = 'RDT_D1';
     epoc_to_align = 'choiceTime';
     event_to_analyze = {'BLOCK',1,'REW',1.2};
 
@@ -54,13 +58,20 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'AA', 1);
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     % uncomment & edit me if you want to examine a subset
                     % of neurons! make sure to do in both parts of else /
                     % elseif statement!!
-                    ca = ca(respClass_all_array_mouse_array{1, 3}{ii, 3} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+
+                    % uncomment below if you want to examine a subset of
+                    % neurons that were not responsive to any of the
+                    % Pre_RDT_RM events
+                    % ca = ca(respClass_all_array_mouse_true_neutral{ii, 1} == 1, :);
 
                     num_samples = size(ca, 2);
                     sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.dt)*100;
@@ -95,22 +106,29 @@ for num_iteration = 1:num_iterations
                 end
             end
 
-            iter = iter+1;
+
             % disp(['iter = ' string(iter)])
-        elseif num_comparison == 2  %num_comparison == 2 %num_comparison == 2 || num_comparison == 1
+        elseif num_comparison == 2   %num_comparison == 2 %num_comparison == 2 || num_comparison == 1
             neuron_num = 0;
             for ii = 1:size(fieldnames(final),1)
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'AA', 1);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     % uncomment & edit me if you want to examine a subset
                     % of neurons! make sure to do in both parts of else /
                     % elseif statement!!
-                    ca = ca(respClass_all_array_mouse_array{1, 3}{ii, 3} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+
+                    % uncomment below if you want to examine a subset of
+                    % neurons that were not responsive to any of the
+                    % Pre_RDT_RM events
+                    % ca = ca(respClass_all_array_mouse_true_neutral{ii, 1} == 1, :);
 
                     % shuffle data for comparison
                     [num_cells, num_samples] = size(ca);
@@ -158,10 +176,9 @@ for num_iteration = 1:num_iterations
             end
         end
     end
-    clear iter
+
     caTraceTrials_mouse_iterations(1, num_iteration) = {caTraceTrials_mouse};
     zall_mouse_iterations(1, num_iteration) = {zall_mouse};
-
 end
 
 
@@ -227,8 +244,8 @@ for uu = 1:size(caTraceTrials_mouse_iterations, 2)
         % figure; plot(ts1, accuracy_by_offset);
         accuracy_at_loop(:, bb) = accuracy_by_offset;
     end
-    accuracy_per_iteration(uu) = {accuracy_at_loop};
-    cross_mouse_accuracy_per_iteration(:, uu) = mean(accuracy_at_loop, 2);
+    accuracy_per_iteration{iter}(uu) = {accuracy_at_loop};
+    cross_mouse_accuracy_per_iteration{iter}(:, uu) = mean(accuracy_at_loop, 2);
     clear accuracy_at_loop
 end
 

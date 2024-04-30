@@ -47,6 +47,34 @@ test_array = respClass_all_array{1,1} ~= exclusive_activated_session_1 & respCla
 
 not_active = neuron_num - (exclusive_activated_session_1_sum + exclusive_activated_session_2_sum + exclusive_activated_session_3_sum + excited_to_excited_sum+ excited_to_excited_1_to_2_sum+excited_to_excited_1_to_3_sum+excited_to_excited_2_to_3_sum);
 
+
+% get cells on a mouse x mouse basis (good for decoding).
+% should build this out
+% Initialize respClass_all_array_mouse_true_neutral
+respClass_all_array_mouse_true_neutral = cell(size(respClass_all_array_mouse, 1), 1);
+respClass_all_array_mouse_pre_choice_active = cell(size(respClass_all_array_mouse, 1), 1);
+respClass_all_array_mouse_post_choice_reward = cell(size(respClass_all_array_mouse, 1), 1);
+respClass_all_array_mouse_consumption = cell(size(respClass_all_array_mouse, 1), 1);
+
+% Loop through each row
+for row = 1:size(respClass_all_array_mouse, 1)
+% Initialize the row result
+    row_cells = respClass_all_array_mouse(row, :);
+    D = vertcat(row_cells{:});
+    % Compare each column of D to check if all values are equal to 3
+    col_comparison_true_neutral = all(D == 3);
+    col_comparison_pre_choice_active = D(1,:) == 1 & D(2,:) ~= 1 & D(3,:) ~= 1;
+    col_comparison_post_choice_reward = D(1,:) ~= 1 & D(2,:) == 1 & D(3,:) ~= 1;
+    col_comparison_consumption = D(1,:) ~= 1 & D(2,:) ~= 1 & D(3,:) == 1;
+    % Assign 1 or 0 based on the comparison result
+    respClass_all_array_mouse_true_neutral{row} = col_comparison_true_neutral;
+    respClass_all_array_mouse_pre_choice_active{row} = col_comparison_pre_choice_active;
+    respClass_all_array_mouse_post_choice_reward{row} = col_comparison_post_choice_reward;
+    respClass_all_array_mouse_consumption{row} = col_comparison_consumption;
+end
+
+
+
 %%
 % Example 2: Nested pie chart with custom colors for each wedge
 
