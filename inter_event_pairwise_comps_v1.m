@@ -1,4 +1,4 @@
-select_mouse = 'BLA_Insc_24';
+select_mouse = 'BLA_Insc_25';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
@@ -88,6 +88,29 @@ for i = 1:numel(original_ensemble_neurons_x_trial)
 end
 
 
+%  THIS WORKS - BUILD OFF OF THIS CODE TOMORROW
+
+for i = 1:numel(original_ensemble_neurons_x_trial)
+    level_cell_array = original_ensemble_neurons_x_trial{i};
+    % Assuming your cell array is named 'level_cell_array'
+    num_rows = size(level_cell_array{1}, 1); % Number of rows in each 24x160 matrix
+    num_cols = numel(level_cell_array); % Number of columns in the cell array
+    result = cell(num_rows, 1);
+
+    for row = 1:num_rows
+        row_values = [];
+        for col = 1:num_cols
+            row_values = [row_values; level_cell_array{col}(row, :)];
+        end
+        result{row} = row_values;
+        level_means(row, :) = mean(row_values);
+    end
+    results{i} = result;
+    original_ensemble_neurons_x_trial_means{i} = level_means;
+end
+
+
+
 %%
 
 original_plus_block_2_emergence = [test; neuron_mean_mouse{select_mouse_index, 1}(respClass_all_array_filtered{1, 1}~=1 & respClass_all_array_filtered{1, 2}==1 & respClass_all_array_filtered{1, 3}~=1, :)];
@@ -115,7 +138,10 @@ for i = 1:numel(original_ensemble_neurons_x_trial_means)
 end
 
 %%
-data = test;
+% data = test;
+
+
+data = concatenated_means;
 
 alpha = 0.0001;
 
