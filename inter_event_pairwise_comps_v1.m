@@ -210,14 +210,84 @@ for zz = 1:size(og_ensemble, 2)
 
 end
 
-for kk = 1:size(results{1, 1}, 1)
-    results_trial = results{1,1}{kk}
-    results_trial_matrix(kk) = mean(mean(corrcoef(results_trial)));
 
 
+% Assuming your array is named results{1, 1}{1, 1}
+array = results{1, 1}{2, 1}  ;
 
+% Get the number of rows
+numRows = size(array, 1);
+
+% Preallocate a matrix to store the correlation coefficients
+correlationMatrix = zeros(numRows, numRows);
+
+% Calculate the correlation coefficients for each pair of rows
+for i = 1:numRows
+    for j = 1:numRows
+        correlationMatrix(i, j) = corr(array(i, :)', array(j, :)');
+    end
 end
 
+% Display the correlation matrix
+% disp(correlationMatrix);
+
+% If you only want unique correlations, you can use the triu function
+uniqueCorrelationMatrix = triu(correlationMatrix, 1);
+uniqueCorrelations = unique(uniqueCorrelationMatrix);
+
+% Display the unique correlations
+% disp(uniqueCorrelations);
+% mean(uniqueCorrelations)
+
+
+%%
+
+% Preallocate a cell array to store the mean correlation for each level
+meanCorrelationArray = cell(size(results));
+
+% Loop through each column of results
+for col = 1:numel(results)
+    % Get the subarray from the current column
+    subarray = results{col}; % Assuming the subarray is 1xN cell array
+    
+    % Preallocate a cell array to store mean correlations for each level
+    meanCorrelationLevels = [];
+    
+    % Loop through each level of subarray
+    for level = 1:numel(subarray)
+        array = subarray{level};
+        
+        % Get the number of rows
+        numRows = size(array, 1);
+
+        % Preallocate a matrix to store the correlation coefficients
+        correlationMatrix = zeros(numRows, numRows);
+
+        % Calculate the correlation coefficients for each pair of rows
+        for i = 1:numRows
+            for j = 1:numRows
+                correlationMatrix(i, j) = corr(array(i, :)', array(j, :)');
+            end
+        end
+
+        % If you only want unique correlations, you can use the triu function
+        uniqueCorrelationMatrix = triu(correlationMatrix, 1);
+        uniqueCorrelations = unique(uniqueCorrelationMatrix);
+
+        % Calculate the mean of the unique correlation coefficients
+        meanUniqueCorrelation = mean(uniqueCorrelations);
+
+        % Store the meanUniqueCorrelation in the cell array
+        meanCorrelationLevels(level) = meanUniqueCorrelation;
+    end
+    
+    % Store the meanCorrelationLevels in the meanCorrelationArray
+    meanCorrelationArray{col} = meanCorrelationLevels;
+    disp(mean(meanCorrelationLevels));
+end
+
+% Display the meanCorrelationArray
+% disp(meanCorrelationArray);
 
 
 
@@ -371,4 +441,55 @@ caxis([-1 1]); % Assuming correlations range from -1 to 1
 %             'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
 %     end
 % end
+
+
+
+%%
+
+% Preallocate a cell array to store the mean correlation for each level
+meanCorrelationArray = cell(size(results));
+
+% Loop through each column of results
+for col = 1:numel(results)
+    % Get the subarray from the current column
+    subarray = results{col}; % Assuming the subarray is 1xN cell array
+    
+    % Preallocate a cell array to store mean correlations for each level
+    meanCorrelationLevels = [];
+    
+    % Loop through each level of subarray
+    for level = 1:numel(subarray)
+        array = subarray{level};
+        
+        % Get the number of rows
+        numRows = size(array, 1);
+
+        % Preallocate a matrix to store the correlation coefficients
+        correlationMatrix = zeros(numRows, numRows);
+
+        % Calculate the correlation coefficients for each pair of rows
+        for i = 1:numRows
+            for j = 1:numRows
+                correlationMatrix(i, j) = corr(array(i, :)', array(j, :)');
+            end
+        end
+
+        % If you only want unique correlations, you can use the triu function
+        uniqueCorrelationMatrix = triu(correlationMatrix, 1);
+        uniqueCorrelations = unique(uniqueCorrelationMatrix);
+
+        % Calculate the mean of the unique correlation coefficients
+        meanUniqueCorrelation = mean(uniqueCorrelations);
+
+        % Store the meanUniqueCorrelation in the cell array
+        meanCorrelationLevels(level) = meanUniqueCorrelation;
+    end
+    
+    % Store the meanCorrelationLevels in the meanCorrelationArray
+    meanCorrelationArray{col} = meanCorrelationLevels;
+    disp(mean(meanCorrelationLevels));
+end
+
+% Display the meanCorrelationArray
+% disp(meanCorrelationArray);
 
