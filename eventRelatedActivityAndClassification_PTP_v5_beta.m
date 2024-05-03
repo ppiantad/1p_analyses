@@ -54,7 +54,15 @@ ca_data_type = "spike_prob"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'RM_D1';
+session_to_analyze = 'RDT_D1';
+
+
+% these are mice that did not complete the entire session - kinda have to
+% toss them to do some comparisons during RDT
+if strcmp('RDT_D1', session_to_analyze)
+    final = rmfield(final, ['BLA_Insc_28'; 'BLA_Insc_38'; 'BLA_Insc_39']);
+end
+
 epoc_to_align = 'collectionTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
@@ -112,7 +120,7 @@ for ii = 1:size(fieldnames(final),1)
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
+        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3, 'SHK', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
         
         % uncomment if you want to test specifically for particular ranges
         % during shock test
@@ -189,11 +197,11 @@ for ii = 1:size(fieldnames(final),1)
                 caTraceTrials(1, 1:size(ts1, 2)) = NaN;
                 zall(1, 1:size(ts1, 2)) = NaN;
             else
-                [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
-                % [caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_only(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
+                % [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
+                [caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_only(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-                zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-                % zall = zscored_caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                % zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                zall = zscored_caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
 
                 % for some events, the mice have no trials, therefore there are
                 % no traces. this line basically skips those neurons (adding 0

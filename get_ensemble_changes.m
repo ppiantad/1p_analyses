@@ -182,7 +182,7 @@ end
 uniqueCorrelationMatrix = triu(correlationMatrix, 1);
 uniqueCorrelations = unique(uniqueCorrelationMatrix);
 
-mean(uniqueCorrelations)
+nanmean(uniqueCorrelations)
 
 %%
 block_1_new_ensemble = neuron_mean_array{1, 1}(indices_2_1, :);
@@ -281,7 +281,8 @@ nanmean(uniqueCorrelations)
 %BELOW USES THE ENSEMBLE MEANS FOR CORRELATIONS, WHICH MIGHT BE BETTTER
 %THAN WHAT IS DONE ABOVE?
 % Initialize empty arrays to store the indices
-
+% need to make sure you have run eventRelatedActivity with mice excluded
+% who did not finish the RDT session
 
 indices_2_1 = [];
 indices_3_1 = [];
