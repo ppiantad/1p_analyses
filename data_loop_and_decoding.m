@@ -2,7 +2,7 @@ iter = 0;
 
 
 %%
-num_iterations = 1; 
+num_iterations = 5; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 % iter = 0;
 uv.evtWin = [-8 1]; %what time do you want to look at around each event [-2 8] [-10 5]
@@ -20,6 +20,16 @@ ca_data_type = "C_raw"; % C % C_raw
 use_normalized_time = 0;
 shuffle_confirm = 1; %1 if you want shuffle, 0 if you don't
 
+session_to_analyze = 'RM_D1';
+epoc_to_align = 'choiceTime';
+
+% these are mice that did not complete the entire session - kinda have to
+% toss them to do some comparisons during RDT
+if strcmp('RDT_D1', session_to_analyze)
+    final = rmfield(final, ['BLA_Insc_28'; 'BLA_Insc_38'; 'BLA_Insc_39']);
+end
+
+
 clear neuron_mean neuron_sem neuron_num zall_mean zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized sem_all zall_mean_all caTraceTrials_mouse caTraceTrials_current caTraceTrials_mouse_decoding
 %%
 
@@ -29,8 +39,7 @@ iter = iter + 1;
 for num_iteration = 1:num_iterations
     fprintf('The current iteration is: %d\n', num_iteration);
 
-    session_to_analyze = 'RDT_D1';
-    epoc_to_align = 'choiceTime';
+
     event_to_analyze = {'BLOCK',1,'REW',1.2};
 
     if exist('iter', 'var') == 1
@@ -58,14 +67,14 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'AA', 1);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     % uncomment & edit me if you want to examine a subset
                     % of neurons! make sure to do in both parts of else /
                     % elseif statement!!
                     % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
-                    % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
+                    ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
@@ -108,13 +117,13 @@ for num_iteration = 1:num_iterations
 
 
             % disp(['iter = ' string(iter)])
-        elseif num_comparison == 2   %num_comparison == 2 %num_comparison == 2 || num_comparison == 1
+        elseif num_comparison == 2  %num_comparison == 2 %num_comparison == 2 || num_comparison == 1
             neuron_num = 0;
             for ii = 1:size(fieldnames(final),1)
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'AA', 1);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -122,7 +131,7 @@ for num_iteration = 1:num_iterations
                     % of neurons! make sure to do in both parts of else /
                     % elseif statement!!
                     % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
-                    % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
+                    ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
@@ -183,7 +192,10 @@ end
 
 
 
-%%
+caTraceTrials_current = []
+empty_rows_indices = []
+accuracy_per_iteration = []
+cross_mouse_accuracy_per_iteration = []
 
 for uu = 1:size(caTraceTrials_mouse_iterations, 2)
     caTraceTrials_current = caTraceTrials_mouse_iterations{:,uu};
@@ -194,7 +206,7 @@ for uu = 1:size(caTraceTrials_mouse_iterations, 2)
     caTraceTrials_current(empty_rows_indices, :) = [];
     % animalIDs(empty_rows_indices,:) = [];
     % trials_per_mouse(empty_rows_indices, :) = [];
-    zall_mouse(empty_rows_indices, :) = [];
+    % zall_mouse(empty_rows_indices, :) = [];
     fprintf('The current iteration is: %d\n', uu);
     for bb = 1:size(caTraceTrials_current, 1)
         caTraceTrials_mouse_decoding = caTraceTrials_current(bb,:);
