@@ -2,10 +2,10 @@ iter = 0;
 
 
 %%
-num_iterations = 5; 
+num_iterations = 1; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 % iter = 0;
-uv.evtWin = [-8 1]; %what time do you want to look at around each event [-2 8] [-10 5]
+uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -67,15 +67,15 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     % uncomment & edit me if you want to examine a subset
                     % of neurons! make sure to do in both parts of else /
                     % elseif statement!!
                     % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
-                    ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
+                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the
@@ -131,8 +131,8 @@ for num_iteration = 1:num_iterations
                     % of neurons! make sure to do in both parts of else /
                     % elseif statement!!
                     % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
-                    ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
+                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the
@@ -194,8 +194,7 @@ end
 
 caTraceTrials_current = []
 empty_rows_indices = []
-accuracy_per_iteration = []
-cross_mouse_accuracy_per_iteration = []
+
 
 for uu = 1:size(caTraceTrials_mouse_iterations, 2)
     caTraceTrials_current = caTraceTrials_mouse_iterations{:,uu};
