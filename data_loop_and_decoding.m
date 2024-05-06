@@ -20,7 +20,7 @@ ca_data_type = "C_raw"; % C % C_raw
 use_normalized_time = 0;
 shuffle_confirm = 1; %1 if you want shuffle, 0 if you don't
 
-session_to_analyze = 'RM_D1';
+session_to_analyze = 'Pre_RDT_RM';
 epoc_to_align = 'choiceTime';
 
 % these are mice that did not complete the entire session - kinda have to
@@ -60,22 +60,22 @@ for num_iteration = 1:num_iterations
     filter_names_idx = cellfun(@ischar,event_to_analyze);
     filter_strings = string(event_to_analyze(filter_names_idx));
     for num_comparison = 1:num_comparisons
-        if num_comparison == 1 %num_comparison == 3 num_comparison == 1 % if you want to force shuffle, swap to num_comparisons 3 (if doing 2 comparisons) and change the shuffle below. prob should make this a little more intuitive in the future
+        if num_comparison == 3 %num_comparison == 3 num_comparison == 1 % if you want to force shuffle, swap to num_comparisons 3 (if doing 2 comparisons) and change the shuffle below. prob should make this a little more intuitive in the future
             neuron_num = 0;
             % neuron_sem = zeros(1, size(ts1, 2));
             for ii = 1:size(fieldnames(final),1)
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     % uncomment & edit me if you want to examine a subset
                     % of neurons! make sure to do in both parts of else /
                     % elseif statement!!
-                    % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
+                    ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the
@@ -117,22 +117,22 @@ for num_iteration = 1:num_iterations
 
 
             % disp(['iter = ' string(iter)])
-        elseif num_comparison == 2  %num_comparison == 2 %num_comparison == 2 || num_comparison == 1
+        elseif num_comparison == 2 || num_comparison == 1  %num_comparison == 2 %num_comparison == 2 || num_comparison == 1
             neuron_num = 0;
             for ii = 1:size(fieldnames(final),1)
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     % uncomment & edit me if you want to examine a subset
                     % of neurons! make sure to do in both parts of else /
                     % elseif statement!!
-                    % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
+                    ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the

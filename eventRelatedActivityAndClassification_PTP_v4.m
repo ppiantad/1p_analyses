@@ -119,7 +119,7 @@ for ii = 1:size(fieldnames(final),1)
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
+        [BehavData,trials,varargin_identity_class]=TrialFilter(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
         
         % uncomment if you want to test specifically for particular ranges
         % during shock test

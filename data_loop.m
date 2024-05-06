@@ -52,7 +52,7 @@ for ii = 1:size(fieldnames(final),1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials,varargin]=TrialFilter(BehavData, 'SHK', 1);
+        [BehavData,trials,varargin]=TrialFilter(BehavData, 'SHK', 1, 'BLOCK', 2, 'BLOCK', 3);
         trials = cell2mat(trials);
         behav_tbl_temp{ii,:} = BehavData;
         % % BehavData = BehavData(BehavData.shockIntensity >= 0.08 & BehavData.shockIntensity <= 0.13, :);
