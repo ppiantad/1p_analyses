@@ -2,7 +2,7 @@ iter = 0;
 
 
 %%
-num_iterations = 1; 
+num_iterations = 5; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 % iter = 0;
 uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
@@ -11,6 +11,8 @@ uv.dt = 0.1; %what is your frame rate
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 counts = 0;
 num_comparisons = 2; 
+epoc_to_align = 'choiceTime';
+
 
 ca_data_type = "C_raw"; % C % C_raw
 % CNMFe_data.C_raw: CNMFe traces
@@ -20,8 +22,7 @@ ca_data_type = "C_raw"; % C % C_raw
 use_normalized_time = 0;
 shuffle_confirm = 1; %1 if you want shuffle, 0 if you don't
 
-session_to_analyze = 'Pre_RDT_RM';
-epoc_to_align = 'choiceTime';
+session_to_analyze = 'RM_D1';
 
 % these are mice that did not complete the entire session - kinda have to
 % toss them to do some comparisons during RDT
@@ -67,15 +68,20 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
+                    
+                    % use if you want to check an event without copious
+                    % other filters
+                    % ca = ca(respClass_all_array_mouse{ii, 3} == 1, :);
+                    
                     % uncomment & edit me if you want to examine a subset
                     % of neurons! make sure to do in both parts of else /
                     % elseif statement!!
-                    ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the
@@ -117,22 +123,27 @@ for num_iteration = 1:num_iterations
 
 
             % disp(['iter = ' string(iter)])
-        elseif num_comparison == 2 || num_comparison == 1  %num_comparison == 2 %num_comparison == 2 || num_comparison == 1
+        elseif num_comparison == 2 || num_comparison == 1  %num_comparison == 2 || num_comparison == 1 %use this one on the left if you want to do shuffle vs shuffle
             neuron_num = 0;
             for ii = 1:size(fieldnames(final),1)
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
+                    
+                    % use if you want to check an event without copious
+                    % other filters
+                    % ca = ca(respClass_all_array_mouse{ii, 3} == 1, :);                   
+                   
                     % uncomment & edit me if you want to examine a subset
                     % of neurons! make sure to do in both parts of else /
                     % elseif statement!!
-                    ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the
@@ -257,69 +268,47 @@ for uu = 1:size(caTraceTrials_mouse_iterations, 2)
     end
     accuracy_per_iteration{iter}(uu) = {accuracy_at_loop};
     cross_mouse_accuracy_per_iteration{iter}(:, uu) = mean(accuracy_at_loop, 2);
+    sem_accuracy_per_iteration{iter}(:, uu) = std(accuracy_at_loop,[],2)/sqrt(size(accuracy_at_loop, 2));
+    cross
     clear accuracy_at_loop
 end
 
 
 
 
-%% old - for one mouse. likely to delete once decoding_all_beta is finished
-select_mouse = 'BLA_Insc_28';
-
-select_mouse_index = find(strcmp(animalIDs, select_mouse));
-
-
-
-
-trials_per_mouse_decoding = trials_per_mouse(select_mouse_index,:);
-
-
-
-for uu = 1:size(caTraceTrials_mouse_iterations, 2)
-    caTraceTrials_mouse_current = caTraceTrials_mouse_iterations{:,uu};
-    caTraceTrials_mouse_decoding = caTraceTrials_mouse_current(select_mouse_index,:);
-    
-    [trimmed_concatenatedColumns_offsets,...
-        trimmed_concatenatedColumns_time_offsets,...
-        trimmed_concatenatedColumns_trials_offsets,...
-        trimmed_concatenatedEvents_offsets]...
-        = flatten_data_for_offset_decoding_fn(caTraceTrials_mouse_decoding, ts1, num_comparisons);
-
-    % additions from Ruairi 01/12/2024
-    k = 10;
-    accuracy_by_offset = zeros(size(trimmed_concatenatedColumns_offsets, 1), 1);
-    numTrees = 100; % Number of decision trees in the forest
-    for p = 1:size(trimmed_concatenatedColumns_offsets, 1)
-        offset_1_GCAMP = cell2mat(trimmed_concatenatedColumns_offsets(p,:));
-        offset_1_events_offset = cell2mat(trimmed_concatenatedEvents_offsets(p,:));
-        offset_1_trials_offset = cell2mat(trimmed_concatenatedColumns_trials_offsets(p,:));
-        offset_1_time_offset = cell2mat(trimmed_concatenatedColumns_time_offsets(p,:));
-
-        y = offset_1_events_offset(:,1);
-        y = y -1;
-        X = offset_1_GCAMP;
-        X = zscore(X);
-        idx = randperm(size(X, 1));
-        X = X(idx, :);
-        y = y(idx,:);
-        cv = cvpartition(size(X, 1),"KFold", k);
-
-
-        for i = 1:k
-            xTrain = X(cv.training(i),:);
-            yTrain = y(cv.training(i),:);
-            xTest = X(cv.test(i), :);
-            yTest = y(cv.test(i), :);
-            % model = TreeBagger(numTrees, xTrain, yTrain, 'Method', 'classification');
-            % model = fitglm(xTrain, yTrain, 'Distribution', 'binomial' , 'Link', 'logit');
-            model = fitcnb(xTrain, yTrain);
-            yPred = predict(model,xTest);
-            accuracy(i) = sum(yPred == yTest)/numel(yTest);
-        end
-        accuracy_by_offset(p) = mean(accuracy);
+%% plot figure - specifics need to be tailored to decoding above
+for zz = 1:size(accuracy_per_iteration, 2)
+    current_iter = accuracy_per_iteration{1, zz}
+    for qq = 1:size(current_iter, 2)
+        sem_data{zz}(:, qq) = std(current_iter{1, qq}, [], 2)/sqrt(size(current_iter{1, qq},2));
     end
-
-    figure; plot(ts1, accuracy_by_offset);
-    accuracy_at_loop(:, uu) = accuracy_by_offset;
-
 end
+
+
+[concatenatedTable_all] = get_median_choice_and_collect_fn(behav_tbl_iter)
+for zz = 1:size(concatenatedTable_all, 2)
+    temp_table = concatenatedTable_all{zz}; 
+    % median_choice_time_all(zz) = median(temp_table.choiceTime - temp_table.stTime);
+    median_collect_time_all(zz) = median(temp_table.collectionTime - temp_table.choiceTime);
+    median_start_time_all(zz) = median(temp_table.stTime - temp_table.choiceTime);
+    % median_choice_time_block_2_all(zz) = median(temp_table.choiceTime(temp_table.Block == 2) - temp_table.stTime(temp_table.Block == 2));
+    % median_choice_time_block_3_all(zz) = median(temp_table.choiceTime(temp_table.Block == 3) - temp_table.stTime(temp_table.Block == 3));
+    clear temp_table
+end
+
+
+
+
+figure;
+shadedErrorBar(ts1, nanmean(cross_mouse_accuracy_per_iteration{1, 1}, 2), nanmean(sem_data{1, 1}, 2), 'lineProps', {'color', 'k'});
+hold on;shadedErrorBar(ts1, nanmean(cross_mouse_accuracy_per_iteration{1, 2}, 2), nanmean(sem_data{1, 2}, 2), 'lineProps', {'color', 'g'});
+hold on;shadedErrorBar(ts1, nanmean(cross_mouse_accuracy_per_iteration{1, 3}, 2), nanmean(sem_data{1, 3}, 2), 'lineProps', {'color', 'c'});
+hold on;shadedErrorBar(ts1, nanmean(cross_mouse_accuracy_per_iteration{1, 4}, 2), nanmean(sem_data{1, 4}, 2), 'lineProps', {'color', 'b'});
+hold on;shadedErrorBar(ts1, nanmean(cross_mouse_accuracy_per_iteration{1, 5}, 2), nanmean(sem_data{1, 5}, 2), 'lineProps', {'color', [.7 .7 .7]});
+
+
+xline(0);
+xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
+xline(median_collect_time_all, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'all neurons', 'pre-choice active', 'post-choice reward active', 'consumption active', 'shuffle (consumption shuff vs. consumption shuff)'}, 'Location','northwest')
