@@ -2,7 +2,7 @@ iter = 0;
 
 
 %%
-num_iterations = 5; 
+num_iterations = 1; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 % iter = 0;
 uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
@@ -61,14 +61,14 @@ for num_iteration = 1:num_iterations
     filter_names_idx = cellfun(@ischar,event_to_analyze);
     filter_strings = string(event_to_analyze(filter_names_idx));
     for num_comparison = 1:num_comparisons
-        if num_comparison == 3 %num_comparison == 3 num_comparison == 1 % if you want to force shuffle, swap to num_comparisons 3 (if doing 2 comparisons) and change the shuffle below. prob should make this a little more intuitive in the future
+        if num_comparison == 1 %num_comparison == 3 num_comparison == 1 % if you want to force shuffle, swap to num_comparisons 3 (if doing 2 comparisons) and change the shuffle below. prob should make this a little more intuitive in the future
             neuron_num = 0;
             % neuron_sem = zeros(1, size(ts1, 2));
             for ii = 1:size(fieldnames(final),1)
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     
@@ -81,7 +81,7 @@ for num_iteration = 1:num_iterations
                     % elseif statement!!
                     % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the
@@ -123,13 +123,13 @@ for num_iteration = 1:num_iterations
 
 
             % disp(['iter = ' string(iter)])
-        elseif num_comparison == 2 || num_comparison == 1  %num_comparison == 2 || num_comparison == 1 %use this one on the left if you want to do shuffle vs shuffle
+        elseif num_comparison == 2   %num_comparison == 2 || num_comparison == 1 %use this one on the left if you want to do shuffle vs shuffle
             neuron_num = 0;
             for ii = 1:size(fieldnames(final),1)
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -143,7 +143,7 @@ for num_iteration = 1:num_iterations
                     % elseif statement!!
                     % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the
@@ -201,14 +201,46 @@ for num_iteration = 1:num_iterations
     zall_mouse_iterations(1, num_iteration) = {zall_mouse};
 end
 
+data_for_decoding = caTraceTrials_mouse_iterations;
 
+%% attempting to focus decoding on particular epoch
+
+ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
+relevant_period = [1 3]
+sub_window_idx = ts1 >= relevant_period(1) & ts1 <= relevant_period(2);
+
+for gg = 1:size(caTraceTrials_mouse_iterations{1, 1}, 1)
+    current_level = caTraceTrials_mouse_iterations{1, 1}(gg,:);
+    for hh = 1:size(current_level, 2)
+        
+        for jj = 1:size(current_level{1, hh})
+            cell_level = current_level{1, hh}{jj};
+            for kk = 1:size(cell_level, 1)
+                cell_mean = mean(cell_level(:, sub_window_idx), 2);
+                caTraceTrials_mouse_iterations_means{1,1}{gg, hh}{1, kk} = cell_mean;
+            end
+            
+        end
+    end
+
+
+
+end
+
+ts1 = 1;
+
+data_for_decoding = caTraceTrials_mouse_iterations_means;
+
+
+
+%%
 
 caTraceTrials_current = []
 empty_rows_indices = []
 
 
-for uu = 1:size(caTraceTrials_mouse_iterations, 2)
-    caTraceTrials_current = caTraceTrials_mouse_iterations{:,uu};
+for uu = 1:size(data_for_decoding, 2)
+    caTraceTrials_current = data_for_decoding{:,uu};
     % caTraceTrials_current(all(cellfun(@isempty,caTraceTrials_current),2), : ) = [];
     % check if there are mice with no data - delete these & the
     % corresponding related arrays
@@ -229,7 +261,7 @@ for uu = 1:size(caTraceTrials_mouse_iterations, 2)
             = flatten_data_for_offset_decoding_fn(caTraceTrials_mouse_decoding, ts1, num_comparisons);
 
         % additions from Ruairi 01/12/2024
-        k = 10;
+        k = 5; %number of cross-validation folds 10
         accuracy_by_offset = zeros(size(trimmed_concatenatedColumns_offsets, 1), 1);
         numTrees = 100; % Number of decision trees in the forest
         for p = 1:size(trimmed_concatenatedColumns_offsets, 1)
@@ -269,7 +301,7 @@ for uu = 1:size(caTraceTrials_mouse_iterations, 2)
     accuracy_per_iteration{iter}(uu) = {accuracy_at_loop};
     cross_mouse_accuracy_per_iteration{iter}(:, uu) = mean(accuracy_at_loop, 2);
     sem_accuracy_per_iteration{iter}(:, uu) = std(accuracy_at_loop,[],2)/sqrt(size(accuracy_at_loop, 2));
-    cross
+
     clear accuracy_at_loop
 end
 
