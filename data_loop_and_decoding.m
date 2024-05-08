@@ -203,29 +203,49 @@ end
 
 data_for_decoding = caTraceTrials_mouse_iterations;
 
-%% attempting to focus decoding on particular epoch
+%% attempting to focus decoding on particular epoch. this section takes the mean activity in a "relevant_period" (pre-choice, etc) for each neuron to be decoded, plus its shuffle. 
+% The final data structure is the exact same as
+% "caTraceTrials_mouse_iterations", except each final level contains means,
+% not all data from the time series. one critical thing is that, since the
+% code below expects timeseries (not mean), the "ts1" variable which
+% represents the time window must be set to "1", meaning you are
+% effectively decoding 1 "sample" (the means)
 
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
-relevant_period = [1 3]
+relevant_period = [-8 -7]
 sub_window_idx = ts1 >= relevant_period(1) & ts1 <= relevant_period(2);
+
+% Preallocate memory for caTraceTrials_mouse_iterations_means
+caTraceTrials_mouse_iterations_means = cell(1, 1);
 
 for gg = 1:size(caTraceTrials_mouse_iterations{1, 1}, 1)
     current_level = caTraceTrials_mouse_iterations{1, 1}(gg,:);
     for hh = 1:size(current_level, 2)
         
-        for jj = 1:size(current_level{1, hh})
-            cell_level = current_level{1, hh}{jj};
-            for kk = 1:size(cell_level, 1)
+        % Check if current_level{1, hh} contains a cell array
+        if iscell(current_level{1, hh})
+            for jj = 1:size(current_level{1, hh}, 2)
+                cell_level = current_level{1, hh}{jj};
+
                 cell_mean = mean(cell_level(:, sub_window_idx), 2);
-                caTraceTrials_mouse_iterations_means{1,1}{gg, hh}{1, kk} = cell_mean;
+                
+                % Initialize if necessary
+                if isempty(caTraceTrials_mouse_iterations_means{1, 1})
+                    caTraceTrials_mouse_iterations_means{1, 1} = cell(size(caTraceTrials_mouse_iterations{1, 1}));
+                end
+                
+                % Initialize if necessary at the gg, hh level
+                if isempty(caTraceTrials_mouse_iterations_means{1, 1}{gg, hh})
+                    caTraceTrials_mouse_iterations_means{1, 1}{gg, hh} = cell(size(current_level{1, hh}));
+                end
+                
+                caTraceTrials_mouse_iterations_means{1, 1}{gg, hh}{jj} = cell_mean;
             end
-            
         end
     end
-
-
-
 end
+
+
 
 ts1 = 1;
 
