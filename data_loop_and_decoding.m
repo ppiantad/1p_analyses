@@ -81,7 +81,7 @@ for num_iteration = 1:num_iterations
                     % elseif statement!!
                     % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the
@@ -123,7 +123,7 @@ for num_iteration = 1:num_iterations
 
 
             % disp(['iter = ' string(iter)])
-        elseif num_comparison == 2   %num_comparison == 2 || num_comparison == 1 %use this one on the left if you want to do shuffle vs shuffle
+        elseif num_comparison == 2 %num_comparison == 2 || num_comparison == 1 %use this one on the left if you want to do shuffle vs shuffle
             neuron_num = 0;
             for ii = 1:size(fieldnames(final),1)
                 currentanimal = char(animalIDs(ii));
@@ -143,7 +143,7 @@ for num_iteration = 1:num_iterations
                     % elseif statement!!
                     % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the
@@ -213,7 +213,7 @@ data_for_decoding = caTraceTrials_mouse_iterations;
 % effectively decoding 1 "sample" (the means)
 
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
-relevant_period = [-8 -7]
+relevant_period = [-4 0]
 sub_window_idx = ts1 >= relevant_period(1) & ts1 <= relevant_period(2);
 
 % Preallocate memory for caTraceTrials_mouse_iterations_means
@@ -247,7 +247,7 @@ for gg = 1:size(caTraceTrials_mouse_iterations{1, 1}, 1)
 end
 
 
-
+iter = iter+1;
 ts1 = 1;
 
 data_for_decoding = caTraceTrials_mouse_iterations_means;

@@ -198,9 +198,27 @@ uu = 1
 % Loop over the upper triangular part of the correlation matrix
 for i = 1:matrix_size
     for j = i+1:matrix_size % Start from i+1 to exclude the diagonal
-        post_choice_ensemble_corr_overall(uu) = post_choice_correl_matrix(i, ['Number of negative correlations: ', num2str(post_choice_negative_count)]);
-disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(post_choice_no_correlation_count)]);
+        post_choice_ensemble_corr_overall(uu) = post_choice_correl_matrix(i, j);
+        uu = uu+1;
+        % Check if p-value is less than 0.01
+        if post_choice_p_value_matrix(i, j) < alpha
+            if post_choice_correl_matrix(i, j) > 0
+                post_choice_positive_count = post_choice_positive_count + 1;
+            elseif post_choice_correl_matrix(i, j) < 0
+                post_choice_negative_count = post_choice_negative_count + 1;
+            end
+        else
+            post_choice_no_correlation_count = post_choice_no_correlation_count + 1;
+        end
+    end
+end
 
+post_choice_comparisons_possible = [post_choice_positive_count + post_choice_negative_count + post_choice_no_correlation_count];
+
+
+disp(['Number of positive correlations: ', num2str(post_choice_positive_count)]);
+disp(['Number of negative correlations: ', num2str(post_choice_negative_count)]);
+disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(post_choice_no_correlation_count)]);
 % Assuming you have positive_count, negative_count, and no_correlation_count variables
 
 % Define data for the stacked bar plot

@@ -35,12 +35,12 @@ exclusive_inhibited_session_3 = respClass_all_array{1,1} ~= 2 & respClass_all_ar
 exclusive_inhibited_session_3_sum = sum(exclusive_inhibited_session_3);
 
 % more conservative approach below
-% exclusive_activated_session_1 = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 3;
-% exclusive_activated_session_1_sum = sum(exclusive_activated_session_1);
-% exclusive_activated_session_2 = respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 1 & respClass_all_array{1,3} == 3;
-% exclusive_activated_session_2_sum = sum(exclusive_activated_session_2);
-% exclusive_activated_session_3 = respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 1;
-% exclusive_activated_session_3_sum = sum(exclusive_activated_session_3);
+exclusive_activated_session_1 = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 3;
+exclusive_activated_session_1_sum = sum(exclusive_activated_session_1);
+exclusive_activated_session_2 = respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 1 & respClass_all_array{1,3} == 3;
+exclusive_activated_session_2_sum = sum(exclusive_activated_session_2);
+exclusive_activated_session_3 = respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 1;
+exclusive_activated_session_3_sum = sum(exclusive_activated_session_3);
 
 
 not_active = neuron_num - (exclusive_activated_session_1_sum + exclusive_activated_session_2_sum + exclusive_activated_session_3_sum);
