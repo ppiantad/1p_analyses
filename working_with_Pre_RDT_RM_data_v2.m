@@ -25,6 +25,15 @@ exclusive_activated_session_2_sum = sum(exclusive_activated_session_2);
 exclusive_activated_session_3 = respClass_all_array{1,1} ~= 1 & respClass_all_array{1,2} ~= 1 & respClass_all_array{1,3} == 1;
 exclusive_activated_session_3_sum = sum(exclusive_activated_session_3);
 
+
+
+exclusive_inhibited_session_1 = respClass_all_array{1,1} == 2 & respClass_all_array{1,2} ~= 2 & respClass_all_array{1,3} ~= 2;
+exclusive_inhibited_session_1_sum = sum(exclusive_inhibited_session_1);
+exclusive_inhibited_session_2 = respClass_all_array{1,1} ~= 2 & respClass_all_array{1,2} == 2 & respClass_all_array{1,3} ~= 2;
+exclusive_inhibited_session_2_sum = sum(exclusive_inhibited_session_2);
+exclusive_inhibited_session_3 = respClass_all_array{1,1} ~= 2 & respClass_all_array{1,2} ~= 2 & respClass_all_array{1,3} == 2;
+exclusive_inhibited_session_3_sum = sum(exclusive_inhibited_session_3);
+
 % more conservative approach below
 % exclusive_activated_session_1 = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 3;
 % exclusive_activated_session_1_sum = sum(exclusive_activated_session_1);
@@ -207,6 +216,18 @@ xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
 legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
 
+
+
+
+figure;
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(exclusive_inhibited_session_1==1, :)), nanmean(neuron_sem_array{1, 1}(exclusive_inhibited_session_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(exclusive_inhibited_session_2==1, :)), nanmean(neuron_sem_array{1, 1}(exclusive_inhibited_session_2==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(exclusive_inhibited_session_3==1, :)), nanmean(neuron_sem_array{1, 1}(exclusive_inhibited_session_3==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
 
 %%
 % Get AUCs for the relevant periods for the 3 defined events
