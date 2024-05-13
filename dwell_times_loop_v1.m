@@ -2,7 +2,7 @@
 fs_cam = 30; %set sampling rate according to camera, this is hard coded for now
 
 animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'RDT_D1_CNO';
+session_to_analyze = 'RDT_D1';
 
 reward_cup_time = [];
 right_screen_time = [];
