@@ -6,8 +6,10 @@
 % time variable
 
 
+block_1_only_real_trials_timestamps = BehavData.stTime((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.Block == 1);
+
 block_1_length = BehavData.TrialPossible(BehavData.Block == 1);
-block_1_ind = SLEAP_data.idx_time > block_1_length(1) & SLEAP_data.idx_time < block_1_length(end);
+block_1_ind = SLEAP_data.idx_time > block_1_only_real_trials_timestamps(1) & SLEAP_data.idx_time < block_1_only_real_trials_timestamps(end);
 
 X_heatmap = SLEAP_data.x_pix(block_1_ind);
 Y_heatmap = SLEAP_data.y_pix(block_1_ind);
@@ -60,6 +62,35 @@ title('Mouse Heatmap');
 xlabel('X Coordinate');
 ylabel('Y Coordinate');
 
+% Hold on to current axis
+hold on;
+
+% Define the size of the heatmap
+heatmap_size = [size(histogram2D, 1), size(histogram2D, 2)];
+
+% Define the size of the squares and circles relative to the heatmap
+square_size_relative = min(heatmap_size) * 0.1; % Adjust this factor as needed
+circle_radius_relative = min(heatmap_size) * 0.05; % Adjust this factor as needed
+
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        % Scale circle center and radius to fit within heatmap dimensions
+        circle_center_scaled = shapeData{k}.Center .* heatmap_size / max(heatmap_size);
+        circle_radius_scaled = shapeData{k}.Radius * circle_radius_relative;
+        viscircles(circle_center_scaled, circle_radius_scaled);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        % Scale square center and size to fit within heatmap dimensions
+        square_center_scaled = shapeData{k}.Center .* heatmap_size / max(heatmap_size);
+        square_size_scaled = shapeData{k}.Size * square_size_relative;
+        rectangle('Position', [square_center_scaled - square_size_scaled / 2, square_size_scaled], 'EdgeColor', 'b');
+    end
+end
+
+% Turn off hold
+hold off;
+
+
 %%
 
 block_3_length = BehavData.TrialPossible(BehavData.Block == 3);
@@ -81,16 +112,19 @@ colormap hot
 
 
 %%
-block_1_length = BehavData.TrialPossible(BehavData.Block == 1);
-block_1_ind = SLEAP_data.idx_time > block_1_length(1) & SLEAP_data.idx_time < block_1_length(end);
+block_1_only_real_trials_timestamps = BehavData.stTime((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.Block == 1);
 
+block_1_length = BehavData.TrialPossible(BehavData.Block == 1);
+block_1_ind = SLEAP_data.idx_time > block_1_only_real_trials_timestamps(1) & SLEAP_data.idx_time < block_1_only_real_trials_timestamps(end);
 X_heatmap_block_1 = SLEAP_data.x_pix(block_1_ind);
 Y_heatmap_block_1 = SLEAP_data.y_pix(block_1_ind);
 
 
 
+block_3_only_real_trials_timestamps = BehavData.stTime((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.Block == 3);
+
 block_3_length = BehavData.TrialPossible(BehavData.Block == 3);
-block_3_ind = SLEAP_data.idx_time > block_3_length(1) & SLEAP_data.idx_time < block_3_length(end);
+block_3_ind = SLEAP_data.idx_time > block_3_only_real_trials_timestamps(1) & SLEAP_data.idx_time < block_3_only_real_trials_timestamps(end);
 
 X_heatmap_block_3 = SLEAP_data.x_pix(block_3_ind);
 Y_heatmap_block_3 = SLEAP_data.y_pix(block_3_ind);
