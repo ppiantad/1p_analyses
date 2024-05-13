@@ -1,12 +1,14 @@
 
 
 % % use zall array if you want to check how trials compare across block
-neuron_mean_concat = horzcat(zall_mean_all_array{:});
+% neuron_mean_concat = horzcat(zall_mean_all_array{:});
+
+% neuron_mean_concat = horzcat(neuron_mean_array{:});
 
 % % use neuron_mean_all_unnorm if you want to check how things differ across
 % % time
-% neuron_mean_concat = horzcat(neuron_mean_all_unnormalized{:});
-% neuron_mean_concat = zscore(neuron_mean_concat);
+neuron_mean_concat = horzcat(neuron_mean_all_unnormalized{:});
+neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
 
 % neuron_mean_concat = neuron_mean_concat_PCA;
 

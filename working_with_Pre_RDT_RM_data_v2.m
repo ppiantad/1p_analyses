@@ -25,7 +25,8 @@ exclusive_activated_session_2_sum = sum(exclusive_activated_session_2);
 exclusive_activated_session_3 = respClass_all_array{1,1} ~= 1 & respClass_all_array{1,2} ~= 1 & respClass_all_array{1,3} == 1;
 exclusive_activated_session_3_sum = sum(exclusive_activated_session_3);
 
-
+inhibited_to_inhibited_all = respClass_all_array{1,1} == 2 & respClass_all_array{1,2} == 2 & respClass_all_array{1,3} == 2;
+inhibited_to_inhibited_sum = sum(inhibited_to_inhibited_all);
 
 exclusive_inhibited_session_1 = respClass_all_array{1,1} == 2 & respClass_all_array{1,2} ~= 2 & respClass_all_array{1,3} ~= 2;
 exclusive_inhibited_session_1_sum = sum(exclusive_inhibited_session_1);
@@ -35,12 +36,12 @@ exclusive_inhibited_session_3 = respClass_all_array{1,1} ~= 2 & respClass_all_ar
 exclusive_inhibited_session_3_sum = sum(exclusive_inhibited_session_3);
 
 % more conservative approach below
-exclusive_activated_session_1 = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 3;
-exclusive_activated_session_1_sum = sum(exclusive_activated_session_1);
-exclusive_activated_session_2 = respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 1 & respClass_all_array{1,3} == 3;
-exclusive_activated_session_2_sum = sum(exclusive_activated_session_2);
-exclusive_activated_session_3 = respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 1;
-exclusive_activated_session_3_sum = sum(exclusive_activated_session_3);
+% exclusive_activated_session_1 = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 3;
+% exclusive_activated_session_1_sum = sum(exclusive_activated_session_1);
+% exclusive_activated_session_2 = respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 1 & respClass_all_array{1,3} == 3;
+% exclusive_activated_session_2_sum = sum(exclusive_activated_session_2);
+% exclusive_activated_session_3 = respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 1;
+% exclusive_activated_session_3_sum = sum(exclusive_activated_session_3);
 
 
 not_active = neuron_num - (exclusive_activated_session_1_sum + exclusive_activated_session_2_sum + exclusive_activated_session_3_sum);
@@ -82,7 +83,12 @@ for row = 1:size(respClass_all_array_mouse, 1)
     respClass_all_array_mouse_consumption{row} = col_comparison_consumption;
 end
 
+%%
+excited_to_inhibited_all = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 2 & respClass_all_array{1,3} == 2;
+excited_to_inhibited_sum = sum(excited_to_inhibited_all);
 
+inhibited_to_excited_all = respClass_all_array{1,1} == 2 & respClass_all_array{1,2} == 1 & respClass_all_array{1,3} == 1;
+inhibited_to_excited_sum = sum(inhibited_to_excited_all);
 
 %%
 % Example 2: Nested pie chart with custom colors for each wedge
@@ -156,6 +162,25 @@ figure; donutchart(inner_pie, 'InnerRadius', 0.5)
 figure; pie(inner_pie)
 
 
+clear inner_pie
+not_active_alternate = neuron_num - (exclusive_inhibited_session_1_sum + exclusive_inhibited_session_2_sum + exclusive_inhibited_session_3_sum + inhibited_to_inhibited_sum);
+
+% Initialize data points
+inner_pie = [exclusive_inhibited_session_1_sum/neuron_num,...
+            
+            exclusive_inhibited_session_2_sum/neuron_num,...
+            
+            exclusive_inhibited_session_3_sum/neuron_num,...
+          
+            
+            
+            not_active_alternate/neuron_num];
+
+figure; donutchart(inner_pie, 'InnerRadius', 0.5)
+figure; pie(inner_pie)
+
+
+
 
 %%
 %These data can be used to plot the median or mean choice
@@ -215,6 +240,7 @@ xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
 xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
 legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+ylim([-0.8 0.8]);
 
 
 
@@ -228,6 +254,7 @@ xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
 xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
 legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+ylim([-0.8 0.8]);
 
 %%
 % Get AUCs for the relevant periods for the 3 defined events

@@ -22,7 +22,7 @@ ca_data_type = "C_raw"; % C % C_raw
 use_normalized_time = 0;
 shuffle_confirm = 1; %1 if you want shuffle, 0 if you don't
 
-session_to_analyze = 'RM_D1';
+session_to_analyze = 'Pre_RDT_RM';
 
 % these are mice that did not complete the entire session - kinda have to
 % toss them to do some comparisons during RDT
@@ -37,6 +37,7 @@ clear neuron_mean neuron_sem neuron_num zall_mean zall_array zall_to_BL_array zs
 animalIDs = (fieldnames(final));
 
 iter = iter + 1;
+
 for num_iteration = 1:num_iterations
     fprintf('The current iteration is: %d\n', num_iteration);
 
@@ -68,7 +69,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     
@@ -81,7 +82,7 @@ for num_iteration = 1:num_iterations
                     % elseif statement!!
                     % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the
@@ -129,7 +130,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -143,7 +144,7 @@ for num_iteration = 1:num_iterations
                     % elseif statement!!
                     % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                     % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
                     % uncomment below if you want to examine a subset of
                     % neurons that were not responsive to any of the
@@ -217,35 +218,35 @@ relevant_period = [-4 0]
 sub_window_idx = ts1 >= relevant_period(1) & ts1 <= relevant_period(2);
 
 % Preallocate memory for caTraceTrials_mouse_iterations_means
-caTraceTrials_mouse_iterations_means = cell(1, 1);
+caTraceTrials_mouse_iterations_means = cell(1, size(caTraceTrials_mouse_iterations, 2));
+for ff = 1:size(caTraceTrials_mouse_iterations, 2)
+    for gg = 1:size(caTraceTrials_mouse_iterations{1, ff}, 1)
+        current_level = caTraceTrials_mouse_iterations{1, ff}(gg,:);
+        for hh = 1:size(current_level, 2)
 
-for gg = 1:size(caTraceTrials_mouse_iterations{1, 1}, 1)
-    current_level = caTraceTrials_mouse_iterations{1, 1}(gg,:);
-    for hh = 1:size(current_level, 2)
-        
-        % Check if current_level{1, hh} contains a cell array
-        if iscell(current_level{1, hh})
-            for jj = 1:size(current_level{1, hh}, 2)
-                cell_level = current_level{1, hh}{jj};
+            % Check if current_level{1, hh} contains a cell array
+            if iscell(current_level{1, hh})
+                for jj = 1:size(current_level{1, hh}, 2)
+                    cell_level = current_level{1, hh}{jj};
 
-                cell_mean = mean(cell_level(:, sub_window_idx), 2);
-                
-                % Initialize if necessary
-                if isempty(caTraceTrials_mouse_iterations_means{1, 1})
-                    caTraceTrials_mouse_iterations_means{1, 1} = cell(size(caTraceTrials_mouse_iterations{1, 1}));
+                    cell_mean = mean(cell_level(:, sub_window_idx), 2);
+
+                    % Initialize if necessary
+                    if isempty(caTraceTrials_mouse_iterations_means{1, 1})
+                        caTraceTrials_mouse_iterations_means{1, 1} = cell(size(caTraceTrials_mouse_iterations{1, ff}));
+                    end
+
+                    % Initialize if necessary at the gg, hh level
+                    if isempty(caTraceTrials_mouse_iterations_means{1, 1}{gg, hh})
+                        caTraceTrials_mouse_iterations_means{1, 1}{gg, hh} = cell(size(current_level{1, hh}));
+                    end
+
+                    caTraceTrials_mouse_iterations_means{1, ff}{gg, hh}{jj} = cell_mean;
                 end
-                
-                % Initialize if necessary at the gg, hh level
-                if isempty(caTraceTrials_mouse_iterations_means{1, 1}{gg, hh})
-                    caTraceTrials_mouse_iterations_means{1, 1}{gg, hh} = cell(size(current_level{1, hh}));
-                end
-                
-                caTraceTrials_mouse_iterations_means{1, 1}{gg, hh}{jj} = cell_mean;
             end
         end
     end
 end
-
 
 iter = iter+1;
 ts1 = 1;
