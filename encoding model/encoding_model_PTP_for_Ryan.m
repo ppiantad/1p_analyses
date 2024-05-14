@@ -1,7 +1,5 @@
-
-
-load('BLA_Insc_24_SLEAP_data.mat')
-load('BLA_Insc_24_Ca_data.mat')
+load('BLA_Insc_24_RDT_D1_SLEAP_data.mat')
+load('BLA_Insc_24_RDT_D1_Ca_data.mat')
 
 %%
 
@@ -348,24 +346,44 @@ figure; plot(sum_coeffs); title('overall kernel')
 
 
 
-% encoding_output.coefs = sgolayfilt(encoding_output.coefs(1, :), 9, 21);
-% figure; plot(encoding_output.coefs(1, 2:26));
-% figure; plot(encoding_output.coefs(1, 27:51));
-% figure; plot(encoding_output.coefs(1, 52:76));
-% figure; plot(encoding_output.coefs(1, 77:101));
-% figure; plot(encoding_output.coefs(1, 102:126));
-% 
-% 
-% 
-% first = encoding_output.coefs(1, 2:26);
-% second = encoding_output.coefs(1, 27:51);
-% third = encoding_output.coefs(1, 52:76);
-% fourth = encoding_output.coefs(1, 77:101);
-% fifth = encoding_output.coefs(1, 102:126);
-% all_coefs = [first; second; third; fourth; fifth];
-% sum_coeffs = sum(all_coefs);
-% 
-% figure; plot(sum_coeffs);
-
 %%
+scaled_coefs = b_final(:,2:end).*x_basic;
+
+scaled_coefs_means = mean(scaled_coefs);
+
+
+first_kernel = mean(scaled_coefs(:, 101:125), 2);
+
+figure; plot(first_kernel)
+xline(Times_RewardCollection)
+
+
+begin_val = 1;
+for preds = 1:size(preds_cells, 2)
+    length_current_pred = length(preds_cells{preds});
+  
+    figure;
+    plot(scaled_coefs_means(1, begin_val:(length_current_pred*preds)));
+    scaled_coefs_by_predictors{preds} = scaled_coefs_means(1, begin_val:(length_current_pred*preds));
+    % title(sprintf('Coefs %d to Coefs %d\n', begin_val, (length_current_pred*preds)+1));
+    begin_val = begin_val + length(preds_cells{preds});
+    title(strrep(cons(preds), '_', ' '));
+end
+
+
+% empty matrix to store the concatenated coefficients
+concatenated_scaled_coefs = [];
+
+
+for preds = 1:numel(coefs_by_predictors)
+    % Check if the cell is empty
+    if ~isempty(coefs_by_predictors{preds})
+        % Concatenate the contents horizontally
+        concatenated_scaled_coefs = [concatenated_scaled_coefs; scaled_coefs_by_predictors{preds}];
+    end
+end
+
+sum_coeffs = sum(concatenated_scaled_coefs);
+
+figure; plot(sum_coeffs); title('overall kernel')
 

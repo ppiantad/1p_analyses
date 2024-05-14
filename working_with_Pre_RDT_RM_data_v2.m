@@ -83,6 +83,10 @@ for row = 1:size(respClass_all_array_mouse, 1)
     respClass_all_array_mouse_consumption{row} = col_comparison_consumption;
 end
 
+
+RM_D1_vs_Pre_RDT_RM_ensemble_logical_indices = [exclusive_activated_session_1; exclusive_activated_session_2; exclusive_activated_session_3; exclusive_inhibited_session_1; ; exclusive_inhibited_session_2; exclusive_inhibited_session_3];
+
+
 %%
 excited_to_inhibited_all = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 2 & respClass_all_array{1,3} == 2;
 excited_to_inhibited_sum = sum(excited_to_inhibited_all);

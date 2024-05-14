@@ -19,7 +19,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 
 epoc_to_align = 'choiceTime';
 
-neuron_num_to_model = 46; %50
+neuron_num_to_model = 2; %50
 
 ca = final.(targetAnimal).(session_to_analyze).CNMFe_data.(ca_data_type);
 zscored_SLEAP_data_vel_filtered_session = final_SLEAP.(targetAnimal).(session_to_analyze).zscored_SLEAP_data_velocity;
@@ -30,6 +30,18 @@ uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [
 uv.BLper = [-10 -5];
 BehavData = final.(targetAnimal).(session_to_analyze).uv.BehavData;
 % BehavData = BehavData(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3, :);
+
+% Check if 'type_binary' exists in the column headers
+isTypeBinary = ismember('type_binary', BehavData.Properties.VariableNames);
+
+if ~isTypeBinary
+    % Add a new column with header 'type_binary' containing some default values
+    defaultValues = NaN(height(BehavData), 1); % Change NaN to whatever default value you need
+    BehavData = addvars(BehavData, defaultValues, 'NewVariableNames', 'type_binary');
+    disp('The column header "type_binary" was added to the table.');
+else
+    disp('The column header "type_binary" already exists in the table.');
+end
 
 frames3 = final.(targetAnimal).(session_to_analyze).time;
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -116,9 +128,13 @@ cons={'Times_TrialStart','Times_Large_no_shk','Times_Large_yes_shk','Times_Small
 eTS = BehavData.(epoc_to_align); %get time stamps
 
 % if you want to check a specific event, uncomment below and re-run
-% eTS = large_aborts; 
+% eTS = valid_rew_collect; 
 
 unitTrace = ca(neuron_num_to_model,:); %get trace
+
+%uncomment below if you want to make a heatmap of a kernel (first_kernel is
+%just a random one, can add more below)
+% unitTrace = first_kernel'; %get trace
 for t = 1:size(eTS,1)
     % set each trial's temporal boundaries
     timeWin = [eTS(t)+uv.evtWin(1,1):uv.dt:eTS(t)+uv.evtWin(1,2)];  %calculate time window around each event
@@ -139,6 +155,7 @@ for t = 1:size(eTS,1)
         for j = 1:size(caTraceTrials,2)
             tmp = tmp+1;
             zall(t,tmp) = (caTraceTrials(t,j) - zb(t))/zsd(t);
+            % zall(t, tmp) = caTraceTrials(t,j);
         end
         clear j;
     end
@@ -342,10 +359,16 @@ end
 
 sum_coeffs = sum(concatenated_coefs);
 
-figure; plot(sum_coeffs); title('overall kernel')
+figure; plot(sum_coeffs); title('overall coefs')
 
 %%
 scaled_coefs = b_final(:,2:end).*x_basic;
+
+all_kernel = sum(scaled_coefs, 2);
+figure; plot(gcamp_y);
+hold on; plot(all_kernel);
+full_kernel_corr_gcamp = corrcoef(all_kernel', gcamp_y)
+
 
 scaled_coefs_means = mean(scaled_coefs);
 
@@ -356,13 +379,13 @@ figure; plot(first_kernel)
 xline(Times_RewardCollection)
 
 
-begin_val = 2;
+begin_val = 1;
 for preds = 1:size(preds_cells, 2)
     length_current_pred = length(preds_cells{preds});
   
     figure;
-    plot(scaled_coefs_means(1, begin_val:(length_current_pred*preds)+1));
-    scaled_coefs_by_predictors{preds} = scaled_coefs_means(1, begin_val:(length_current_pred*preds)+1);
+    plot(scaled_coefs_means(1, begin_val:(length_current_pred*preds)));
+    scaled_coefs_by_predictors{preds} = scaled_coefs_means(1, begin_val:(length_current_pred*preds));
     % title(sprintf('Coefs %d to Coefs %d\n', begin_val, (length_current_pred*preds)+1));
     begin_val = begin_val + length(preds_cells{preds});
     title(strrep(cons(preds), '_', ' '));
@@ -385,24 +408,3 @@ sum_coeffs = sum(concatenated_scaled_coefs);
 
 figure; plot(sum_coeffs); title('overall kernel')
 
-
-% encoding_output.coefs = sgolayfilt(encoding_output.coefs(1, :), 9, 21);
-% figure; plot(encoding_output.coefs(1, 2:26));
-% figure; plot(encoding_output.coefs(1, 27:51));
-% figure; plot(encoding_output.coefs(1, 52:76));
-% figure; plot(encoding_output.coefs(1, 77:101));
-% figure; plot(encoding_output.coefs(1, 102:126));
-% 
-% 
-% 
-% first = encoding_output.coefs(1, 2:26);
-% second = encoding_output.coefs(1, 27:51);
-% third = encoding_output.coefs(1, 52:76);
-% fourth = encoding_output.coefs(1, 77:101);
-% fifth = encoding_output.coefs(1, 102:126);
-% all_coefs = [first; second; third; fourth; fifth];
-% sum_coeffs = sum(all_coefs);
-% 
-% figure; plot(sum_coeffs);
-
-%%
