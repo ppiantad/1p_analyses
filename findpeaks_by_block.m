@@ -97,16 +97,19 @@ for ii = 1:size(fieldnames(final),1)
             block_1_peaks_sum(neuron_num) = sum(peaks);
             block_1_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
             block_1_length(neuron_num) = block_1_mouse(ii, 2)-block_1_mouse(ii, 1);
+            block_1_peaks_per_s_mouse{ii, iter}(dd) = block_1_peaks_sum_mouse{ii, iter}(dd)/block_1_length(neuron_num);
             block_2_ca = ca(dd, time_array > block_2_mouse(ii, 1) & time_array < block_2_mouse(ii, 2));
             [peaks, peak_locs] = findpeaks(block_2_ca, 'MinPeakDistance',4);
             block_2_peaks_sum(neuron_num) = sum(peaks);
             block_2_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
             block_2_length(neuron_num) = block_2_mouse(ii, 2)-block_2_mouse(ii, 1);
+            block_2_peaks_per_s_mouse{ii, iter}(dd) = block_2_peaks_sum_mouse{ii, iter}(dd)/block_2_length(neuron_num);
             block_3_ca = ca(dd, time_array > block_3_mouse(ii, 1) & time_array < block_3_mouse(ii, 2));
             [peaks, peak_locs] = findpeaks(block_3_ca, 'MinPeakDistance',4);
             block_3_peaks_sum(neuron_num) = sum(peaks);
             block_3_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
             block_3_length(neuron_num) = block_3_mouse(ii, 2)-block_3_mouse(ii, 1);
+            block_3_peaks_per_s_mouse{ii, iter}(dd) = block_3_peaks_sum_mouse{ii, iter}(dd)/block_3_length(neuron_num);
         end
     end
 end
@@ -151,6 +154,18 @@ mean(block_1_peaks_per_s_nonzero)
 mean(block_2_peaks_per_s_nonzero)
 mean(block_3_peaks_per_s_nonzero)
 
+% non_zero_peaks_per_blocks_for_ANOVA = [block_1_peaks_per_s_nonzero', block_2_peaks_per_s_nonzero', block_3_peaks_per_s_nonzero'];
+
+for qq = 1:size(block_1_peaks_per_s_mouse, 1)
+    block_1_peaks_per_s_mouse_mean(qq) = mean(block_1_peaks_per_s_mouse{qq, 1});
+    block_2_peaks_per_s_mouse_mean(qq) = mean(block_2_peaks_per_s_mouse{qq, 1});
+    block_3_peaks_per_s_mouse_mean(qq) = mean(block_3_peaks_per_s_mouse{qq, 1});
+end
+
+block_1_to_3_diff = block_1_peaks_per_s_mouse_mean - block_3_peaks_per_s_mouse_mean;
+figure; scatter(riskiness, block_1_to_3_diff')
+
+
 %%
 % Calculate the number of neurons
 num_neurons = size(block_1_peaks_per_s, 2);
@@ -159,8 +174,8 @@ num_neurons = size(block_1_peaks_per_s, 2);
 increase_count = 0;
 decrease_count = 0;
 mixed_count = 0;
-increase_then_decrease = 0;
-decrease_then_increase = 0;
+increase_then_decrease_count = 0;
+decrease_then_increase_count = 0;
 
 % Loop through each neuron
 for neuron = 1:num_neurons
