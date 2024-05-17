@@ -1,3 +1,5 @@
+% to use this code, use decoding_variables_to_use to load data
+
 iter = 0;
 num_iterations = 5;
 caTraceTrials_mouse_iterations = cell(1, num_iterations);

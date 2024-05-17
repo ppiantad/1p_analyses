@@ -36,7 +36,7 @@ uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-ca_data_type = "S"; % C % C_raw %S
+ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
@@ -162,6 +162,7 @@ for qq = 1:size(block_1_peaks_per_s_mouse, 1)
     block_3_peaks_per_s_mouse_mean(qq) = mean(block_3_peaks_per_s_mouse{qq, 1});
 end
 
+% to create "riskiness" run get_risk_percent_from_BehavData.m
 block_1_to_3_diff = block_1_peaks_per_s_mouse_mean - block_3_peaks_per_s_mouse_mean;
 figure; scatter(riskiness, block_1_to_3_diff')
 

@@ -8,8 +8,9 @@
 %consumption 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1 collectionTime 1 to 3
 %shk 'SHK', 1 choiceTime 0 to 2
 
+% then run shk_from_3_ensembles.m
 
-array_to_examine = 1;
+array_to_examine = 4;
 
 %create a dataset where only shk responsive cells are stored for each mouse
 zz=0;
@@ -50,6 +51,56 @@ middle_shk_data_sem = nansem(middle_shk_data);
 
 final_shk_data_mean = mean(last_shk_data);
 final_shk_data_sem = nansem(last_shk_data);
+
+num_mice = numel(animalIDs); % Number of mice
+
+mean_first_shk_data = zeros(num_mice, size(first_shk_data, 2)); % Initialize mean data storage
+
+for i = 1:num_mice
+    % Extract first_shk_data for the current mouse
+    data_for_mouse = first_shk_data(strcmp(corresponding_mouse, animalIDs{i}), :);
+    
+    % Calculate mean for the current mouse
+    mean_first_shk_data(i, :) = mean(data_for_mouse, 1);
+end
+
+first_shk_epoch_mean = mean(mean_first_shk_data(:, ts1 > 0 & ts1 <= 2),2)
+
+corrcoef(first_shk_epoch_mean, riskiness);
+figure; scatter(first_shk_epoch_mean, riskiness);
+
+
+mean_middle_shk_data = zeros(num_mice, size(middle_shk_data, 2)); % Initialize mean data storage
+
+for i = 1:num_mice
+    % Extract first_shk_data for the current mouse
+    data_for_mouse = middle_shk_data(strcmp(corresponding_mouse, animalIDs{i}), :);
+    
+    % Calculate mean for the current mouse
+    mean_middle_shk_data(i, :) = mean(data_for_mouse, 1);
+end
+
+middle_shk_epoch_mean = mean(mean_middle_shk_data(:, ts1 > 0 & ts1 <= 2),2);
+
+corrcoef(middle_shk_epoch_mean, riskiness);
+figure; scatter(middle_shk_epoch_mean, riskiness);
+
+
+mean_final_shk_data = zeros(num_mice, size(last_shk_data, 2)); % Initialize mean data storage
+
+for i = 1:num_mice
+    % Extract first_shk_data for the current mouse
+    data_for_mouse = last_shk_data(strcmp(corresponding_mouse, animalIDs{i}), :);
+    
+    % Calculate mean for the current mouse
+    mean_final_shk_data(i, :) = mean(data_for_mouse, 1);
+end
+
+final_shk_epoch_mean = mean(mean_final_shk_data(:, ts1 > 0 & ts1 <= 2),2);
+
+corrcoef(final_shk_epoch_mean, riskiness);
+figure; scatter(final_shk_epoch_mean, riskiness);
+
 %%
 
 figure;
