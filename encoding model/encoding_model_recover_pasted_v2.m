@@ -6,7 +6,7 @@
 animalIDs = (fieldnames(final));
 
 % String to compare
-targetAnimal = 'BLA_Insc_24';
+targetAnimal = 'BLA_Insc_37';
 
 session_to_analyze = 'RDT_D1';
 
@@ -19,7 +19,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 
 epoc_to_align = 'choiceTime';
 
-neuron_num_to_model = 2; %50
+neuron_num_to_model = 4; %50
 
 ca = final.(targetAnimal).(session_to_analyze).CNMFe_data.(ca_data_type);
 zscored_SLEAP_data_vel_filtered_session = final_SLEAP.(targetAnimal).(session_to_analyze).zscored_SLEAP_data_velocity;
@@ -128,7 +128,7 @@ cons={'Times_TrialStart','Times_Large_no_shk','Times_Large_yes_shk','Times_Small
 eTS = BehavData.(epoc_to_align); %get time stamps
 
 % if you want to check a specific event, uncomment below and re-run
-% eTS = valid_rew_collect; 
+% eTS = large_aborts; 
 
 unitTrace = ca(neuron_num_to_model,:); %get trace
 
@@ -365,9 +365,12 @@ figure; plot(sum_coeffs); title('overall coefs')
 scaled_coefs = b_final(:,2:end).*x_basic;
 
 all_kernel = sum(scaled_coefs, 2);
+
+
+all_kernel_zscore = (all_kernel-nanmean(all_kernel))./nanstd(all_kernel);
 figure; plot(gcamp_y);
-hold on; plot(all_kernel);
-full_kernel_corr_gcamp = corrcoef(all_kernel', gcamp_y)
+hold on; plot(all_kernel_zscore);
+full_kernel_corr_gcamp = corrcoef(all_kernel_zscore', gcamp_y)
 
 
 scaled_coefs_means = mean(scaled_coefs);

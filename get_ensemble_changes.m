@@ -28,38 +28,73 @@ end
 
 
 %%
+
+[concatenatedTable_all, concatenate_all_tables] = get_median_choice_and_collect_fn(behav_tbl_iter);
+
+median_choice_time_block_1 = median(concatenate_all_tables.choiceTime(concatenate_all_tables.Block == 1) - concatenate_all_tables.stTime(concatenate_all_tables.Block == 1));
+median_choice_time_block_2 = median(concatenate_all_tables.choiceTime(concatenate_all_tables.Block == 2) - concatenate_all_tables.stTime(concatenate_all_tables.Block == 2));
+median_choice_time_block_3 = median(concatenate_all_tables.choiceTime(concatenate_all_tables.Block == 3) - concatenate_all_tables.stTime(concatenate_all_tables.Block == 3));
+
+median_collect_time_block_1 = median(concatenate_all_tables.collectionTime(concatenate_all_tables.Block == 1) - concatenate_all_tables.choiceTime(concatenate_all_tables.Block == 1));
+median_collect_time_block_2 = median(concatenate_all_tables.collectionTime(concatenate_all_tables.Block == 2) - concatenate_all_tables.choiceTime(concatenate_all_tables.Block == 2));
+median_collect_time_block_3 = median(concatenate_all_tables.collectionTime(concatenate_all_tables.Block == 3) - concatenate_all_tables.choiceTime(concatenate_all_tables.Block == 3));
+
+median_start_time_block_1 = median(concatenate_all_tables.stTime(concatenate_all_tables.Block == 1) - concatenate_all_tables.choiceTime(concatenate_all_tables.Block == 1));
+median_start_time_block_2 = median(concatenate_all_tables.stTime(concatenate_all_tables.Block == 2) - concatenate_all_tables.choiceTime(concatenate_all_tables.Block == 2));
+median_start_time_block_3 = median(concatenate_all_tables.stTime(concatenate_all_tables.Block == 3) - concatenate_all_tables.choiceTime(concatenate_all_tables.Block == 3));
+
+
+
+median_start_time_all = [median_start_time_block_1; median_start_time_block_2; median_start_time_block_3]
+median_choice_times_all = [median_choice_time_block_1; median_choice_time_block_2; median_choice_time_block_3]
+median_collect_times_all = [median_collect_time_block_1; median_collect_time_block_2; median_collect_time_block_3]
+
+%%
+
+
+% uncomment one line below if using 3 arrays (blocks 1 to 3 for example) or if combining
+% blocks 2 and 3, use only the 1st and 2nd respClass_all_array
 %classic loss of ensemble strength
-figure; 
-plot(nanmean(neuron_mean_array{1,1}(respClass_all_array{1,1} == 1,:)))
-hold on; plot(nanmean(neuron_mean_array{1,2}(respClass_all_array{1,1} == 1,:)))
-hold on; plot(nanmean(neuron_mean_array{1,3}(respClass_all_array{1,1} == 1,:)))
-
-
-
 figure;
 shadedErrorBar(ts1, nanmean(neuron_mean_array{1,1}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
 hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 2}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 2}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
-hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+% hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
 xline(0);
-xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
-xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
+xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
-legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+% legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
 
 
-
+% uncomment one line below if using 3 arrays (blocks 1 to 3 for example) or if combining
+% blocks 2 and 3, use only the 1st and 2nd respClass_all_array
 %uut actually ensemble strength is maintained, just by different neurons
 figure; 
-plot(nanmean(neuron_mean_array{1,1}(respClass_all_array{1,1} == 1,:)))
-hold on; plot(nanmean(neuron_mean_array{1,2}(respClass_all_array{1,2} == 1,:)))
-hold on; plot(nanmean(neuron_mean_array{1,3}(respClass_all_array{1,3} == 1,:)))
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1,1}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+hold on; shadedErrorBar(ts1, nanmean(neuron_mean_array{1,2}(respClass_all_array{1,2} == 1,:)), nanmean(neuron_sem_array{1, 2}(respClass_all_array{1,2} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+% hold on; shadedErrorBar(ts1, nanmean(neuron_mean_array{1,3}(respClass_all_array{1,3} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,3} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
+xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+% legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
 
+
+
+
+% uncomment one line below if using 3 arrays (blocks 1 to 3 for example) or if combining
+% blocks 2 and 3, use only the 1st and 2nd respClass_all_array
 %here are the different neurons
 figure; 
 % plot(nanmean(neuron_mean_array{1,1}(intersect(indices_2_1, indices_3_1),:)))
-plot(nanmean(neuron_mean_array{1,1}(union(indices_2_1, indices_3_1),:)))
-hold on; plot(nanmean(neuron_mean_array{1,2}(indices_2_1,:)))
-hold on; plot(nanmean(neuron_mean_array{1,3}(indices_3_1,:)))
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1,1}(union(indices_2_1, indices_3_1),:)), nanmean(neuron_sem_array{1,1}(union(indices_2_1, indices_3_1),:)), 'lineProps', {'color', batlowW(iter,:)});
+hold on; shadedErrorBar(ts1, nanmean(neuron_mean_array{1,2}(indices_2_1,:)), nanmean(neuron_sem_array{1,2}(indices_2_1,:)), 'lineProps', {'color', batlowW(iter,:)});
+% hold on; shadedErrorBar(ts1, nanmean(neuron_mean_array{1,3}(indices_3_1,:)), nanmean(neuron_sem_array{1,3}(indices_3_1,:)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
+xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+% legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
 
 %%
 % Get neurons from zall array that correspond to each event

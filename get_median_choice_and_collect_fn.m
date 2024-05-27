@@ -1,4 +1,4 @@
-function [concatenatedTable_all] = get_median_choice_and_collect_fn(behav_tbl_iter)
+function [concatenatedTable_all, concatenate_all_tables] = get_median_choice_and_collect_fn(behav_tbl_iter)
 
 
 %%
@@ -33,6 +33,8 @@ for i = 1:numel(behav_tbl_iter)
     % clear concatenatedTable
     
 end
+
+concatenate_all_tables = vertcat(concatenatedTable_all{:});
 
 median_choice_time_block_1 = median(concatenatedTable.choiceTime(concatenatedTable.Block == 1) - concatenatedTable.stTime(concatenatedTable.Block == 1));
 median_choice_time_block_2 = median(concatenatedTable.choiceTime(concatenatedTable.Block == 2) - concatenatedTable.stTime(concatenatedTable.Block == 2));

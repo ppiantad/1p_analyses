@@ -126,6 +126,31 @@ true_neutral = respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 3 & r
 sum(true_neutral)
 
 
+figure;
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 1}  ==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 1}  ==1, :)), 'lineProps', {'color', batlowW(5,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 1}  ==2, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 1}  ==2, :)), 'lineProps', {'color', batlowW(50,:)});
+
+
+figure;
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}  ==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 2}  ==1, :)), 'lineProps', {'color', batlowW(5,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 2}  ==2, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 2}  ==2, :)), 'lineProps', {'color', batlowW(50,:)});
+
+
+
+figure;
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 3}  ==1, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 3}  ==1, :)), 'lineProps', {'color', batlowW(5,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(respClass_all_array{1, 3}  ==2, :)), nanmean(neuron_sem_array{1, 1}(respClass_all_array{1, 3}  ==2, :)), 'lineProps', {'color', batlowW(50,:)});
+
+
+
+figure;
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{1, 4}  ==1, :)), nanmean(neuron_sem_array{1, 4}(respClass_all_array{1, 4}  ==1, :)), 'lineProps', {'color', batlowW(5,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{1, 4}  ==2, :)), nanmean(neuron_sem_array{1, 4}(respClass_all_array{1, 4}  ==2, :)), 'lineProps', {'color', batlowW(50,:)});
+
+
+
+
+
 % true_neutral = respClass_all_array{1,1} ~= 1 & respClass_all_array{1,2} ~= 1 & respClass_all_array{1,3} ~= 1 & respClass_all_array{1,4} ~= 1;
 % sum(true_neutral)
 
