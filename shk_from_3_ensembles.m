@@ -156,7 +156,7 @@ hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{
 
 %%
 
-
+exclusive_shk_activated = respClass_all_array{1,4} == 1 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 3;
 shk_event = respClass_all_array{1,4} == 1;
 post_choice_both_excited = respClass_all_array{1,2} == 1 & respClass_all_array{1,4} == 1;
 % this is the start of checking if neurons are MORE active than during

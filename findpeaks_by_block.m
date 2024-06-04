@@ -36,7 +36,7 @@ uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-ca_data_type = "C_raw"; % C % C_raw %S
+ca_data_type = "C"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
@@ -92,6 +92,13 @@ for ii = 1:size(fieldnames(final),1)
 
         for dd = 1:size(ca, 1)
             neuron_num = neuron_num + 1;
+            session_ca = ca(dd, :);
+            [peaks, peak_locs] = findpeaks(session_ca, 'MinPeakDistance',4);
+            session_peaks_sum(neuron_num) = sum(peaks);
+            session_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
+            session_length(neuron_num) = final.BLA_Insc_24.RDT_D1.time(end)  - final.BLA_Insc_24.RDT_D1.time(1) ;
+            session_peaks_per_s_mouse{ii, iter}(dd) = session_peaks_sum_mouse{ii, iter}(dd)/session_length(neuron_num);
+            session_peaks_per_min_mouse{ii, iter}(dd) = (session_peaks_sum_mouse{ii, iter}(dd)/session_length(neuron_num))*60;
             block_1_ca = ca(dd, time_array > block_1_mouse(ii, 1) & time_array < block_1_mouse(ii, 2));
             [peaks, peak_locs] = findpeaks(block_1_ca, 'MinPeakDistance',4);
             block_1_peaks_sum(neuron_num) = sum(peaks);

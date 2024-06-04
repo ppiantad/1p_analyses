@@ -5,7 +5,7 @@ iter = 0;
 
 
 load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.ch/colourmaps.php)
-
+load('acton.mat')
 
 
 
@@ -54,13 +54,8 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
-% these are mice that did not complete the entire session - kinda have to
-% toss them to do some comparisons during RDT
-if strcmp('RDT_D1', session_to_analyze)
-    final = rmfield(final, ['BLA_Insc_28'; 'BLA_Insc_38'; 'BLA_Insc_39']);
-end
 
 epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -68,6 +63,13 @@ animalIDs = (fieldnames(final));
 neuron_num = 0;
 use_normalized_time = 0;
 clear neuron_mean neuron_sem neuron_num zall_mean zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized sem_all zall_mean_all 
+
+
+% these are mice that did not complete the entire session - kinda have to
+% toss them to do some comparisons during RDT
+if strcmp('RDT_D1', session_to_analyze)
+    final = rmfield(final, ['BLA_Insc_28'; 'BLA_Insc_38'; 'BLA_Insc_39']);
+end
 
 
 %% %user selected variables
@@ -119,7 +121,7 @@ for ii = 1:size(fieldnames(final),1)
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3, 'REW', 0.3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
         
         % uncomment if you want to test specifically for particular ranges
         % during shock test
@@ -140,6 +142,17 @@ for ii = 1:size(fieldnames(final),1)
         end
         if ~strcmp('collectionTime',BehavData.Properties.VariableNames)
             BehavData.collectionTime = BehavData.choiceTime + 5;
+        end
+
+        if strcmpi('stTime',epoc_to_align)
+            time2EPOC = BehavData.stTime(:) - BehavData.choiceTime(:);
+        elseif strcmpi('collectionTime', epoc_to_align)
+            BL_time = BehavData.collectionTime(:)-BehavData.choiceTime(:);
+            time2EPOC = BehavData.choiceTime(:)-BehavData.collectionTime(:); %time2Collect = BehavData.collectionTime(:)-BehavData.choiceTime(:);
+        elseif strcmpi('choiceTime', epoc_to_align)
+            BL_time = BehavData.stTime(:)-BehavData.choiceTime(:);
+            %     time2Collect = BehavData.collectionTime(:)-BehavData.choiceTime(:);
+            time2EPOC = BehavData.stTime(:)-BehavData.choiceTime(:);
         end
         behav_tbl_temp{ii,:} = BehavData;
         varargin_strings = string(varargin_identity_class);
@@ -176,6 +189,10 @@ for ii = 1:size(fieldnames(final),1)
         elseif strcmp(epoc_to_align, 'collectionTime') & uv.evtSigWin.outcome == [1 3] %for SHK or immediate post-choice [1 3]
             other_evtWinIdx1{iter,:} = ts1 >= -4 & ts1 <= 0;
             other_evtWinIdx2{iter,:} = ts1 >= -2 & ts1 <= 0;
+        elseif strcmp(epoc_to_align, 'stTime') & uv.evtSigWin.outcome == [0 2] %for SHK or immediate post-choice [1 3]
+            other_evtWinIdx1{iter,:} = ts1 >= 0 & ts1 <= 2;
+            other_evtWinIdx2{iter,:} = ts1 >= 0 & ts1 <= 2;
+
         end
 
         zb_session = mean(ca,2);
@@ -245,7 +262,7 @@ for ii = 1:size(fieldnames(final),1)
                     neuron_mean_mouse{ii, iter}(u,: ) = mean(zall, 1);
                     neuron_sem_mouse{ii, iter}(u,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
                     caTraceTrials_unnormalized_array(iter, neuron_num) = {caTraceTrials};
-                    trials_per_mouse{ii, iter+1} = trials;
+                    trials_per_mouse{ii, iter} = trials;
                     caTraceTrials = zall;
                     clear zall zb zsd zall_baselined zall_window zall_session;
 
@@ -413,7 +430,7 @@ figure; shadedErrorBar(ts1, nanmean(neuron_mean(respClass_all_array{:,iter} == 3
 %% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
 % **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
 
-for ii = 500:size(zall_array, 2)
+for ii = 1000:size(zall_array, 2)
     figure;
     % Initialize variables to store global max and min for heatmap and line graph
     globalMaxHeatmap = -inf;
