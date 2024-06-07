@@ -156,7 +156,8 @@ hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{
 
 %%
 
-exclusive_shk_activated = respClass_all_array{1,4} == 1 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 3;
+exclusive_shk_activated = respClass_all_array{1,4} == 1 & respClass_all_array{1,1} == 3 &respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 3;
+exclusive_collection_activated = respClass_all_array{1,4} == 3 & respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 1;
 shk_event = respClass_all_array{1,4} == 1;
 post_choice_both_excited = respClass_all_array{1,2} == 1 & respClass_all_array{1,4} == 1;
 % this is the start of checking if neurons are MORE active than during
@@ -383,3 +384,30 @@ xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
 xline(median_collect_time_from_choice, '--r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
 legend({'large_pre_choice_ensemble_block_1', 'consumption active', 'neutral'}, 'Location','northwest')
+
+
+%% attempts to correlate shk-identified neurons w/ behavior 
+% get maximum response for shock array
+for ff = 1:size(neuron_mean_mouse, 1)
+    max_response(ff) = max(mean(neuron_mean_mouse{ff, 4}(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.SHK_1==1, :)));
+    num_shk_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.SHK_1==1)
+end
+
+
+figure; scatter(max_response, riskiness)
+hold on;
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(max_response, riskiness, 1);
+x_fit = linspace(min(max_response), max(max_response), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+hold off; 
+
+figure; scatter(num_shk_cells, riskiness)
+hold on;
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(num_shk_cells, riskiness, 1);
+x_fit = linspace(min(num_shk_cells), max(num_shk_cells), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+hold off; 

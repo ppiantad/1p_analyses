@@ -54,10 +54,10 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'RM_D1';
 
 
-epoc_to_align = 'choiceTime';
+epoc_to_align = 'collectionTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
 neuron_num = 0;
@@ -78,9 +78,9 @@ uv.chooseFluoresenceOrRate = 1;                                             %set
 uv.sigma = 1.5;  %1.5                                                             %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 % uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
-uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
+% uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
 % uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice [0 2]
-% uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3]
+uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3]
 % 
 
 
@@ -121,7 +121,7 @@ for ii = 1:size(fieldnames(final),1)
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3, 'REW', 0.3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
         
         % uncomment if you want to test specifically for particular ranges
         % during shock test
