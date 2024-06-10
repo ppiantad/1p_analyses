@@ -29,7 +29,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RM_D1';
 epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));

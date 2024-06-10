@@ -7,10 +7,58 @@
 
 % % use neuron_mean_all_unnorm if you want to check how things differ across
 % % time
-neuron_mean_concat = horzcat(neuron_mean_all_unnormalized{:});
-neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
+% neuron_mean_concat = horzcat(neuron_mean_all_unnormalized{:});
+% neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
 
-% neuron_mean_concat = neuron_mean_concat_PCA;
+% % use below to normalize THEN concatenate, which might be a better
+% approach?
+% Iterate through each cell and apply zscore
+for i = 1:size(neuron_mean_all_unnormalized, 2)
+    % Apply zscore to the data in each cell
+    neuron_mean_all_normalized{i} = zscore(neuron_mean_all_unnormalized{i}, 0, 2);
+    neuron_mean_reformat{i} = neuron_mean_all_unnormalized{i}';
+end
+% 
+neuron_mean_concat = horzcat(neuron_mean_all_normalized{:});
+
+
+neuron_mean_reformat_concat = vertcat(neuron_mean_reformat{:});
+neuron_mean_reformat_concat_normalized = zscore(neuron_mean_reformat_concat, 0 , 1);
+
+
+%%
+% Make behav_tbl_iters the same size (RDT contains one extra column)
+
+% Loop through the first level of behav_tbl_iter
+for i = 1:length(behav_tbl_iter)
+    % Get the 12x1 cell array from the current cell
+    subArray = behav_tbl_iter{i};
+    
+    % Loop through the second level of the 12x1 cell array
+    for j = 1:length(subArray)
+        % Check if the current cell contains a table
+        if istable(subArray{j})
+            % Get the table from the current cell
+            tbl = subArray{j};
+            
+            % Check if the 'type_binary' column exists
+            if ismember('type_binary', tbl.Properties.VariableNames)
+                % Delete the 'type_binary' column
+                tbl.type_binary = [];
+            end
+            
+            % Update the subArray with the modified table
+            subArray{j} = tbl;
+        end
+    end
+    
+    % Update the behav_tbl_iter with the modified subArray
+    behav_tbl_iter{i} = subArray;
+end
+
+%%
+
+
 
 [full_table_all] = get_median_choice_and_collect_fn(behav_tbl_iter);
 full_table = vertcat(full_table_all{:});
@@ -36,7 +84,7 @@ median_collect_time_block_3 = median(full_table.collectionTime(full_table.Block 
 [~, closest_index_collect_time_block_2] = min(abs(ts1 - median_collect_time_block_2));
 [~, closest_index_collect_time_block_3] = min(abs(ts1 - median_collect_time_block_3));
 
-%% PCA on data that was zscored prior to inputting in to PCA
+%% PCA
 % Load your data if not already loaded
 % load('neuron_mean_concat.mat');
 
@@ -65,7 +113,6 @@ result = cell(size(varargin_list));
 for i = 1:numel(varargin_list)
     % Initialize an empty string to store the concatenated values
     concat_str = '';
-    
     % Loop through the elements in the 1x4 cell array
     for j = 1:numel(varargin_list{i})
         % Convert doubles to strings and concatenate with underscores
@@ -75,10 +122,8 @@ for i = 1:numel(varargin_list)
             concat_str = [concat_str, varargin_list{i}{j}, '_'];
         end
     end
-    
     % Remove the trailing underscore
     concat_str = concat_str(1:end-1);
-    
     % Store the concatenated string in the result cell array
     result{i} = concat_str;
 end
@@ -88,9 +133,6 @@ eventNames = string(result);
 
 % Display the result
 disp(result)
-
-
-% array_size = size(neuron_mean_concat, 1);
 
 % Generate the ranges & then use this to loop through and conduct PCA STILL
 % NEED TO FINISH UPDATING CODE BELOW LINE 32
@@ -103,7 +145,6 @@ for i = 1:numConditions
     if i == numConditions
         end_index = array_size;
     end
-    
     condition_ranges{i} = {start_index,end_index};
 end
 
@@ -124,43 +165,6 @@ for i = eventIdx
     PCScore{i} = coef(1:size(temp,1), 1: NumPC)'*temp;
 
 end
-
-
-
-
-% % Split data into conditions
-% condition1_data = neuron_mean_concat(1:1492, 1:end-1); %the last sample is screwed uo, trim it off
-% condition2_data = neuron_mean_concat(1493:2984, 1:end-1);
-% condition3_data = neuron_mean_concat(2985:end, 1:end-1);
-% 
-% % Perform PCA for each condition
-% num_components = 2; % Number of principal components (PC1 and PC2)
-% [coeff1, ~, ~, ~, ~] = pca(condition1_data);
-% [coeff2, ~, ~, ~, ~] = pca(condition2_data);
-% [coeff3, ~, ~, ~, ~] = pca(condition3_data);
-% 
-% % Select the first 'num_components' principal components
-% coeff1 = coeff1(:, 1:num_components);
-% coeff2 = coeff2(:, 1:num_components);
-% coeff3 = coeff3(:, 1:num_components);
-
-% % Create a time array
-% ts1 = linspace(-10, 10, 200);
-% 
-% % Create a 3D plot with lines for PCA trajectories
-% figure;
-% hold on;
-% plot3(ts1, coeff1(:, 1), coeff1(:, 2), 'r', 'DisplayName', 'Condition 1');
-% plot3(ts1, coeff2(:, 1), coeff2(:, 2), 'g', 'DisplayName', 'Condition 2');
-% plot3(ts1, coeff3(:, 1), coeff3(:, 2), 'b', 'DisplayName', 'Condition 3');
-% xlabel('Time');
-% ylabel('PC1');
-% zlabel('PC2');
-% title('PCA Trajectories for Each Condition');
-% legend;
-% grid on;
-% hold off;
-
 
 %% plot for publication 3D trajectories
 d_legend = eventNames;
@@ -193,7 +197,9 @@ figure;
 % d2 = smoothforward(PCScore{1,2}(:,1:5:end), [1,size(PCScore{1,2},2);], 5, 15, 'mono_dir');
 % d3 = smoothforward(PCScore{1,3}(:,1:5:end), [1,size(PCScore{1,3},2);], 5, 15, 'mono_dir');
 
-
+% d1 = PCScore{1,1};
+% d2 = PCScore{1,2};
+% d3 = PCScore{1,3};
 d1 = smoothforward(PCScore{1,1}, [1,size(PCScore{1,1},2);], 5, 15, 'mono_dir');
 d2 = smoothforward(PCScore{1,2}, [1,size(PCScore{1,2},2);], 5, 15, 'mono_dir');
 d3 = smoothforward(PCScore{1,3}, [1,size(PCScore{1,3},2);], 5, 15, 'mono_dir');

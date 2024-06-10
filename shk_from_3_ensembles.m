@@ -390,7 +390,7 @@ legend({'large_pre_choice_ensemble_block_1', 'consumption active', 'neutral'}, '
 % get maximum response for shock array
 for ff = 1:size(neuron_mean_mouse, 1)
     max_response(ff) = max(mean(neuron_mean_mouse{ff, 4}(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.SHK_1==1, :)));
-    num_shk_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.SHK_1==1)
+    num_shk_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.SHK_1==1);
 end
 
 
