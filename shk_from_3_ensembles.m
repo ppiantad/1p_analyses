@@ -168,6 +168,7 @@ post_choice_both_excited = respClass_all_array{1,2} == 1 & respClass_all_array{1
 % increase in response to SHK
 co_activated_indices = find(post_choice_both_excited(1,:) == 1);
 co_activated_indices_sum = numel(co_activated_indices);
+clear h p 
 for qq = 1:size(co_activated_indices, 2)
     [h(qq),p(qq),ci{qq},stats{qq}] = ttest(neuron_mean_array{1, 2}(co_activated_indices(qq),sub_window_idx),neuron_mean_array{1, 4}(co_activated_indices(qq),sub_window_idx));
     mean_diff(qq) = mean(neuron_mean_array{1, 2}(co_activated_indices(qq),sub_window_idx) - mean(neuron_mean_array{1, 4}(co_activated_indices(qq),sub_window_idx)));
@@ -201,6 +202,13 @@ for i = 1:size(K, 2)
     text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
 end
 
+
+for zz = 1:size(respClass_all_array_mouse, 1)
+    exclusive_shk_activated_mouse{zz} = respClass_all_array_mouse{zz,4} == 1 & respClass_all_array_mouse{zz,1} == 3 & respClass_all_array_mouse{zz,2} == 3 & respClass_all_array_mouse{zz,3} == 3;
+    sum_exclusive_shk_activated_mouse(zz) = sum(exclusive_shk_activated_mouse{zz});
+    percent_exclusive_shk_activated_mouse(zz) = sum_exclusive_shk_activated_mouse(zz)/size(exclusive_shk_activated_mouse{zz}, 2);
+    max_activity_exclusive_shk(zz) = max(mean(neuron_mean_mouse{zz, 4}(exclusive_shk_activated_mouse{1, zz}   == 1, :)));
+end
 
 %%
 
@@ -402,26 +410,146 @@ legend({'large_pre_choice_ensemble_block_1', 'consumption active', 'neutral'}, '
 
 %% attempts to correlate shk-identified neurons w/ behavior 
 % get maximum response for shock array
+
+
+outcome_variable = 'OMITALL_0_BLANK_TOUCH_0_BLOCK_1'; % OMITALL_0_BLANK_TOUCH_0_BLOCK_1
+
 for ff = 1:size(neuron_mean_mouse, 1)
-    max_response(ff) = max(mean(neuron_mean_mouse{ff, 4}(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.SHK_1==1, :)));
-    num_shk_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.SHK_1==1);
+    max_response(ff) = max(mean(neuron_mean_mouse{ff, 4}(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.(outcome_variable)==1, :)));
+    min_response(ff) = min(mean(neuron_mean_mouse{ff, 4}(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.(outcome_variable)==2, :)));
+    num_shk_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.(outcome_variable)==1);
+    percent_shk_ensemble(ff) = num_shk_cells(ff)/size(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.(outcome_variable), 1);
 end
 
 
-figure; scatter(max_response, riskiness)
+x = max_response;
+y = riskiness;
+figure; 
 hold on;
+scatter(x, y)
 % Add a regression line (You can keep this part unchanged)
-coefficients = polyfit(max_response, riskiness, 1);
-x_fit = linspace(min(max_response), max(max_response), 100);
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
 y_fit = polyval(coefficients, x_fit);
 plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% can also calculate the r-squared this way
+% Calculate the R^2 value
+[r, ~] = corrcoef(x, y); % Compute correlation coefficient matrix
+rsq = r(1, 2)^2; % Extract and square the correlation coefficient
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
 hold off; 
 
-figure; scatter(num_shk_cells, riskiness)
+x = num_shk_cells;
+y = riskiness;
+figure; 
 hold on;
+scatter(x, y)
 % Add a regression line (You can keep this part unchanged)
-coefficients = polyfit(num_shk_cells, riskiness, 1);
-x_fit = linspace(min(num_shk_cells), max(num_shk_cells), 100);
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
 y_fit = polyval(coefficients, x_fit);
 plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% can also calculate the r-squared this way
+% Calculate the R^2 value
+[r, ~] = corrcoef(x, y); % Compute correlation coefficient matrix
+rsq = r(1, 2)^2; % Extract and square the correlation coefficient
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+hold off; 
+
+x = percent_shk_ensemble;
+y = riskiness;
+figure; 
+hold on;
+scatter(x, y)
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% can also calculate the r-squared this way
+% Calculate the R^2 value
+[r, ~] = corrcoef(x, y); % Compute correlation coefficient matrix
+rsq = r(1, 2)^2; % Extract and square the correlation coefficient
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+hold off; 
+
+
+x = percent_exclusive_shk_activated_mouse;
+y = riskiness;
+figure; 
+hold on;
+scatter(x, y)
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% can also calculate the r-squared this way
+% Calculate the R^2 value
+[r, ~] = corrcoef(x, y); % Compute correlation coefficient matrix
+rsq = r(1, 2)^2; % Extract and square the correlation coefficient
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+hold off; 
+
+
+x = max_activity_exclusive_shk;
+y = riskiness;
+figure; 
+hold on;
+scatter(x, y)
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% can also calculate the r-squared this way
+% Calculate the R^2 value
+[r, ~] = corrcoef(x, y); % Compute correlation coefficient matrix
+rsq = r(1, 2)^2; % Extract and square the correlation coefficient
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
 hold off; 

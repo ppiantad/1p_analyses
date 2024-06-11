@@ -162,6 +162,7 @@ for ii = 1:size(fieldnames(final),1)
         
         trials = cell2mat(trials);
         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
+        % ca = zscore(ca, 0, 2);
         if strcmp(ca_data_type, 'S')
             ca = full(ca);
 

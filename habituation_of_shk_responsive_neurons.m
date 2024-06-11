@@ -66,7 +66,7 @@ end
 
 first_shk_epoch_mean = mean(mean_first_shk_data(:, ts1 > 0 & ts1 <= 2),2)
 
-corrcoef(first_shk_epoch_mean, riskiness);
+corrcoef(first_shk_epoch_mean, riskiness)
 figure; scatter(first_shk_epoch_mean, riskiness);
 
 
@@ -82,7 +82,7 @@ end
 
 middle_shk_epoch_mean = mean(mean_middle_shk_data(:, ts1 > 0 & ts1 <= 2),2);
 
-corrcoef(middle_shk_epoch_mean, riskiness);
+corrcoef(middle_shk_epoch_mean, riskiness)
 figure; scatter(middle_shk_epoch_mean, riskiness);
 
 
@@ -98,16 +98,18 @@ end
 
 final_shk_epoch_mean = mean(mean_final_shk_data(:, ts1 > 0 & ts1 <= 2),2);
 
-corrcoef(final_shk_epoch_mean, riskiness);
+corrcoef(final_shk_epoch_mean, riskiness)
 figure; scatter(final_shk_epoch_mean, riskiness);
 
 %%
 
 figure;
-shadedErrorBar(ts1, first_shk_data_mean, first_shk_data_sem, 'lineProps', {'color', batlowW(iter+50,:), 'LineWidth', 2});
-hold on; shadedErrorBar(ts1, middle_shk_data_mean, middle_shk_data_sem, 'lineProps', {'color', batlowW(iter+75,:), 'LineWidth', 2});
-hold on; shadedErrorBar(ts1, final_shk_data_mean, final_shk_data_sem, 'lineProps', {'color', batlowW(iter+100,:), 'LineWidth', 2});
-legend({'first shock', 'middle shock', 'final shock'}, 'Location','northwest');
+hold on; 
+h(1) = shadedErrorBar(ts1, first_shk_data_mean, first_shk_data_sem, 'lineProps', {'color', acton(1,:)});
+h(2) = shadedErrorBar(ts1, middle_shk_data_mean, middle_shk_data_sem, 'lineProps', {'color', batlowW(iter+75,:), 'LineWidth', 2});
+h(3) = shadedErrorBar(ts1, final_shk_data_mean, final_shk_data_sem, 'lineProps', {'color', batlowW(iter+100,:), 'LineWidth', 2});
+legend([h(1).mainLine h(2).mainLine h(3).mainLine], 'first shock', 'middle shock', 'final shock')
+
 
 %% for analyzing SHOCK TEST DATA
 % first run eventRelatedActivity with SHK, 1 as the filter! 

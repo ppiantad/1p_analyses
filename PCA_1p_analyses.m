@@ -18,9 +18,9 @@ for i = 1:size(neuron_mean_all_unnormalized, 2)
     neuron_mean_all_normalized{i} = zscore(neuron_mean_all_unnormalized{i}, 0, 2);
     neuron_mean_reformat{i} = neuron_mean_all_unnormalized{i}';
 end
-% 
+% % 
 neuron_mean_concat = horzcat(neuron_mean_all_normalized{:});
-
+neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
 
 neuron_mean_reformat_concat = vertcat(neuron_mean_reformat{:});
 neuron_mean_reformat_concat_normalized = zscore(neuron_mean_reformat_concat, 0 , 1);
@@ -307,97 +307,6 @@ for i = 1:numLines
         pause(pauseTime);
     end
 end
-
-
-%% PCA on "raw" data that is zscored all together
-% Load your data if not already loaded
-% load('neuron_mean_concat.mat');
-
-% Split data into conditions
-
-%THIS ZSCORE METHOD SEEMS BAD AND OUTPUTS WEIRD RESULTS! 
-z = zscore(neuron_mean_unnorm_concat);
-
-condition1_data = z(1:1492, 1:end-1); %the last sample is screwed uo, trim it off
-condition2_data = z(1493:2984, 1:end-1);
-condition3_data = z(2985:end, 1:end-1);
-
-% Perform PCA for each condition
-num_components = 2; % Number of principal components (PC1 and PC2)
-[coeff1, ~, ~, ~, ~] = pca(condition1_data);
-[coeff2, ~, ~, ~, ~] = pca(condition2_data);
-[coeff3, ~, ~, ~, ~] = pca(condition3_data);
-
-% Select the first 'num_components' principal components
-coeff1 = coeff1(:, 1:num_components);
-coeff2 = coeff2(:, 1:num_components);
-coeff3 = coeff3(:, 1:num_components);
-
-% Create a time array
-ts1 = linspace(-10, 10, 200);
-
-% Create a 3D plot with lines for PCA trajectories
-figure;
-hold on;
-plot3(ts1, coeff1(:, 1), coeff1(:, 2), 'r', 'DisplayName', 'Condition 1');
-plot3(ts1, coeff2(:, 1), coeff2(:, 2), 'g', 'DisplayName', 'Condition 2');
-plot3(ts1, coeff3(:, 1), coeff3(:, 2), 'b', 'DisplayName', 'Condition 3');
-xlabel('Time');
-ylabel('PC1');
-zlabel('PC2');
-title('PCA Trajectories for Each Condition');
-legend;
-grid on;
-hold off;
-
-
-
-%% Random Forest (this seemed to work best to decode Blocks of Large Rew Trials (B1 Large Choice Aligned, B2 Large Choice Aligned, B3 Large Choice Aligned)
-% This is done on data that is zscored AFTER it is concatenated
-% Assuming you have already loaded and preprocessed your data
-% neuron_mean_concats is a 300x200 array with 300 rows (neurons) and 200 columns (samples)
-
-% Create label vector y (corresponding to trial blocks)
-numNeuronsPerBlock = neuron_num;
-% change depending on the number of behaviors to decode!
-numBlocks = size(z, 1)/numNeuronsPerBlock;
-y = repelem(1:numBlocks, numNeuronsPerBlock);
-
-% Split data into training and testing sets
-[trainIdx, testIdx] = crossvalind('HoldOut', size(z, 1), 0.2);
-XTrain = z(trainIdx, 1:end-1);
-yTrain = y(trainIdx);
-XTest = z(testIdx, 1:end-1);
-yTest = y(testIdx);
-
-% Train a Random Forest classification model
-numTrees = 100; % Number of decision trees in the forest
-model = TreeBagger(numTrees, XTrain, yTrain, 'Method', 'classification');
-
-% Predict trial block labels using the trained model
-predictions = predict(model, XTest);
-
-% Convert cell array of strings to numeric labels
-predictions = str2double(predictions);
-
-% Evaluate the model's performance
-correctPredictions = sum(predictions == yTest');
-totalSamples = numel(yTest);
-accuracy = correctPredictions / totalSamples;
-confusionMat = confusionmat(yTest, predictions);
-
-% Visualize the confusion matrix
-heatmap(confusionMat, 'XLabel', 'Predicted', 'YLabel', 'Actual');
-
-disp(['Accuracy: ' num2str(accuracy)]);
-
-
-figure; 
-hold on;
-for ii = 1:numBlocks
-    plot(ts1(1,:), mean(z(y==ii, 1:end-1)));
-end
-hold off;
 
 
 
