@@ -159,6 +159,7 @@ hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{
 exclusive_shk_activated = respClass_all_array{1,4} == 1 & respClass_all_array{1,1} == 3 &respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 3;
 exclusive_collection_activated = respClass_all_array{1,4} == 3 & respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 1;
 shk_event = respClass_all_array{1,4} == 1;
+post_choice_rew_event = respClass_all_array{1,2} == 1;
 post_choice_both_excited = respClass_all_array{1,2} == 1 & respClass_all_array{1,4} == 1;
 % this is the start of checking if neurons are MORE active than during
 % other events, i.e. if you wanted to check if REW activated neurons are
@@ -187,6 +188,19 @@ shk_activated = respClass_all_array{1,4} == 1 & no_sig_increase_shk_from_large_i
 shk_activated_sum = sum(shk_activated);
 
 figure; plot(ts1, nanmean(neuron_mean_array{1, 4}(shk_activated,:))); hold on; plot(ts1,  nanmean(neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:)));
+
+
+total_modulated = [(sum(post_choice_rew_event)/neuron_num)*100 (sum(shk_event)/neuron_num)*100];
+
+A = total_modulated;
+I = (co_activated_indices_sum/neuron_num)*100;
+K = [A I];
+figure; 
+[H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
+for i = 1:size(K, 2)
+    text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
+end
+
 
 %%
 

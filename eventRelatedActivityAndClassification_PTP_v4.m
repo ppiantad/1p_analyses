@@ -54,7 +54,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'RM_D1';
+session_to_analyze = 'RDT_D1';
 
 
 epoc_to_align = 'collectionTime';
