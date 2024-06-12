@@ -409,16 +409,19 @@ legend({'large_pre_choice_ensemble_block_1', 'consumption active', 'neutral'}, '
 
 
 %% attempts to correlate shk-identified neurons w/ behavior 
-% get maximum response for shock array
+% need to run get_risk_percent_from_BehavData
 
 
-outcome_variable = 'SHK_1'; % OMITALL_0_BLANK_TOUCH_0_BLOCK_1
+epoch_to_analyze = 'choiceTime'; % choiceTime collectionTime
+window_to_analyze = 'Outcome_Minus_4to0'; % Minus_4to0  Outcome_0to2 Outcome_1to3
+outcome_variable = 'OMITALL_0_BLANK_TOUCH_0_BLOCK_1'; % OMITALL_0_BLANK_TOUCH_0_BLOCK_1
+array_to_select = 1; 
 
 for ff = 1:size(neuron_mean_mouse, 1)
-    max_response(ff) = max(mean(neuron_mean_mouse{ff, 4}(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.(outcome_variable)==1, :)));
-    min_response(ff) = min(mean(neuron_mean_mouse{ff, 4}(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.(outcome_variable)==2, :)));
-    num_shk_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.(outcome_variable)==1);
-    percent_shk_ensemble(ff) = num_shk_cells(ff)/size(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.(outcome_variable), 1);
+    max_response(ff) = max(mean(neuron_mean_mouse{ff, (array_to_select)}(respClass_mouse.(animalIDs{ff}).RDT_D1.(epoch_to_analyze).(window_to_analyze).(outcome_variable)==1, :)));
+    min_response(ff) = min(mean(neuron_mean_mouse{ff, (array_to_select)}(respClass_mouse.(animalIDs{ff}).RDT_D1.(epoch_to_analyze).(window_to_analyze).(outcome_variable)==2, :)));
+    num_shk_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).RDT_D1.(epoch_to_analyze).(window_to_analyze).(outcome_variable)==1);
+    percent_shk_ensemble(ff) = num_shk_cells(ff)/size(respClass_mouse.(animalIDs{ff}).RDT_D1.(epoch_to_analyze).(window_to_analyze).(outcome_variable), 1);
 end
 
 
@@ -427,11 +430,14 @@ y = riskiness;
 % Create a new figure with specific dimensions
 figure;
 width = 500; % Width of the figure
-height = 1000; % Height of the figure (width is half of height)
+height = 350; % Height of the figure (width is half of height)
 set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
 
 hold on;
 scatter(x, y, 100)
+% Set the axis labels to have 2 decimal places
+xtickformat('%.2f');
+ytickformat('%.2f');
 % Add a regression line (You can keep this part unchanged)
 coefficients = polyfit(x, y, 1);
 x_fit = linspace(min(x), max(x), 100);
@@ -450,8 +456,8 @@ r_squared = ssr / sst;
 rsq = r(1, 2)^2; % Extract and square the correlation coefficient
 
 % Add R-squared value to the plot (You can keep this part unchanged)
-text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
-text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2e')], 'FontSize', 12, 'Color', 'blue');
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared, '%.2f')], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2f')], 'FontSize', 12, 'Color', 'blue');
 hold off; 
 
 x = num_shk_cells;
@@ -463,6 +469,8 @@ set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, 
 
 hold on;
 scatter(x, y, 100)
+xtickformat('%.2f');
+ytickformat('%.2f');
 % Add a regression line (You can keep this part unchanged)
 coefficients = polyfit(x, y, 1);
 x_fit = linspace(min(x), max(x), 100);
@@ -481,19 +489,20 @@ r_squared = ssr / sst;
 rsq = r(1, 2)^2; % Extract and square the correlation coefficient
 
 % Add R-squared value to the plot (You can keep this part unchanged)
-text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
-text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2e')], 'FontSize', 12, 'Color', 'blue');
-hold off; 
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared, '%.2f')], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2f')], 'FontSize', 12, 'Color', 'blue');
+hold off;  
 
 x = percent_shk_ensemble;
 y = riskiness;
 figure;
 width = 500; % Width of the figure
-height = 1000; % Height of the figure (width is half of height)
+height = 350; % Height of the figure (width is half of height)
 set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
-
 hold on;
 scatter(x, y, 100)
+xtickformat('%.2f');
+ytickformat('%.2f');
 % Add a regression line (You can keep this part unchanged)
 coefficients = polyfit(x, y, 1);
 x_fit = linspace(min(x), max(x), 100);
@@ -512,8 +521,8 @@ r_squared = ssr / sst;
 rsq = r(1, 2)^2; % Extract and square the correlation coefficient
 
 % Add R-squared value to the plot (You can keep this part unchanged)
-text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
-text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2e')], 'FontSize', 12, 'Color', 'blue');
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared, '%.2f')], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2f')], 'FontSize', 12, 'Color', 'blue');
 hold off; 
 
 
@@ -526,6 +535,8 @@ set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, 
 
 hold on;
 scatter(x, y, 100)
+xtickformat('%.2f');
+ytickformat('%.2f');
 % Add a regression line (You can keep this part unchanged)
 coefficients = polyfit(x, y, 1);
 x_fit = linspace(min(x), max(x), 100);
@@ -544,9 +555,9 @@ r_squared = ssr / sst;
 rsq = r(1, 2)^2; % Extract and square the correlation coefficient
 
 % Add R-squared value to the plot (You can keep this part unchanged)
-text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
-text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2e')], 'FontSize', 12, 'Color', 'blue');
-hold off; 
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared, '%.2f')], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2f')], 'FontSize', 12, 'Color', 'blue');
+hold off;  
 
 
 x = max_activity_exclusive_shk;
@@ -558,6 +569,8 @@ set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, 
 
 hold on;
 scatter(x, y, 100)
+xtickformat('%.2f');
+ytickformat('%.2f');
 % Add a regression line (You can keep this part unchanged)
 coefficients = polyfit(x, y, 1);
 x_fit = linspace(min(x), max(x), 100);
@@ -576,6 +589,39 @@ r_squared = ssr / sst;
 rsq = r(1, 2)^2; % Extract and square the correlation coefficient
 
 % Add R-squared value to the plot (You can keep this part unchanged)
-text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
-text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2e')], 'FontSize', 12, 'Color', 'blue');
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared, '%.2f')], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2f')], 'FontSize', 12, 'Color', 'blue');
+hold off; 
+
+x = max_response;
+y = aborts;
+figure;
+width = 250; % Width of the figure
+height = 500; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 50, width, height]); % Set position and size [left, bottom, width, height]
+
+hold on;
+scatter(x, y, 100)
+xtickformat('%.2f');
+ytickformat('%.2f');
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% can also calculate the r-squared this way
+% Calculate the R^2 value
+[r, pval] = corrcoef(x, y); % Compute correlation coefficient matrix
+rsq = r(1, 2)^2; % Extract and square the correlation coefficient
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared, '%.2f')], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2f')], 'FontSize', 12, 'Color', 'blue');
 hold off; 

@@ -42,7 +42,7 @@ load('BLA_panneuronal_Risk_2024_04_19_just_CNMFe_and_BehavData.mat')
 
 
 %% Edit these user variables with what you want to look at
-uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
+uv.evtWin = [-12 8]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
@@ -57,7 +57,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 session_to_analyze = 'RDT_D1';
 
 
-epoc_to_align = 'collectionTime';
+epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
 neuron_num = 0;
@@ -78,9 +78,9 @@ uv.chooseFluoresenceOrRate = 1;                                             %set
 uv.sigma = 1.5;  %1.5                                                             %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 % uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
-% uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
+uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
 % uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice [0 2]
-uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3]
+% uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3]
 % 
 
 
@@ -121,7 +121,7 @@ for ii = 1:size(fieldnames(final),1)
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 0.3, 'LOSESHIFT', 0, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
         
         % uncomment if you want to test specifically for particular ranges
         % during shock test
@@ -238,8 +238,8 @@ for ii = 1:size(fieldnames(final),1)
                     % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) = 0;
                     % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = 0;
                     % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = 0;
-                    neuron_mean(neuron_num,:) = nan;
-                    neuron_sem(neuron_num,:) = nan;
+                    neuron_mean(neuron_num,:) = NaN;
+                    neuron_sem(neuron_num,:) = NaN;
                 elseif ~isempty(caTraceTrials) && size(caTraceTrials, 1) > 1
 
                     % Loop through each row of zall
@@ -431,7 +431,7 @@ figure; shadedErrorBar(ts1, nanmean(neuron_mean(respClass_all_array{:,iter} == 3
 %% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
 % **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
 
-for ii = 1000:size(zall_array, 2)
+for ii = 1:size(zall_array, 2)
     figure;
     % Initialize variables to store global max and min for heatmap and line graph
     globalMaxHeatmap = -inf;

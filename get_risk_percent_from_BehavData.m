@@ -16,8 +16,9 @@ for ii = 1:size(animalIDs,1) % 1:size(fieldnames(final),1)
         lose_shift_percent = sum(BehavData.lose_shift == 1)/sum(((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0) & BehavData.Block == 3);
         lose_omit_percent = sum(BehavData.lose_omit == 1)/sum(((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0) & BehavData.Block == 3);
         lose_stay_percent = sum(BehavData.lose_stay == 1)/sum(((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0) & BehavData.Block == 3);
+        large_aborts = sum(BehavData.type_binary == 1);
     end
-    risk_table(ii,:) = array2table([block_1_large_choice_percent, block_2_large_choice_percent, block_3_large_choice_percent, lose_shift_percent, lose_omit_percent, lose_stay_percent]);
+    risk_table(ii,:) = array2table([block_1_large_choice_percent, block_2_large_choice_percent, block_3_large_choice_percent, large_aborts, lose_shift_percent, lose_omit_percent, lose_stay_percent]);
 end
 
 % some mice have NaNs if they didn't make it to this trial block. replace
@@ -27,4 +28,5 @@ risk_table{:, :}(isnan(risk_table{:, :})) = 0;
 row_means = nanmean(risk_table{:, 1:3}, 2);
 risk_table.Mean_1_to_3 = row_means;
 riskiness = risk_table.Mean_1_to_3;
+aborts = risk_table.Var4;
 
