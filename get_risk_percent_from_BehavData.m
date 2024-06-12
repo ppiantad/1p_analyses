@@ -1,7 +1,7 @@
 iter = iter+1;
-neuron_num = 0;
+% neuron_num = 0;
 risk_table = table;
-for ii = 1:size(fieldnames(final),1)
+for ii = 1:size(animalIDs,1) % 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;

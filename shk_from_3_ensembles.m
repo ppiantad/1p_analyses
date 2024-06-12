@@ -412,7 +412,7 @@ legend({'large_pre_choice_ensemble_block_1', 'consumption active', 'neutral'}, '
 % get maximum response for shock array
 
 
-outcome_variable = 'OMITALL_0_BLANK_TOUCH_0_BLOCK_1'; % OMITALL_0_BLANK_TOUCH_0_BLOCK_1
+outcome_variable = 'SHK_1'; % OMITALL_0_BLANK_TOUCH_0_BLOCK_1
 
 for ff = 1:size(neuron_mean_mouse, 1)
     max_response(ff) = max(mean(neuron_mean_mouse{ff, 4}(respClass_mouse.(animalIDs{ff}).RDT_D1.choiceTime.Outcome_0to2.(outcome_variable)==1, :)));
@@ -424,9 +424,14 @@ end
 
 x = max_response;
 y = riskiness;
-figure; 
+% Create a new figure with specific dimensions
+figure;
+width = 500; % Width of the figure
+height = 1000; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+
 hold on;
-scatter(x, y)
+scatter(x, y, 100)
 % Add a regression line (You can keep this part unchanged)
 coefficients = polyfit(x, y, 1);
 x_fit = linspace(min(x), max(x), 100);
@@ -441,18 +446,23 @@ r_squared = ssr / sst;
 
 % can also calculate the r-squared this way
 % Calculate the R^2 value
-[r, ~] = corrcoef(x, y); % Compute correlation coefficient matrix
+[r, pval] = corrcoef(x, y); % Compute correlation coefficient matrix
 rsq = r(1, 2)^2; % Extract and square the correlation coefficient
 
 % Add R-squared value to the plot (You can keep this part unchanged)
 text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2e')], 'FontSize', 12, 'Color', 'blue');
 hold off; 
 
 x = num_shk_cells;
 y = riskiness;
-figure; 
+figure;
+width = 500; % Width of the figure
+height = 1000; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+
 hold on;
-scatter(x, y)
+scatter(x, y, 100)
 % Add a regression line (You can keep this part unchanged)
 coefficients = polyfit(x, y, 1);
 x_fit = linspace(min(x), max(x), 100);
@@ -467,18 +477,23 @@ r_squared = ssr / sst;
 
 % can also calculate the r-squared this way
 % Calculate the R^2 value
-[r, ~] = corrcoef(x, y); % Compute correlation coefficient matrix
+[r, pval] = corrcoef(x, y); % Compute correlation coefficient matrix
 rsq = r(1, 2)^2; % Extract and square the correlation coefficient
 
 % Add R-squared value to the plot (You can keep this part unchanged)
 text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2e')], 'FontSize', 12, 'Color', 'blue');
 hold off; 
 
 x = percent_shk_ensemble;
 y = riskiness;
-figure; 
+figure;
+width = 500; % Width of the figure
+height = 1000; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+
 hold on;
-scatter(x, y)
+scatter(x, y, 100)
 % Add a regression line (You can keep this part unchanged)
 coefficients = polyfit(x, y, 1);
 x_fit = linspace(min(x), max(x), 100);
@@ -493,19 +508,24 @@ r_squared = ssr / sst;
 
 % can also calculate the r-squared this way
 % Calculate the R^2 value
-[r, ~] = corrcoef(x, y); % Compute correlation coefficient matrix
+[r, pval] = corrcoef(x, y); % Compute correlation coefficient matrix
 rsq = r(1, 2)^2; % Extract and square the correlation coefficient
 
 % Add R-squared value to the plot (You can keep this part unchanged)
 text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2e')], 'FontSize', 12, 'Color', 'blue');
 hold off; 
 
 
 x = percent_exclusive_shk_activated_mouse;
 y = riskiness;
-figure; 
+figure;
+width = 500; % Width of the figure
+height = 1000; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+
 hold on;
-scatter(x, y)
+scatter(x, y, 100)
 % Add a regression line (You can keep this part unchanged)
 coefficients = polyfit(x, y, 1);
 x_fit = linspace(min(x), max(x), 100);
@@ -520,19 +540,24 @@ r_squared = ssr / sst;
 
 % can also calculate the r-squared this way
 % Calculate the R^2 value
-[r, ~] = corrcoef(x, y); % Compute correlation coefficient matrix
+[r, pval] = corrcoef(x, y); % Compute correlation coefficient matrix
 rsq = r(1, 2)^2; % Extract and square the correlation coefficient
 
 % Add R-squared value to the plot (You can keep this part unchanged)
 text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2e')], 'FontSize', 12, 'Color', 'blue');
 hold off; 
 
 
 x = max_activity_exclusive_shk;
 y = riskiness;
-figure; 
+figure;
+width = 500; % Width of the figure
+height = 1000; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+
 hold on;
-scatter(x, y)
+scatter(x, y, 100)
 % Add a regression line (You can keep this part unchanged)
 coefficients = polyfit(x, y, 1);
 x_fit = linspace(min(x), max(x), 100);
@@ -547,9 +572,10 @@ r_squared = ssr / sst;
 
 % can also calculate the r-squared this way
 % Calculate the R^2 value
-[r, ~] = corrcoef(x, y); % Compute correlation coefficient matrix
+[r, pval] = corrcoef(x, y); % Compute correlation coefficient matrix
 rsq = r(1, 2)^2; % Extract and square the correlation coefficient
 
 % Add R-squared value to the plot (You can keep this part unchanged)
 text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2e')], 'FontSize', 12, 'Color', 'blue');
 hold off; 
