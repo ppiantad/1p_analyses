@@ -26,7 +26,7 @@ hold on;shadedErrorBar(ts1, nanmean(non_lose_shift_small_choice_data), nanmean(n
 % xtickformat('%.2f');
 ytickformat('%.2f');
 xline(0);
-xline(median_start_times, 'g')
-xline(median_collect_times, 'r')
+% xline(median_start_times, 'g')
+% xline(median_collect_times, 'r')
 % xlabel('Time from Large Rew Choice (s)');
 % legend({'large_pre_choice_ensemble_block_1', 'consumption active', 'neutral'}, 'Location','northwest')

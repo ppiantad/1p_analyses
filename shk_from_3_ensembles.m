@@ -202,6 +202,16 @@ for i = 1:size(K, 2)
     text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
 end
 
+total_modulated = [(sum(shk_event)/neuron_num)*100 (sum(post_choice_rew_event)/neuron_num)*100];
+A = total_modulated;
+I = (co_activated_indices_sum/neuron_num)*100;
+K = [A I];
+figure; 
+[H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
+for i = 1:size(K, 2)
+    text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
+end
+
 
 for zz = 1:size(respClass_all_array_mouse, 1)
     exclusive_shk_activated_mouse{zz} = respClass_all_array_mouse{zz,4} == 1 & respClass_all_array_mouse{zz,1} == 3 & respClass_all_array_mouse{zz,2} == 3 & respClass_all_array_mouse{zz,3} == 3;
@@ -413,17 +423,19 @@ legend({'large_pre_choice_ensemble_block_1', 'consumption active', 'neutral'}, '
 
 
 epoch_to_analyze = 'choiceTime'; % choiceTime collectionTime
-window_to_analyze = 'Outcome_Minus_4to0'; % Minus_4to0  Outcome_0to2 Outcome_1to3
-outcome_variable = 'OMITALL_0_BLANK_TOUCH_0_BLOCK_1'; % OMITALL_0_BLANK_TOUCH_0_BLOCK_1
+window_to_analyze = 'Outcome_0to2'; % Minus_4to0  Outcome_0to2 Outcome_1to3
+outcome_variable = 'SHK_1'; % OMITALL_0_BLANK_TOUCH_0_BLOCK_1 SHK_1
 array_to_select = 1; 
 
 for ff = 1:size(neuron_mean_mouse, 1)
-    max_response(ff) = max(mean(neuron_mean_mouse{ff, (array_to_select)}(respClass_mouse.(animalIDs{ff}).RDT_D1.(epoch_to_analyze).(window_to_analyze).(outcome_variable)==1, :)));
-    min_response(ff) = min(mean(neuron_mean_mouse{ff, (array_to_select)}(respClass_mouse.(animalIDs{ff}).RDT_D1.(epoch_to_analyze).(window_to_analyze).(outcome_variable)==2, :)));
-    num_shk_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).RDT_D1.(epoch_to_analyze).(window_to_analyze).(outcome_variable)==1);
-    percent_shk_ensemble(ff) = num_shk_cells(ff)/size(respClass_mouse.(animalIDs{ff}).RDT_D1.(epoch_to_analyze).(window_to_analyze).(outcome_variable), 1);
+    max_response(ff) = max(mean(neuron_mean_mouse{ff, (array_to_select)}(respClass_mouse.(animalIDs{ff}).(session_to_analyze).(epoch_to_analyze).(window_to_analyze).(outcome_variable)==1, :)));
+    min_response(ff) = min(mean(neuron_mean_mouse{ff, (array_to_select)}(respClass_mouse.(animalIDs{ff}).(session_to_analyze).(epoch_to_analyze).(window_to_analyze).(outcome_variable)==2, :)));
+    num_shk_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).(session_to_analyze).(epoch_to_analyze).(window_to_analyze).(outcome_variable)==1);
+    % num_consumption_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).(session_to_analyze).collectionTime.Outcome_1to3.OMITALL_0_BLANK_TOUCH_0_BLOCK_1==1);
+    percent_shk_ensemble(ff) = num_shk_cells(ff)/size(respClass_mouse.(animalIDs{ff}).(session_to_analyze).(epoch_to_analyze).(window_to_analyze).(outcome_variable), 1);
 end
 
+consum_to_shk_ratio = num_consumption_cells./num_shk_cells;
 
 x = max_response;
 y = riskiness;
