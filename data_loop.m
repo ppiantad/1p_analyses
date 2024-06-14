@@ -46,13 +46,30 @@ for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
+        % for labeling shock + 1 trials, for subsequent analysis
+        for BehavDataRow = 1:size(BehavData,1)
+            if BehavData.shock(BehavDataRow) == 1
+                kk = 1;
+                while true
+                    if (BehavDataRow + kk) > size(BehavData, 1)  % Check if index exceeds the number of rows
+                        break;
+                    end
+                    if ~isnan(BehavData.bigSmall(BehavDataRow + kk)) & BehavData.ForceFree(BehavDataRow + kk) ~= 999
+                        BehavData.trial_after_shk(BehavDataRow + kk) = 1;
+                        break;
+                    else
+                        kk = kk + 1;
+                    end
+                end
+            end
+        end
         % block_1 = [BehavData.stTime(BehavData.Block == 1) BehavData.collectionTime(BehavData.Block == 1)]; 
         % block_1 = [block_1(1, 1) block_1(end, 2)];
         % block_2 = [BehavData.stTime(BehavData.Block == 2) BehavData.collectionTime(BehavData.Block == 2)]; 
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'REW', 0.3, 'BLOCK', 1, 'SHK', 0);
+        [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'LOSS_PLUS_ONE', 1);
         trials = cell2mat(trials);
         behav_tbl_temp{ii,:} = BehavData;
         % % BehavData = BehavData(BehavData.shockIntensity >= 0.08 & BehavData.shockIntensity <= 0.13, :);
@@ -108,8 +125,8 @@ for ii = 1:size(fieldnames(final),1)
                 zall(1, 1:size(ts1, 2)) = NaN;
             else
                 [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
-                [normalized_trial_ca, concatenated_normalized_trial_ca] = normalize_trials_in_time_fn(trial_ca);
-                time_normalized_ca{neuron_num} = concatenated_normalized_trial_ca;
+                % [normalized_trial_ca, concatenated_normalized_trial_ca] = normalize_trials_in_time_fn(trial_ca);
+                % time_normalized_ca{neuron_num} = concatenated_normalized_trial_ca;
                 StartChoiceCollect_times_array{neuron_num} = StartChoiceCollect_times;
                 caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                 zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
