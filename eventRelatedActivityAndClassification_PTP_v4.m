@@ -121,8 +121,13 @@ for ii = 1:size(fieldnames(final),1)
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
+        for BehavDataRow = 1:size(BehavData,1)
+            if BehavData.shock(BehavDataRow) == 1
+                BehavData.trial_after_shk(BehavDataRow+1) = 1;
+            end
+        end
         [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
-        
+
         % uncomment if you want to test specifically for particular ranges
         % during shock test
         % shk_intensity_range = [0.42 0.50];
