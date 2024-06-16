@@ -1,17 +1,17 @@
-% Define the time range for 0 to 2 seconds
-timeRange = (ts1 >= 0) & (ts1 <= 2);
-
-% Iterate through each cell in the cell array
-for i = 1:length(zall_array)
-    % Get the current double array
-    currentArray = zall_array{i};
-    
-    % Compute the mean activity for each row in the time range 0 to 2 seconds
-    meanValues = mean(currentArray(:, timeRange), 2);
-    
-    % Store the mean values in the corresponding cell of the new cell array
-    meanCellArray{i} = meanValues;
-end
+% % Define the time range for 0 to 2 seconds
+% timeRange = (ts1 >= 0) & (ts1 <= 2);
+% 
+% % Iterate through each cell in the cell array
+% for i = 1:length(zall_array)
+%     % Get the current double array
+%     currentArray = zall_array{i};
+% 
+%     % Compute the mean activity for each row in the time range 0 to 2 seconds
+%     meanValues = mean(currentArray(:, timeRange), 2);
+% 
+%     % Store the mean values in the corresponding cell of the new cell array
+%     meanCellArray{i} = meanValues;
+% end
 
 %% use these data for mouse x mouse, which is likely better
 % run eventRelatedActivityAndClassification with:
@@ -39,6 +39,7 @@ for i = 1:length(zall_mouse)
         
         % Compute the mean activity for each row in the time range 0 to 2 seconds
         meanValues = mean(currentArray(:, timeRange), 2);
+        % meanValues = max(currentArray(:, timeRange), [], 2);
         
         % Store the mean values in the corresponding cell of the nested cell array
         meanNestedCellArray{j} = meanValues;
@@ -142,6 +143,7 @@ end
 
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
+figure;
 histogram(allCorrelations);
 xlabel('Correlation Coefficient');
 ylabel('Frequency');
@@ -158,6 +160,7 @@ only_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}==1);
 not_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}==3);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
+figure;
 histogram(only_shk_responsive_corrs);
 xlabel('Correlation Coefficient');
 ylabel('Frequency');
@@ -200,6 +203,36 @@ hold off;
 fprintf('Kolmogorov-Smirnov test result:\n');
 fprintf('h = %d (0 means the null hypothesis cannot be rejected, 1 means it can be rejected)\n', h);
 fprintf('p-value = %.4f\n', p);
+
+%%
+
+% Calculate means
+mean_only_shk = mean(only_shk_responsive_corrs);
+mean_not_shk = mean(not_shk_responsive_corrs);
+
+% Plot means as bars
+figure;
+hold on;
+bar(1, mean_only_shk, 'FaceColor', 'r'); % Red bar for 'only_shk_responsive_corrs'
+bar(2, mean_not_shk, 'FaceColor', 'b'); % Blue bar for 'not_shk_responsive_corrs'
+
+% Scatter individual data points
+scatter(ones(size(only_shk_responsive_corrs)), only_shk_responsive_corrs, 'r', 'filled', 'jitter', 'on', 'jitterAmount', 0.15); % Red points with jitter
+scatter(2 * ones(size(not_shk_responsive_corrs)), not_shk_responsive_corrs, 'b', 'filled', 'jitter', 'on', 'jitterAmount', 0.15); % Blue points with jitter
+
+% Customize plot
+xlim([0.5, 2.5]);
+xticks([1 2]);
+xticklabels({'Only Shk Responsive', 'Not Shk Responsive'});
+ylabel('Correlation Values');
+title('Correlation Values and Means');
+grid on;
+
+% Add legend
+legend({'Mean Only Shk', 'Mean Not Shk', 'Individual Only Shk', 'Individual Not Shk'}, 'Location', 'best');
+
+hold off;
+
 %% attempting logistic regression to predict large vs. small vs. omit from magnitude of SHK response
 
 
@@ -208,7 +241,7 @@ shockResponses = [];
 trialChoices = [];
 
 % Iterate through each level of meanZallMouse
-for i = 1:length(meanZallMouse)
+for i = 1:1 %1:length(meanZallMouse)
     % Get the current nested cell array of mean values
     meanNestedCellArray = meanZallMouse{i};
     
@@ -241,4 +274,23 @@ mdl = fitmnr(shockResponses, y);
 disp('Model Coefficients:');
 disp(mdl);
 
+%% minor attempts to correlate with MOTION (velocity after shock)
 
+meanNestedCellArray = meanZallMouse{6};
+
+for j = 1:length(meanNestedCellArray)
+    % Get the current mean values array
+    meanValues = meanNestedCellArray{j};
+
+    % Check if trialChoiceTimes has the same length as meanValues
+    if length(meanValues_motion) == length(meanValues)
+        % Compute the correlation
+        correlationCoeff = corr(meanValues, meanValues_motion(:));
+    else
+        % If lengths do not match, handle the mismatch (e.g., set correlation to NaN)
+        correlationCoeff = NaN;
+    end
+
+    % Store the correlation coefficient in the nested cell array
+    correlationNestedArray(j) = correlationCoeff;
+end

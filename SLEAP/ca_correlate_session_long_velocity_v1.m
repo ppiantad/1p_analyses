@@ -30,7 +30,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
@@ -53,7 +53,7 @@ for ii = 1:size(fieldnames(final),1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+        [BehavData,trials,varargin]=TrialFilter(BehavData,'SHK', 1);
         trials = cell2mat(trials);
         behav_tbl_temp{ii,:} = BehavData;
         % % BehavData = BehavData(BehavData.shockIntensity >= 0.08 & BehavData.shockIntensity <= 0.13, :);
@@ -161,7 +161,7 @@ for ii = 1:size(fieldnames(final),1)
             end
         end
         motion_TraceTrials_mouse{ii} =  motion_TraceTrials;
-
+        clear motion_TraceTrials
         for u = 1:size(ca,1)
             neuron_num = neuron_num+1;
             % initialize trial matrices
