@@ -22,7 +22,9 @@
 meanZallMouse = cell(length(zall_mouse), 1);
 
 % Define the time range for 0 to 2 seconds
-timeRange = (ts1 >= 0) & (ts1 <= 2);
+% timeRange = (ts1 >= 0) & (ts1 <= 2);
+timeRange = (ts1 >= -4) & (ts1 <= 0);
+
 
 % Iterate through each cell in the zall_mouse array
 for i = 1:length(zall_mouse)
@@ -53,14 +55,14 @@ end
 % Each cell in meanZallMouse contains a nested cell array with the
 
 %%
-for q = 1:length (behav_tbl_iter{2, 1})
+for q = 1:length (behav_tbl_iter{1, 1})
     nestedCellArray_1 = behav_tbl_iter{1, 1}{q};
-    nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
-    trial_choice_times = nestedCellArray_2.choiceTime - nestedCellArray_2.stTime;
-    delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
+    % nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
+    % trial_choice_times = nestedCellArray_2.choiceTime - nestedCellArray_2.stTime;
+    % delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
     delay_to_collect_post_shk = nestedCellArray_1.collectionTime - nestedCellArray_1.choiceTime;
-    trial_choice_times_by_mouse{q} = trial_choice_times;
-    delay_to_initiation_by_mouse{q} = delay_to_initiation;
+    % trial_choice_times_by_mouse{q} = trial_choice_times;
+    % delay_to_initiation_by_mouse{q} = delay_to_initiation;
     delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
     clear trial_choice_times delay_to_initiation delay_to_collect_post_shk
 
@@ -179,11 +181,11 @@ hold off;
 
 % Create a histogram for allCorrelations
 figure;
-histogram(not_shk_responsive_corrs , 'Normalization', 'probability', 'FaceColor', 'blue', 'FaceAlpha', 0.5);
+histogram(not_shk_responsive_corrs , 'Normalization', 'probability', 'FaceColor', 'blue', 'FaceAlpha', 0.5, 'BinWidth', 0.1);
 hold on;
 
 % Create a histogram for only_shk_responsive_corrs on the same figure
-histogram(only_shk_responsive_corrs, 'Normalization', 'probability', 'FaceColor', 'red', 'FaceAlpha', 0.5);
+histogram(only_shk_responsive_corrs, 'Normalization', 'probability', 'FaceColor', 'red', 'FaceAlpha', 0.5, 'BinWidth', 0.1);
 
 % Add labels and title
 xlabel('Correlation Coefficient');
