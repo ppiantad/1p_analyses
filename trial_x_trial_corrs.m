@@ -22,8 +22,8 @@
 meanZallMouse = cell(length(zall_mouse), 1);
 
 % Define the time range for 0 to 2 seconds
-% timeRange = (ts1 >= 0) & (ts1 <= 2);
-timeRange = (ts1 >= -4) & (ts1 <= 0);
+timeRange = (ts1 >= 0) & (ts1 <= 1);
+% timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
 % Iterate through each cell in the zall_mouse array
@@ -57,12 +57,12 @@ end
 %%
 for q = 1:length (behav_tbl_iter{1, 1})
     nestedCellArray_1 = behav_tbl_iter{1, 1}{q};
-    % nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
-    % trial_choice_times = nestedCellArray_2.choiceTime - nestedCellArray_2.stTime;
-    % delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
+    nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
+    trial_choice_times = nestedCellArray_2.choiceTime - nestedCellArray_2.stTime;
+    delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
     delay_to_collect_post_shk = nestedCellArray_1.collectionTime - nestedCellArray_1.choiceTime;
-    % trial_choice_times_by_mouse{q} = trial_choice_times;
-    % delay_to_initiation_by_mouse{q} = delay_to_initiation;
+    trial_choice_times_by_mouse{q} = trial_choice_times;
+    delay_to_initiation_by_mouse{q} = delay_to_initiation;
     delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
     clear trial_choice_times delay_to_initiation delay_to_collect_post_shk
 
@@ -79,7 +79,7 @@ end
 % Initialize the new cell array to store the correlation results
 correlationResults = cell(size(meanZallMouse));
 
-variable_to_correlate = delay_to_collect_post_shk_by_mouse;
+variable_to_correlate = delay_to_initiation_by_mouse;
 
 % Iterate through each level of meanZallMouse
 for i = 1:length(meanZallMouse)
@@ -158,7 +158,7 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}==1);
+only_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}==1 & respClass_all_array{1, 3}~=1);
 not_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}==3);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
@@ -181,11 +181,11 @@ hold off;
 
 % Create a histogram for allCorrelations
 figure;
-histogram(not_shk_responsive_corrs , 'Normalization', 'probability', 'FaceColor', 'blue', 'FaceAlpha', 0.5, 'BinWidth', 0.1);
+histogram(not_shk_responsive_corrs , 'Normalization', 'probability', 'FaceColor', 'blue', 'FaceAlpha', 0.5, 'BinWidth', 0.05);
 hold on;
 
 % Create a histogram for only_shk_responsive_corrs on the same figure
-histogram(only_shk_responsive_corrs, 'Normalization', 'probability', 'FaceColor', 'red', 'FaceAlpha', 0.5, 'BinWidth', 0.1);
+histogram(only_shk_responsive_corrs, 'Normalization', 'probability', 'FaceColor', 'red', 'FaceAlpha', 0.5, 'BinWidth', 0.05);
 
 % Add labels and title
 xlabel('Correlation Coefficient');
@@ -196,6 +196,8 @@ legend('All Correlations', 'Only SHK Responsive Correlations');
 % Optionally, you can add a vertical line at 0 for reference
 yLimits = ylim;
 plot([0 0], yLimits, 'k--', 'LineWidth', 2);
+xtickformat('%.2f');
+ytickformat('%.2f');
 hold off;
 
 % Perform a Kolmogorov-Smirnov test to compare the two distributions
@@ -206,34 +208,57 @@ fprintf('Kolmogorov-Smirnov test result:\n');
 fprintf('h = %d (0 means the null hypothesis cannot be rejected, 1 means it can be rejected)\n', h);
 fprintf('p-value = %.4f\n', p);
 
+[h,p,ci,stats] = ttest2(not_shk_responsive_corrs , only_shk_responsive_corrs)
+
 %%
 
 % Calculate means
 mean_only_shk = mean(only_shk_responsive_corrs);
 mean_not_shk = mean(not_shk_responsive_corrs);
 
-% Plot means as bars
+
+
+% % Plot means as bars
+% figure;
+% hold on;
+% bar(1, mean_only_shk, 'FaceColor', 'r'); % Red bar for 'only_shk_responsive_corrs'
+% bar(2, mean_not_shk, 'FaceColor', 'b'); % Blue bar for 'not_shk_responsive_corrs'
+% 
+% swarmchart(1, only_shk_responsive_corrs, 5)
+% 
+% % Scatter individual data points
+% scatter(ones(size(only_shk_responsive_corrs)), only_shk_responsive_corrs, 'r', 'filled', 'jitter', 'on', 'jitterAmount', 0.15); % Red points with jitter
+% scatter(2 * ones(size(not_shk_responsive_corrs)), not_shk_responsive_corrs, 'b', 'filled', 'jitter', 'on', 'jitterAmount', 0.15); % Blue points with jitter
+% 
+% % Customize plot
+% xlim([0.5, 2.5]);
+% xticks([1 2]);
+% xticklabels({'Only Shk Responsive', 'Not Shk Responsive'});
+% ylabel('Correlation Values');
+% title('Correlation Values and Means');
+% grid on;
+% 
+% % Add legend
+% legend({'Mean Only Shk', 'Mean Not Shk', 'Individual Only Shk', 'Individual Not Shk'}, 'Location', 'best');
+% 
+% hold off;
+
 figure;
-hold on;
-bar(1, mean_only_shk, 'FaceColor', 'r'); % Red bar for 'only_shk_responsive_corrs'
-bar(2, mean_not_shk, 'FaceColor', 'b'); % Blue bar for 'not_shk_responsive_corrs'
+width = 500; % Width of the figure
+height = 1000; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+swarmchart(ones(1, length(only_shk_responsive_corrs)), only_shk_responsive_corrs)
+hold on
+swarmchart(ones(1, length(not_shk_responsive_corrs))*2, not_shk_responsive_corrs)
 
-% Scatter individual data points
-scatter(ones(size(only_shk_responsive_corrs)), only_shk_responsive_corrs, 'r', 'filled', 'jitter', 'on', 'jitterAmount', 0.15); % Red points with jitter
-scatter(2 * ones(size(not_shk_responsive_corrs)), not_shk_responsive_corrs, 'b', 'filled', 'jitter', 'on', 'jitterAmount', 0.15); % Blue points with jitter
+% yline(mean(only_shk_responsive_corrs), ones(length(only_shk_responsive_corrs)))
+plot([0.5; 1.5], [mean(only_shk_responsive_corrs); mean(only_shk_responsive_corrs)], 'LineWidth',3)
+plot([1.5; 2.5], [mean(not_shk_responsive_corrs); mean(not_shk_responsive_corrs)], 'LineWidth',3)
+yline(0);
+xtickformat('%.1f');
+ytickformat('%.1f');
+hold off
 
-% Customize plot
-xlim([0.5, 2.5]);
-xticks([1 2]);
-xticklabels({'Only Shk Responsive', 'Not Shk Responsive'});
-ylabel('Correlation Values');
-title('Correlation Values and Means');
-grid on;
-
-% Add legend
-legend({'Mean Only Shk', 'Mean Not Shk', 'Individual Only Shk', 'Individual Not Shk'}, 'Location', 'best');
-
-hold off;
 
 %% attempting logistic regression to predict large vs. small vs. omit from magnitude of SHK response
 
