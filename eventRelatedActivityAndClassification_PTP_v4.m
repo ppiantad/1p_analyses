@@ -138,7 +138,7 @@ for ii = 1:size(fieldnames(final),1)
                 end
             end
         end
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'LOSS_PLUS_ONE', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1
 
         % uncomment if you want to test specifically for particular ranges
         % during shock test

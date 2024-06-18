@@ -22,7 +22,7 @@
 meanZallMouse = cell(length(zall_mouse), 1);
 
 % Define the time range for 0 to 2 seconds
-timeRange = (ts1 >= 0) & (ts1 <= 1);
+timeRange = (ts1 >= 0) & (ts1 <= 2);
 % timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
@@ -158,7 +158,7 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}==1 & respClass_all_array{1, 3}~=1);
+only_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}==1);
 not_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}==3);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients

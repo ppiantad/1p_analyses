@@ -69,7 +69,7 @@ for ii = 1:size(fieldnames(final),1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'LOSS_PLUS_ONE', 1);
+        [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'LOSESHIFT', 0, 'REW', 0.3, 'BLOCK', 2, 'BLOCK', 3);
         trials = cell2mat(trials);
         behav_tbl_temp{ii,:} = BehavData;
         % % BehavData = BehavData(BehavData.shockIntensity >= 0.08 & BehavData.shockIntensity <= 0.13, :);
@@ -120,9 +120,11 @@ for ii = 1:size(fieldnames(final),1)
             % initialize trial matrices
             caTraceTrials = NaN(size(eTS,1),numMeasurements); %
             unitTrace = ca(u,:); %get trace
-            if isempty(eTS)
-                caTraceTrials(1, 1:size(ts1, 2)) = NaN;
-                zall(1, 1:size(ts1, 2)) = NaN;
+            if isempty(eTS) || size(eTS, 1) == 1
+                caTraceTrials(1, 1:size(ts1, 2)) = nan;
+                zall(1, 1:size(ts1, 2)) = nan;
+                sem_all(neuron_num, size(zall, 2)) = nan;
+                zall_mean_all(neuron_num,:) = nan;
             else
                 [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 % [normalized_trial_ca, concatenated_normalized_trial_ca] = normalize_trials_in_time_fn(trial_ca);
@@ -144,7 +146,7 @@ for ii = 1:size(fieldnames(final),1)
                 zall_mean_all(neuron_num,:) = nanmean(zall(:, 1:size(ts1, 2)));
 
                 if size(zall, 1) == 1
-                    sem_all(neuron_num, size(zall, 2)) = NaN;
+                   
 
                 else
                     sem_temp = nanstd(zall,1)/(sqrt(size(zall, 1)));
