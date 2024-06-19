@@ -360,11 +360,11 @@ for ii = 1:size(fieldnames(final),1)
                     % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) = empiricalWinAvg < lowerSD;     %classify as inhibited if empirical response exceeds lower limit
                     % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).neutral(qq,1) = respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).activated(qq,1) == 0 & respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args).inhibited(qq,1) == 0;
                     % Check if empiricalWinAvg exceeds the 95% confidence interval boundary
-                    if empiricalWinAvg > upperSD & empiricalWinAvg > otherEventWinAvg1 & empiricalWinAvg > otherEventWinAvg2 %empiricalWinAvg > upperSD & empiricalWinAvg > otherEventWinAvg1 & empiricalWinAvg > otherEventWinAvg2
+                    if empiricalWinAvg > upperSD  %empiricalWinAvg > upperSD & empiricalWinAvg > otherEventWinAvg1 & empiricalWinAvg > otherEventWinAvg2
                         respClass_all(neuron_num) = 1;
                         respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 1;
                         respClass_all_array_mouse{ii, iter}(u) = 1;
-                    elseif empiricalWinAvg < lowerSD & empiricalWinAvg < otherPeriodWinAvg & empiricalWinAvg < otherEventWinAvg2  % empiricalWinAvg < lowerSD & empiricalWinAvg < otherPeriodWinAvg & empiricalWinAvg < otherEventWinAvg2
+                    elseif empiricalWinAvg < lowerSD  % empiricalWinAvg < lowerSD & empiricalWinAvg < otherPeriodWinAvg & empiricalWinAvg < otherEventWinAvg2
                         respClass_all(neuron_num) = 2;
                         respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 2;
                         respClass_all_array_mouse{ii, iter}(u) = 2;
@@ -448,7 +448,7 @@ figure; shadedErrorBar(ts1, nanmean(neuron_mean(respClass_all_array{:,iter} == 3
 %% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
 % **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
 
-for ii = 949:size(zall_array, 2)
+for ii = 46:size(zall_array, 2)
     figure;
     % Initialize variables to store global max and min for heatmap and line graph
     globalMaxHeatmap = -inf;

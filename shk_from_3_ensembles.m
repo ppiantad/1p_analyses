@@ -420,18 +420,24 @@ legend({'large_pre_choice_ensemble_block_1', 'consumption active', 'neutral'}, '
 
 %% attempts to correlate shk-identified neurons w/ behavior 
 % need to run get_risk_percent_from_BehavData
+% load a RDT dataset with the following variables filtered (in order):
+    % "choiceTime.Outcome_Minus_4to0.OMITALL_0_BLANK_TOUCH_0_BLOCK_1"
+    % "choiceTime.Outcome_0to2.OMITALL_0_BLANK_TOUCH_0_BLOCK_1"
+    % "collectionTime.Outcome_1to3.OMITALL_0_BLANK_TOUCH_0_BLOCK_1"
+    % "choiceTime.Outcome_0to2.SHK_1"
+    % "choiceTime.Outcome_0to2.LOSS_PLUS_ONE_1"
 
 
 epoch_to_analyze = 'choiceTime'; % choiceTime collectionTime
 window_to_analyze = 'Outcome_0to2'; % Minus_4to0  Outcome_0to2 Outcome_1to3
 outcome_variable = 'SHK_1'; % OMITALL_0_BLANK_TOUCH_0_BLOCK_1 SHK_1
-array_to_select = 1; 
+array_to_select = 4; 
 
 for ff = 1:size(neuron_mean_mouse, 1)
     max_response(ff) = max(mean(neuron_mean_mouse{ff, (array_to_select)}(respClass_mouse.(animalIDs{ff}).(session_to_analyze).(epoch_to_analyze).(window_to_analyze).(outcome_variable)==1, :)));
     min_response(ff) = min(mean(neuron_mean_mouse{ff, (array_to_select)}(respClass_mouse.(animalIDs{ff}).(session_to_analyze).(epoch_to_analyze).(window_to_analyze).(outcome_variable)==2, :)));
     num_shk_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).(session_to_analyze).(epoch_to_analyze).(window_to_analyze).(outcome_variable)==1);
-    % num_consumption_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).(session_to_analyze).collectionTime.Outcome_1to3.OMITALL_0_BLANK_TOUCH_0_BLOCK_1==1);
+    num_consumption_cells(ff) = sum(respClass_mouse.(animalIDs{ff}).(session_to_analyze).collectionTime.Outcome_1to3.OMITALL_0_BLANK_TOUCH_0_BLOCK_1==1);
     percent_shk_ensemble(ff) = num_shk_cells(ff)/size(respClass_mouse.(animalIDs{ff}).(session_to_analyze).(epoch_to_analyze).(window_to_analyze).(outcome_variable), 1);
 end
 
@@ -441,7 +447,7 @@ x = max_response;
 y = riskiness;
 % Create a new figure with specific dimensions
 figure;
-width = 500; % Width of the figure
+width = 650; % Width of the figure
 height = 350; % Height of the figure (width is half of height)
 set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
 
@@ -508,7 +514,7 @@ hold off;
 x = percent_shk_ensemble;
 y = riskiness;
 figure;
-width = 500; % Width of the figure
+width = 650; % Width of the figure
 height = 350; % Height of the figure (width is half of height)
 set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
 hold on;

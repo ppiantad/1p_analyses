@@ -1,25 +1,17 @@
-% % Define the time range for 0 to 2 seconds
-% timeRange = (ts1 >= 0) & (ts1 <= 2);
-% 
-% % Iterate through each cell in the cell array
-% for i = 1:length(zall_array)
-%     % Get the current double array
-%     currentArray = zall_array{i};
-% 
-%     % Compute the mean activity for each row in the time range 0 to 2 seconds
-%     meanValues = mean(currentArray(:, timeRange), 2);
-% 
-%     % Store the mean values in the corresponding cell of the new cell array
-%     meanCellArray{i} = meanValues;
-% end
 
 %% use these data for mouse x mouse, which is likely better
-% run eventRelatedActivityAndClassification with:
-%   choiceTime.Outcome_0to2.SHK_1
-%   choiceTime.Outcome_0to2.LOSS_PLUS_ONE_1
+% load a RDT dataset with the following variables filtered (in order):
+    % "choiceTime.Outcome_Minus_4to0.OMITALL_0_BLANK_TOUCH_0_BLOCK_1"
+    % "choiceTime.Outcome_0to2.OMITALL_0_BLANK_TOUCH_0_BLOCK_1"
+    % "collectionTime.Outcome_1to3.OMITALL_0_BLANK_TOUCH_0_BLOCK_1"
+    % "choiceTime.Outcome_0to2.SHK_1"
+    % "choiceTime.Outcome_0to2.LOSS_PLUS_ONE_1"
+
+
+array_for_means = 4; 
 
 % Initialize the new cell array to store the mean values
-meanZallMouse = cell(length(zall_mouse), 1);
+meanZallMouse = cell(length(zall_mouse{1, array_for_means}), 1);
 
 % Define the time range for 0 to 2 seconds
 timeRange = (ts1 >= 0) & (ts1 <= 2);
@@ -29,7 +21,7 @@ timeRange = (ts1 >= 0) & (ts1 <= 2);
 % Iterate through each cell in the zall_mouse array
 for i = 1:length(zall_mouse)
     % Get the current nested cell array
-    nestedCellArray_2 = zall_mouse{i};
+    nestedCellArray_2 = zall_mouse{i, array_for_means};
     
     % Initialize the nested cell array for storing mean values
     meanNestedCellArray = cell(size(nestedCellArray_2));
@@ -55,9 +47,9 @@ end
 % Each cell in meanZallMouse contains a nested cell array with the
 
 %%
-for q = 1:length (behav_tbl_iter{1, 1})
-    nestedCellArray_1 = behav_tbl_iter{1, 1}{q};
-    nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
+for q = 1:length (behav_tbl_iter{4, 1})
+    nestedCellArray_1 = behav_tbl_iter{4, 1}{q};
+    nestedCellArray_2 = behav_tbl_iter{5, 1}{q};
     trial_choice_times = nestedCellArray_2.choiceTime - nestedCellArray_2.stTime;
     delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
     delay_to_collect_post_shk = nestedCellArray_1.collectionTime - nestedCellArray_1.choiceTime;
@@ -79,7 +71,7 @@ end
 % Initialize the new cell array to store the correlation results
 correlationResults = cell(size(meanZallMouse));
 
-variable_to_correlate = delay_to_initiation_by_mouse;
+variable_to_correlate = delay_to_collect_post_shk_by_mouse;
 
 % Iterate through each level of meanZallMouse
 for i = 1:length(meanZallMouse)
@@ -158,8 +150,8 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}==1);
-not_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}==3);
+only_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 4}==1);
+not_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 4}==3);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
 figure;
@@ -181,6 +173,9 @@ hold off;
 
 % Create a histogram for allCorrelations
 figure;
+width = 250; % Width of the figure
+height = 500; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 histogram(not_shk_responsive_corrs , 'Normalization', 'probability', 'FaceColor', 'blue', 'FaceAlpha', 0.5, 'BinWidth', 0.05);
 hold on;
 
@@ -190,8 +185,8 @@ histogram(only_shk_responsive_corrs, 'Normalization', 'probability', 'FaceColor'
 % Add labels and title
 xlabel('Correlation Coefficient');
 ylabel('Probability');
-title('Histograms of Correlation Coefficients');
-legend('All Correlations', 'Only SHK Responsive Correlations');
+% title('Histograms of Correlation Coefficients');
+% legend('All Correlations', 'Only SHK Responsive Correlations');
 
 % Optionally, you can add a vertical line at 0 for reference
 yLimits = ylim;
@@ -243,17 +238,19 @@ mean_not_shk = mean(not_shk_responsive_corrs);
 % 
 % hold off;
 
+bar_separation_value = 3;
+
 figure;
-width = 500; % Width of the figure
-height = 1000; % Height of the figure (width is half of height)
+width = 250; % Width of the figure
+height = 500; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 swarmchart(ones(1, length(only_shk_responsive_corrs)), only_shk_responsive_corrs)
 hold on
-swarmchart(ones(1, length(not_shk_responsive_corrs))*2, not_shk_responsive_corrs)
+swarmchart(ones(1, length(not_shk_responsive_corrs))*bar_separation_value, not_shk_responsive_corrs)
 
 % yline(mean(only_shk_responsive_corrs), ones(length(only_shk_responsive_corrs)))
 plot([0.5; 1.5], [mean(only_shk_responsive_corrs); mean(only_shk_responsive_corrs)], 'LineWidth',3)
-plot([1.5; 2.5], [mean(not_shk_responsive_corrs); mean(not_shk_responsive_corrs)], 'LineWidth',3)
+plot([bar_separation_value-.5; bar_separation_value+.5], [mean(not_shk_responsive_corrs); mean(not_shk_responsive_corrs)], 'LineWidth',3)
 yline(0);
 xtickformat('%.1f');
 ytickformat('%.1f');

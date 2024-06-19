@@ -1,6 +1,6 @@
 %% Run eventRelatedActivity first for whatever events you want to identify responsive neurons for
 clear zall_first_event zall_second_event zall_third_event sem_first_event sem_second_event sem_third_event zall_fourth_event sem_fourth_event
-select_mouse = 'BLA_Insc_30';
+select_mouse = 'BLA_Insc_34';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
