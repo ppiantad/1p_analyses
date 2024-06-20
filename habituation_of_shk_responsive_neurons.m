@@ -105,10 +105,10 @@ figure; scatter(final_shk_epoch_mean, riskiness);
 
 figure;
 hold on; 
-h(1) = shadedErrorBar(ts1, first_shk_data_mean, first_shk_data_sem, 'lineProps', {'color', acton(1,:)});
-h(2) = shadedErrorBar(ts1, middle_shk_data_mean, middle_shk_data_sem, 'lineProps', {'color', batlowW(iter+75,:), 'LineWidth', 2});
-h(3) = shadedErrorBar(ts1, final_shk_data_mean, final_shk_data_sem, 'lineProps', {'color', batlowW(iter+100,:), 'LineWidth', 2});
-legend([h(1).mainLine h(2).mainLine h(3).mainLine], 'first shock', 'middle shock', 'final shock')
+ff(1) = shadedErrorBar(ts1, first_shk_data_mean, first_shk_data_sem, 'lineProps', {'color', acton(1,:)});
+ff(2) = shadedErrorBar(ts1, middle_shk_data_mean, middle_shk_data_sem, 'lineProps', {'color', batlowW(iter+75,:), 'LineWidth', 2});
+ff(3) = shadedErrorBar(ts1, final_shk_data_mean, final_shk_data_sem, 'lineProps', {'color', batlowW(iter+100,:), 'LineWidth', 2});
+legend([ff(1).mainLine ff(2).mainLine ff(3).mainLine], 'first shock', 'middle shock', 'final shock')
 
 
 %% for analyzing SHOCK TEST DATA

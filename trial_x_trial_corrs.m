@@ -30,7 +30,8 @@ for i = 1:length(zall_mouse)
     for j = 1:length(nestedCellArray_2)
         % Get the current double array
         currentArray = nestedCellArray_2{j};
-        
+        currentArray_mean = mean(currentArray, 2);
+        currentArray = currentArray-currentArray_mean ;
         % Compute the mean activity for each row in the time range 0 to 2 seconds
         meanValues = mean(currentArray(:, timeRange), 2);
         % meanValues = max(currentArray(:, timeRange), [], 2);

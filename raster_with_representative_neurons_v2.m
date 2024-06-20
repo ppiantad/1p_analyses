@@ -1,6 +1,6 @@
 %% Run eventRelatedActivity first for whatever events you want to identify responsive neurons for
 clear zall_first_event zall_second_event zall_third_event sem_first_event sem_second_event sem_third_event zall_fourth_event sem_fourth_event
-select_mouse = 'BLA_Insc_34';
+select_mouse = 'BLA_Insc_24';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
@@ -217,9 +217,9 @@ neurons_to_plot = 3;
 rand_first = randi([1 size(zall_first_event, 1)], 3, 1)
 rand_second = randi([1 size(zall_second_event, 1)], 3, 1)
 rand_third = randi([1 size(zall_third_event, 1)], 3, 1)
-selected_neurons_first = zall_first_event([4 2 5], 1:trim_length);
+selected_neurons_first = zall_first_event(1:neurons_to_plot, 1:trim_length); %[4 2 5]
 selected_neurons_second = zall_second_event(1:neurons_to_plot, 1:trim_length);
-selected_neurons_third = zall_third_event([10 8 3], 1:trim_length);
+selected_neurons_third = zall_third_event(1:neurons_to_plot, 1:trim_length); %[10 8 3]
 % selected_neurons_third = zall_neutral_event(1:neurons_to_plot, 1:trim_length);
 
 % Combine selected neurons into one array

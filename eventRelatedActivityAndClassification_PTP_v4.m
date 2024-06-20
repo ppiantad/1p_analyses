@@ -234,7 +234,8 @@ for ii = 1:size(fieldnames(final),1)
                 [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 % [caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_only(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-                zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                % zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                zall = zall_session(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                 % zall = zscored_caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
 
                 % for some events, the mice have no trials, therefore there are
