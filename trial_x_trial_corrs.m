@@ -7,11 +7,36 @@
     % "choiceTime.Outcome_0to2.SHK_1"
     % "choiceTime.Outcome_0to2.LOSS_PLUS_ONE_1"
 
+%%
+for q = 1:length (behav_tbl_iter{4, 1})
+    nestedCellArray_1 = behav_tbl_iter{4, 1}{q};
+    nestedCellArray_2 = behav_tbl_iter{5, 1}{q};
+    if size(nestedCellArray_1, 1) > size(nestedCellArray_2, 1)
+        delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime(1:end-1,:);
+    else 
+        delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
+    end
+    trial_choice_times = nestedCellArray_2.choiceTime - nestedCellArray_2.stTime;
+    % delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
+    delay_to_collect_post_shk = nestedCellArray_1.collectionTime - nestedCellArray_1.choiceTime;
+    trial_choice_times_by_mouse{q} = trial_choice_times;
+    delay_to_initiation_by_mouse{q} = delay_to_initiation;
+    delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
+    clear trial_choice_times delay_to_initiation delay_to_collect_post_shk
 
+
+
+end
+
+
+variable_to_correlate = delay_to_collect_post_shk_by_mouse;
+
+
+%%
 array_for_means = 4; 
 
 % Initialize the new cell array to store the mean values
-meanZallMouse = cell(length(zall_mouse{1, array_for_means}), 1);
+meanZallMouse = cell(size(zall_mouse, 1), 1);
 
 % Define the time range for 0 to 2 seconds
 timeRange = (ts1 >= 0) & (ts1 <= 2);
@@ -21,17 +46,29 @@ timeRange = (ts1 >= 0) & (ts1 <= 2);
 % Iterate through each cell in the zall_mouse array
 for i = 1:length(zall_mouse)
     % Get the current nested cell array
-    nestedCellArray_2 = zall_mouse{i, array_for_means};
-    
+    nestedCellArray_1 = zall_mouse{i, array_for_means};
+    nestedCellArray_2 = zall_mouse{i, 5};
     % Initialize the nested cell array for storing mean values
-    meanNestedCellArray = cell(size(nestedCellArray_2));
+    meanNestedCellArray = cell(size(nestedCellArray_1));
     
     % Iterate through each cell in the nested cell array
-    for j = 1:length(nestedCellArray_2)
+    for j = 1:length(nestedCellArray_1)
         % Get the current double array
-        currentArray = nestedCellArray_2{j};
-        currentArray_mean = mean(currentArray, 2);
-        currentArray = currentArray-currentArray_mean ;
+        currentArray = nestedCellArray_1{j};
+        comparisonArray_for_size = nestedCellArray_2{j};
+        
+        if isequal(variable_to_correlate, delay_to_collect_post_shk_by_mouse)
+            currentArray = nestedCellArray_1{j};
+        else
+            if size(currentArray, 1) > size(comparisonArray_for_size, 1)
+                currentArray = currentArray(1:end-1,:);
+            else
+
+            end
+        end
+        % uncomment below if you want to mean center
+        % currentArray_mean = mean(currentArray, 2);
+        % currentArray = currentArray-currentArray_mean;
         % Compute the mean activity for each row in the time range 0 to 2 seconds
         meanValues = mean(currentArray(:, timeRange), 2);
         % meanValues = max(currentArray(:, timeRange), [], 2);
@@ -47,21 +84,7 @@ end
 % Now, meanZallMouse contains the mean activity for each row in the time period 0 to 2 seconds
 % Each cell in meanZallMouse contains a nested cell array with the
 
-%%
-for q = 1:length (behav_tbl_iter{4, 1})
-    nestedCellArray_1 = behav_tbl_iter{4, 1}{q};
-    nestedCellArray_2 = behav_tbl_iter{5, 1}{q};
-    trial_choice_times = nestedCellArray_2.choiceTime - nestedCellArray_2.stTime;
-    delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
-    delay_to_collect_post_shk = nestedCellArray_1.collectionTime - nestedCellArray_1.choiceTime;
-    trial_choice_times_by_mouse{q} = trial_choice_times;
-    delay_to_initiation_by_mouse{q} = delay_to_initiation;
-    delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
-    clear trial_choice_times delay_to_initiation delay_to_collect_post_shk
 
-
-
-end
 
 %%
 
@@ -72,7 +95,7 @@ end
 % Initialize the new cell array to store the correlation results
 correlationResults = cell(size(meanZallMouse));
 
-variable_to_correlate = delay_to_collect_post_shk_by_mouse;
+
 
 % Iterate through each level of meanZallMouse
 for i = 1:length(meanZallMouse)
@@ -87,7 +110,7 @@ for i = 1:length(meanZallMouse)
     trialIndex = mod(i-1, length(variable_to_correlate)) + 1;
     
     % Get the corresponding trial choice times
-    trialChoiceTimes = variable_to_correlate{trialIndex};
+    trialChoiceTimes = variable_to_correlate{i};
     
     % Iterate through each cell in the nested cell array
     for j = 1:length(meanNestedCellArray)
@@ -106,7 +129,7 @@ for i = 1:length(meanZallMouse)
         % Store the correlation coefficient in the nested cell array
         correlationNestedArray(j) = correlationCoeff;
     end
-    
+    clear meanValues
     % Store the nested cell array of correlation coefficients in the main cell array
     correlationResults{i} = correlationNestedArray;
 end
@@ -151,7 +174,7 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 4}==1);
+only_shk_responsive_corrs = allCorrelations(exclusive_activated_session_4==1);
 not_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 4}==3);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
@@ -172,17 +195,22 @@ hold off;
 % allCorrelations: array containing correlation coefficients from correlationResults
 % only_shk_responsive_corrs: array containing correlation coefficients from a different variable
 
+% Calculate means
+mean_only_shk = mean(only_shk_responsive_corrs);
+mean_not_shk = mean(not_shk_responsive_corrs);
+
 % Create a histogram for allCorrelations
 figure;
 width = 250; % Width of the figure
 height = 500; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
-histogram(not_shk_responsive_corrs , 'Normalization', 'probability', 'FaceColor', 'blue', 'FaceAlpha', 0.5, 'BinWidth', 0.05);
+histogram(not_shk_responsive_corrs , 'Normalization', 'probability', 'FaceColor', 'blue','BinWidth', 0.05);
 hold on;
 
 % Create a histogram for only_shk_responsive_corrs on the same figure
-histogram(only_shk_responsive_corrs, 'Normalization', 'probability', 'FaceColor', 'red', 'FaceAlpha', 0.5, 'BinWidth', 0.05);
-
+histogram(only_shk_responsive_corrs, 'Normalization', 'probability', 'FaceColor', 'red', 'BinWidth', 0.05);
+xline(mean_only_shk, 'r')
+xline(mean_not_shk, 'g')
 % Add labels and title
 xlabel('Correlation Coefficient');
 ylabel('Probability');
@@ -191,7 +219,7 @@ ylabel('Probability');
 
 % Optionally, you can add a vertical line at 0 for reference
 yLimits = ylim;
-plot([0 0], yLimits, 'k--', 'LineWidth', 2);
+plot([0 0], yLimits, 'k', 'LineWidth', 2);
 xtickformat('%.2f');
 ytickformat('%.2f');
 hold off;
@@ -206,11 +234,26 @@ fprintf('p-value = %.4f\n', p);
 
 [h,p,ci,stats] = ttest2(not_shk_responsive_corrs , only_shk_responsive_corrs)
 
+
+%%
+for hh = 1:length(meanZallMouse)
+    % Get the current nested cell array of mean values
+    meanNestedCellArray = meanZallMouse{hh};
+    only_shk_meanNestedCellArray = meanNestedCellArray(:, respClass_all_array_mouse{hh, 4}==1);
+
+    only_shk_meanNestedCellArray_mat = cell2mat(only_shk_meanNestedCellArray);
+    mean_only_shk_meanNestedCellArray_mat = mean(only_shk_meanNestedCellArray_mat, 2);
+    mean_mean_only_shk_meanNestedCellArray_mat(hh) = mean(mean_only_shk_meanNestedCellArray_mat);
+
+end
+
+scatter(mean_mean_only_shk_meanNestedCellArray_mat, riskiness)
+corr(mean_mean_only_shk_meanNestedCellArray_mat', riskiness)
+
+
 %%
 
-% Calculate means
-mean_only_shk = mean(only_shk_responsive_corrs);
-mean_not_shk = mean(not_shk_responsive_corrs);
+
 
 
 

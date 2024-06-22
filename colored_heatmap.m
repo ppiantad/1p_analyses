@@ -8,7 +8,9 @@
 %     1, 0.5, 0; % orange
 % ];
 
-% green
+plot_num = 21; 
+
+
 % custom_colormap = [
 %     1, 1, 1;       % white
 %     0.9, 0.95, 0.9;
@@ -42,34 +44,54 @@ custom_colormap = [
 % Generate more intermediate colors for a smoother transition
 n = 256; % Number of colors
 custom_colormap = interp1(linspace(0, 1, size(custom_colormap, 1)), custom_colormap, linspace(0, 1, n));
-figure;
-subplot(2, 1, 1);
-hold on;
-% 949, 1001, 946
-% Plot the heatmap
 
-imagesc(ts1, 0 , zall_array{1, 946});
+% Create a figure with a narrow width and taller height
+figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+
+% Create a tiled layout with 2 rows and 1 column
+tiledlayout(2, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
+
+% First tile (heatmap)
+ax1 = nexttile;
+hold on;
+
+% Plot the heatmap
+imagesc(ts1, 0, zall_array{1, plot_num});
 
 % Apply the custom colormap
 colormap(custom_colormap);
-% Restrict the color axis range to [2, 0]
-clim([-1 1]);
-% Add a colorbar
-colorbar;
 
+% Restrict the color axis range to [-1, 1]
+clim([-1 1]);
+
+% Add a separate axes for the colorbar to associate it only with the upper tile
+c = colorbar(ax1, 'eastoutside');
+set(c, 'YTick', clim); % 
+
+ylim([1  size(zall_array{1, plot_num}, 1)])
+xlim([-8 8]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, -4, 0, 4, 8]);
+set(gca, 'YTick', [1, size(zall_array{1, plot_num}, 1)]);
+xline(0)
 hold off;
 
-% % Create subplot for the mean and raw data
-subplot(2, 1, 2);
+% Second tile (mean and raw data)
+ax2 = nexttile;
 hold on;
 
 % Plot the mean as a thick black line
-meanData = mean(zall_array{1, 946});
+meanData = mean(zall_array{1, plot_num});
 plot(ts1, meanData, 'r', 'LineWidth', 2, 'Color', custom_colormap(end, :));
 
-
 % Plot the raw data in grey with transparency
-for trial = 1:size(zall_array{1, 946}, 1)
-    plot(ts1, zall_array{1, 946}(trial, :), 'Color', [custom_colormap(end, :), 0.5]);
-    hold on;
+for trial = 1:size(zall_array{1, plot_num}, 1)
+    plot(ts1, zall_array{1, plot_num}(trial, :), 'Color', [custom_colormap(end, :), 0.5]);
 end
+ylim([-4 4]);
+xlim([-8 8]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, -4, 0, 4, 8]);
+xline(0)
+yline(0)
+hold off;

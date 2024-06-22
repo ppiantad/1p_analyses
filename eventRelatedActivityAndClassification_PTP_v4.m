@@ -68,7 +68,9 @@ clear neuron_mean neuron_sem neuron_num zall_mean zall_to_BL_array zsd_array tri
 % these are mice that did not complete the entire session - kinda have to
 % toss them to do some comparisons during RDT
 if strcmp('RDT_D1', session_to_analyze)
-    final = rmfield(final, ['BLA_Insc_28'; 'BLA_Insc_38'; 'BLA_Insc_39']);
+    final = rmfield(final, ['BLA_Insc_28'; 'BLA_Insc_29'; 'BLA_Insc_38'; 'BLA_Insc_39']);
+elseif strcmp('RDT_D2', session_to_analyze)
+    final = rmfield(final, ['BLA_Insc_28'; 'BLA_Insc_39']);
 end
 
 
@@ -449,7 +451,7 @@ figure; shadedErrorBar(ts1, nanmean(neuron_mean(respClass_all_array{:,iter} == 3
 %% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
 % **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
 
-for ii = 46:size(zall_array, 2)
+for ii = 1:size(zall_array, 2)
     figure;
     % Initialize variables to store global max and min for heatmap and line graph
     globalMaxHeatmap = -inf;

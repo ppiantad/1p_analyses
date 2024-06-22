@@ -12,16 +12,24 @@ select_mouse_cells_indices = find(strcmp(mouse_cells(1,:), select_mouse));
 %     respClass_all_array{i} = respClass_all_array{i}(select_mouse_cells_indices);
 % end
 
-
+test = [];
 test = [neuron_mean_array{1, 1}(respClass_all_array{1, 1}==1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}~=1, :)];
-test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1, :)];
+% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1, :)];
 test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}==1, :)];
 % test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1,:)]
 
+% pre_choice_index = [1:sum(respClass_all_array{1, 1}==1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}~=1)];
+% post_choice_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1)];
+% consumption_index = [post_choice_index(end)+1:post_choice_index(end)+sum(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}==1)];
+% neutral_index = [consumption_index(end)+1:consumption_index(end)+sum(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1)];
+
 pre_choice_index = [1:sum(respClass_all_array{1, 1}==1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}~=1)];
-post_choice_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1)];
-consumption_index = [post_choice_index(end)+1:post_choice_index(end)+sum(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}==1)];
-neutral_index = [consumption_index(end)+1:consumption_index(end)+sum(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1)];
+consumption_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}==1)];
+% consumption_index = [post_choice_index(end)+1:post_choice_index(end)+sum(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1, 3}==1)];
+% neutral_index = [consumption_index(end)+1:consumption_index(end)+sum(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1)];
+
+
+
 
 % tabulate how neurons assigned to neuron_mean_array for the 1st event
 % % change across subsequent events
@@ -54,15 +62,15 @@ end
 % Plot the correlation matrix
 figure;
 imagesc(correlation_matrix);
-colorbar; % Add a colorbar to the plot
-axis square; % Make the plot square for better visualization
-title('Correlation Matrix');
-xlabel('Neuron Number');
-ylabel('Neuron Number');
 
+axis square; % Make the plot square for better visualization
+% title('Correlation Matrix');
+% xlabel('Neuron Number');
+% ylabel('Neuron Number');
+ylim([1  size(test, 1)])
 % Show row and column indices on the plot
-xticks(0:50:size(data, 1));
-yticks(0:50:size(data, 1));
+xticks([1  size(test, 1)]);
+yticks([1  size(test, 1)]);
 
 % If you want to customize the color map, you can use colormap function
 % For example, using a blue-white-red colormap:
@@ -70,7 +78,9 @@ colormap(bluewhitered);
 
 % If you want to limit the color scale to the range [0, 1]
 caxis([-1 1]); % Assuming correlations range from -1 to 1
-
+% Add a separate axes for the colorbar to associate it only with the upper tile
+c = colorbar('eastoutside');
+set(c, 'YTick', clim); % 
 % % Display p-values as text on the plot
 % for i = 1:size(data, 1)
 %     for j = 1:size(data, 1)
@@ -606,15 +616,17 @@ xlim([0.5, 1.5]); % since we only have one set of data, we set the limits to cen
 % Assuming you have action_data, consumption_data, and action_consumption_data matrices
 
 % Define x-values for each set of bars
-x = 1:6;
-
+% x = 1:6;
+x = 1:3;
 % Create a new figure
 figure;
 
 % Plot the stacked bar plots for each dataset
 % bar(x, [action_data; post_choice_data; consumption_data; action_post_choice_data; action_consumption_data; post_choice_consumption_data], 'stacked');
 
-barh(x, [action_data; post_choice_data; consumption_data; action_post_choice_data; action_consumption_data; post_choice_consumption_data], 'stacked');
+% barh(x, [action_data; post_choice_data; consumption_data; action_post_choice_data; action_consumption_data; post_choice_consumption_data], 'stacked');
+bar(x, [action_data; consumption_data; action_consumption_data], 'stacked');
+
 % % Set x-axis tick locations and labels
 % xticks(x);
 % xticklabels({'aa', 'cc', 'ac'});

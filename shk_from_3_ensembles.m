@@ -109,12 +109,18 @@ figure; pie(inner_pie)
 
 
 figure;
+width = 450; % Width of the figure
+height = 650; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+
+
 shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(exclusive_activated_session_1==1, :)), nanmean(neuron_sem_array{1, 1}(exclusive_activated_session_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
 hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(exclusive_activated_session_2==1, :)), nanmean(neuron_sem_array{1, 1}(exclusive_activated_session_2==1, :)), 'lineProps', {'color', batlowW(iter,:)});
 hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(exclusive_activated_session_3==1, :)), nanmean(neuron_sem_array{1, 1}(exclusive_activated_session_3==1, :)), 'lineProps', {'color', batlowW(iter,:)});
 hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(exclusive_activated_session_4==1, :)), nanmean(neuron_sem_array{1, 4}(exclusive_activated_session_4==1, :)), 'lineProps', {'color', batlowW(iter,:)});
 hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(not_active_ind==1, :)), nanmean(neuron_sem_array{1, 1}(not_active_ind==1, :)), 'lineProps', {'color', batlowW(iter,:)});
-
+% xtickformat('%.2f');
+ytickformat('%.2f');
 xline(0);
 xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
 xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
@@ -168,7 +174,7 @@ post_choice_both_excited = respClass_all_array{1,2} == 1 & respClass_all_array{1
 % increase in response to SHK
 co_activated_indices = find(post_choice_both_excited(1,:) == 1);
 co_activated_indices_sum = numel(co_activated_indices);
-clear h p 
+clear h p ci stats
 for qq = 1:size(co_activated_indices, 2)
     [h(qq),p(qq),ci{qq},stats{qq}] = ttest(neuron_mean_array{1, 2}(co_activated_indices(qq),sub_window_idx),neuron_mean_array{1, 4}(co_activated_indices(qq),sub_window_idx));
     mean_diff(qq) = mean(neuron_mean_array{1, 2}(co_activated_indices(qq),sub_window_idx) - mean(neuron_mean_array{1, 4}(co_activated_indices(qq),sub_window_idx)));
