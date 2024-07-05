@@ -1,10 +1,12 @@
+selected_zall_data = zall_mouse(1,:);
+
 % Assuming zall_mouse is your 11x3 cell array
 
 % Initialize the new cell array to store the reorganized data
-reorganized_data = cell(11, 3);
+reorganized_data = cell(10, 6);
 
-for col = 1:3
-    for row = 1:11
+for col = 1:6
+    for row = 1:10
         % Extract the subarray from the current cell
         subarray = zall_mouse{row, col};
         
