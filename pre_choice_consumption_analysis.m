@@ -73,6 +73,77 @@ figure; donutchart(inner_pie, 'InnerRadius', 0)
 figure; donutchart(inner_pie, 'InnerRadius', .3)
 figure; donutchart(outer_donut, 'InnerRadius', 0.7)
 
+
+mean_data_pre_choice_activated_exclusive = neuron_mean_array{1,1}(pre_choice_activated_exclusive, :);
+mean_data_consum_activated_exclusive = neuron_mean_array{1,1}(consum_activated_exclusive, :);
+mean_data_pre_choice_inhibited_exclusive = neuron_mean_array{1,1}(pre_choice_inhibited_exclusive, :);
+
+
+
+data_for_big_heatmap = [mean_data_pre_choice_activated_exclusive; mean_data_consum_activated_exclusive];
+
+figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+imagesc(ts1, [], data_for_big_heatmap)
+% Apply the custom colormap
+colormap(flipud(gray));
+
+% Restrict the color axis range to [-1, 1]
+clim([-.5 .5]);
+
+% Add a separate axes for the colorbar to associate it only with the upper tile
+c = colorbar('eastoutside');
+set(c, 'YTick', clim); % 
+
+ylim([1  size(zall_array{1, plot_num}, 1)])
+xlim([-8 8]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, -4, 0, 4, 8]);
+set(gca, 'YTick', [1, size(zall_array{1, plot_num}, 1)]);
+xline(0)
+hold off;
+
+%%
+pre_choice_activated_consum_inhibited = respClass_all_array{1,1} == 1 & respClass_all_array{1,3} == 2; 
+pre_choice_activated_consum_activated = respClass_all_array{1,1} == 1 & respClass_all_array{1,3} == 1; 
+pre_choice_inhibited_consum_inhibited = respClass_all_array{1,1} == 2 & respClass_all_array{1,3} == 2; 
+pre_choice_inhibited_consum_activated = respClass_all_array{1,1} == 2 & respClass_all_array{1,3} == 1; 
+
+mean_data_pre_choice_activated_consum_inhibited = neuron_mean_array{1,1}(pre_choice_activated_consum_inhibited, :);
+mean_data_pre_choice_activated_consum_activated = neuron_mean_array{1,1}(pre_choice_activated_consum_activated, :);
+mean_data_pre_choice_inhibited_consum_inhibited = neuron_mean_array{1,1}(pre_choice_inhibited_consum_inhibited, :);
+mean_data_pre_choice_inhibited_consum_activated = neuron_mean_array{1,1}(pre_choice_inhibited_consum_activated, :);
+
+
+data_for_big_heatmap = [    mean_data_pre_choice_activated_consum_inhibited;...
+                            mean_data_pre_choice_activated_consum_activated;...
+                            mean_data_pre_choice_inhibited_consum_inhibited;...
+                            mean_data_pre_choice_inhibited_consum_activated;...
+    
+    
+    ];
+
+figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+imagesc(ts1, [], data_for_big_heatmap)
+% Apply the custom colormap
+colormap(flipud(gray));
+
+% Restrict the color axis range to [-1, 1]
+clim([-.5 .5]);
+
+% Add a separate axes for the colorbar to associate it only with the upper tile
+c = colorbar('eastoutside');
+set(c, 'YTick', clim); % 
+
+ylim([1  size(zall_array{1, plot_num}, 1)])
+xlim([-8 8]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, -4, 0, 4, 8]);
+set(gca, 'YTick', [1, size(zall_array{1, plot_num}, 1)]);
+xline(0)
+hold off;
+yline(size(mean_data_pre_choice_activated_consum_inhibited, 1))
+yline(size(mean_data_pre_choice_activated_consum_activated, 1))
+
 %%
 figure;
 width = 450; % Width of the figure
@@ -167,17 +238,49 @@ figure; donutchart(inhibited_inner_pie, 'InnerRadius', .5)
 figure; donutchart(inhibited_outer_donut, 'InnerRadius', 0.7)
 
 %%
-percent_pre_choice_activated_exclusive = sum(pre_choice_activated_exclusive)/sum(all_pre_choice_activated);
-percent_pre_choice_activated_consum_inhibited = sum(pre_choice_activated_consum_inhibited)/sum(all_pre_choice_activated);
-percent_pre_choice_activated_consum_activated = sum(pre_choice_activated_consum_activated)/sum(all_pre_choice_activated);
+percent_pre_choice_activated_exclusive = sum(pre_choice_activated_exclusive)/sum(all_pre_choice_activated)*100;
+percent_pre_choice_activated_consum_inhibited = sum(pre_choice_activated_consum_inhibited)/sum(all_pre_choice_activated)*100;
+percent_pre_choice_activated_consum_activated = sum(pre_choice_activated_consum_activated)/sum(all_pre_choice_activated)*100;
 
 figure;
 bar(1, [percent_pre_choice_activated_exclusive; percent_pre_choice_activated_consum_inhibited; percent_pre_choice_activated_consum_activated], 'stacked')
 
 %%
-percent_consum_activated_exclusive = sum(consum_activated_exclusive)/sum(all_consum_activated);
-percent_consum_activated_pre_choice_inhibited = sum(consum_activated_pre_choice_inhibited)/sum(all_consum_activated);
-percent_consum_activated_pre_choice_activated = sum(consum_activated_pre_choice_activated)/sum(all_consum_activated);
+percent_consum_activated_exclusive = sum(consum_activated_exclusive)/sum(all_consum_activated)*100;
+percent_consum_activated_pre_choice_inhibited = sum(consum_activated_pre_choice_inhibited)/sum(all_consum_activated)*100;
+percent_consum_activated_pre_choice_activated = sum(consum_activated_pre_choice_activated)/sum(all_consum_activated)*100;
 
 figure;
 bar(1, [percent_consum_activated_exclusive; percent_consum_activated_pre_choice_inhibited; percent_consum_activated_pre_choice_activated], 'stacked')
+
+%%
+percent_pre_choice_active = (sum(all_pre_choice_activated)/neuron_num)*100
+percent_consum_inhib = (sum(all_consum_inhibited)/neuron_num)*100
+percent_overlap_from_total_neurons =  (sum(pre_choice_activated_consum_inhibited)/neuron_num)*100
+total_modulated = [percent_pre_choice_active percent_consum_inhib];
+
+
+A = total_modulated;
+I = percent_overlap_from_total_neurons;
+K = [A I];
+figure; 
+[H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
+for i = 1:size(K, 2)
+    text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
+end
+
+%%
+percent_pre_choice_inhib = (sum(all_pre_choice_inhibited)/neuron_num)*100
+percent_consum_active = (sum(all_consum_activated)/neuron_num)*100
+percent_overlap_from_total_neurons =  (sum(pre_choice_inhibited_consum_activated)/neuron_num)*100
+total_modulated = [percent_pre_choice_inhib percent_consum_active];
+
+
+A = total_modulated;
+I = percent_overlap_from_total_neurons;
+K = [A I];
+figure; 
+[H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
+for i = 1:size(K, 2)
+    text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
+end
