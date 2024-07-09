@@ -40,6 +40,7 @@ hold on; plot(ts1, mean(neuron_mean_array{1,6}(exclusive_activated_session_post_
 % this is a little tricky with the RDT, because mice have diff #s of
 % trials. so, it might be best to take the first, median, and last trial
 % (assuming mice have 3 or > trials, this should work)
+
 pre_choice_only = zall_array(:, exclusive_activated_session_1);
 
 consumption_neurons_only = zall_array(:, exclusive_activated_session_3);

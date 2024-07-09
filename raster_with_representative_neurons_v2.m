@@ -37,7 +37,7 @@ hold on; plot(ts1, mean(neuron_mean_mouse{select_mouse_index, 4}(respClass_mouse
 
 
 caTraceTrials = final.(select_mouse).(first_session).CNMFe_data.C_raw(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 1, :);
-
+%
 for h = 1:size(caTraceTrials,1)
     zb(h) = mean(caTraceTrials(h,:)); %baseline mean
     zsd(h) = std(caTraceTrials(h,:)); %baseline std
@@ -284,7 +284,7 @@ xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
 xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
 xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
 xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
-
+xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
 hold off;
 
 

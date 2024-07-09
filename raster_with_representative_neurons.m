@@ -4,7 +4,7 @@ select_mouse = 'BLA_Insc_37';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-first_session = 'Pre_RDT_RM';
+first_session = 'RDT_D1';
 
 second_session = 'Pre_RDT_RM';
 
