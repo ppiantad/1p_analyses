@@ -54,7 +54,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'RDT_D2';
+session_to_analyze = 'SHOCK_TEST';
 
 
 epoc_to_align = 'choiceTime';
@@ -139,18 +139,20 @@ for ii = 1:size(fieldnames(final),1)
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
         % for labeling shock + 1 trials, for subsequent analysis
-        for BehavDataRow = 1:size(BehavData,1)
-            if BehavData.shock(BehavDataRow) == 1
-                kk = 1;
-                while true
-                    if (BehavDataRow + kk) > size(BehavData, 1)  % Check if index exceeds the number of rows
-                        break;
-                    end
-                    if ~isnan(BehavData.bigSmall(BehavDataRow + kk)) & BehavData.ForceFree(BehavDataRow + kk) ~= 999
-                        BehavData.trial_after_shk(BehavDataRow + kk) = 1;
-                        break;
-                    else
-                        kk = kk + 1;
+        if contains(session_to_analyze, 'RDT')
+            for BehavDataRow = 1:size(BehavData,1)
+                if BehavData.shock(BehavDataRow) == 1
+                    kk = 1;
+                    while true
+                        if (BehavDataRow + kk) > size(BehavData, 1)  % Check if index exceeds the number of rows
+                            break;
+                        end
+                        if ~isnan(BehavData.bigSmall(BehavDataRow + kk)) & BehavData.ForceFree(BehavDataRow + kk) ~= 999
+                            BehavData.trial_after_shk(BehavDataRow + kk) = 1;
+                            break;
+                        else
+                            kk = kk + 1;
+                        end
                     end
                 end
             end
