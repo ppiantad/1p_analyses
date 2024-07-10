@@ -77,7 +77,7 @@ figure; donutchart(outer_donut, 'InnerRadius', 0.7)
 mean_data_pre_choice_activated_exclusive = neuron_mean_array{1,1}(pre_choice_activated_exclusive, :);
 mean_data_consum_activated_exclusive = neuron_mean_array{1,1}(consum_activated_exclusive, :);
 mean_data_pre_choice_inhibited_exclusive = neuron_mean_array{1,1}(pre_choice_inhibited_exclusive, :);
-
+mean_data_consum_inhibited_exclusive = neuron_mean_array{1,1}(consum_inhibited_exclusive, :);
 
 
 data_for_big_heatmap = [mean_data_pre_choice_activated_exclusive; mean_data_consum_activated_exclusive];
@@ -103,6 +103,17 @@ xline(0)
 hold off;
 
 %%
+
+% Calculate the number of rows for each group
+num_rows_pre_choice_activated_exclusive = size(mean_data_pre_choice_activated_exclusive, 1);
+num_rows_pre_choice_activated_consum_inhibited = size(mean_data_pre_choice_activated_consum_inhibited, 1);
+num_rows_pre_choice_activated_consum_activated = size(mean_data_pre_choice_activated_consum_activated, 1);
+num_rows_consum_inhibited_exclusive = size(mean_data_consum_inhibited_exclusive, 1);
+num_rows_consum_activated_exclusive = size(mean_data_consum_activated_exclusive, 1);
+num_rows_pre_choice_inhibited_consum_inhibited = size(mean_data_pre_choice_inhibited_consum_inhibited, 1);
+num_rows_pre_choice_inhibited_consum_activated = size(mean_data_pre_choice_inhibited_consum_activated, 1);
+num_rows_pre_choice_inhibited_exclusive = size(mean_data_pre_choice_inhibited_exclusive, 1);
+
 pre_choice_activated_consum_inhibited = respClass_all_array{1,1} == 1 & respClass_all_array{1,3} == 2; 
 pre_choice_activated_consum_activated = respClass_all_array{1,1} == 1 & respClass_all_array{1,3} == 1; 
 pre_choice_inhibited_consum_inhibited = respClass_all_array{1,1} == 2 & respClass_all_array{1,3} == 2; 
@@ -114,13 +125,27 @@ mean_data_pre_choice_inhibited_consum_inhibited = neuron_mean_array{1,1}(pre_cho
 mean_data_pre_choice_inhibited_consum_activated = neuron_mean_array{1,1}(pre_choice_inhibited_consum_activated, :);
 
 
-data_for_big_heatmap = [    mean_data_pre_choice_activated_consum_inhibited;...
+data_for_big_heatmap = [    mean_data_pre_choice_activated_exclusive;...
+                            mean_data_pre_choice_activated_consum_inhibited;...
                             mean_data_pre_choice_activated_consum_activated;...
+                            mean_data_consum_inhibited_exclusive;...
+                            mean_data_consum_activated_exclusive;...
                             mean_data_pre_choice_inhibited_consum_inhibited;...
                             mean_data_pre_choice_inhibited_consum_activated;...
-    
-    
-    ];
+                            mean_data_pre_choice_inhibited_exclusive;...
+                            ];
+
+% Calculate the positions where to add the horizontal lines
+yline_positions = cumsum([num_rows_pre_choice_activated_exclusive, ...
+                          num_rows_pre_choice_activated_consum_inhibited, ...
+                          num_rows_pre_choice_activated_consum_activated, ...
+                          num_rows_consum_inhibited_exclusive, ...
+                          num_rows_consum_activated_exclusive, ...
+                          num_rows_pre_choice_inhibited_consum_inhibited, ...
+                          num_rows_pre_choice_inhibited_consum_activated, ...
+                          num_rows_pre_choice_inhibited_exclusive]);
+
+
 
 figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
 imagesc(ts1, [], data_for_big_heatmap)
@@ -134,15 +159,22 @@ clim([-.5 .5]);
 c = colorbar('eastoutside');
 set(c, 'YTick', clim); % 
 
-ylim([1  size(zall_array{1, plot_num}, 1)])
+
+% Add ylines at the end of each set of data
+hold on;
+for i = 1:length(yline_positions)
+    yline(yline_positions(i) + 0.5, 'r--', 'LineWidth', 1); % Adjust +0.5 to place the line between rows
+end
+hold off;
+
+ylim([1  size(data_for_big_heatmap, 1)])
 xlim([-8 8]);
 % Set X-axis ticks
 set(gca, 'XTick', [-8, -4, 0, 4, 8]);
-set(gca, 'YTick', [1, size(zall_array{1, plot_num}, 1)]);
+set(gca, 'YTick', [1, size(data_for_big_heatmap, 1)]);
 xline(0)
 hold off;
-yline(size(mean_data_pre_choice_activated_consum_inhibited, 1))
-yline(size(mean_data_pre_choice_activated_consum_activated, 1))
+
 
 %%
 figure;
@@ -284,3 +316,19 @@ figure;
 for i = 1:size(K, 2)
     text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
 end
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+pre_choice_active_ind = find(all_pre_choice_activated == 1);
+consum_active_ind = find(all_consum_activated == 1);
+pre_choice_inhibited_ind = find(all_pre_choice_inhibited == 1);
+consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {pre_choice_active_ind, consum_active_ind, pre_choice_inhibited_ind, consum_inhibited_ind};
+setLabels = ["Pre-choice excited", "Consumption excited", "Pre-choice inhibited", "Consumption inhibited"];
+
+h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+h.ShowIntersectionCounts = true;
+h.ShowIntersectionAreas = true;
+% h.SetLabels = [];
