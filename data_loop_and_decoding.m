@@ -24,10 +24,23 @@ shuffle_confirm = 1; %1 if you want shuffle, 0 if you don't
 
 session_to_analyze = 'Pre_RDT_RM';
 
-% these are mice that did not complete the entire session - kinda have to
-% toss them to do some comparisons during RDT
-if strcmp('RDT_D1', session_to_analyze)
-    final = rmfield(final, ['BLA_Insc_28'; 'BLA_Insc_38'; 'BLA_Insc_39']);
+if strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
+    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final, fieldsToRemove{i})
+            final = rmfield(final, fieldsToRemove{i});
+        end
+    end
+elseif strcmp('RDT_D2', session_to_analyze)
+
+    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_39'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final, fieldsToRemove{i})
+            final = rmfield(final, fieldsToRemove{i});
+        end
+    end
 end
 
 
@@ -69,7 +82,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 0.3); %'OMITALL', 0, 'BLANK_TOUCH', 0
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     
@@ -130,7 +143,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 1.2);
+                    [BehavData,trials,varargin]=TrialFilter(BehavData,'REW', 0.3);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -204,7 +217,7 @@ end
 
 data_for_decoding = caTraceTrials_mouse_iterations;
 
-%% only run this section if you want to not decode across time!  
+%% only run this section if you DO NOT WANT TO decode across time!  
 % attempting to focus decoding on particular epoch. this section takes the mean activity in a "relevant_period" (pre-choice, etc) for each neuron to be decoded, plus its shuffle. 
 % The final data structure is the exact same as
 % "caTraceTrials_mouse_iterations", except each final level contains means,

@@ -100,7 +100,7 @@ numConditions = size(neuron_mean_concat, 2)/numMeasurements;
 
 eventIdx = 1:numConditions;
 
-NumPC = 2;
+NumPC = 3;
 
 array_size = size(neuron_mean_concat, 2);
 
