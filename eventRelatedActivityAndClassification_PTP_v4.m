@@ -55,7 +55,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 session_to_analyze = 'Pre_RDT_RM';
-
+yoke_data = 1; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed
 
 epoc_to_align = 'collectionTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -158,6 +158,43 @@ for ii = 1:size(fieldnames(final),1)
             end
         end
         [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        varargin_strings = string(varargin_identity_class);
+        varargin_strings = strrep(varargin_strings, '0.3', 'Small');
+        varargin_strings = strrep(varargin_strings, '1.2', 'Large');
+        filter_args = strjoin(varargin_strings,'_');
+        
+        if yoke_data == 1
+            for i = 1:size(full_filter_string, 2)
+                fprintf('%d. %s\n', i, full_filter_string{1, i});
+            end
+
+            % Prompt the user for input
+            user_selection = input('Which data would you like to match trials to?: ');
+
+            % Check if the input is valid
+            if user_selection >= 1 && user_selection <= size(full_filter_string, 2)
+                selected_data = full_filter_string{1, user_selection};
+                fprintf('You have selected: %s\n', selected_data);
+            else
+                disp('Invalid selection. Please run the script again and enter a valid number.');
+            end
+            size_to_downsample_to = size(trials_per_mouse{ii, user_selection}, 1);
+            if size(BehavData, 1) > size_to_downsample_to
+                % Randomly select rows from BehavData
+                rand_indices = randperm(size(BehavData, 1), size_to_downsample_to);
+                BehavData = BehavData(rand_indices, :);
+                % Sort the filtered BehavData by the Trial column
+                BehavData = sortrows(BehavData, 'Trial');
+            else
+                % If the size is not greater, keep BehavData as it is
+                disp('No downsampling needed.');
+            end
+
+        else
+
+        end
+
+
 
         % uncomment if you want to test specifically for particular ranges
         % during shock test
@@ -191,10 +228,7 @@ for ii = 1:size(fieldnames(final),1)
             time2EPOC = BehavData.stTime(:)-BehavData.choiceTime(:);
         end
         behav_tbl_temp{ii,:} = BehavData;
-        varargin_strings = string(varargin_identity_class);
-        varargin_strings = strrep(varargin_strings, '0.3', 'Small');
-        varargin_strings = strrep(varargin_strings, '1.2', 'Large');
-        filter_args = strjoin(varargin_strings,'_');
+
         
         trials = cell2mat(trials);
         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
