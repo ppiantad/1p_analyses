@@ -9,7 +9,7 @@
 % collectionTime Blocks 2 & 3), then change the variable below to do that
 % comparison with the appropriate array #s
 
-arrays_to_examine = [3 7];
+arrays_to_examine = [3 10];
 
 
 collect_all_possible = sum([sum(respClass_all_array{1, arrays_to_examine(1)} ==1), sum(respClass_all_array{1, arrays_to_examine(2)} ==1)])

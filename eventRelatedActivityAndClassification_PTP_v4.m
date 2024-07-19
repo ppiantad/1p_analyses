@@ -54,7 +54,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 yoke_data = 1; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed
 
 epoc_to_align = 'collectionTime';
@@ -183,6 +183,8 @@ for ii = 1:size(fieldnames(final),1)
                 % Randomly select rows from BehavData
                 rand_indices = randperm(size(BehavData, 1), size_to_downsample_to);
                 BehavData = BehavData(rand_indices, :);
+                trials = trials(rand_indices, :);
+                trials = sortrows(trials);
                 % Sort the filtered BehavData by the Trial column
                 BehavData = sortrows(BehavData, 'Trial');
             else

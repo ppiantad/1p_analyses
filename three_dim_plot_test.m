@@ -8,4 +8,6 @@ zlabel('Z values (Row 3)');
 grid on; % Optional: adds a grid to the plot
 
 hold on; plot3(PCScore{1, 2}(1, :), PCScore{1, 2}(2, :), PCScore{1, 2}(3, :), '-o'); % '-o' adds circle markers to the line
-hold on; plot3(PCScore{1, 3}(1, :), PCScore{1, 3}(2, :), PCScore{1, 3}(3, :), '-o'); % '-o' adds circle markers to the line
+% hold on; plot3(PCScore{1, 3}(1, :), PCScore{1, 3}(2, :), PCScore{1, 3}(3, :), '-o'); % '-o' adds circle markers to the line
+
+%%
