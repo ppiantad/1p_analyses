@@ -8,6 +8,7 @@
 % % use neuron_mean_all_unnorm if you want to check how things differ across
 % % time
 % neuron_mean_concat = horzcat(neuron_mean_all_unnormalized{:});
+
 % neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
 
 % % use below to normalize THEN concatenate, which might be a better
@@ -58,7 +59,7 @@ end
 
 %%
 
-
+[concatenatedTable_all, concatenate_all_tables] = get_median_choice_and_collect_fn(behav_tbl_iter);
 
 [full_table_all] = get_median_choice_and_collect_fn(behav_tbl_iter);
 full_table = vertcat(full_table_all{:});
@@ -83,6 +84,11 @@ median_collect_time_block_3 = median(full_table.collectionTime(full_table.Block 
 [~, closest_index_collect_time_block_1] = min(abs(ts1 - median_collect_time_block_1));
 [~, closest_index_collect_time_block_2] = min(abs(ts1 - median_collect_time_block_2));
 [~, closest_index_collect_time_block_3] = min(abs(ts1 - median_collect_time_block_3));
+
+for zz = 1:size(concatenatedTable_all, 2)
+    median_start_time(1, zz) = median(concatenatedTable_all{1, zz}.stTime - concatenatedTable_all{1, zz}.choiceTime)
+    median_collect_time(1, zz) = median(concatenatedTable_all{1, zz}.collectionTime - concatenatedTable_all{1, zz}.stTime)
+end
 
 %% PCA
 % Load your data if not already loaded
@@ -165,6 +171,18 @@ for i = eventIdx
     PCScore{i} = coef(1:size(temp,1), 1: NumPC)'*temp;
 
 end
+
+% Assuming explained is a double array with variance explained for each principal component
+% explained = [var1, var2, var3, ...]; % Replace this with your actual explained array
+
+% Create the scree plot
+figure;
+bar(explained, 'FaceColor', [0.2 0.6 0.8]); % Creates a bar plot with custom color
+title('Scree Plot');
+xlabel('Principal Component');
+ylabel('Variance Explained (%)');
+grid on; % Optional: adds a grid to the plot
+
 
 %% plot for publication 3D trajectories
 d_legend = eventNames;
