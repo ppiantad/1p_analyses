@@ -12,7 +12,7 @@
 
 figure;
 plot3(PCScore{1, 1}(1, :), PCScore{1, 1}(2, :), PCScore{1, 1}(3, :)); % '-o' adds circle markers to the line
-title('3D Plot of PCScore');
+title(['trajectories for ', num2str(uv.evtWin), ' aligned to ', epoc_to_align]);
 xlabel(['PC1 (Variance explained: ' num2str(explained(1), '%.2f') '%)']);
 ylabel(['PC2 (Variance explained: ' num2str(explained(2), '%.2f') '%)']);
 zlabel(['PC3 (Variance explained: ' num2str(explained(3), '%.2f') '%)']);
@@ -53,7 +53,7 @@ hold on; plot(PCScore{1, 2}(1, :), PCScore{1, 2}(2, :), '-o'); % '-o' adds circl
 % Create the 3D plot
 figure;
 plot(ts1, PCScore{1, 1}(1, :), '-o'); % '-o' adds circle markers to the line
-title('3D Plot of PCScore');
+title(['trajectories for ', num2str(uv.evtWin), ' aligned to ', epoc_to_align]);
 xlabel('X values (Row 1)');
 ylabel('Y values (Row 2)');
 zlabel('Z values (Row 3)');
@@ -66,7 +66,7 @@ hold on; plot(ts1, PCScore{1, 2}(1, :), '-o'); % '-o' adds circle markers to the
 % Create the 3D plot
 figure;
 plot(ts1, PCScore{1, 1}(2, :), '-o'); % '-o' adds circle markers to the line
-title('3D Plot of PCScore');
+title(['trajectories for ', num2str(uv.evtWin), ' aligned to ', epoc_to_align]);
 xlabel('X values (Row 1)');
 ylabel('Y values (Row 2)');
 zlabel('Z values (Row 3)');
@@ -80,7 +80,7 @@ hold on; plot(ts1, PCScore{1, 2}(2, :), '-o'); % '-o' adds circle markers to the
 % Create the 3D plot
 figure;
 plot(ts1, PCScore{1, 1}(3, :), '-o'); % '-o' adds circle markers to the line
-title('3D Plot of PCScore');
+title(['trajectories for ', num2str(uv.evtWin), ' aligned to ', epoc_to_align]);
 xlabel('X values (Row 1)');
 ylabel('Y values (Row 2)');
 zlabel('Z values (Row 3)');
