@@ -9,21 +9,31 @@
 % collectionTime Blocks 2 & 3), then change the variable below to do that
 % comparison with the appropriate array #s
 
-arrays_to_examine = [3 10];
+arrays_to_examine = [1 8];
 
+event_for_figures = 1; 
+
+prechoice_block_1 = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} ~= 1 & respClass_all_array{1, 3} ~= 1;
+prechoice_blocks_2_and_3 = respClass_all_array{1, 8} == 1 & respClass_all_array{1, 9} ~= 1 & respClass_all_array{1, 10} ~= 1;
+
+postchoice_reward_block_1 = respClass_all_array{1, 2} == 1 & respClass_all_array{1, 1} ~= 1 & respClass_all_array{1, 3} ~= 1;
+postchoice_reward_blocks_2_and_3 = respClass_all_array{1, 9} == 1 & respClass_all_array{1, 8} ~= 1 & respClass_all_array{1, 10} ~= 1;
+
+collect_block_1 = respClass_all_array{1, 3} == 1 & respClass_all_array{1, 1} ~= 1 & respClass_all_array{1, 2} ~= 1;
+collect_blocks_2_and_3 = respClass_all_array{1, 10} == 1 & respClass_all_array{1, 8} ~= 1 & respClass_all_array{1, 9} ~= 1;
 
 collect_all_possible = sum([sum(respClass_all_array{1, arrays_to_examine(1)} ==1), sum(respClass_all_array{1, arrays_to_examine(2)} ==1)])
-collect_conserved = respClass_all_array{1, arrays_to_examine(1)}==1 & respClass_all_array{1, arrays_to_examine(2)}==1;
+collect_conserved = respClass_all_array{1, arrays_to_examine(1)} == event_for_figures & respClass_all_array{1, arrays_to_examine(2)} == event_for_figures;
 collect_conserved_sum = sum(collect_conserved)
 collect_original_activated_sum = sum(respClass_all_array{1, arrays_to_examine(1)}==1)
 collect_original_inhibited_sum = sum(respClass_all_array{1, arrays_to_examine(1)}==2)
-collect_remapped = respClass_all_array{1, arrays_to_examine(1)} ~=1 & respClass_all_array{1, arrays_to_examine(2)}==1;
+collect_remapped = respClass_all_array{1, arrays_to_examine(1)} ~= event_for_figures & respClass_all_array{1, arrays_to_examine(2)} == event_for_figures;
 collect_remapped_sum = sum(collect_remapped)
-not_collect_original_sum = sum(respClass_all_array{1, arrays_to_examine(1)} ==3)
+not_collect_original_sum = sum(respClass_all_array{1, arrays_to_examine(1)} == 3)
 
-collect_lost = respClass_all_array{1, arrays_to_examine(1)} ==1 & respClass_all_array{1, arrays_to_examine(2)} ~=1;
+collect_lost = respClass_all_array{1, arrays_to_examine(1)} == event_for_figures & respClass_all_array{1, arrays_to_examine(2)} ~= event_for_figures;
 collect_lost_sum = sum(collect_lost)
-collect_all_possible = sum([sum(respClass_all_array{1, arrays_to_examine(1)} ==1), sum(respClass_all_array{1, arrays_to_examine(2)} ==1)])
+collect_all_possible = sum([sum(respClass_all_array{1, arrays_to_examine(1)} == 1), sum(respClass_all_array{1, arrays_to_examine(2)} ==1)])
 collect_conserved_percent = collect_conserved_sum/neuron_num
 collect_remapped_percent = collect_remapped_sum/neuron_num
 collect_lost_percent = collect_lost_sum/neuron_num
@@ -47,8 +57,8 @@ width = 450; % Width of the figure
 height = 650; % Height of the figure (width is half of height)
 set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
 hold on;
-h(1) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(1)}(respClass_all_array{1, arrays_to_examine(1)}==1, :)), nanmean(neuron_sem_array{1,arrays_to_examine(1)}(respClass_all_array{1, arrays_to_examine(1)}==1, :)), 'lineProps', {'color', 'r'});
-h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(respClass_all_array{1, arrays_to_examine(2)}==1, :)), nanmean(neuron_sem_array{1,arrays_to_examine(2)}(respClass_all_array{1, arrays_to_examine(2)}==1, :)), 'lineProps', {'color', 'b'});
+h(1) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(1)}(respClass_all_array{1, arrays_to_examine(1)} == event_for_figures, :)), nanmean(neuron_sem_array{1,arrays_to_examine(1)}(respClass_all_array{1, arrays_to_examine(1)} == event_for_figures, :)), 'lineProps', {'color', 'r'});
+h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(respClass_all_array{1, arrays_to_examine(2)} == event_for_figures, :)), nanmean(neuron_sem_array{1,arrays_to_examine(2)}(respClass_all_array{1, arrays_to_examine(2)} == event_for_figures, :)), 'lineProps', {'color', 'b'});
 legend([h(1).mainLine h(2).mainLine], '1st block', '2nd and 3rd block')
 xlim([-8 8]);
 ylim([-0.6 0.8])
@@ -79,11 +89,11 @@ set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, 
 ytickformat('%.2f');
 N = 5;
 axes('ColorOrder',brewermap(N,'Pastel2'),'NextPlot','replacechildren')
-plot(ts1, mean(neuron_mean_array{1, 1}(collect_conserved  ==1, :)))
-hold on; plot(ts1, mean(neuron_mean_array{1, arrays_to_examine(1)}(collect_remapped  ==1, :)))
-hold on; plot(ts1, mean(neuron_mean_array{1, arrays_to_examine(2)}(collect_remapped  ==1, :)))
-hold on; plot(ts1, mean(neuron_mean_array{1, arrays_to_examine(2)}(collect_lost  ==1, :)))
-hold on; plot(ts1, mean(neuron_mean_array{1, arrays_to_examine(1)}(collect_lost  ==1, :)))
+plot(ts1, mean(neuron_mean_array{1, 1}(collect_conserved  == 1, :)))
+hold on; plot(ts1, mean(neuron_mean_array{1, arrays_to_examine(1)}(collect_remapped == 1, :)))
+hold on; plot(ts1, mean(neuron_mean_array{1, arrays_to_examine(2)}(collect_remapped == 1, :)))
+hold on; plot(ts1, mean(neuron_mean_array{1, arrays_to_examine(2)}(collect_lost == 1, :)))
+hold on; plot(ts1, mean(neuron_mean_array{1, arrays_to_examine(1)}(collect_lost == 1, :)))
 
 
 figure;
