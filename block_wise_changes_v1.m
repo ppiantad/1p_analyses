@@ -9,9 +9,11 @@
 % collectionTime Blocks 2 & 3), then change the variable below to do that
 % comparison with the appropriate array #s
 
-arrays_to_examine = [1 8];
+arrays_to_examine = [3 10];
 
 event_for_figures = 1; 
+
+%%
 
 prechoice_block_1 = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} ~= 1 & respClass_all_array{1, 3} ~= 1;
 prechoice_blocks_2_and_3 = respClass_all_array{1, 8} == 1 & respClass_all_array{1, 9} ~= 1 & respClass_all_array{1, 10} ~= 1;
@@ -21,6 +23,19 @@ postchoice_reward_blocks_2_and_3 = respClass_all_array{1, 9} == 1 & respClass_al
 
 collect_block_1 = respClass_all_array{1, 3} == 1 & respClass_all_array{1, 1} ~= 1 & respClass_all_array{1, 2} ~= 1;
 collect_blocks_2_and_3 = respClass_all_array{1, 10} == 1 & respClass_all_array{1, 8} ~= 1 & respClass_all_array{1, 9} ~= 1;
+
+collect_conserved = collect_block_1 == event_for_figures & collect_blocks_2_and_3 == event_for_figures;
+collect_conserved_sum = sum(collect_conserved)
+
+collect_lost = collect_block_1 == event_for_figures & collect_blocks_2_and_3 ~= event_for_figures;
+collect_lost_sum = sum(collect_lost)
+
+collect_remapped = collect_block_1 ~= event_for_figures & collect_blocks_2_and_3 == event_for_figures;
+collect_remapped_sum = sum(collect_remapped)
+
+%%
+
+
 
 collect_all_possible = sum([sum(respClass_all_array{1, arrays_to_examine(1)} ==1), sum(respClass_all_array{1, arrays_to_examine(2)} ==1)])
 collect_conserved = respClass_all_array{1, arrays_to_examine(1)} == event_for_figures & respClass_all_array{1, arrays_to_examine(2)} == event_for_figures;
