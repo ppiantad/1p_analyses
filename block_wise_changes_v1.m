@@ -24,6 +24,31 @@ postchoice_reward_blocks_2_and_3 = respClass_all_array{1, 9} == 1 & respClass_al
 collect_block_1 = respClass_all_array{1, 3} == 1 & respClass_all_array{1, 1} ~= 1 & respClass_all_array{1, 2} ~= 1;
 collect_blocks_2_and_3 = respClass_all_array{1, 10} == 1 & respClass_all_array{1, 8} ~= 1 & respClass_all_array{1, 9} ~= 1;
 
+
+%%
+collect_conserved = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
+collect_conserved_sum = sum(collect_conserved)
+
+collect_lost = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 ~= event_for_figures;
+collect_lost_sum = sum(collect_lost)
+
+collect_remapped = prechoice_block_1 ~= event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
+collect_remapped_sum = sum(collect_remapped)
+
+%%
+collect_conserved = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
+collect_conserved_sum = sum(collect_conserved)
+
+collect_lost = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 ~= event_for_figures;
+collect_lost_sum = sum(collect_lost)
+
+collect_remapped = postchoice_reward_block_1 ~= event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
+collect_remapped_sum = sum(collect_remapped)
+
+
+
+%%
+
 collect_conserved = collect_block_1 == event_for_figures & collect_blocks_2_and_3 == event_for_figures;
 collect_conserved_sum = sum(collect_conserved)
 
