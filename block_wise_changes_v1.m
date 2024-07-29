@@ -9,23 +9,26 @@
 % collectionTime Blocks 2 & 3), then change the variable below to do that
 % comparison with the appropriate array #s
 
-arrays_to_examine = [3 10];
+arrays_to_examine = [1 8];
+
+inhib_or_excite = 2;
 
 event_for_figures = 1; 
 
 %%
 
-prechoice_block_1 = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} ~= 1 & respClass_all_array{1, 3} ~= 1;
-prechoice_blocks_2_and_3 = respClass_all_array{1, 8} == 1 & respClass_all_array{1, 9} ~= 1 & respClass_all_array{1, 10} ~= 1;
+prechoice_block_1 = respClass_all_array{1, 1} == inhib_or_excite & respClass_all_array{1, 2} ~= inhib_or_excite & respClass_all_array{1, 3} ~= inhib_or_excite;
+prechoice_blocks_2_and_3 = respClass_all_array{1, 8} == inhib_or_excite & respClass_all_array{1, 9} ~= inhib_or_excite & respClass_all_array{1, 10} ~= inhib_or_excite;
 
-postchoice_reward_block_1 = respClass_all_array{1, 2} == 1 & respClass_all_array{1, 1} ~= 1 & respClass_all_array{1, 3} ~= 1;
-postchoice_reward_blocks_2_and_3 = respClass_all_array{1, 9} == 1 & respClass_all_array{1, 8} ~= 1 & respClass_all_array{1, 10} ~= 1;
+postchoice_reward_block_1 = respClass_all_array{1, 2} == inhib_or_excite & respClass_all_array{1, 1} ~= inhib_or_excite & respClass_all_array{1, 3} ~= inhib_or_excite;
+postchoice_reward_blocks_2_and_3 = respClass_all_array{1, 9} == inhib_or_excite & respClass_all_array{1, 8} ~= inhib_or_excite & respClass_all_array{1, 10} ~= inhib_or_excite;
 
-collect_block_1 = respClass_all_array{1, 3} == 1 & respClass_all_array{1, 1} ~= 1 & respClass_all_array{1, 2} ~= 1;
-collect_blocks_2_and_3 = respClass_all_array{1, 10} == 1 & respClass_all_array{1, 8} ~= 1 & respClass_all_array{1, 9} ~= 1;
+collect_block_1 = respClass_all_array{1, 3} == inhib_or_excite & respClass_all_array{1, 1} ~= inhib_or_excite & respClass_all_array{1, 2} ~= inhib_or_excite;
+collect_blocks_2_and_3 = respClass_all_array{1, 10} == inhib_or_excite & respClass_all_array{1, 8} ~= inhib_or_excite & respClass_all_array{1, 9} ~= inhib_or_excite;
 
 
 %%
+arrays_to_examine = [1 8];
 collect_conserved = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
 collect_conserved_sum = sum(collect_conserved)
 
@@ -35,7 +38,10 @@ collect_lost_sum = sum(collect_lost)
 collect_remapped = prechoice_block_1 ~= event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
 collect_remapped_sum = sum(collect_remapped)
 
+vars_to_use = {'prechoice_block_1', 'prechoice_blocks_2_and_3'};
+
 %%
+arrays_to_examine = [2 9];
 collect_conserved = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
 collect_conserved_sum = sum(collect_conserved)
 
@@ -45,10 +51,10 @@ collect_lost_sum = sum(collect_lost)
 collect_remapped = postchoice_reward_block_1 ~= event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
 collect_remapped_sum = sum(collect_remapped)
 
-
+vars_to_use = {'postchoice_reward_block_1', 'postchoice_reward_blocks_2_and_3'};
 
 %%
-
+arrays_to_examine = [3 10];
 collect_conserved = collect_block_1 == event_for_figures & collect_blocks_2_and_3 == event_for_figures;
 collect_conserved_sum = sum(collect_conserved)
 
@@ -57,6 +63,8 @@ collect_lost_sum = sum(collect_lost)
 
 collect_remapped = collect_block_1 ~= event_for_figures & collect_blocks_2_and_3 == event_for_figures;
 collect_remapped_sum = sum(collect_remapped)
+
+vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
 
 %%
 
@@ -92,6 +100,7 @@ labels = {'activated: ' + string(collect_new_activated_sum), 'inhibited: ' + str
 legend(labels)
 
 
+
 figure;
 width = 450; % Width of the figure
 height = 650; % Height of the figure (width is half of height)
@@ -107,6 +116,25 @@ xline(0);
 % xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
 % xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from choice (s)');
+
+%%
+
+figure;
+width = 450; % Width of the figure
+height = 650; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+hold on;
+h(1) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(1)}(eval(vars_to_use{1, 1})  == event_for_figures, :)), nanmean(neuron_sem_array{1,arrays_to_examine(1)}(eval(vars_to_use{1, 1})  == event_for_figures, :)), 'lineProps', {'color', 'r'});
+h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), nanmean(neuron_sem_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), 'lineProps', {'color', 'b'});
+legend([h(1).mainLine h(2).mainLine], '1st block', '2nd and 3rd block')
+xlim([-8 8]);
+ylim([-0.6 0.8])
+% hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+% xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from choice (s)');
+
 
 inner_pie = [collect_conserved_sum/neuron_num,...
             
