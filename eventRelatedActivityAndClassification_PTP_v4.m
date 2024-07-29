@@ -55,7 +55,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 session_to_analyze = 'RDT_D1';
-yoke_data = 1; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed
+yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
 epoc_to_align = 'collectionTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -92,7 +92,7 @@ end
 %% %user selected variables
 clear neuron_mean neuron_sem neuron_num trials
 uv.chooseFluoresenceOrRate = 1;                                             %set to 1 to classify fluoresence response; set to 2 to classify firing rate responses
-uv.sigma = 1.5;  %1.5                                                             %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
+uv.sigma = 1;  %1.5                                                             %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 % uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
 % uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
@@ -157,43 +157,45 @@ for ii = 1:size(fieldnames(final),1)
                 end
             end
         end
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 1, 'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');
         filter_args = strjoin(varargin_strings,'_');
-        
-        if yoke_data == 1
-            for i = 1:size(full_filter_string, 2)
-                fprintf('%d. %s\n', i, full_filter_string{1, i});
-            end
+        if exist('full_filter_string', 'var')
+            if yoke_data == 1
+                
+                for i = 1:size(full_filter_string, 2)
+                    fprintf('%d. %s\n', i, full_filter_string{1, i});
+                end
 
-            % Prompt the user for input
-            user_selection = input('Which data would you like to match trials to?: ');
+                % Prompt the user for input
+                user_selection = input('Which data would you like to match trials to?: ');
 
-            % Check if the input is valid
-            if user_selection >= 1 && user_selection <= size(full_filter_string, 2)
-                selected_data = full_filter_string{1, user_selection};
-                fprintf('You have selected: %s\n', selected_data);
+                % Check if the input is valid
+                if user_selection >= 1 && user_selection <= size(full_filter_string, 2)
+                    selected_data = full_filter_string{1, user_selection};
+                    fprintf('You have selected: %s\n', selected_data);
+                else
+                    disp('Invalid selection. Please run the script again and enter a valid number.');
+                end
+                size_to_downsample_to = size(trials_per_mouse{ii, user_selection}, 1);
+                if size(BehavData, 1) > size_to_downsample_to
+                    % Randomly select rows from BehavData
+                    rand_indices = randperm(size(BehavData, 1), size_to_downsample_to);
+                    BehavData = BehavData(rand_indices, :);
+                    trials = trials(rand_indices, :);
+                    trials = sortrows(trials);
+                    % Sort the filtered BehavData by the Trial column
+                    BehavData = sortrows(BehavData, 'Trial');
+                else
+                    % If the size is not greater, keep BehavData as it is
+                    disp('No downsampling needed.');
+                end
+
             else
-                disp('Invalid selection. Please run the script again and enter a valid number.');
-            end
-            size_to_downsample_to = size(trials_per_mouse{ii, user_selection}, 1);
-            if size(BehavData, 1) > size_to_downsample_to
-                % Randomly select rows from BehavData
-                rand_indices = randperm(size(BehavData, 1), size_to_downsample_to);
-                BehavData = BehavData(rand_indices, :);
-                trials = trials(rand_indices, :);
-                trials = sortrows(trials);
-                % Sort the filtered BehavData by the Trial column
-                BehavData = sortrows(BehavData, 'Trial');
-            else
-                % If the size is not greater, keep BehavData as it is
-                disp('No downsampling needed.');
-            end
 
-        else
-
+            end
         end
 
 
