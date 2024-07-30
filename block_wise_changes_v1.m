@@ -11,7 +11,7 @@
 
 arrays_to_examine = [1 8];
 
-inhib_or_excite = 2;
+inhib_or_excite = 1;
 
 event_for_figures = 1; 
 
@@ -26,6 +26,27 @@ postchoice_reward_blocks_2_and_3 = respClass_all_array{1, 9} == inhib_or_excite 
 collect_block_1 = respClass_all_array{1, 3} == inhib_or_excite & respClass_all_array{1, 1} ~= inhib_or_excite & respClass_all_array{1, 2} ~= inhib_or_excite;
 collect_blocks_2_and_3 = respClass_all_array{1, 10} == inhib_or_excite & respClass_all_array{1, 8} ~= inhib_or_excite & respClass_all_array{1, 9} ~= inhib_or_excite;
 
+
+
+block_1_pre_and_post = respClass_all_array{1, 1} == inhib_or_excite & respClass_all_array{1, 2} == inhib_or_excite & respClass_all_array{1, 3} ~= inhib_or_excite;
+sum(block_1_pre_and_post)
+block_1_post_and_consumption = respClass_all_array{1, 1} ~= inhib_or_excite & respClass_all_array{1, 2} == inhib_or_excite & respClass_all_array{1, 3} == inhib_or_excite;
+sum(block_1_post_and_consumption)
+block_1_pre_and_consumption = respClass_all_array{1, 1} == inhib_or_excite & respClass_all_array{1, 2} ~= inhib_or_excite & respClass_all_array{1, 3} == inhib_or_excite;
+sum(block_1_pre_and_consumption)
+
+
+block_2_and_3_pre_and_post = respClass_all_array{1, 8} == inhib_or_excite & respClass_all_array{1, 9} == inhib_or_excite & respClass_all_array{1, 10} ~= inhib_or_excite;
+sum(block_2_and_3_pre_and_post)
+block_2_and_3_post_and_consumption = respClass_all_array{1, 8} ~= inhib_or_excite & respClass_all_array{1, 9} == inhib_or_excite & respClass_all_array{1, 10} == inhib_or_excite;
+sum(block_2_and_3_post_and_consumption)
+block_2_and_3_pre_and_consumption = respClass_all_array{1, 8} == inhib_or_excite & respClass_all_array{1, 9} ~= inhib_or_excite & respClass_all_array{1, 10} == inhib_or_excite;
+sum(block_2_and_3_pre_and_consumption)
+
+
+%% 
+% Run one cell below, then do all the figure generation in the following
+% code. Then run the next cell below, and do the same figure generation
 
 %%
 arrays_to_examine = [1 8];
@@ -66,9 +87,7 @@ collect_remapped_sum = sum(collect_remapped)
 
 vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
 
-%%
-
-
+%% DO NOT USE IF USING CODE ABOVE
 
 collect_all_possible = sum([sum(respClass_all_array{1, arrays_to_examine(1)} ==1), sum(respClass_all_array{1, arrays_to_examine(2)} ==1)])
 collect_conserved = respClass_all_array{1, arrays_to_examine(1)} == event_for_figures & respClass_all_array{1, arrays_to_examine(2)} == event_for_figures;
@@ -117,7 +136,7 @@ xline(0);
 % xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from choice (s)');
 
-%%
+%% START HERE IF USING CODE SEQUENCES ABOVE
 
 figure;
 width = 450; % Width of the figure
