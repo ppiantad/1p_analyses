@@ -405,39 +405,78 @@ hold off;
 %% MULTIPLEX NEURONS
 %%
 arrays_to_examine = [1 8];
-collect_conserved = block_1_pre_and_post  == event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
-collect_conserved_sum = sum(collect_conserved)
+conserved = block_1_pre_and_post  == event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
+conserved_sum = sum(conserved)
 
-collect_lost = block_1_pre_and_post == event_for_figures & block_2_and_3_pre_and_post ~= event_for_figures;
-collect_lost_sum = sum(collect_lost)
+lost = block_1_pre_and_post == event_for_figures & block_2_and_3_pre_and_post ~= event_for_figures;
+lost_sum = sum(lost)
 
-collect_remapped = block_1_pre_and_post ~= event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
-collect_remapped_sum = sum(collect_remapped)
+remapped = block_1_pre_and_post ~= event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
+remapped_sum = sum(remapped)
 
 vars_to_use = {'block_1_pre_and_post', 'block_2_and_3_pre_and_post'};
 
 %%
 arrays_to_examine = [2 9];
-collect_conserved = block_1_pre_and_post == event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
-collect_conserved_sum = sum(collect_conserved)
+conserved = block_1_pre_and_post == event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
+conserved_sum = sum(conserved)
 
-collect_lost = block_1_pre_and_post == event_for_figures & block_2_and_3_pre_and_post ~= event_for_figures;
-collect_lost_sum = sum(collect_lost)
+lost = block_1_pre_and_post == event_for_figures & block_2_and_3_pre_and_post ~= event_for_figures;
+lost_sum = sum(lost)
 
-collect_remapped = block_1_pre_and_post ~= event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
-collect_remapped_sum = sum(collect_remapped)
+remapped = block_1_pre_and_post ~= event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
+remapped_sum = sum(remapped)
 
-vars_to_use = {'postchoice_reward_block_1', 'postchoice_reward_blocks_2_and_3'};
+vars_to_use = {'block_1_pre_and_post', 'block_2_and_3_pre_and_post'};
 
 %%
 arrays_to_examine = [3 10];
-collect_conserved = block_1_pre_and_post == event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
-collect_conserved_sum = sum(collect_conserved)
+conserved = block_1_pre_and_post == event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
+conserved_sum = sum(conserved)
 
-collect_lost = block_1_pre_and_post == event_for_figures & block_2_and_3_pre_and_post ~= event_for_figures;
-collect_lost_sum = sum(collect_lost)
+lost = block_1_pre_and_post == event_for_figures & block_2_and_3_pre_and_post ~= event_for_figures;
+lost_sum = sum(lost)
 
-collect_remapped = block_1_pre_and_post ~= event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
-collect_remapped_sum = sum(collect_remapped)
+remapped = block_1_pre_and_post ~= event_for_figures & block_2_and_3_pre_and_post == event_for_figures;
+remapped_sum = sum(remapped)
 
-vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
+vars_to_use = {'block_1_pre_and_post', 'block_2_and_3_pre_and_post'};
+
+%%
+arrays_to_examine = [1 8];
+conserved = block_1_post_and_consumption  == event_for_figures & block_2_and_3_post_and_consumption == event_for_figures;
+conserved_sum = sum(conserved)
+
+lost = block_1_post_and_consumption == event_for_figures & block_2_and_3_post_and_consumption ~= event_for_figures;
+lost_sum = sum(lost)
+
+remapped = block_1_post_and_consumption ~= event_for_figures & block_2_and_3_post_and_consumption == event_for_figures;
+remapped_sum = sum(remapped)
+
+vars_to_use = {'block_1_post_and_consumption', 'block_2_and_3_post_and_consumption'};
+
+%%
+arrays_to_examine = [2 9];
+conserved = block_1_post_and_consumption == event_for_figures & block_2_and_3_post_and_consumption == event_for_figures;
+conserved_sum = sum(conserved)
+
+lost = block_1_post_and_consumption == event_for_figures & block_2_and_3_post_and_consumption ~= event_for_figures;
+lost_sum = sum(lost)
+
+remapped = block_1_post_and_consumption ~= event_for_figures & block_2_and_3_post_and_consumption == event_for_figures;
+remapped_sum = sum(remapped)
+
+vars_to_use = {'block_1_post_and_consumption', 'block_2_and_3_post_and_consumption'};
+
+%%
+arrays_to_examine = [3 10];
+conserved = block_1_post_and_consumption == event_for_figures & block_2_and_3_post_and_consumption == event_for_figures;
+conserved_sum = sum(conserved)
+
+lost = block_1_post_and_consumption == event_for_figures & block_2_and_3_post_and_consumption ~= event_for_figures;
+lost_sum = sum(lost)
+
+remapped = block_1_post_and_consumption ~= event_for_figures & block_2_and_3_post_and_consumption == event_for_figures;
+remapped_sum = sum(remapped)
+
+vars_to_use = {'block_1_post_and_consumption', 'block_2_and_3_post_and_consumption'};
