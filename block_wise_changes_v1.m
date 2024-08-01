@@ -11,7 +11,7 @@
 
 arrays_to_examine = [1 8];
 
-inhib_or_excite = 2;
+inhib_or_excite = 1;
 
 event_for_figures = 1; 
 
@@ -51,39 +51,39 @@ sum(block_2_and_3_pre_and_consumption)
 %%
 arrays_to_examine = [1 8];
 conserved = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
-conserved_sum = sum(conserved)
+conserved_sum(1) = sum(conserved)
 
 lost = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 ~= event_for_figures;
-lost_sum = sum(lost)
+lost_sum(1) = sum(lost)
 
 remapped = prechoice_block_1 ~= event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
-remapped_sum = sum(remapped)
+remapped_sum(1) = sum(remapped)
 
 vars_to_use = {'prechoice_block_1', 'prechoice_blocks_2_and_3'};
 
 %%
 arrays_to_examine = [2 9];
 conserved = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
-conserved_sum = sum(conserved)
+conserved_sum(2) = sum(conserved)
 
 lost = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 ~= event_for_figures;
-lost_sum = sum(lost)
+lost_sum(2) = sum(lost)
 
 remapped = postchoice_reward_block_1 ~= event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
-remapped_sum = sum(remapped)
+remapped_sum(2) = sum(remapped)
 
 vars_to_use = {'postchoice_reward_block_1', 'postchoice_reward_blocks_2_and_3'};
 
 %%
 arrays_to_examine = [3 10];
 conserved = collect_block_1 == event_for_figures & collect_blocks_2_and_3 == event_for_figures;
-conserved_sum = sum(conserved)
+conserved_sum(3) = sum(conserved)
 
 lost = collect_block_1 == event_for_figures & collect_blocks_2_and_3 ~= event_for_figures;
-lost_sum = sum(lost)
+lost_sum(3) = sum(lost)
 
 remapped = collect_block_1 ~= event_for_figures & collect_blocks_2_and_3 == event_for_figures;
-remapped_sum = sum(remapped)
+remapped_sum(3) = sum(remapped)
 
 vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
 
@@ -480,3 +480,16 @@ remapped = block_1_post_and_consumption ~= event_for_figures & block_2_and_3_pos
 remapped_sum = sum(remapped)
 
 vars_to_use = {'block_1_post_and_consumption', 'block_2_and_3_post_and_consumption'};
+
+%% for plotting changes on a donut (specific) and pie (broad) charts
+all_conserved_sum = sum(conserved_sum)
+all_lost_sum = sum(lost_sum)
+all_remapped_sum = sum(remapped_sum)
+remaining_neurons = neuron_num - (all_conserved_sum + all_lost_sum +all_remapped_sum);
+
+figure;
+piechart([all_conserved_sum/neuron_num, all_lost_sum/neuron_num, all_remapped_sum/neuron_num, remaining_neurons/neuron_num])
+
+figure;
+donutchart([conserved_sum/neuron_num, lost_sum/neuron_num, remapped_sum/neuron_num, remaining_neurons/neuron_num])
+
