@@ -84,7 +84,8 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                    behav_tbl_temp{ii, num_comparison} = BehavData;
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     
@@ -140,13 +141,50 @@ for num_iteration = 1:num_iterations
 
             % disp(['iter = ' string(iter)])
         elseif num_comparison == 2 %num_comparison == 2 || num_comparison == 1 %use this one on the left if you want to do shuffle vs shuffle
+            yoke_data = 1; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
             neuron_num = 0;
             for ii = 1:size(fieldnames(final),1)
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2);
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2, 'BLOCK', 2);
+                    behav_tbl_temp{ii, num_comparison} = BehavData;
                     trials = cell2mat(trials);
+                    % if exist('full_filter_string', 'var')
+                    % if yoke_data == 1
+                    %     if 
+                    %     for i = 1:size(full_filter_string, 2)
+                    %         fprintf('%d. %s\n', i, full_filter_string{1, i});
+                    %     end
+                    % 
+                    %     % Prompt the user for input
+                    %     user_selection = input('Which data would you like to match trials to?: ');
+                    % 
+                    %     % Check if the input is valid
+                    %     if user_selection >= 1 && user_selection <= size(full_filter_string, 2)
+                    %         selected_data = full_filter_string{1, user_selection};
+                    %         fprintf('You have selected: %s\n', selected_data);
+                    %     else
+                    %         disp('Invalid selection. Please run the script again and enter a valid number.');
+                    %     end
+                    %     size_to_downsample_to = size(trials_per_mouse{ii, user_selection}, 1);
+                    %     if size(BehavData, 1) > size_to_downsample_to
+                    %         % Randomly select rows from BehavData
+                    %         rand_indices = randperm(size(BehavData, 1), size_to_downsample_to);
+                    %         BehavData = BehavData(rand_indices, :);
+                    %         trials = trials(rand_indices, :);
+                    %         trials = sortrows(trials);
+                    %         % Sort the filtered BehavData by the Trial column
+                    %         BehavData = sortrows(BehavData, 'Trial');
+                    %     else
+                    %         % If the size is not greater, keep BehavData as it is
+                    %         disp('No downsampling needed.');
+                    %     end
+                    % 
+                    % else
+                    % 
+                    % end
+                    % end
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     
@@ -167,14 +205,14 @@ for num_iteration = 1:num_iterations
                     % ca = ca(respClass_all_array_mouse_true_neutral{ii, 1} == 1, :);
 
                     % shuffle data for comparison
-                    [num_cells, num_samples] = size(ca);
-                    shuffled_data = zeros(num_cells, num_samples); % Preallocate matrix for efficiency
-                    shift_val = randi(num_samples); % Generate a random shift value for each signal RUAIRI RECOMMENDED KEEPING THE SAME SHIFT VAL, rather than randomizing per neuron. this is because then you keep the overall correlation b/w the neurons, but disrupt the relationship to the event timestamps
-                    for i = 1:num_cells
-                        % shift_val = randi(num_signals); % Generate a random shift value for each signal
-                        shuffled_data(i,:) = circshift(ca(i,:), shift_val,2); % Perform the circular shuffle
-                    end
-                    ca = shuffled_data;
+                    % [num_cells, num_samples] = size(ca);
+                    % shuffled_data = zeros(num_cells, num_samples); % Preallocate matrix for efficiency
+                    % shift_val = randi(num_samples); % Generate a random shift value for each signal RUAIRI RECOMMENDED KEEPING THE SAME SHIFT VAL, rather than randomizing per neuron. this is because then you keep the overall correlation b/w the neurons, but disrupt the relationship to the event timestamps
+                    % for i = 1:num_cells
+                    %     % shift_val = randi(num_signals); % Generate a random shift value for each signal
+                    %     shuffled_data(i,:) = circshift(ca(i,:), shift_val,2); % Perform the circular shuffle
+                    % end
+                    % ca = shuffled_data;
 
                     num_samples = size(ca, 2);
                     sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.dt)*100;
@@ -215,6 +253,7 @@ for num_iteration = 1:num_iterations
 
     caTraceTrials_mouse_iterations(1, num_iteration) = {caTraceTrials_mouse};
     zall_mouse_iterations(1, num_iteration) = {zall_mouse};
+    behav_tbl_iter(1, num_iteration) = {behav_tbl_temp};
 end
 
 data_for_decoding = caTraceTrials_mouse_iterations;
