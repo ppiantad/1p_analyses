@@ -187,6 +187,10 @@ for ii = 1:size(fieldnames(final),1)
                 zall_mouse{ii, iter}(u) = {zall(:, 1:size(ts1, 2))};
                 sem_mouse{ii, iter}(u) = {nanstd(zall,1)/(sqrt(size(zall, 1)))};
                 caTraceTrials_mouse{ii, iter}(u) = {caTraceTrials(:, 1:size(ts1, 2))};
+                neuron_mean_mouse_unnormalized{ii, iter}(u,: ) = mean(caTraceTrials, 1);
+                neuron_sem_mouse_unnormalized{ii, iter}(u,: ) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
+                neuron_mean_mouse{ii, iter}(u,: ) = mean(zall, 1);
+                neuron_sem_mouse{ii, iter}(u,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
                 zall_mean_all(neuron_num,:) = nanmean(zall(:, 1:size(ts1, 2)));
 
                 if size(zall, 1) == 1

@@ -24,7 +24,7 @@ ca_data_type = "C_raw"; % C % C_raw
 use_normalized_time = 0;
 shuffle_confirm = 1; %1 if you want shuffle, 0 if you don't
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
 if strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39'};
@@ -126,7 +126,17 @@ for num_iteration = 1:num_iterations
                         [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
 
                         caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                        % caTraceTrials = sgolayfilt(caTraceTrials, 9, 21);
+
+
+
                         zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                        
+                        neuron_mean_mouse_unnormalized{ii, num_comparison}(u,: ) = mean(caTraceTrials, 1);
+                        neuron_sem_mouse_unnormalized{ii, num_comparison}(u,: ) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
+                        neuron_mean_mouse{ii, num_comparison}(u,: ) = mean(zall, 1);
+                        neuron_sem_mouse{ii, num_comparison}(u,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
+
                         zall_array{neuron_num} = zall;
                         zall_mouse{ii, num_comparison}(u) = {zall};
                         caTraceTrials_mouse{ii, num_comparison}(u) = {caTraceTrials};
@@ -147,7 +157,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2, 'BLOCK', 2);
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2, 'BLOCK', 3);
                     behav_tbl_temp{ii, num_comparison} = BehavData;
                     trials = cell2mat(trials);
                     % if exist('full_filter_string', 'var')
@@ -235,11 +245,21 @@ for num_iteration = 1:num_iterations
                         [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
 
                         caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                        % caTraceTrials = sgolayfilt(caTraceTrials, 9, 21);
+
                         zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                         zall_array{neuron_num} = zall;
                         zall_mouse{ii, num_comparison}(u) = {zall};
                         caTraceTrials_mouse{ii, num_comparison}(u) = {caTraceTrials};
+
+
                         zall_mean(neuron_num,:) = mean(zall);
+
+                        neuron_mean_mouse_unnormalized{ii, num_comparison}(u,: ) = mean(caTraceTrials, 1);
+                        neuron_sem_mouse_unnormalized{ii, num_comparison}(u,: ) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
+                        neuron_mean_mouse{ii, num_comparison}(u,: ) = mean(zall, 1);
+                        neuron_sem_mouse{ii, num_comparison}(u,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
+
                         trials_per_mouse{ii, num_comparison} = trials;
                         clear zall caTraceTrials zb zsd;
 
@@ -250,8 +270,10 @@ for num_iteration = 1:num_iterations
             end
         end
     end
-
-    caTraceTrials_mouse_iterations(1, num_iteration) = {caTraceTrials_mouse};
+    %08/01/2024: trying to use zall_mouse for decoding, because I am
+    %worried that direct comparisons b/w events won't work without having
+    %the data normalized prior to re-formatting for decoding! 
+    caTraceTrials_mouse_iterations(1, num_iteration) = {zall_mouse};
     zall_mouse_iterations(1, num_iteration) = {zall_mouse};
     behav_tbl_iter(1, num_iteration) = {behav_tbl_temp};
 end

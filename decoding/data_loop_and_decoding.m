@@ -212,7 +212,12 @@ for num_iteration = 1:num_iterations
             end
         end
     end
-
+    % from dabbling on some other code, worth keeping in mind for the
+    % future and updating this to zall_mouse if ever decoding two events
+    % directly
+    %08/01/2024: trying to use zall_mouse for decoding, because I am
+    %worried that direct comparisons b/w events won't work without having
+    %the data normalized prior to re-formatting for decoding! 
     caTraceTrials_mouse_iterations(1, num_iteration) = {caTraceTrials_mouse};
     zall_mouse_iterations(1, num_iteration) = {zall_mouse};
 end
