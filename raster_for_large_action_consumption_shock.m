@@ -25,7 +25,7 @@ sum(Shock_activated_alone)
 clear zall_first_event zall_second_event zall_third_event
 
 
-select_mouse = 'BLA_Insc_32';
+select_mouse = 'BLA_Insc_24';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
