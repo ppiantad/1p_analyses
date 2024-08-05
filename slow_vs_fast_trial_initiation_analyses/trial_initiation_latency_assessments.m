@@ -6,7 +6,7 @@ load('BLA_C_raw_no_additional_filtering_Pre_RDT_RM_only_completed_sessions_zall_
 %%
 % arrays_to_examine = [1 8];
 
-inhib_or_excite = 2;
+inhib_or_excite = 1;
 
 event_for_figures = 1; 
 
@@ -18,6 +18,11 @@ for kk = 1:size(respClass_all_array_mouse, 1)
     
     prechoice{kk, 1} = respClass_data{1, 1} == inhib_or_excite & respClass_data{1, 2} ~= inhib_or_excite & respClass_data{1, 3} ~= inhib_or_excite;
     prechoice_inds{kk, 1} = find(respClass_data{1, 1} == inhib_or_excite & respClass_data{1, 2} ~= inhib_or_excite & respClass_data{1, 3} ~= inhib_or_excite);
+
+    % prechoice_no_consumption{kk, 1} = respClass_data{1, 1} == inhib_or_excite & respClass_data{1, 2} ~= inhib_or_excite & respClass_data{1, 3} ~= inhib_or_excite;
+    % prechoice_inds{kk, 1} = find(respClass_data{1, 1} == inhib_or_excite & respClass_data{1, 2} ~= inhib_or_excite & respClass_data{1, 3} ~= inhib_or_excite);
+
+
     % 
     postchoice{kk, 1} = respClass_data{1, 2} == inhib_or_excite & respClass_data{1, 1} ~= inhib_or_excite & respClass_data{1, 3} ~= inhib_or_excite;
     postchoice_inds{kk, 1} = find(respClass_data{1, 2} == inhib_or_excite & respClass_data{1, 1} ~= inhib_or_excite & respClass_data{1, 3} ~= inhib_or_excite);
@@ -163,3 +168,7 @@ xline(0);
 % xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
 % xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from choice (s)');
+
+%%
+prechoice_no_consumption = respClass_all_array{1,1} == 1 & respClass_all_array{1,3} == 3; 
+prechoice_no_consumption_inds = find(respClass_all_array{1,1} == 1 & respClass_all_array{1,3} == 3); 
