@@ -60,7 +60,7 @@ for ii = 1:size(fieldnames(final),1)
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
         % only use rewarded trials for this, otherwise things get wonky
-        [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0); 
+        [BehavData,trials,varargin]=TrialFilter_test(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0); 
         block_1 = [BehavData.stTime(BehavData.Block == 1) BehavData.collectionTime(BehavData.Block == 1)]; 
         block_1_mouse(ii,:) = [block_1(1, 1) block_1(end, 2)];
         block_2 = [BehavData.stTime(BehavData.Block == 2) BehavData.collectionTime(BehavData.Block == 2)]; 
@@ -105,6 +105,7 @@ for ii = 1:size(fieldnames(final),1)
             block_1_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
             block_1_length(neuron_num) = block_1_mouse(ii, 2)-block_1_mouse(ii, 1);
             block_1_peaks_per_s_mouse{ii, iter}(dd) = block_1_peaks_sum_mouse{ii, iter}(dd)/block_1_length(neuron_num);
+            block_1_ca_mouse{ii, iter}(dd,:) = session_ca;
             block_2_ca = ca(dd, time_array > block_2_mouse(ii, 1) & time_array < block_2_mouse(ii, 2));
             [peaks, peak_locs] = findpeaks(block_2_ca, 'MinPeakDistance',4);
             block_2_peaks_sum(neuron_num) = sum(peaks);

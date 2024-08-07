@@ -122,7 +122,7 @@ set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, 
 hold on;
 h(1) = shadedErrorBar(ts1, nanmean(prechoice_mean_data_from_cells_long), nanmean(prechoice_sem_data_from_cells_long), 'lineProps', {'color', 'r'});
 h(2) = shadedErrorBar(ts1, nanmean(prechoice_mean_data_from_cells_short), nanmean(prechoice_sem_data_from_cells_short), 'lineProps', {'color', 'b'});
-legend([h(1).mainLine h(2).mainLine], '1st block', '2nd and 3rd block')
+legend([h(1).mainLine h(2).mainLine], 'long ITI', 'short ITI interval')
 xlim([-8 8]);
 ylim([-0.6 0.8])
 % hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});

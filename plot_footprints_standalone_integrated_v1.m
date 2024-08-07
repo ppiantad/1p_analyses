@@ -7,7 +7,7 @@
 
 
 % String to compare
-targetAnimal = 'BLA_Insc_27';
+targetAnimal = 'BLA_Insc_37';
 
 % Perform element-wise comparison
 animal_index_to_plot = find(strcmp(animalIDs, targetAnimal));

@@ -1,17 +1,17 @@
 %% Run eventRelatedActivity first for whatever events you want to identify responsive neurons for
 clear zall_first_event zall_second_event zall_third_event sem_first_event sem_second_event sem_third_event zall_fourth_event sem_fourth_event
-select_mouse = 'BLA_Insc_24';
+select_mouse = 'BLA_Insc_34';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-first_session = 'RDT_D1';
+first_session = 'Pre_RDT_RM';
 
 second_session = 'RDT_D1';
 
 pre_choice_data = neuron_mean_mouse_unnormalized{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 1, :);
 post_choice_data = neuron_mean_mouse_unnormalized{select_mouse_index, 1}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{2, 1}) == 1, :);
 consumption_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{3, 1}) == 1, :);
-shock_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 4}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{4, 1}) == 1, :);
+% shock_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 4}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_0to2.(all_filter_args{4, 1}) == 1, :);
 % neutral_data = neuron_mean_mouse_unnormalized{select_mouse_index, 2}(respClass_mouse.(select_mouse).(first_session).choiceTime.Outcome_Minus_4to0.(all_filter_args{1, 1}) == 3 & respClass_mouse.(select_mouse).(first_session).collectionTime.Outcome_1to3.(all_filter_args{2, 1}) == 3, :);
 % velocity_data = final_SLEAP.(select_mouse).(first_session).choiceTime.unitXTrials.velocity_trace_trials(final_SLEAP.(select_mouse).(first_session).BehavData.bigSmall == 1.2, :);
 
