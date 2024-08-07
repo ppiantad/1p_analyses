@@ -47,17 +47,31 @@ uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-ca_data_type = "C_raw"; % C % C_raw %S
+uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'Pre_RDT_RM';
-yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
+session_to_analyze = 'RM_D1';
+uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'collectionTime';
+epoc_to_align = 'choiceTime';
+period_of_interest = 'prechoice';
+
+if strcmp(epoc_to_align, 'stTime')
+    uv.evtSigWin.trial_start = [-3 0]; %for trial start
+elseif strcmp(epoc_to_align, 'choiceTime')
+    if strcmp(period_of_interest, 'prechoice')
+        uv.evtSigWin.prechoice = [-4 0]; %for pre-choice   [-4 0]    [-4 1]
+    elseif strcmp(period_of_interest, 'postchoice')
+        uv.evtSigWin.postchoice = [0 2]; %for SHK or immediate post-choice [0 2]
+    end
+elseif strcmp(epoc_to_align, 'collectionTime')
+    uv.evtSigWin.collect = [1 3]; %for REW collection [1 3]
+end
+
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
 neuron_num = 0;
@@ -95,18 +109,23 @@ uv.chooseFluoresenceOrRate = 1;                                             %set
 uv.sigma = 1.5;  %1.5                                                             %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 % uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
-% uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
+uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
 % uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice [0 2]
-uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3]
+% uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3]
 % 
+% % uv.evtSigWin.trial_start = [-3 0]; %for trial start
+% uv.evtSigWin.prechoice = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
+% uv.evtSigWin.postchoice = [0 2]; %for SHK or immediate post-choice [0 2]
+% uv.evtSigWin.collect = [1 3]; %for REW collection [1 3]
 
-
-
-
-% uv.evtSigWin.groomingStop = [-.5 3];
-% uv.evtSigWin.faceGroomingStart = [-.5 2];
-% uv.evtSigWin.faceGroomingStop = [-.5 2];
 uv.resamples = 100                                                         %number of resamples to use in shuffle analysis 1000
+uv.zscore_to = 'window'; %
+% 'baseline'
+% 'session'
+uv.smoothing.method = 'savgol';
+uv.smoothing.params = [9 21];
+
+
 
 sub_window_idx = ts1 >= uv.evtSigWin.outcome(1) & ts1 <= uv.evtSigWin.outcome(2);
 
@@ -157,13 +176,13 @@ for ii = 1:size(fieldnames(final),1)
                 end
             end
         end
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');
         filter_args = strjoin(varargin_strings,'_');
         if exist('full_filter_string', 'var')
-            if yoke_data == 1
+            if uv.yoke_data == 1
                 
                 for i = 1:size(full_filter_string, 2)
                     fprintf('%d. %s\n', i, full_filter_string{1, i});
@@ -235,9 +254,9 @@ for ii = 1:size(fieldnames(final),1)
 
         
         trials = cell2mat(trials);
-        ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
+        ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(uv.ca_data_type);
         % ca = zscore(ca, 0, 2);
-        if strcmp(ca_data_type, 'S')
+        if strcmp(uv.ca_data_type, 'S')
             ca = full(ca);
 
         end
@@ -291,10 +310,15 @@ for ii = 1:size(fieldnames(final),1)
                 [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 % [caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_only(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-                zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-                % zall = zall_session(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-                % zall = zscored_caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
 
+                if strcmp(uv.zscore_to, 'window') 
+                    zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                elseif strcmp(uv.zscore_to, 'session') 
+                    zall = zall_session(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                elseif strcmp(uv.zscore_to, 'baseline') 
+                    zall = zall_baselined(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                % zall = zscored_caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                end
                 % for some events, the mice have no trials, therefore there are
                 % no traces. this line basically skips those neurons (adding 0
                 % to the respClass struct), to maintain the same total # of
@@ -319,8 +343,10 @@ for ii = 1:size(fieldnames(final),1)
 
                     % Loop through each row of zall
                     for z = 1:size(zall, 1)
-                        % Apply Savitzky-Golay filter to each row
-                        zall(z, :) = sgolayfilt(zall(z, :), 9, 21);
+                        if strcmp(uv.smoothing.method, 'savgol')
+                            % Apply Savitzky-Golay filter to each row
+                            zall(z, :) = sgolayfilt(zall(z, :), uv.smoothing.params(1), uv.smoothing.params(2));
+                        end
                     end
                     mouse_cells(iter, neuron_num) = {currentanimal};
                     zall_array(iter, neuron_num) = {zall};

@@ -11,7 +11,7 @@
 
 arrays_to_examine = [1 8];
 
-inhib_or_excite = 2;
+inhib_or_excite = 1;
 
 event_for_figures = 1; 
 
