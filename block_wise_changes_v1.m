@@ -9,6 +9,19 @@
 % collectionTime Blocks 2 & 3), then change the variable below to do that
 % comparison with the appropriate array #s
 
+% use this to specify which arrays should be compared below. this is
+% critical - you must know which arrays correspond to variables to be
+% compared, i..e, prechoice B1 vs prechoice B2/3, which may correspond to
+% respClass_all_arrays 1 and 4, in the case of arrays of size 6. this code
+% will break and could make invalid comparisons if you do not adjust these values appropriately 
+if size(respClass_all_array, 2) == 10
+    comparison_arrays = [1 2 3; 8 9 10]
+elseif size(respClass_all_array, 2) == 6
+    comparison_arrays = [1 2 3; 4 5 6]
+end
+
+
+
 arrays_to_examine = [1 8];
 
 inhib_or_excite = 1;
@@ -17,30 +30,30 @@ event_for_figures = 1;
 
 %%
 
-prechoice_block_1 = respClass_all_array{1, 1} == inhib_or_excite & respClass_all_array{1, 2} ~= inhib_or_excite & respClass_all_array{1, 3} ~= inhib_or_excite;
-prechoice_blocks_2_and_3 = respClass_all_array{1, 8} == inhib_or_excite & respClass_all_array{1, 9} ~= inhib_or_excite & respClass_all_array{1, 10} ~= inhib_or_excite;
+prechoice_block_1 = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
+prechoice_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
 
-postchoice_reward_block_1 = respClass_all_array{1, 2} == inhib_or_excite & respClass_all_array{1, 1} ~= inhib_or_excite & respClass_all_array{1, 3} ~= inhib_or_excite;
-postchoice_reward_blocks_2_and_3 = respClass_all_array{1, 9} == inhib_or_excite & respClass_all_array{1, 8} ~= inhib_or_excite & respClass_all_array{1, 10} ~= inhib_or_excite;
+postchoice_reward_block_1 = respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
+postchoice_reward_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
 
-collect_block_1 = respClass_all_array{1, 3} == inhib_or_excite & respClass_all_array{1, 1} ~= inhib_or_excite & respClass_all_array{1, 2} ~= inhib_or_excite;
-collect_blocks_2_and_3 = respClass_all_array{1, 10} == inhib_or_excite & respClass_all_array{1, 8} ~= inhib_or_excite & respClass_all_array{1, 9} ~= inhib_or_excite;
+collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite;
+collect_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite;
 
 
 
-block_1_pre_and_post = respClass_all_array{1, 1} == inhib_or_excite & respClass_all_array{1, 2} == inhib_or_excite & respClass_all_array{1, 3} ~= inhib_or_excite;
+block_1_pre_and_post = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
 sum(block_1_pre_and_post)
-block_1_post_and_consumption = respClass_all_array{1, 1} ~= inhib_or_excite & respClass_all_array{1, 2} == inhib_or_excite & respClass_all_array{1, 3} == inhib_or_excite;
+block_1_post_and_consumption = respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite;
 sum(block_1_post_and_consumption)
-block_1_pre_and_consumption = respClass_all_array{1, 1} == inhib_or_excite & respClass_all_array{1, 2} ~= inhib_or_excite & respClass_all_array{1, 3} == inhib_or_excite;
+block_1_pre_and_consumption = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite;
 sum(block_1_pre_and_consumption)
 
 
-block_2_and_3_pre_and_post = respClass_all_array{1, 8} == inhib_or_excite & respClass_all_array{1, 9} == inhib_or_excite & respClass_all_array{1, 10} ~= inhib_or_excite;
+block_2_and_3_pre_and_post = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
 sum(block_2_and_3_pre_and_post)
-block_2_and_3_post_and_consumption = respClass_all_array{1, 8} ~= inhib_or_excite & respClass_all_array{1, 9} == inhib_or_excite & respClass_all_array{1, 10} == inhib_or_excite;
+block_2_and_3_post_and_consumption = respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite;
 sum(block_2_and_3_post_and_consumption)
-block_2_and_3_pre_and_consumption = respClass_all_array{1, 8} == inhib_or_excite & respClass_all_array{1, 9} ~= inhib_or_excite & respClass_all_array{1, 10} == inhib_or_excite;
+block_2_and_3_pre_and_consumption = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite;
 sum(block_2_and_3_pre_and_consumption)
 
 
@@ -49,7 +62,7 @@ sum(block_2_and_3_pre_and_consumption)
 % code. Then run the next cell below, and do the same figure generation
 
 %%
-arrays_to_examine = [1 8];
+arrays_to_examine = [comparison_arrays(1, 1) comparison_arrays(2, 1)];
 conserved = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
 conserved_sum(1) = sum(conserved)
 
@@ -62,7 +75,7 @@ remapped_sum(1) = sum(remapped)
 vars_to_use = {'prechoice_block_1', 'prechoice_blocks_2_and_3'};
 
 %%
-arrays_to_examine = [2 9];
+arrays_to_examine = [comparison_arrays(1, 2) comparison_arrays(2, 2)];
 conserved = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
 conserved_sum(2) = sum(conserved)
 
@@ -75,7 +88,7 @@ remapped_sum(2) = sum(remapped)
 vars_to_use = {'postchoice_reward_block_1', 'postchoice_reward_blocks_2_and_3'};
 
 %%
-arrays_to_examine = [3 10];
+arrays_to_examine = [comparison_arrays(1, 3) comparison_arrays(2, 3)];
 conserved = collect_block_1 == event_for_figures & collect_blocks_2_and_3 == event_for_figures;
 conserved_sum(3) = sum(conserved)
 
