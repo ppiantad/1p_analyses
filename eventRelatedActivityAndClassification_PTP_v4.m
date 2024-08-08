@@ -54,22 +54,24 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'RM_D1';
-uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
+session_to_analyze = 'Pre_RDT_RM';
+uv.yoke_data = 1; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'choiceTime';
-period_of_interest = 'prechoice';
+epoc_to_align = 'collectionTime';
+period_of_interest = 'postchoice';
 
 if strcmp(epoc_to_align, 'stTime')
-    uv.evtSigWin.trial_start = [-3 0]; %for trial start
+    period_of_interest = 'trial_start';
+    uv.evtSigWin.outcome = [-3 0]; %for trial start
 elseif strcmp(epoc_to_align, 'choiceTime')
     if strcmp(period_of_interest, 'prechoice')
-        uv.evtSigWin.prechoice = [-4 0]; %for pre-choice   [-4 0]    [-4 1]
+        uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]
     elseif strcmp(period_of_interest, 'postchoice')
-        uv.evtSigWin.postchoice = [0 2]; %for SHK or immediate post-choice [0 2]
+        uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice [0 2]
     end
 elseif strcmp(epoc_to_align, 'collectionTime')
-    uv.evtSigWin.collect = [1 3]; %for REW collection [1 3]
+    period_of_interest = 'reward_collection';
+    uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3]
 end
 
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -109,7 +111,7 @@ uv.chooseFluoresenceOrRate = 1;                                             %set
 uv.sigma = 1.5;  %1.5                                                             %this parameter controls the number of standard deviations that the response must exceed to be classified as a responder. try 1 as a starting value and increase or decrease as necessary.
 % uv.evtWin = [-10 10];                                                       %time window around each event in sec relative to event times (use long windows here to see more data)
 % % uv.evtSigWin.outcome = [-3 0]; %for trial start
-uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
+% uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]                              %period within time window that response is classified on (sec relative to event)
 % uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice [0 2]
 % uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3]
 % 
@@ -127,9 +129,24 @@ uv.smoothing.params = [9 21];
 
 
 
+% sub_window_idx = ts1 >= uv.evtSigWin.outcome(1) & ts1 <= uv.evtSigWin.outcome(2);
+% 
+% identity_classification_win = 'Outcome';
+% identity_classification_str = join(string(uv.evtSigWin.outcome), 'to');
+% 
+% if contains(identity_classification_str, '-')
+%     identity_classification_str = strrep(identity_classification_str, '-', 'Minus_');
+% end
+% 
+% if contains(identity_classification_str, '.')
+%     identity_classification_str = strrep(identity_classification_str, '.', 'point');
+% end
+% 
+% identity_classification_str = join([identity_classification_win, identity_classification_str],'_');
+
 sub_window_idx = ts1 >= uv.evtSigWin.outcome(1) & ts1 <= uv.evtSigWin.outcome(2);
 
-identity_classification_win = 'Outcome';
+identity_classification_win = period_of_interest;
 identity_classification_str = join(string(uv.evtSigWin.outcome), 'to');
 
 if contains(identity_classification_str, '-')
@@ -141,6 +158,10 @@ if contains(identity_classification_str, '.')
 end
 
 identity_classification_str = join([identity_classification_win, identity_classification_str],'_');
+
+
+
+
 
 iter = iter +1;
 
@@ -176,7 +197,7 @@ for ii = 1:size(fieldnames(final),1)
                 end
             end
         end
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');
@@ -479,7 +500,7 @@ for ii = 1:size(fieldnames(final),1)
 end
 varargin_list{iter,:} = varargin_identity_class;
 behav_tbl_iter{iter, :} = behav_tbl_temp;
-
+user_vars{iter} = uv; 
 
 clear behav_tbl_temp
 
