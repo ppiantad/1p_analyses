@@ -55,7 +55,7 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 session_to_analyze = 'RM_D1';
-uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
+uv.yoke_data = 1; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
 epoc_to_align = 'collectionTime'; % stTime choiceTime collectionTime
 period_of_interest = 'postchoice';
