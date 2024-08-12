@@ -506,3 +506,28 @@ piechart([all_conserved_sum/neuron_num, all_lost_sum/neuron_num, all_remapped_su
 figure;
 donutchart([conserved_sum/neuron_num, lost_sum/neuron_num, remapped_sum/neuron_num, remaining_neurons/neuron_num])
 
+all_neurons = [conserved_sum; lost_sum; remapped_sum]
+%all_neurons_2 = [conserved_sum; lost_sum; remapped_sum]
+
+%% chi-square test on all_neurons. load in data for 1 set of all_neurons above, then load in second set and create all_neurons_2, then run code below
+
+% Given arrays
+% all_neurons = [ ... ]; % Your 3x3 array
+% all_neurons_2 = [ ... ]; % Your other 3x3 array
+
+% Initialize a matrix to store p-values
+p_values = zeros(size(all_neurons));
+
+% Perform chi-square test for each corresponding cell
+for i = 1:size(all_neurons, 1)
+    for j = 1:size(all_neurons, 2)
+        observed = [all_neurons(i,j), all_neurons_2(i,j)];
+        expected = mean(observed);
+        chi2_stat = sum((observed - expected).^2 ./ expected);
+        p_values(i,j) = 1 - chi2cdf(chi2_stat, 1); % degrees of freedom = 1
+    end
+end
+
+% Display the p-values
+disp('P-values for each corresponding cell:');
+disp(p_values);
