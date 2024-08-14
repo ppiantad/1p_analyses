@@ -104,6 +104,13 @@ hold off;
 
 %%
 
+
+mean_data_pre_choice_activated_consum_inhibited = neuron_mean_array{1,1}(pre_choice_activated_consum_inhibited, :);
+mean_data_pre_choice_activated_consum_activated = neuron_mean_array{1,1}(pre_choice_activated_consum_activated, :);
+mean_data_pre_choice_inhibited_consum_inhibited = neuron_mean_array{1,1}(pre_choice_inhibited_consum_inhibited, :);
+mean_data_pre_choice_inhibited_consum_activated = neuron_mean_array{1,1}(pre_choice_inhibited_consum_activated, :);
+
+
 % Calculate the number of rows for each group
 num_rows_pre_choice_activated_exclusive = size(mean_data_pre_choice_activated_exclusive, 1);
 num_rows_pre_choice_activated_consum_inhibited = size(mean_data_pre_choice_activated_consum_inhibited, 1);
@@ -119,10 +126,6 @@ pre_choice_activated_consum_activated = respClass_all_array{1,1} == 1 & respClas
 pre_choice_inhibited_consum_inhibited = respClass_all_array{1,1} == 2 & respClass_all_array{1,3} == 2; 
 pre_choice_inhibited_consum_activated = respClass_all_array{1,1} == 2 & respClass_all_array{1,3} == 1; 
 
-mean_data_pre_choice_activated_consum_inhibited = neuron_mean_array{1,1}(pre_choice_activated_consum_inhibited, :);
-mean_data_pre_choice_activated_consum_activated = neuron_mean_array{1,1}(pre_choice_activated_consum_activated, :);
-mean_data_pre_choice_inhibited_consum_inhibited = neuron_mean_array{1,1}(pre_choice_inhibited_consum_inhibited, :);
-mean_data_pre_choice_inhibited_consum_activated = neuron_mean_array{1,1}(pre_choice_inhibited_consum_activated, :);
 
 
 data_for_big_heatmap = [    mean_data_pre_choice_activated_exclusive;...
