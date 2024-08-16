@@ -52,28 +52,39 @@ for zz = 1:size(metafolder_list, 1)
 
     for ii = 1:size(folder_list, 1)
         folder_list_string = strsplit(folder_list{ii}, '\');
-        current_animal = folder_list_string{5}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
+        current_animal = folder_list_string{7}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
         current_animal = matlab.lang.makeValidName(current_animal);
-        current_session = folder_list_string{6};
+        current_session_raw = folder_list_string{8};
+        current_session = strsplit(current_session_raw, '_');
+        if strcmp(current_session{end}, 'EPM')
+            current_session = current_session{end};
+
+        elseif ~strcmp(current_session{end}, 'EPM')
+            current_session = append(current_session{2}, '_', current_session{end});
+
+        end
+
         if contains(lower(current_session), 'aft') || contains(lower(current_session), 'noon')
-            if contains(lower(current_session), '1')
+            if contains(lower(current_session), '2')
                 current_session_renamed = 'D1_Afternoon';
 
-            elseif contains(lower(current_session), '2')
+            elseif contains(lower(current_session), '3')
                 current_session_renamed = 'D2_Afternoon';
             end
         elseif contains(lower(current_session), 'morn')
-            if contains(lower(current_session), '1')
+            if contains(lower(current_session), '2')
                 current_session_renamed = 'D1_Morning';
 
-            elseif contains(lower(current_session), '2')
+            elseif contains(lower(current_session), '3')
                 current_session_renamed = 'D2_Morning';
             end
-        elseif contains(lower(current_session), '3')
+        elseif contains(lower(current_session), '4')
             current_session_renamed = 'D3';
 
-        elseif contains(lower(current_session), '4')
+        elseif contains(lower(current_session), '5')
             current_session_renamed = 'D4';
+        else
+            current_session_renamed = current_session;
         end
 
 
@@ -85,9 +96,12 @@ for zz = 1:size(metafolder_list, 1)
         for i = 1:length(list)
             % Check if the item in subfolders is a directory (not "." or "..") or
             % one of the sets of files that I haven't analyzed yet (PR currently)
-            if list(i).isdir && ~strcmp(list(i).name, '.') && ~strcmp(list(i).name, '..') && contains(list(i).name, 'cylander_behaviour')
+            if list(i).isdir && ~strcmp(list(i).name, '.') && ~strcmp(list(i).name, '..') && contains(list(i).name, 'Behavior')
                 % Get the full path of the subfolder
-                subsubfolderPath = fullfile(startDirectory, current_session, list(i).name);
+                subsubfolderPath = fullfile(startDirectory, current_session_raw, list(i).name);
+                list_2 =  dir(subsubfolderPath);%grab a directory of the foldercontents
+
+
                 % Create a cell array for the subfolder path and append it
                 % vertically to folder_list
                 % sub_folder_list = vertcat(sub_folder_list,{subsubfolderPath});
@@ -123,7 +137,7 @@ for zz = 1:size(metafolder_list, 1)
 
         for mm = 1:length(csv_names)
             % Check if the current name contains three distinct substrings
-            if contains(lower(csv_names{mm}), 'dlc')
+            if contains(lower(csv_names{mm}), 'preprocessed.parquet')
                 disp(['DLC = ', csv_names{mm}])
                 DLC_file = strcat(subsubsubfolderPath, '\', csv_names{mm});
             end
