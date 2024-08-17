@@ -161,18 +161,16 @@ for zz = 1:size(metafolder_list, 1)
     end
 end
 %%
-experimental_grps = readtable('D:\Context Data\Pilot\pilot groups.xlsx');
 animalIDs = fieldnames(final_DLC);
+experimental_grp_label = 'Experimental';
+experimental_grps = repmat(experimental_grp_label, size(animalIDs, 1), 1);
+
 
 for dd = 1:size(experimental_grps, 1)
-    current_mouse = experimental_grps{dd, :};
+    current_mouse = animalIDs{dd};
+    label = experimental_grps(dd, :); 
+    final_DLC.(current_mouse).experimental_grp = label;
 
-    for hh = 1:size(animalIDs, 1)
-        if strcmp(current_mouse{1}, animalIDs(hh))
-            final_DLC.(current_mouse{1}).experimental_grp = current_mouse{2};
-        end
-
-    end
 
 end
 

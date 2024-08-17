@@ -42,9 +42,15 @@ end
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
     current_mouse = animalIDs{gg};
-    if strcmp(final_DLC.(current_mouse).experimental_grp, 'One Context')
+    if strcmp(final_DLC.(current_mouse).experimental_grp, 'Experimental')
         mouse_count = mouse_count+1;
-        freeze_data = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw.freeze; 
+        DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw;
+        if any(strcmp('freeze', DLC_data_mouse.Properties.VariableNames))
+            freeze_data = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw.freeze; 
+        elseif any(strcmp('freeze_status', DLC_data_mouse.Properties.VariableNames))
+            freeze_data = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw.freeze_status; 
+        end
+        % freeze_data = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw.freeze; 
         frames_data = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw.frame;
         
         for qq = 1:num_repeats
@@ -96,6 +102,7 @@ disp('Interleaved Means:');
 disp(interleaved_means);
 
 figure; plot(interleaved_means);
+% hold on; plot(interleaved_means);
 
 %%
 % Plotting the data
