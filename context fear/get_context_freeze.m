@@ -42,7 +42,7 @@ end
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
     current_mouse = animalIDs{gg};
-    if strcmp(final_DLC.(current_mouse).experimental_grp, 'Experimental')
+    if strcmp(final_DLC.(current_mouse).experimental_grp, 'One Context')
         mouse_count = mouse_count+1;
         DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw;
         if any(strcmp('freeze', DLC_data_mouse.Properties.VariableNames))
@@ -101,8 +101,8 @@ interleaved_means(2:2:end) = mean_aversive;
 disp('Interleaved Means:');
 disp(interleaved_means);
 
-figure; plot(interleaved_means);
-% hold on; plot(interleaved_means);
+% figure; plot(interleaved_means);
+hold on; plot(interleaved_means);
 
 %%
 % Plotting the data
