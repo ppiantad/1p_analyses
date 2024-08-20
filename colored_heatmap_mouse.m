@@ -1,7 +1,15 @@
 
-plot_num = 104; 
+plot_num = 46; 
 
-select_mouse = 'BLA_Insc_24';
+array_to_plot = 1; % depends on the structure of zall
+
+select_mouse = 'BLA_Insc_25';
+
+% for RDT D1 BLA_Insc_25:
+%prechoice neuron num 46
+%postchoice rew num 38
+%consumption num 39
+%shock num 11
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
@@ -27,8 +35,8 @@ stTime = BehavData.TrialPossible(1)-60;
 
 
 
-time2Collect = BehavData.collectionTime(trials_per_mouse{select_mouse_index, 3}) - BehavData.choiceTime(trials_per_mouse{select_mouse_index, 3});
-trialStartTime = BehavData.stTime(trials_per_mouse{select_mouse_index, 3}) - BehavData.choiceTime(trials_per_mouse{select_mouse_index, 3});
+time2Collect = BehavData.collectionTime(trials_per_mouse{select_mouse_index, array_to_plot}) - BehavData.choiceTime(trials_per_mouse{select_mouse_index, array_to_plot});
+trialStartTime = BehavData.stTime(trials_per_mouse{select_mouse_index, array_to_plot}) - BehavData.choiceTime(trials_per_mouse{select_mouse_index, array_to_plot});
 median_trialStartTime = median(trialStartTime)
 median_time2Collect = median(time2Collect)
 xline(median_trialStartTime)
@@ -58,15 +66,15 @@ Tris = [1:numTrials]';
 
 
 
-% custom_colormap = [
-%     1, 1, 1;       % white
-%     0.9, 0.95, 0.9;
-%     0.8, 0.9, 0.8;
-%     0.6, 0.8, 0.6;
-%     0.4, 0.7, 0.4;
-%     0.2, 0.6, 0.2;
-%     0.13, 0.55, 0.13; % forest green
-% ];
+custom_colormap = [
+    1, 1, 1;       % white
+    0.9, 0.95, 0.9;
+    0.8, 0.9, 0.8;
+    0.6, 0.8, 0.6;
+    0.4, 0.7, 0.4;
+    0.2, 0.6, 0.2;
+    0.13, 0.55, 0.13; % forest green
+];
 
 % custom_colormap = [
 %     1, 1, 1;         % white
@@ -77,23 +85,38 @@ Tris = [1:numTrials]';
 %     0.2, 0.8, 0.8;
 %     0.0, 0.8, 0.8;   % robin's egg blue
 % ];
-% 
-custom_colormap = [
-    1, 1, 1;         % white
-    0.9, 0.9, 0.95;
-    0.8, 0.8, 0.9;
-    0.6, 0.6, 0.8;
-    0.4, 0.4, 0.7;
-    0.2, 0.2, 0.6;
-    0.0, 0.0, 0.55;   % dark blue
-];
+
+% custom_colormap = [
+%     1, 1, 1;         % white
+%     0.9, 0.9, 0.95;
+%     0.8, 0.8, 0.9;
+%     0.6, 0.6, 0.8;
+%     0.4, 0.4, 0.7;
+%     0.2, 0.2, 0.6;
+%     0.0, 0.0, 0.55;   % dark blue
+% ];
+
+% custom_colormap = [
+%     1, 1, 1; % white
+%     1, 0.9, 0.9;
+%     1, 0.8, 0.8;
+%     1, 0.7, 0.7;
+%     1, 0.6, 0.6;
+%     1, 0.5, 0.5;
+%     1, 0.4, 0.4;
+%     1, 0.3, 0.3;
+%     1, 0.2, 0.2;
+%     1, 0.1, 0.1;
+%     1, 0, 0;   % red
+% ];
+
 
 % Generate more intermediate colors for a smoother transition
 n = 256; % Number of colors
 custom_colormap = interp1(linspace(0, 1, size(custom_colormap, 1)), custom_colormap, linspace(0, 1, n));
 
 % Create a figure with a narrow width and taller height
-figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+figure('Position', [100, 100, 250, 600]); % [left, bottom, width, height]
 
 % Create a tiled layout with 2 rows and 1 column
 tiledlayout(2, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
@@ -103,7 +126,8 @@ ax1 = nexttile;
 hold on;
 
 % Plot the heatmap
-imagesc(ts1, 0, zall_mouse{select_mouse_index, 1}{1, plot_num});
+imagesc(ts1, 1:size(zall_mouse{select_mouse_index, array_to_plot}{1, plot_num}, 1), zall_mouse{select_mouse_index, array_to_plot}{1, plot_num});
+
 
 % Apply the custom colormap
 colormap(custom_colormap);
@@ -115,32 +139,37 @@ clim([-1 1]);
 c = colorbar(ax1, 'eastoutside');
 set(c, 'YTick', clim); % 
 
-ylim([1  size(zall_mouse{select_mouse_index, 1}{1, plot_num}, 1)])
+ylim([0.5, size(zall_mouse{select_mouse_index, array_to_plot}{1, plot_num}, 1) + 0.5]);
+
 xlim([-8 8]);
 % Set X-axis ticks
-set(gca, 'XTick', [-8, -4, 0, 4, 8]);
-set(gca, 'YTick', [1, size(zall_mouse{select_mouse_index, 1}{1, plot_num}, 1)]);
+set(gca, 'XTick', []);
+set(gca, 'YTick', [1, size(zall_mouse{select_mouse_index, array_to_plot}{1, plot_num}, 1)]);
 xline(0)
-scatter(time2Collect, Tris               , 'Marker', 'p', 'MarkerFaceColor', 'k', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 0.7)
-scatter(trialStartTime, Tris, 'Marker', 's', 'MarkerFaceColor', 'k', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 0.7)
+scatter(time2Collect, Tris               , 'Marker', 'p')
+scatter(trialStartTime, Tris, 'Marker', 's')
+fontsize(18, 'points')
 hold off;
 
 % Second tile (mean and raw data)
 ax2 = nexttile;
 hold on;
 
-% Plot the mean as a thick black line
-meanData = mean(zall_mouse{select_mouse_index, 1}{1, plot_num});
-plot(ts1, meanData, 'r', 'LineWidth', 2, 'Color', custom_colormap(end, :));
 
 % Plot the raw data in grey with transparency
-for trial = 1:size(zall_mouse{select_mouse_index, 1}{1, plot_num}, 1)
-    plot(ts1, zall_mouse{select_mouse_index, 1}{1, plot_num}(trial, :), 'Color', [custom_colormap(end, :), 0.5]);
+for trial = 1:size(zall_mouse{select_mouse_index, array_to_plot}{1, plot_num}, 1)
+    plot(ts1, zall_mouse{select_mouse_index, array_to_plot}{1, plot_num}(trial, :), 'Color', [custom_colormap(end, :), 0.5]);
 end
+
+% Plot the mean as a thick black line
+meanData = mean(zall_mouse{select_mouse_index, array_to_plot}{1, plot_num});
+plot(ts1, meanData, 'r', 'LineWidth', 2, 'Color', 'k');
+
 ylim([-4 4]);
 xlim([-8 8]);
 % Set X-axis ticks
-set(gca, 'XTick', [-8, -4, 0, 4, 8]);
+set(gca, 'XTick', [-8, 0, 8]);
 xline(0)
 yline(0)
+fontsize(18, 'points')
 hold off;

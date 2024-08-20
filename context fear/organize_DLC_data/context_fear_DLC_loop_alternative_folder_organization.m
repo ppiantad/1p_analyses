@@ -9,7 +9,7 @@ ts1 = (-10:(uv.dt):10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'D:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data';
+metaDirectory = 'E:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -96,7 +96,7 @@ for zz = 1:size(metafolder_list, 1)
         for i = 1:length(list)
             % Check if the item in subfolders is a directory (not "." or "..") or
             % one of the sets of files that I haven't analyzed yet (PR currently)
-            if list(i).isdir && ~strcmp(list(i).name, '.') && ~strcmp(list(i).name, '..') && contains(list(i).name, 'Behavior')
+            if list(i).isdir && ~strcmp(list(i).name, '.') && ~strcmp(list(i).name, '..') && contains(list(i).name, 'Behavior') || contains(list(i).name, 'Behaviour' )
                 % Get the full path of the subfolder
                 subsubfolderPath = fullfile(startDirectory, current_session_raw, list(i).name);
                 list_2 =  dir(subsubfolderPath);%grab a directory of the foldercontents
@@ -176,7 +176,7 @@ for zz = 1:size(metafolder_list, 1)
 end
 
 %%
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\some_PFC_mice.csv');
+experimental_grps = readtable('D:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 animalIDs = fieldnames(final_DLC);
 
 for dd = 1:size(experimental_grps, 1)
