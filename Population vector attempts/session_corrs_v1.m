@@ -4,7 +4,7 @@
 % also you should first run block_wise_changes_v1.m to get the blocktimes
 
 
-neuronTypes = respClass_all_array_mouse{1, 10};
+neuronTypes = respClass_all_array_mouse{1, 1};
 neuralActivity = final.BLA_Insc_24.RDT_D1.CNMFe_data.C_raw;
 
 
@@ -102,3 +102,44 @@ ylabel('Mean Similarity');
 legend({'Stage 1', 'Stage 2', 'Stage 3'});
 title('Mean Similarity Across Stages');
 
+
+%%
+
+next_neuron = 0;
+
+PV_consumption_mouse = [];
+for ff = 1:size(respClass_all_array_mouse{1, 3}, 2)
+    if respClass_all_array_mouse{1, 3}(ff) == 1
+        next_neuron = next_neuron+1;
+        PV_consumption_mouse (next_neuron) = neuron_mean_mouse{1, 3}(ff, 91);
+
+
+
+    end
+
+end
+
+
+time_array = (0:(num_samples-1)) / sampling_frequency;
+
+block_1_data_for_consumption_neurons = block_1_ca_mouse{1, 11}(respClass_all_array_mouse{1, 3} == 1, :);
+
+windowSize = 100; % Number of time points in the window
+for t = 1:size(block_1_data_for_consumption_neurons, 2)
+    % for i = 1:length(uniqueTypes)
+        % typeIdx = (neuronTypes == uniqueTypes(i));
+        % use specific subset of neurons
+        activitySubset = block_1_data_for_consumption_neurons(:, t);
+        % uncomment if you want to use all neurons
+        %activitySubset = neuralActivity(typeIdx, t:(t + windowSize - 1));
+        similarityMatrix = corrcoef(activitySubset', PV_consumption_mouse);
+        similarityOverTime(t) = similarityMatrix(2);
+    % end
+end
+
+figure; plot(time_array(1:size(similarityOverTime, 2)), similarityOverTime)
+xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
+xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
+xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
+xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
+xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
