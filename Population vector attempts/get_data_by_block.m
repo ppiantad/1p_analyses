@@ -4,7 +4,7 @@ function [block_1_ca_mouse] = get_data_by_block(animalIDs, session_to_analyze, i
 %% FILTER TO GET UN-SHUFFLED DATA
 iter = iter+1;
 neuron_num = 0;
-for ii = 1:size(fieldnames(final),1)
+for ii = 1:size(animalIDs,1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
@@ -44,31 +44,31 @@ for ii = 1:size(fieldnames(final),1)
             session_ca = ca(dd, :);
             [peaks, peak_locs] = findpeaks(session_ca, 'MinPeakDistance',4);
             session_peaks_sum(neuron_num) = sum(peaks);
-            session_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
+            session_peaks_sum_mouse{ii}(dd) = sum(peaks);
             session_length(neuron_num) = final.BLA_Insc_24.RDT_D1.time(end)  - final.BLA_Insc_24.RDT_D1.time(1) ;
-            session_peaks_per_s_mouse{ii, iter}(dd) = session_peaks_sum_mouse{ii, iter}(dd)/session_length(neuron_num);
-            session_peaks_per_min_mouse{ii, iter}(dd) = (session_peaks_sum_mouse{ii, iter}(dd)/session_length(neuron_num))*60;
+            session_peaks_per_s_mouse{ii}(dd) = session_peaks_sum_mouse{ii}(dd)/session_length(neuron_num);
+            session_peaks_per_min_mouse{ii}(dd) = (session_peaks_sum_mouse{ii}(dd)/session_length(neuron_num))*60;
             block_1_ca = ca(dd, time_array > block_1_mouse(ii, 1) & time_array < block_1_mouse(ii, 2));
             [peaks, peak_locs] = findpeaks(block_1_ca, 'MinPeakDistance',4);
             block_1_peaks_sum(neuron_num) = sum(peaks);
-            block_1_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
+            block_1_peaks_sum_mouse{ii}(dd) = sum(peaks);
             block_1_length(neuron_num) = block_1_mouse(ii, 2)-block_1_mouse(ii, 1);
-            block_1_peaks_per_s_mouse{ii, iter}(dd) = block_1_peaks_sum_mouse{ii, iter}(dd)/block_1_length(neuron_num);
-            block_1_ca_mouse{ii, iter}(dd,:) = block_1_ca;
+            block_1_peaks_per_s_mouse{ii}(dd) = block_1_peaks_sum_mouse{ii}(dd)/block_1_length(neuron_num);
+            block_1_ca_mouse{ii}(dd,:) = block_1_ca;
             block_2_ca = ca(dd, time_array > block_2_mouse(ii, 1) & time_array < block_2_mouse(ii, 2));
             [peaks, peak_locs] = findpeaks(block_2_ca, 'MinPeakDistance',4);
             block_2_peaks_sum(neuron_num) = sum(peaks);
-            block_2_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
+            block_2_peaks_sum_mouse{ii}(dd) = sum(peaks);
             block_2_length(neuron_num) = block_2_mouse(ii, 2)-block_2_mouse(ii, 1);
-            block_2_peaks_per_s_mouse{ii, iter}(dd) = block_2_peaks_sum_mouse{ii, iter}(dd)/block_2_length(neuron_num);
-            block_2_ca_mouse{ii, iter}(dd,:) = block_2_ca;
+            block_2_peaks_per_s_mouse{ii}(dd) = block_2_peaks_sum_mouse{ii}(dd)/block_2_length(neuron_num);
+            block_2_ca_mouse{ii}(dd,:) = block_2_ca;
             block_3_ca = ca(dd, time_array > block_3_mouse(ii, 1) & time_array < block_3_mouse(ii, 2));
             [peaks, peak_locs] = findpeaks(block_3_ca, 'MinPeakDistance',4);
             block_3_peaks_sum(neuron_num) = sum(peaks);
-            block_3_peaks_sum_mouse{ii, iter}(dd) = sum(peaks);
+            block_3_peaks_sum_mouse{ii}(dd) = sum(peaks);
             block_3_length(neuron_num) = block_3_mouse(ii, 2)-block_3_mouse(ii, 1);
-            block_3_peaks_per_s_mouse{ii, iter}(dd) = block_3_peaks_sum_mouse{ii, iter}(dd)/block_3_length(neuron_num);
-            block_3_ca_mouse{ii, iter}(dd,:) = block_3_ca;
+            block_3_peaks_per_s_mouse{ii}(dd) = block_3_peaks_sum_mouse{ii}(dd)/block_3_length(neuron_num);
+            block_3_ca_mouse{ii}(dd,:) = block_3_ca;
         end
     end
 end
@@ -76,29 +76,29 @@ end
 
 %%
 % Assume block_2_ca_mouse{1, 2} is a 112x5212 double array
-data = block_2_ca_mouse{1, 2};
-
-% Initialize a cell array to store correlation matrices for each column
-correlation_results = cell(1, size(data, 2));
-
-% Loop over each column
-for col = 1:size(data, 2)
-    % Extract the current column
-    column_data = data(:, col);
-    
-    % Compute the correlation matrix for the current column
-    % Since the column data is a single vector, corr(column_data) will return NaN
-    % Therefore, we need to compute the correlation for each pair manually
-    correlation_matrix = zeros(size(column_data, 1));
-    for i = 1:size(column_data, 1)
-        for j = 1:size(column_data, 1)
-            correlation_matrix(i, j) = corr(column_data(i), column_data(j));
-        end
-    end
-    
-    % Store the correlation matrix
-    correlation_results{col} = correlation_matrix;
-end
+% data = block_2_ca_mouse{1, 2};
+% 
+% % Initialize a cell array to store correlation matrices for each column
+% correlation_results = cell(1, size(data, 2));
+% 
+% % Loop over each column
+% for col = 1:size(data, 2)
+%     % Extract the current column
+%     column_data = data(:, col);
+% 
+%     % Compute the correlation matrix for the current column
+%     % Since the column data is a single vector, corr(column_data) will return NaN
+%     % Therefore, we need to compute the correlation for each pair manually
+%     correlation_matrix = zeros(size(column_data, 1));
+%     for i = 1:size(column_data, 1)
+%         for j = 1:size(column_data, 1)
+%             correlation_matrix(i, j) = corr(column_data(i), column_data(j));
+%         end
+%     end
+% 
+%     % Store the correlation matrix
+%     correlation_results{col} = correlation_matrix;
+% end
 
 % Now correlation_results contains the correlation matrix for each column
 

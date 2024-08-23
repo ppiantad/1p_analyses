@@ -4,9 +4,9 @@
 % also you should first run block_wise_changes_v1.m to get the blocktimes
 
 
-neuronTypes = respClass_all_array_mouse{1, 1};
+neuronTypes = respClass_all_array_mouse{1, 3};
 neuralActivity = final.BLA_Insc_24.RDT_D1.CNMFe_data.C_raw;
-
+BehavData = final.BLA_Insc_24.RDT_D1.uv.BehavData;
 
 
 %%
@@ -30,6 +30,7 @@ end
 
 %%
 windowSize = 100; % Number of time points in the window
+uniqueTypes = unique(neuronTypes);
 for t = 1:(size(neuralActivity, 2) - windowSize + 1)
     for i = 1:length(uniqueTypes)
         typeIdx = (neuronTypes == uniqueTypes(i));
@@ -120,9 +121,16 @@ for ff = 1:size(respClass_all_array_mouse{1, 3}, 2)
 end
 
 
+
+
+block_1_data_for_consumption_neurons = block_1_ca_mouse{1, 1}(respClass_all_array_mouse{1, 3} == 1, :);
+
+num_samples = size(block_1_data_for_consumption_neurons, 2)
+% sampling_frequency = (final.(select_mouse).(first_session).choiceTime.uv.dt)*100;
+sampling_frequency = (final.BLA_Insc_24.RDT_D1.uv.dt)*100;
+% Create a time array
 time_array = (0:(num_samples-1)) / sampling_frequency;
 
-block_1_data_for_consumption_neurons = block_1_ca_mouse{1, 11}(respClass_all_array_mouse{1, 3} == 1, :);
 
 windowSize = 100; % Number of time points in the window
 for t = 1:size(block_1_data_for_consumption_neurons, 2)
@@ -143,3 +151,104 @@ xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
 xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
 xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
 xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
+
+%%
+
+PV_consumption_all_mouse = [];
+for ff = 1:size(zall_mouse{1, 3}, 2)
+    for cc = 1:size(zall_mouse{1,3}{1, ff}, 1)
+        PV_consumption_all_mouse(cc, ff) = zall_mouse{1,3}{1, ff}(cc, 91);
+
+    end
+
+end
+
+
+PV_consumption_all_mouse_just_consumption = PV_consumption_all_mouse(:, respClass_all_array_mouse{1, 3} == 1); 
+PV_consumption_all_mouse_just_consumption = [PV_consumption_all_mouse_just_consumption PV_consumption_all_mouse(:, respClass_all_array_mouse{1, 3} ~= 1)];
+mean_PV_consumption_all_mouse = mean(PV_consumption_all_mouse)';
+hold on;
+figure; imagesc(1:size(PV_consumption_all_mouse_just_consumption, 1), [], PV_consumption_all_mouse_just_consumption')
+colormap gray;
+colorbar;
+clim([0 2]);
+hold off;
+
+
+
+
+ca = final.BLA_Insc_24.(session_to_analyze).CNMFe_data.(ca_data_type);
+ca_zscored = zscore(ca, [], 2);
+time_array = final.BLA_Insc_24.(session_to_analyze).time;
+
+for t = 1:size(ca_zscored, 2)
+    % for i = 1:length(uniqueTypes)
+        % typeIdx = (neuronTypes == uniqueTypes(i));
+        % use specific subset of neurons
+        activitySubset = ca_zscored(:, t);
+        % uncomment if you want to use all neurons
+        %activitySubset = neuralActivity(typeIdx, t:(t + windowSize - 1));
+        similarityMatrix = corrcoef(activitySubset, mean_PV_consumption_all_mouse);
+        similarityOverTime(t) = similarityMatrix(2);
+    % end
+end
+
+figure; plot(time_array(1:size(similarityOverTime, 2)), similarityOverTime)
+xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
+xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
+xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
+xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
+xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
+
+%%
+PV_prechoice_all_mouse = [];
+for ff = 1:size(zall_mouse{1, 1}, 2)
+    for cc = 1:size(zall_mouse{1,1}{1, ff}, 1)
+        PV_prechoice_all_mouse(cc, ff) = zall_mouse{1,1}{1, ff}(cc, 71);
+
+    end
+
+end
+
+
+PV_prechoice_all_mouse_just_prechoice = PV_prechoice_all_mouse(:, respClass_all_array_mouse{1, 1} == 1); 
+PV_prechoice_all_mouse_just_prechoice = [PV_prechoice_all_mouse_just_prechoice PV_prechoice_all_mouse(:, respClass_all_array_mouse{1, 1} ~= 1)];
+mean_PV_prechoice_all_mouse = mean(PV_prechoice_all_mouse)';
+hold on;
+figure; imagesc(1:size(PV_prechoice_all_mouse_just_prechoice, 1), [], PV_prechoice_all_mouse_just_prechoice')
+colormap gray;
+colorbar;
+clim([0 2]);
+hold off;
+
+
+
+
+ca = final.BLA_Insc_24.(session_to_analyze).CNMFe_data.(ca_data_type);
+ca_zscored = zscore(ca, [], 2);
+time_array = final.BLA_Insc_24.(session_to_analyze).time;
+
+for t = 1:size(ca_zscored, 2)
+    % for i = 1:length(uniqueTypes)
+        % typeIdx = (neuronTypes == uniqueTypes(i));
+        % use specific subset of neurons
+        activitySubset = ca_zscored(:, t);
+        % uncomment if you want to use all neurons
+        %activitySubset = neuralActivity(typeIdx, t:(t + windowSize - 1));
+        similarityMatrix = corrcoef(activitySubset, mean_PV_prechoice_all_mouse);
+        similarityOverTime(t) = similarityMatrix(2);
+    % end
+end
+
+figure; plot(time_array(1:size(similarityOverTime, 2)), similarityOverTime)
+xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
+xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
+xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
+xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
+xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
+
+
+b1_prechoice_corr = mean(similarityOverTime(1, time_array > block_1_mouse(1, 1) & time_array <= block_1_mouse(1, 2)));
+b2_prechoice_corr = mean(similarityOverTime(1, time_array > block_2_mouse(1, 1) & time_array <= block_2_mouse(1, 2)));
+b3_prechoice_corr = mean(similarityOverTime(1, time_array > block_3_mouse(1, 1) & time_array <= block_3_mouse(1, 2)));
+
