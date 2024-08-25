@@ -165,6 +165,56 @@ yline(0)
 fontsize(18, 'points')
 hold off;
 
+%%
+if size(respClass_all_array, 2) == 10
+    comparison_arrays = [1 2 3; 8 9 10]
+elseif size(respClass_all_array, 2) == 6
+    comparison_arrays = [1 2 3; 4 5 6]
+end
+
+
+
+arrays_to_examine = [1 8];
+
+inhib_or_excite = 1;
+
+event_for_figures = 1; 
+
+
+
+% prechoice_block_1 = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+prechoice_block_1 = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
+prechoice_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
+
+% postchoice_reward_block_1 = respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+postchoice_reward_block_1 = respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
+postchoice_reward_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
+
+% collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite;
+collect_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite;
+
+% shk_neurons = respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} == inhib_or_excite;
+shk_neurons = 0;
+
+rest_of_neurons = neuron_num - [sum(prechoice_block_1)+sum(postchoice_reward_block_1)+sum(collect_block_1)+sum(shk_neurons)];
+figure; pie([sum(prechoice_block_1), sum(postchoice_reward_block_1), sum(collect_block_1), sum(shk_neurons), rest_of_neurons])
+
+block_1_pre_and_post = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
+sum(block_1_pre_and_post)
+block_1_post_and_consumption = respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite;
+sum(block_1_post_and_consumption)
+block_1_pre_and_consumption = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite;
+sum(block_1_pre_and_consumption)
+
+
+block_2_and_3_pre_and_post = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
+sum(block_2_and_3_pre_and_post)
+block_2_and_3_post_and_consumption = respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite;
+sum(block_2_and_3_post_and_consumption)
+block_2_and_3_pre_and_consumption = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite;
+sum(block_2_and_3_pre_and_consumption)
+
 
 %% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
 % this outputs a ever so slightly wonky diagram. a few nodes that do not
@@ -177,13 +227,244 @@ post_choice_active_ind = find(respClass_all_array{1,2} == 1);
 setListData = {pre_choice_active_ind, consum_active_ind, post_choice_active_ind};
 setLabels = ["Pre-choice excited", "Consumption excited", "Post-choice excited"];
 
-h = vennEulerDiagram(setListData, setLabels, 'drawProportional', false);
+h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
 
 h.ShowIntersectionCounts = true;
 h.ShowIntersectionAreas = true;
 % h.SetLabels = [];
 
+
 %%
+%These data can be used to plot the median or mean choice
+% time on a PCA graph, for example
+
+behav_tbl_iter_single = behav_tbl_iter(1);
+
+% Initialize the concatenated table
+concatenatedTable = table();
+
+% Iterate through the 3x1 cell array
+for i = 1:numel(behav_tbl_iter_single)
+    % Assuming each cell contains a 12x1 cell array of tables
+    twelveByOneCellArray = behav_tbl_iter_single{i};
+    
+    % Initialize a temporary table to store the concatenated tables for this cell
+    tempTable = table();
+    
+    % Iterate through the 12x1 cell array
+    for j = 1:numel(twelveByOneCellArray)
+        % Assuming each cell in the 12x1 cell array contains a table
+        currentTable = twelveByOneCellArray{j};
+        
+        % Concatenate the current table to the temporary table vertically
+        tempTable = vertcat(tempTable, currentTable);
+    end
+    
+    % Concatenate the temporary table to the overall concatenated table vertically
+    concatenatedTable = vertcat(concatenatedTable, tempTable);
+end
+
+median_choice_time_block_1 = median(concatenatedTable.choiceTime(concatenatedTable.Block == 1) - concatenatedTable.stTime(concatenatedTable.Block == 1));
+median_choice_time_block_2 = median(concatenatedTable.choiceTime(concatenatedTable.Block == 2) - concatenatedTable.stTime(concatenatedTable.Block == 2));
+median_choice_time_block_3 = median(concatenatedTable.choiceTime(concatenatedTable.Block == 3) - concatenatedTable.stTime(concatenatedTable.Block == 3));
+
+median_collect_time_block_1 = median(concatenatedTable.collectionTime(concatenatedTable.Block == 1) - concatenatedTable.stTime(concatenatedTable.Block == 1));
+median_collect_time_block_2 = median(concatenatedTable.collectionTime(concatenatedTable.Block == 2) - concatenatedTable.stTime(concatenatedTable.Block == 2));
+median_collect_time_block_3 = median(concatenatedTable.collectionTime(concatenatedTable.Block == 3) - concatenatedTable.stTime(concatenatedTable.Block == 3));
+
+
+
+
+
+median_start_time_from_choice = median(concatenatedTable.stTime - concatenatedTable.choiceTime);
+median_collect_time_from_choice = median(concatenatedTable.collectionTime - concatenatedTable.choiceTime);
+
+
+%%
+
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-8 8]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8]);
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(prechoice_block_1==1, :)), nanmean(neuron_sem_array{1, 1}(prechoice_block_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(postchoice_reward_block_1==1, :)), nanmean(neuron_sem_array{1, 1}(postchoice_reward_block_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(collect_block_1==1, :)), nanmean(neuron_sem_array{1, 1}(collect_block_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+ylim([-0.8 0.8]);
+hold off
+
+
+%% create correlation matrix heatmap with exclusively active cells
+test = [];
+test = [neuron_mean_array{1, 1}(prechoice_block_1 == 1, :)];
+% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1, :)];
+test = [test; neuron_mean_array{1, 1}(postchoice_reward_block_1 == 1, :)];
+test = [test; neuron_mean_array{1, 1}(collect_block_1 == 1,:)];
+test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1,3}~=1, :)];
+
+pre_choice_index = [1:sum(prechoice_block_1)];
+post_choice_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(postchoice_reward_block_1)];
+consumption_index = [post_choice_index(end)+1:post_choice_index(end)+sum(collect_block_1)];
+neutral_index = [consumption_index(end)+1:consumption_index(end)+sum(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1)];
+
+
+data = test;
+
+alpha = 0.0001;
+
+% Initialize matrices to store correlation coefficients and p-values
+correlation_matrix = zeros(size(data, 1));
+p_value_matrix = zeros(size(data, 1));
+
+% Calculate correlation coefficients and p-values between rows
+for i = 1:size(data, 1)
+    for j = 1:size(data, 1)
+        [corr_coeff, p_value] = corrcoef(data(i, :)', data(j, :)');
+        correlation_matrix(i, j) = corr_coeff(1, 2); % Store correlation coefficient
+        p_value_matrix(i, j) = p_value(1, 2); % Store p-value
+    end
+end
+
+% Plot the correlation matrix
+figure;
+imagesc(correlation_matrix);
+
+axis square; % Make the plot square for better visualization
+% title('Correlation Matrix');
+% xlabel('Neuron Number');
+% ylabel('Neuron Number');
+ylim([1  size(test, 1)])
+% Show row and column indices on the plot
+xticks([1  size(test, 1)]);
+yticks([1  size(test, 1)]);
+
+% If you want to customize the color map, you can use colormap function
+% For example, using a blue-white-red colormap:
+colormap(bluewhitered);
+
+% If you want to limit the color scale to the range [0, 1]
+caxis([-1 1]); % Assuming correlations range from -1 to 1
+% Add a separate axes for the colorbar to associate it only with the upper tile
+c = colorbar('eastoutside');
+set(c, 'YTick', clim); % 
+% % Display p-values as text on the plot
+% for i = 1:size(data, 1)
+%     for j = 1:size(data, 1)
+%         text(j, i, sprintf('p = %.4f', p_value_matrix(i, j)), ...
+%             'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
+%     end
+% end
+
+
+%%
+
+% edit these with whichever indices you want. if you want to do across
+% neuron types, put one in "first" and the other in "second"
+data_to_use_first = pre_choice_index; % 
+data_to_use_second = pre_choice_index;
+
+prechoice_p_value_matrix = p_value_matrix(data_to_use_first, data_to_use_second);
+prechoice_correl_matrix = correlation_matrix(data_to_use_first, data_to_use_second);
+
+n = size(pre_choice_index, 2); % Total number of neurons
+k = 2;   % Number of neurons chosen for pairwise combinations
+
+num_combinations = nchoosek(n, k);
+disp(['Number of distinct pairwise combinations: ', num2str(num_combinations)]);
+
+
+% Assuming action_correl_matrix and action_p_value_matrix are your matrices
+
+% Initialize counters
+prechoice_positive_count = 0;
+prechoice_negative_count = 0;
+prechoice_no_correlation_count = 0;
+
+% Get the size of the correlation matrix
+matrix_size = size(prechoice_correl_matrix, 1);
+uu = 1;
+% Loop over the upper triangular part of the correlation matrix
+for i = 1:matrix_size
+    for j = i+1:matrix_size % Start from i+1 to exclude the diagonal
+        % get total pairwise correlations between all possible combos of
+        % neurons
+        prechoice_ensemble_corr_overall(uu) = prechoice_correl_matrix(i, j);
+        uu = uu+1;
+        % Check if p-value is less than 0.01
+        if prechoice_p_value_matrix(i, j) < alpha
+            if prechoice_correl_matrix(i, j) > 0
+                prechoice_positive_count = prechoice_positive_count + 1;
+            elseif prechoice_correl_matrix(i, j) < 0
+                prechoice_negative_count = prechoice_negative_count + 1;
+            end
+        else
+            prechoice_no_correlation_count = prechoice_no_correlation_count + 1;
+        end
+    end
+end
+
+prechoice_comparisons_possible = [prechoice_positive_count + prechoice_negative_count + prechoice_no_correlation_count];
+
+
+disp(['Number of positive correlations: ', num2str(prechoice_positive_count)]);
+disp(['Number of negative correlations: ', num2str(prechoice_negative_count)]);
+disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(prechoice_no_correlation_count)]);
+
+% Assuming you have positive_count, negative_count, and no_correlation_count variables
+
+% Define data for the stacked bar plot
+prechoice_data = [(prechoice_positive_count/prechoice_comparisons_possible)*100, (prechoice_negative_count/prechoice_comparisons_possible)*100, (prechoice_no_correlation_count/prechoice_comparisons_possible)*100];
+figure;
+% Define labels for the bars
+labels = {'Positive Correlation', 'Negative Correlation', 'No Correlation'};
+
+% Create the stacked bar plot
+bar(1, prechoice_data, 'stacked');
+
+% Add labels and title
+xlabel('Counts');
+ylabel('Correlation Type');
+title('Correlation Counts');
+
+% Add legend
+legend(labels);
+
+% Adjust x-axis limits
+xlim([0.5, 1.5]); % since we only have one set of data, we set the limits to center the bars
+
+% Adjust y-axis limits if needed
+% ylim([0, max(data) + 10]); % adjust ylim if needed for better visualization
+
+% Optionally, you can add data labels on each bar
+% text(1:length(data), data, num2str(data'), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+
+% Optionally, you can rotate x-axis labels if needed
+% xticklabels(labels);
+
+% Optionally, you can change bar colors
+% colormap([0.8 0.2 0.2; 0.2 0.8 0.2; 0.2 0.2 0.8]); % customize colors as needed
+
+
+% uu = 1
+% for i = 1:matrix_size
+%     for j = i+1:matrix_size % Start from i+1 to exclude the diagonal
+%         % Check if p-value is less than 0.01
+%         action_ensemble_corr_overall(uu) = action_correl_matrix(i, j);
+%         uu = uu+1;
+%     end
+% end
+
 
 %% use these data for mouse x mouse, which is likely better
 % load a RDT dataset with the following variables filtered (in order):
@@ -283,39 +564,7 @@ end
 
 %% work in progress to do some correlations w/ block 1 activity.
 
-% prechoice_block_1 = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
-prechoice_block_1 = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
-prechoice_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
-
-% postchoice_reward_block_1 = respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
-postchoice_reward_block_1 = respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
-postchoice_reward_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
-
-% collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
-collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite;
-collect_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite;
-
-% shk_neurons = respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} == inhib_or_excite;
-shk_neurons = 0;
-
-rest_of_neurons = neuron_num - [sum(prechoice_block_1)+sum(postchoice_reward_block_1)+sum(collect_block_1)+sum(shk_neurons)];
-figure; pie([sum(prechoice_block_1), sum(postchoice_reward_block_1), sum(collect_block_1), sum(shk_neurons), rest_of_neurons])
-
-block_1_pre_and_post = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
-sum(block_1_pre_and_post)
-block_1_post_and_consumption = respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite;
-sum(block_1_post_and_consumption)
-block_1_pre_and_consumption = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite;
-sum(block_1_pre_and_consumption)
-
-
-block_2_and_3_pre_and_post = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
-sum(block_2_and_3_pre_and_post)
-block_2_and_3_post_and_consumption = respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite;
-sum(block_2_and_3_post_and_consumption)
-block_2_and_3_pre_and_consumption = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite;
-sum(block_2_and_3_pre_and_consumption)
-
+%%
 
 % Assuming the following variables are defined:
 % meanZallMouse: 14x1 cell array where each cell contains another cell array with mean values
@@ -350,6 +599,8 @@ for i = 1:length(meanZallMouse)
         if length(trialChoiceTimes) == length(meanValues)
             % Compute the correlation
             correlationCoeff = corr(meanValues, trialChoiceTimes(:));
+        elseif length(trialChoiceTimes) < length(meanValues)
+            correlationCoeff = corr(meanValues(1:end-1), trialChoiceTimes(:));
         else
             % If lengths do not match, handle the mismatch (e.g., set correlation to NaN)
             correlationCoeff = NaN;
@@ -404,7 +655,7 @@ hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
 only_shk_responsive_corrs = allCorrelations(prechoice_block_1==1);
-not_shk_responsive_corrs = allCorrelations(prechoice_block_1~=3);
+not_shk_responsive_corrs = allCorrelations(prechoice_block_1~=1);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
 figure;
