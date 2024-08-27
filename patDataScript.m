@@ -7,17 +7,17 @@ uv.dt = 0.1; %what is your frame rate (check neuron.Fs to be sure) 0.2 0.1
 uv.behav = 'choiceTime'; %which behavior/timestamp to look at choiceTime stTime
 
 
-load('BLA-Insc-9_Session-20211025-100456_bla-insc-9-RM-D12.CNMF_final.mat');
-[BehavData,ABETfile,Descriptives, block_end, largeRewSide, smallRewSide]=ABET2TableFn_Chamber_A_v6('BLA-Insc-9 10252021 ABET.csv',[]);
-gpio_tbl = readtable('Session-20211025-100456_bla-insc-9-RM-D12_GPIO.csv');
+load('BLA-Insc-6_2021-06-03_RDT_D2.CNMF_final.mat');
+[BehavData,ABETfile,Descriptives, block_end, largeRewSide, smallRewSide, forced_trial_start, free_trial_start]=ABET2TableFn_Chamber_A_v6('BA-INSC-6 06032021 ABET.csv',[]);
+gpio_tbl = readtable('BLA-Insc-6_2021-06-03_RDT_D2_GPIO.csv');
 
-SLEAP_data = readtable('BLA-Insc-9_RM D12_body_sleap_data.csv');
+SLEAP_data = readtable('BLA-INSC-6_RDT D2_body_sleap_data.csv');
 %EDIT FOR EACH MOUSE AS NECESSARY
 SLEAP_time_range_adjustment = []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; -1.23;
 
-boris_file = []; %'BLA-Insc-39_RDT_D1_2023-05-11T14_32_33.avi. BORIS.csv'; %'BLA-Insc-27_RDT_D1.csv';
+boris_file = 'BLA-INSC-6_RDT_D2_2021-06-03T12_41_25 BORIS.csv'; %'BLA-Insc-39_RDT_D1_2023-05-11T14_32_33.avi. BORIS.csv'; %'BLA-Insc-27_RDT_D1.csv';
 
-[BehavData, boris_Extract_tbl] = boris_to_table(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment);
+[BehavData, boris_Extract_tbl] = boris_to_table(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment, forced_trial_start, free_trial_start);
 
 
 
@@ -84,7 +84,7 @@ BehavData.choTime3 = BehavData.Insc_TTL+BehavData.choTime2;
 
 %filter based on TrialFilter inputs (see TrialFilter.m for full list of
 %possibilities)
-BehavData=TrialFilter(BehavData,'ALL',1); %BehavData=TrialFilter(BehavData,'OMITALL',0, 'BLANK_TOUCH', 0);
+BehavData=TrialFilter(BehavData,'AA',1); %BehavData=TrialFilter(BehavData,'OMITALL',0, 'BLANK_TOUCH', 0);
 
 
 % BehavData_for_SLEAP = BehavData;

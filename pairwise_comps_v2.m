@@ -616,16 +616,16 @@ xlim([0.5, 1.5]); % since we only have one set of data, we set the limits to cen
 % Assuming you have action_data, consumption_data, and action_consumption_data matrices
 
 % Define x-values for each set of bars
-% x = 1:6;
-x = 1:3;
+x = 1:6;
+% x = 1:3;
 % Create a new figure
 figure;
 
 % Plot the stacked bar plots for each dataset
 % bar(x, [action_data; post_choice_data; consumption_data; action_post_choice_data; action_consumption_data; post_choice_consumption_data], 'stacked');
 
-% barh(x, [action_data; post_choice_data; consumption_data; action_post_choice_data; action_consumption_data; post_choice_consumption_data], 'stacked');
-bar(x, [action_data; consumption_data; action_consumption_data], 'stacked');
+barh(x, [action_data; post_choice_data; consumption_data; action_post_choice_data; action_consumption_data; post_choice_consumption_data], 'stacked');
+% bar(x, [action_data; consumption_data; action_consumption_data], 'stacked');
 
 % % Set x-axis tick locations and labels
 % xticks(x);
