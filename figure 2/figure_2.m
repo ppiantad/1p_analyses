@@ -279,6 +279,12 @@ median_collect_time_block_3 = median(concatenatedTable.collectionTime(concatenat
 median_start_time_from_choice = median(concatenatedTable.stTime - concatenatedTable.choiceTime);
 median_collect_time_from_choice = median(concatenatedTable.collectionTime - concatenatedTable.choiceTime);
 
+median_start_time_from_choice_large = median(concatenatedTable.stTime(concatenatedTable.bigSmall == 1.2) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 1.2));
+median_start_time_from_choice_small = median(concatenatedTable.stTime(concatenatedTable.bigSmall == 0.3) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 0.3));
+
+median_collect_time_from_choice_large = median(concatenatedTable.collectionTime(concatenatedTable.bigSmall == 1.2) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 1.2));
+median_collect_time_from_choice_small = median(concatenatedTable.collectionTime(concatenatedTable.bigSmall == 0.3) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 0.3));
+
 
 %%
 
@@ -1481,4 +1487,33 @@ for j = 1:length(meanNestedCellArray)
     % Store the correlation coefficient in the nested cell array
     correlationNestedArray(j) = correlationCoeff;
 end
+
+
+
+
+%%
+
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-8 8]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8]);
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 11}(postchoice_reward_block_1, :)), nanmean(sem_all_array{1, 11} (postchoice_reward_block_1==1, :)), 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(postchoice_reward_block_1==1, :)), nanmean(sem_all_array{1, 12}(postchoice_reward_block_1==1, :)), 'lineProps', {'color', 'k'});
+% hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(collect_block_1==1, :)), nanmean(neuron_sem_array{1, 1}(collect_block_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+xline(median_start_time_from_choice_large, 'g', {'Median', 'start', 'time'})
+xline(median_start_time_from_choice_small, 'g', {'Median', 'start', 'time'})
+xline(median_collect_time_from_choice_large, 'r', {'Median', 'collect', 'latency'})
+xline(median_collect_time_from_choice_small, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+ylim([-0.8 0.8]);
+hold off
 

@@ -45,7 +45,7 @@ clear neuron_mean neuron_sem neuron_num zall_mean zall_array zall_to_BL_array zs
 %% FILTER TO GET UN-SHUFFLED DATA
 iter = iter+1;
 neuron_num = 0;
-for ii = 1:size(fieldnames(final),1)
+for ii = 1:size(animalIDs,1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
@@ -72,7 +72,7 @@ for ii = 1:size(fieldnames(final),1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 1);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
