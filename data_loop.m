@@ -33,7 +33,7 @@ session_to_analyze = 'RDT_D1';
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'choiceTime';
+epoc_to_align = 'collectionTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 animalIDs = (fieldnames(final));
 neuron_num = 0;
@@ -72,7 +72,7 @@ for ii = 1:size(animalIDs,1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1, 'BLOCK', 3);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 0.3, 'BLOCK', 2, 'BLOCK', 3);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');

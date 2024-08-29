@@ -1,8 +1,134 @@
 %% run eventRelatedActivity and then run data_loop to get AA for Block 1 and Block 2. should continue to update this & do a real probe of AAs
+% actually just load the x10 dataset, then run data_loop with AA, 1, Block,
+% 2 and AA, 1, Block, 3
 
 
 
-abort_mean = mean(neuron_mean_array{1, 1}(:, ts1 > -1 & ts1 < 1),  2);
+
+
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+shk_ind = find(respClass_all_array{1,4} == 1);
+% pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
+consum_active_ind = find(respClass_all_array{1,3} == 1);
+consum_active_block_2_3 = find(respClass_all_array{1,10} == 1);
+post_choice_active_ind = find(respClass_all_array{1,2} == 1);
+aa_active_ind = find(respClass_all_array{1,11} == 1);
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {shk_ind, consum_active_ind, aa_active_ind};
+setLabels = ["Shk excited", "Consumption excited", "Approach-Abort excited"];
+
+h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+h.ShowIntersectionCounts = true;
+h.ShowIntersectionAreas = true;
+% h.SetLabels = [];
+
+shk_alone = respClass_all_array{1,4} == 1  & prechoice_block_1 ~=1 & postchoice_reward_block_1 ~= 1 & collect_block_1 ~= 1 & respClass_all_array{1,11} ~= 1;
+%%
+
+% Initialize the binary matrix
+response_matrix = zeros(neuron_num, 3);
+
+% Fill in the matrix
+response_matrix(shk_ind, 1) = 1;           % Column 1 for shk_ind
+response_matrix(consum_active_ind, 2) = 1; % Column 2 for consum_active_ind
+response_matrix(aa_active_ind, 3) = 1;     % Column 3 for aa_active_ind
+
+% Sum across columns to find neurons responding to 0, 1, 2, or 3 stimuli
+response_counts = sum(response_matrix, 2);
+
+% Create a contingency table
+contingency_table = histcounts(response_counts, 0:4);
+
+% Perform the Chi-square test
+[~, p, stats] = chi2gof(response_counts, 'Ctrs', 0:3);
+
+% Display the results
+disp('Chi-square test results:');
+disp(['Chi-square value: ', num2str(stats.chi2stat)]);
+disp(['p-value: ', num2str(p)]);
+
+%%
+% Find overlaps
+shk_aa_overlap = intersect(shk_ind, aa_active_ind);
+shk_consum_overlap = intersect(shk_ind, consum_active_ind);
+
+
+% Count neurons in each overlap category
+N_shk_aa = length(shk_aa_overlap);
+N_shk_consum = length(shk_consum_overlap);
+N_shk_only = length(shk_ind) - N_shk_aa - N_shk_consum;
+
+% Number of neurons not in shk but in aa or consum
+N_aa_only = length(aa_active_ind) - N_shk_aa;
+N_consum_only = length(consum_active_ind) - N_shk_consum;
+
+% Contingency table
+contingency_table = [
+    N_shk_aa, N_aa_only;
+    N_shk_consum, N_consum_only;
+];
+
+% Perform the Chi-square test for independence
+[~, p, stats] = chi2test(contingency_table);
+
+% Display the results
+disp('Chi-square test for independence results:');
+disp(['Chi-square value: ', num2str(stats.chi2stat)]);
+disp(['p-value: ', num2str(p)]);
+
+
+% Overlap counts
+N_shk_aa = length(intersect(shk_ind, aa_active_ind));
+N_shk_consum = length(intersect(shk_ind, consum_active_ind));
+
+% Total counts for each category
+N_shk = length(shk_ind);
+N_aa = length(aa_active_ind);
+N_consum = length(consum_active_ind);
+
+% Contingency table
+contingency_table = [
+    N_shk_aa, N_shk - N_shk_aa;       % shk & aa overlap and shk only
+    N_shk_consum, N_shk - N_shk_consum % shk & consum overlap and shk only
+];
+
+% Perform the Chi-square test for independence
+[~, chi2stat, p] = crosstab(contingency_table(:), [1;1;2;2]);
+
+% Display results
+disp('Chi-square test for independence results:');
+disp(['Chi-square value: ', num2str(chi2stat)]);
+disp(['p-value: ', num2str(p)]);
+
+% Observed values
+observed = contingency_table;
+
+% Expected values assuming independence
+row_totals = sum(contingency_table, 2);
+col_totals = sum(contingency_table, 1);
+total = sum(contingency_table(:));
+
+expected = (row_totals * col_totals) / total;
+
+% Perform Chi-square test
+chi2stat = sum((observed(:) - expected(:)).^2 ./ expected(:));
+p = 1 - chi2cdf(chi2stat, 1); % degrees of freedom = 1
+
+% Display results
+disp('Chi-square test for independence results:');
+disp(['Chi-square value: ', num2str(chi2stat)]);
+disp(['p-value: ', num2str(p)]);
+
+
+%%
+
+
+
+abort_mean = mean(neuron_mean_array{1, 11}(:, ts1 > -1 & ts1 < 1),  2);
 
 % [peak_values, time_of_peak_activity] = max(neuron_mean_array{1, 1}, [], 2);
 [~, sort_indices] = sort(abort_mean);
@@ -92,8 +218,8 @@ set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bo
 xlim([-8 8]);
 % Set X-axis ticks
 set(gca, 'XTick', [-8, 0, 8]);
-shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 2}(respClass_all_array{1, 1}==2, :)), nanmean(sem_all_array{1, 2}(respClass_all_array{1, 1}==2, :)), 'lineProps', {'color', 'r'});
-hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 3}(respClass_all_array{1, 1}==2, :)), nanmean(sem_all_array{1, 3}(respClass_all_array{1, 1}==2, :)), 'lineProps', {'color', 'k'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 13}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 13}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
 
 xline(0);
 xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
