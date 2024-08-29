@@ -1,4 +1,55 @@
 %%
+if size(respClass_all_array, 2) == 10
+    comparison_arrays = [1 2 3; 8 9 10]
+elseif size(respClass_all_array, 2) == 6
+    comparison_arrays = [1 2 3; 4 5 6]
+end
+
+
+
+arrays_to_examine = [1 8];
+
+inhib_or_excite = 1;
+
+event_for_figures = 1; 
+
+
+
+% prechoice_block_1 = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+prechoice_block_1 = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
+prechoice_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
+
+% postchoice_reward_block_1 = respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+postchoice_reward_block_1 = respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
+postchoice_reward_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
+
+% collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite;
+collect_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite;
+
+% shk_neurons = respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} == inhib_or_excite;
+shk_neurons = 0;
+
+rest_of_neurons = neuron_num - [sum(prechoice_block_1)+sum(postchoice_reward_block_1)+sum(collect_block_1)+sum(shk_neurons)];
+figure; pie([sum(prechoice_block_1), sum(postchoice_reward_block_1), sum(collect_block_1), sum(shk_neurons), rest_of_neurons])
+
+block_1_pre_and_post = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
+sum(block_1_pre_and_post)
+block_1_post_and_consumption = respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite;
+sum(block_1_post_and_consumption)
+block_1_pre_and_consumption = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite;
+sum(block_1_pre_and_consumption)
+
+
+block_2_and_3_pre_and_post = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
+sum(block_2_and_3_pre_and_post)
+block_2_and_3_post_and_consumption = respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite;
+sum(block_2_and_3_post_and_consumption)
+block_2_and_3_pre_and_consumption = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite;
+sum(block_2_and_3_pre_and_consumption)
+
+
+%%
 
 
 
@@ -81,7 +132,71 @@ hold off;
 
 
 
+%%
 
+exclusive_shk_activated = respClass_all_array{1,4} == 1 & respClass_all_array{1,1} == 3 &respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 3;
+exclusive_collection_activated = respClass_all_array{1,4} == 3 & respClass_all_array{1,1} == 3 & respClass_all_array{1,2} == 3 & respClass_all_array{1,3} == 1;
+shk_event = respClass_all_array{1,4} == 1;
+post_choice_rew_event = respClass_all_array{1,2} == 1;
+post_choice_both_excited = respClass_all_array{1,2} == 1 & respClass_all_array{1,4} == 1;
+% this is the start of checking if neurons are MORE active than during
+% other events, i.e. if you wanted to check if REW activated neurons are
+% significantly differentially activated by SHK. preliminary poking around
+% seems to suggest that few large reward active neurons have their activity
+% increase in response to SHK
+co_activated_indices = find(post_choice_both_excited(1,:) == 1);
+co_activated_indices_sum = numel(co_activated_indices);
+clear h p ci stats
+for qq = 1:size(co_activated_indices, 2)
+    [h(qq),p(qq),ci{qq},stats{qq}] = ttest(neuron_mean_array{1, 2}(co_activated_indices(qq),sub_window_idx),neuron_mean_array{1, 4}(co_activated_indices(qq),sub_window_idx));
+    mean_diff(qq) = mean(neuron_mean_array{1, 2}(co_activated_indices(qq),sub_window_idx) - mean(neuron_mean_array{1, 4}(co_activated_indices(qq),sub_window_idx)));
+end
+
+sig_increase_shk_from_large = co_activated_indices(p < 0.05 & mean_diff < 0);
+sig_increase_shk_from_large_sum = numel(sig_increase_shk_from_large);
+sig_increase_shk_from_large_ind = zeros(1, size(respClass_all_array{1,4}, 2));
+
+sig_increase_shk_from_large_ind(:, sig_increase_shk_from_large) = 1;
+
+no_sig_increase_shk_from_large = co_activated_indices(p > 0.05);
+no_sig_increase_shk_from_large_sum = numel(no_sig_increase_shk_from_large);
+no_sig_increase_shk_from_large_ind = zeros(1, size(respClass_all_array{1,4}, 2));
+no_sig_increase_shk_from_large_ind(:, no_sig_increase_shk_from_large ) = 1;
+
+shk_activated = respClass_all_array{1,4} == 1 & no_sig_increase_shk_from_large_ind ~= 1
+shk_activated_sum = sum(shk_activated);
+
+figure; plot(ts1, nanmean(neuron_mean_array{1, 4}(shk_activated,:))); hold on; plot(ts1,  nanmean(neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:)));
+
+
+total_modulated = [(sum(post_choice_rew_event)/neuron_num)*100 (sum(shk_event)/neuron_num)*100];
+
+A = total_modulated;
+I = (co_activated_indices_sum/neuron_num)*100;
+K = [A I];
+figure; 
+[H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
+for i = 1:size(K, 2)
+    text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
+end
+
+total_modulated = [(sum(shk_event)/neuron_num)*100 (sum(post_choice_rew_event)/neuron_num)*100];
+A = total_modulated;
+I = (co_activated_indices_sum/neuron_num)*100;
+K = [A I];
+figure; 
+[H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
+for i = 1:size(K, 2)
+    text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
+end
+
+
+for zz = 1:size(respClass_all_array_mouse, 1)
+    exclusive_shk_activated_mouse{zz} = respClass_all_array_mouse{zz,4} == 1 & respClass_all_array_mouse{zz,1} == 3 & respClass_all_array_mouse{zz,2} == 3 & respClass_all_array_mouse{zz,3} == 3;
+    sum_exclusive_shk_activated_mouse(zz) = sum(exclusive_shk_activated_mouse{zz});
+    percent_exclusive_shk_activated_mouse(zz) = sum_exclusive_shk_activated_mouse(zz)/size(exclusive_shk_activated_mouse{zz}, 2);
+    max_activity_exclusive_shk(zz) = max(mean(neuron_mean_mouse{zz, 4}(exclusive_shk_activated_mouse{1, zz}   == 1, :)));
+end
 
 %%
 
@@ -154,3 +269,5 @@ xlabel('Time from Large Rew Choice (s)');
 legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
 ylim([-0.6 1.0]);
 hold off
+
+
