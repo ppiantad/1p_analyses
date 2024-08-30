@@ -84,7 +84,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 0.3, 'BLOCK', 1, 'SHK', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'BLANK_TOUCH', 1, 'BLANK_TOUCH', 2); %'OMITALL', 0, 'BLANK_TOUCH', 0
                     behav_tbl_temp{ii, num_comparison} = BehavData;
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -157,7 +157,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2, 'BLOCK', 1, 'SHK', 0);
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'BLANK_TOUCH', 0, 'BLOCK', 1);
                     behav_tbl_temp{ii, num_comparison} = BehavData;
                     trials = cell2mat(trials);
                     % if exist('full_filter_string', 'var')
@@ -391,18 +391,32 @@ for uu = 1:size(data_for_decoding, 2)
                 model = fitcnb(xTrain, yTrain);
                 yPred = predict(model,xTest);
                 accuracy(i) = sum(yPred == yTest)/numel(yTest);
+                precision(i) = sum(yPred == yTest)/[sum(yPred == yTest) + sum(yPred == 1 & yTest == 0)];
+                recall(i) = sum(yPred == yTest)/[sum(yPred == yTest) + sum(yPred ~= 1 & yTest == 1)];
+                F1_score(i) = [2*precision(i)*recall(i)]/[precision(i) + recall(i)];
             end
             accuracy_by_offset(p) = mean(accuracy);
+            precision_by_offset(p) = mean(precision);
+            recall_by_offset(p) = mean(recall);
+            F1_score_by_offset(p) = mean(F1_score);
         end
 
         % figure; plot(ts1, accuracy_by_offset);
         accuracy_at_loop(:, bb) = accuracy_by_offset;
+        precision_at_loop(:, bb) = precision_by_offset;
+        recall_at_loop(:, bb) = recall_by_offset;
+        F1_score_at_loop(:, bb) = F1_score_by_offset;
     end
     accuracy_per_iteration{iter}(uu) = {accuracy_at_loop};
+    precision_per_iteration{iter}(uu) = {precision_at_loop};
+    recall_per_iteration{iter}(uu) = {recall_at_loop};
+    F1_score_per_iteration{iter}(uu) = {F1_score_at_loop};
+    
+    mean_F1_score_per_iteration{iter}(:, uu) = mean(F1_score_at_loop, 2);
     cross_mouse_accuracy_per_iteration{iter}(:, uu) = mean(accuracy_at_loop, 2);
     sem_accuracy_per_iteration{iter}(:, uu) = std(accuracy_at_loop,[],2)/sqrt(size(accuracy_at_loop, 2));
 
-    clear accuracy_at_loop
+    clear accuracy_at_loop precision_at_loop recall_at_loop
 end
 
 

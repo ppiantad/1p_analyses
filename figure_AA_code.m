@@ -20,108 +20,49 @@ aa_active_ind = find(respClass_all_array{1,11} == 1);
 setListData = {shk_ind, consum_active_ind, aa_active_ind};
 setLabels = ["Shk excited", "Consumption excited", "Approach-Abort excited"];
 
-h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
 
-h.ShowIntersectionCounts = true;
-h.ShowIntersectionAreas = true;
+ve_diagram.ShowIntersectionCounts = true;
+ve_diagram.ShowIntersectionAreas = true;
 % h.SetLabels = [];
 
 shk_alone = respClass_all_array{1,4} == 1  & prechoice_block_1 ~=1 & postchoice_reward_block_1 ~= 1 & collect_block_1 ~= 1 & respClass_all_array{1,11} ~= 1;
-%%
+%% chi-square test of proportions to see if more the proprtion of AA that are also shock cells is greater than consumption that are also shock
+% based on https://www.mathworks.com/matlabcentral/answers/96572-how-can-i-perform-a-chi-square-test-to-determine-how-statistically-different-two-proportions-are-in
+aa_and_shk = respClass_all_array{1,11} == 1 & respClass_all_array{1,4} == 1 & respClass_all_array{1,3} ~= 1;
+aa_and_shk_sum = sum(aa_and_shk)
+aa_not_shk = respClass_all_array{1,11} == 1 & respClass_all_array{1,4} ~= 1 & respClass_all_array{1,3} ~= 1;
+aa_not_shk_sum = sum(aa_not_shk)
 
-% Initialize the binary matrix
-response_matrix = zeros(neuron_num, 3);
+% using block 1 consumption neurons
+consumption_and_shk = respClass_all_array{1,3} == 1 & respClass_all_array{1,4} == 1 & respClass_all_array{1,11} ~= 1;
+consumption_and_shk_sum = sum(consumption_and_shk)
+consumption_not_shk = respClass_all_array{1,3} == 1 & respClass_all_array{1,4} ~= 1 & respClass_all_array{1,11} ~= 1;
+consumption_not_shk_sum = sum(consumption_not_shk)
 
-% Fill in the matrix
-response_matrix(shk_ind, 1) = 1;           % Column 1 for shk_ind
-response_matrix(consum_active_ind, 2) = 1; % Column 2 for consum_active_ind
-response_matrix(aa_active_ind, 3) = 1;     % Column 3 for aa_active_ind
+n1 = aa_and_shk_sum; N1 = aa_and_shk_sum+aa_not_shk_sum;
 
-% Sum across columns to find neurons responding to 0, 1, 2, or 3 stimuli
-response_counts = sum(response_matrix, 2);
+n2 = consumption_and_shk_sum; N2 = consumption_and_shk_sum+consumption_not_shk_sum;
 
-% Create a contingency table
-contingency_table = histcounts(response_counts, 0:4);
+% Pooled estimate of proportion
 
-% Perform the Chi-square test
-[~, p, stats] = chi2gof(response_counts, 'Ctrs', 0:3);
+p0 = (n1+n2) / (N1+N2)
 
-% Display the results
-disp('Chi-square test results:');
-disp(['Chi-square value: ', num2str(stats.chi2stat)]);
-disp(['p-value: ', num2str(p)]);
+% Expected counts under H0 (null hypothesis)
 
-%%
-% Find overlaps
-shk_aa_overlap = intersect(shk_ind, aa_active_ind);
-shk_consum_overlap = intersect(shk_ind, consum_active_ind);
+n10 = N1 * p0;
 
+n20 = N2 * p0;
 
-% Count neurons in each overlap category
-N_shk_aa = length(shk_aa_overlap);
-N_shk_consum = length(shk_consum_overlap);
-N_shk_only = length(shk_ind) - N_shk_aa - N_shk_consum;
+% Chi-square test, by hand
 
-% Number of neurons not in shk but in aa or consum
-N_aa_only = length(aa_active_ind) - N_shk_aa;
-N_consum_only = length(consum_active_ind) - N_shk_consum;
+observed = [n1 N1-n1 n2 N2-n2];
 
-% Contingency table
-contingency_table = [
-    N_shk_aa, N_aa_only;
-    N_shk_consum, N_consum_only;
-];
+expected = [n10 N1-n10 n20 N2-n20];
 
-% Perform the Chi-square test for independence
-[~, p, stats] = chi2test(contingency_table);
+chi2stat = sum((observed-expected).^2 ./ expected)
 
-% Display the results
-disp('Chi-square test for independence results:');
-disp(['Chi-square value: ', num2str(stats.chi2stat)]);
-disp(['p-value: ', num2str(p)]);
-
-
-% Overlap counts
-N_shk_aa = length(intersect(shk_ind, aa_active_ind));
-N_shk_consum = length(intersect(shk_ind, consum_active_ind));
-
-% Total counts for each category
-N_shk = length(shk_ind);
-N_aa = length(aa_active_ind);
-N_consum = length(consum_active_ind);
-
-% Contingency table
-contingency_table = [
-    N_shk_aa, N_shk - N_shk_aa;       % shk & aa overlap and shk only
-    N_shk_consum, N_shk - N_shk_consum % shk & consum overlap and shk only
-];
-
-% Perform the Chi-square test for independence
-[~, chi2stat, p] = crosstab(contingency_table(:), [1;1;2;2]);
-
-% Display results
-disp('Chi-square test for independence results:');
-disp(['Chi-square value: ', num2str(chi2stat)]);
-disp(['p-value: ', num2str(p)]);
-
-% Observed values
-observed = contingency_table;
-
-% Expected values assuming independence
-row_totals = sum(contingency_table, 2);
-col_totals = sum(contingency_table, 1);
-total = sum(contingency_table(:));
-
-expected = (row_totals * col_totals) / total;
-
-% Perform Chi-square test
-chi2stat = sum((observed(:) - expected(:)).^2 ./ expected(:));
-p = 1 - chi2cdf(chi2stat, 1); % degrees of freedom = 1
-
-% Display results
-disp('Chi-square test for independence results:');
-disp(['Chi-square value: ', num2str(chi2stat)]);
-disp(['p-value: ', num2str(p)]);
+p = 1 - chi2cdf(chi2stat,1)
 
 
 %%

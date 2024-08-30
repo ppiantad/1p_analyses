@@ -1,5 +1,5 @@
 %%
-if size(respClass_all_array, 2) == 10
+if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11
     comparison_arrays = [1 2 3; 8 9 10]
 elseif size(respClass_all_array, 2) == 6
     comparison_arrays = [1 2 3; 4 5 6]
