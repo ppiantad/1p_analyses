@@ -107,6 +107,27 @@ remapped_sum(3) = sum(remapped)
 
 vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
 
+
+%%
+lost_prechoice = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 ~= event_for_figures;
+lost_postchoice = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 ~= event_for_figures;
+lost_consumption = collect_block_1 == event_for_figures & collect_blocks_2_and_3 ~= event_for_figures;
+lost_all = lost_prechoice == 1 | lost_postchoice == 1 | lost_consumption == 1; 
+
+
+conserved_prechoice = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
+conserved_postchoice = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
+conserved_consumption = collect_block_1 == event_for_figures & collect_blocks_2_and_3 == event_for_figures;
+
+remapped_prechoice = prechoice_block_1 ~= event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
+remapped_postchoice = postchoice_reward_block_1 ~= event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
+remapped_consumption = collect_block_1 ~= event_for_figures & collect_blocks_2_and_3 == event_for_figures;
+
+
+
+sum(lost_all)
+intersect(lost_prechoice, lost_postchoice)
+
 %% DO NOT USE IF USING CODE ABOVE
 
 collect_all_possible = sum([sum(respClass_all_array{1, arrays_to_examine(1)} ==1), sum(respClass_all_array{1, arrays_to_examine(2)} ==1)])
