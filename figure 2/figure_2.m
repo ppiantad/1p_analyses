@@ -1491,7 +1491,7 @@ end
 
 
 
-%%
+%% USE DATA FROM Pre_RDT_RM (load data with 10 variables), then run data_loop on REW, 1.2 and REW, 0.3
 
 
 figure;
@@ -1504,8 +1504,8 @@ set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bo
 xlim([-8 8]);
 % Set X-axis ticks
 set(gca, 'XTick', [-8, 0, 8]);
-shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 11}(postchoice_reward_block_1, :)), nanmean(sem_all_array{1, 11} (postchoice_reward_block_1==1, :)), 'lineProps', {'color', 'r'});
-hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(postchoice_reward_block_1==1, :)), nanmean(sem_all_array{1, 12}(postchoice_reward_block_1==1, :)), 'lineProps', {'color', 'k'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 11}(collect_block_1, :)), nanmean(sem_all_array{1, 11} (collect_block_1==1, :)), 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(collect_block_1==1, :)), nanmean(sem_all_array{1, 12}(collect_block_1==1, :)), 'lineProps', {'color', 'k'});
 % hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(collect_block_1==1, :)), nanmean(neuron_sem_array{1, 1}(collect_block_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
 xline(0);
 xline(median_start_time_from_choice_large, 'g', {'Median', 'start', 'time'})

@@ -20,11 +20,13 @@ ca_data_type = "C_raw"; % C % C_raw
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
+% CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
+% (10) for spike rate
 
 use_normalized_time = 0;
 shuffle_confirm = 1; %1 if you want shuffle, 0 if you don't
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 
 if strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39'};
@@ -84,7 +86,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'BLANK_TOUCH', 1, 'BLANK_TOUCH', 2); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0
                     behav_tbl_temp{ii, num_comparison} = BehavData;
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -157,7 +159,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'BLANK_TOUCH', 0, 'BLOCK', 1);
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 0.3);
                     behav_tbl_temp{ii, num_comparison} = BehavData;
                     trials = cell2mat(trials);
                     % if exist('full_filter_string', 'var')

@@ -19,7 +19,7 @@ aa_active_ind = find(respClass_all_array{1,11} == 1);
 % consum_inhibited_ind = find(all_consum_inhibited == 1);
 setListData = {shk_ind, consum_active_ind, aa_active_ind};
 setLabels = ["Shk excited", "Consumption excited", "Approach-Abort excited"];
-
+figure;
 ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
 
 ve_diagram.ShowIntersectionCounts = true;
@@ -40,9 +40,19 @@ consumption_and_shk_sum = sum(consumption_and_shk)
 consumption_not_shk = respClass_all_array{1,3} == 1 & respClass_all_array{1,4} ~= 1 & respClass_all_array{1,11} ~= 1;
 consumption_not_shk_sum = sum(consumption_not_shk)
 
+
+postchoice_and_shk = respClass_all_array{1,2} == 1 & respClass_all_array{1,4} == 1 & respClass_all_array{1,11} ~= 1;
+postchoice_and_shk_sum = sum(postchoice_and_shk)
+postchoice_not_shk = respClass_all_array{1,2} == 1 & respClass_all_array{1,4} ~= 1 & respClass_all_array{1,11} ~= 1;
+postchoice_not_shk_sum = sum(postchoice_not_shk)
+
+
+
 n1 = aa_and_shk_sum; N1 = aa_and_shk_sum+aa_not_shk_sum;
 
 n2 = consumption_and_shk_sum; N2 = consumption_and_shk_sum+consumption_not_shk_sum;
+
+% n2 = postchoice_and_shk_sum; N2 = postchoice_and_shk_sum+postchoice_not_shk_sum;
 
 % Pooled estimate of proportion
 
@@ -73,7 +83,7 @@ abort_mean = mean(neuron_mean_array{1, 11}(:, ts1 > -1 & ts1 < 1),  2);
 
 % [peak_values, time_of_peak_activity] = max(neuron_mean_array{1, 1}, [], 2);
 [~, sort_indices] = sort(abort_mean);
-neuron_mean_sorted = neuron_mean_array{1, 1}(sort_indices, :);
+neuron_mean_sorted = neuron_mean_array{1, 11}(sort_indices, :);
 
 
 % Sort the rows of activated_neuron_mean based on peak_times.
@@ -157,8 +167,9 @@ width = 300; % Width of the figure
 height = 600; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 xlim([-8 8]);
+ylim([-0.5 0.5]);
 % Set X-axis ticks
-set(gca, 'XTick', [-8, 0, 8]);
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.5 0 0.5]);
 shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'r'});
 hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 13}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 13}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
 
@@ -167,7 +178,7 @@ xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
 xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
 legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
-ylim([-0.6 1.0]);
+
 hold off
 
 
@@ -207,4 +218,14 @@ for i = 1:size(neuron_mean_array{1,1}, 1)
     end
 end
 
+%%
+
+figure; imagesc(ts1, [], zall_mouse{4, 11}{1, 75})
+figure; imagesc(ts1, [], zall_mouse{4, 4}{1, 75})
+
+figure; imagesc(ts1, [], zall_mouse{8, 11}{1, 7})
+figure; imagesc(ts1, [], zall_mouse{8, 4}{1, 7})
+
+figure; imagesc(ts1, [], zall_mouse{8, 11}{1, 41})
+figure; imagesc(ts1, [], zall_mouse{8, 4}{1, 41})
 
