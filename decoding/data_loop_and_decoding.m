@@ -1,5 +1,7 @@
 iter = 0;
 
+load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.ch/colourmaps.php)
+load('acton.mat')
 
 %%
 num_iterations = 1; 
@@ -222,10 +224,11 @@ for num_iteration = 1:num_iterations
     caTraceTrials_mouse_iterations(1, num_iteration) = {caTraceTrials_mouse};
     zall_mouse_iterations(1, num_iteration) = {zall_mouse};
     behav_tbl_iter(1, num_iteration) = {behav_tbl_temp};
+    
 end
 
 data_for_decoding = caTraceTrials_mouse_iterations;
-
+varargin_array(iter,:) = varargin;
 %% only run this section if you DO NOT WANT TO decode across time!  
 % attempting to focus decoding on particular epoch. this section takes the mean activity in a "relevant_period" (pre-choice, etc) for each neuron to be decoded, plus its shuffle. 
 % The final data structure is the exact same as
