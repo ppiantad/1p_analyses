@@ -12,8 +12,11 @@ if size(respClass_all_array, 2) == 10
     comparison_arrays_full = [1 2 3; 8 9 10]
 elseif size(respClass_all_array, 2) == 6
     comparison_arrays_full = [1 2 3; 4 5 6]
+elseif size(respClass_all_array, 2) == 7
+    comparison_arrays_full = [1 2 3; 5 6 7]
 end
 
+ca_data_type = uv.ca_data_type
 
 %%
 for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
@@ -46,7 +49,8 @@ for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
 
         ca = final.(select_mouse).(first_session).CNMFe_data.(ca_data_type);
         % ca = ca(prechoice_indices_for_PV{aa, select_mouse_index} == 1, :);
-        ca_zscored = zscore(ca, [], 2);
+        % ca_zscored = zscore(ca, [], 2);
+        ca_zscored = normalize(ca, 2);
         time_array = final.(select_mouse).(first_session).time;
         prechoice_similarityOverTime = [];
         for t = 1:size(ca_zscored, 2)
@@ -83,7 +87,8 @@ for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
 
         ca = final.(select_mouse).(session_to_analyze).CNMFe_data.(ca_data_type);
         % ca = ca(postchoice_indices_for_PV{aa, select_mouse_index} == 1, :);
-        ca_zscored = zscore(ca, [], 2);
+        % ca_zscored = zscore(ca, [], 2);
+        ca_zscored = normalize(ca, 2);
         time_array = final.(select_mouse).(first_session).time;
         postchoice_similarityOverTime = [];
         for t = 1:size(ca_zscored, 2)
@@ -118,7 +123,8 @@ for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
 
         ca = final.(select_mouse).(session_to_analyze).CNMFe_data.(ca_data_type);
         % ca = ca(consumption_indices_for_PV{aa, select_mouse_index} == 1, :);
-        ca_zscored = zscore(ca, [], 2);
+        % ca_zscored = zscore(ca, [], 2);
+        ca_zscored = normalize(ca, 2);
         time_array = final.(select_mouse).(first_session).time;
         consumption_similarityOverTime = [];
         for t = 1:size(ca_zscored, 2)
