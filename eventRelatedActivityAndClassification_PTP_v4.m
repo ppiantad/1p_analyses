@@ -47,7 +47,7 @@ uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-uv.ca_data_type = "spike_prob"; % C % C_raw %S
+uv.ca_data_type = "S"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
@@ -55,7 +55,7 @@ uv.ca_data_type = "spike_prob"; % C % C_raw %S
 % (10) for spike rate
 
 session_to_analyze = 'RDT_D1';
-uv.yoke_data = 1; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
+uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
 epoc_to_align = 'collectionTime'; % stTime choiceTime collectionTime
 period_of_interest = 'postchoice';
@@ -197,7 +197,7 @@ for ii = 1:size(fieldnames(final),1)
                 end
             end
         end
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');

@@ -1,8 +1,10 @@
 iter = 0;
 
+load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.ch/colourmaps.php)
+load('acton.mat')
 
 %%
-num_iterations = 1; 
+num_iterations = 5; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 % iter = 0;
 uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
@@ -12,7 +14,7 @@ ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 counts = 0;
 num_comparisons = 2; 
 epoc_to_align = 'choiceTime';
-yoke_data = 1; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
+yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
 
 
@@ -20,8 +22,6 @@ ca_data_type = "C_raw"; % C % C_raw
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
-% CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
-% (10) for spike rate
 
 use_normalized_time = 0;
 shuffle_confirm = 1; %1 if you want shuffle, 0 if you don't
@@ -86,7 +86,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 0.3); %'OMITALL', 0, 'BLANK_TOUCH', 0
                     behav_tbl_temp{ii, num_comparison} = BehavData;
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -128,19 +128,8 @@ for num_iteration = 1:num_iterations
                         [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
 
                         caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-                        % caTraceTrials = sgolayfilt(caTraceTrials, 9, 21);
-
-
-
                         zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-                        
-                        neuron_mean_mouse_unnormalized{ii, num_comparison}(u,: ) = mean(caTraceTrials, 1);
-                        neuron_sem_mouse_unnormalized{ii, num_comparison}(u,: ) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
-                        neuron_mean_mouse{ii, num_comparison}(u,: ) = mean(zall, 1);
-                        neuron_sem_mouse{ii, num_comparison}(u,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
-
                         zall_array{neuron_num} = zall;
-                        zall_array_pseudopop{num_comparisons}(neuron_num) = {zall};
                         zall_mouse{ii, num_comparison}(u) = {zall};
                         caTraceTrials_mouse{ii, num_comparison}(u) = {caTraceTrials};
                         caTraceTrials_pseudopop{num_comparison}(neuron_num) = {caTraceTrials};
@@ -155,50 +144,13 @@ for num_iteration = 1:num_iterations
 
             % disp(['iter = ' string(iter)])
         elseif num_comparison == 2 %num_comparison == 2 || num_comparison == 1 %use this one on the left if you want to do shuffle vs shuffle
-            yoke_data = 1; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
             neuron_num = 0;
             for ii = 1:size(fieldnames(final),1)
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
                     [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 0.3);
-                    behav_tbl_temp{ii, num_comparison} = BehavData;
                     trials = cell2mat(trials);
-                    % if exist('full_filter_string', 'var')
-                    % if yoke_data == 1
-                    %     if 
-                    %     for i = 1:size(full_filter_string, 2)
-                    %         fprintf('%d. %s\n', i, full_filter_string{1, i});
-                    %     end
-                    % 
-                    %     % Prompt the user for input
-                    %     user_selection = input('Which data would you like to match trials to?: ');
-                    % 
-                    %     % Check if the input is valid
-                    %     if user_selection >= 1 && user_selection <= size(full_filter_string, 2)
-                    %         selected_data = full_filter_string{1, user_selection};
-                    %         fprintf('You have selected: %s\n', selected_data);
-                    %     else
-                    %         disp('Invalid selection. Please run the script again and enter a valid number.');
-                    %     end
-                    %     size_to_downsample_to = size(trials_per_mouse{ii, user_selection}, 1);
-                    %     if size(BehavData, 1) > size_to_downsample_to
-                    %         % Randomly select rows from BehavData
-                    %         rand_indices = randperm(size(BehavData, 1), size_to_downsample_to);
-                    %         BehavData = BehavData(rand_indices, :);
-                    %         trials = trials(rand_indices, :);
-                    %         trials = sortrows(trials);
-                    %         % Sort the filtered BehavData by the Trial column
-                    %         BehavData = sortrows(BehavData, 'Trial');
-                    %     else
-                    %         % If the size is not greater, keep BehavData as it is
-                    %         disp('No downsampling needed.');
-                    %     end
-                    % 
-                    % else
-                    % 
-                    % end
-                    % end
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
                     
@@ -219,14 +171,14 @@ for num_iteration = 1:num_iterations
                     % ca = ca(respClass_all_array_mouse_true_neutral{ii, 1} == 1, :);
 
                     % shuffle data for comparison
-                    % [num_cells, num_samples] = size(ca);
-                    % shuffled_data = zeros(num_cells, num_samples); % Preallocate matrix for efficiency
-                    % shift_val = randi(num_samples); % Generate a random shift value for each signal RUAIRI RECOMMENDED KEEPING THE SAME SHIFT VAL, rather than randomizing per neuron. this is because then you keep the overall correlation b/w the neurons, but disrupt the relationship to the event timestamps
-                    % for i = 1:num_cells
-                    %     % shift_val = randi(num_signals); % Generate a random shift value for each signal
-                    %     shuffled_data(i,:) = circshift(ca(i,:), shift_val,2); % Perform the circular shuffle
-                    % end
-                    % ca = shuffled_data;
+                    [num_cells, num_samples] = size(ca);
+                    shuffled_data = zeros(num_cells, num_samples); % Preallocate matrix for efficiency
+                    shift_val = randi(num_samples); % Generate a random shift value for each signal RUAIRI RECOMMENDED KEEPING THE SAME SHIFT VAL, rather than randomizing per neuron. this is because then you keep the overall correlation b/w the neurons, but disrupt the relationship to the event timestamps
+                    for i = 1:num_cells
+                        % shift_val = randi(num_signals); % Generate a random shift value for each signal
+                        shuffled_data(i,:) = circshift(ca(i,:), shift_val,2); % Perform the circular shuffle
+                    end
+                    ca = shuffled_data;
 
                     num_samples = size(ca, 2);
                     sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.dt)*100;
@@ -249,22 +201,12 @@ for num_iteration = 1:num_iterations
                         [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
 
                         caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-                        % caTraceTrials = sgolayfilt(caTraceTrials, 9, 21);
-
                         zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                         zall_array{neuron_num} = zall;
                         zall_mouse{ii, num_comparison}(u) = {zall};
                         caTraceTrials_mouse{ii, num_comparison}(u) = {caTraceTrials};
                         caTraceTrials_pseudopop{num_comparison}(neuron_num) = {caTraceTrials};
-                        zall_array_pseudopop{num_comparisons}(neuron_num) = {zall};
-
                         zall_mean(neuron_num,:) = mean(zall);
-
-                        neuron_mean_mouse_unnormalized{ii, num_comparison}(u,: ) = mean(caTraceTrials, 1);
-                        neuron_sem_mouse_unnormalized{ii, num_comparison}(u,: ) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
-                        neuron_mean_mouse{ii, num_comparison}(u,: ) = mean(zall, 1);
-                        neuron_sem_mouse{ii, num_comparison}(u,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
-
                         trials_per_mouse{ii, num_comparison} = trials;
                         clear zall caTraceTrials zb zsd;
 
@@ -274,22 +216,23 @@ for num_iteration = 1:num_iterations
             clear zall caTraceTrials zb zsd;
             end
         end
-        zall_mean_array(1, num_comparison) = {zall_mean};
     end
+    % from dabbling on some other code, worth keeping in mind for the
+    % future and updating this to zall_mouse if ever decoding two events
+    % directly
     %08/01/2024: trying to use zall_mouse for decoding, because I am
     %worried that direct comparisons b/w events won't work without having
     %the data normalized prior to re-formatting for decoding! 
-    caTraceTrials_mouse_iterations(1, num_iteration) = {zall_mouse};
+    caTraceTrials_mouse_iterations(1, num_iteration) = {caTraceTrials_mouse};
     caTraceTrials_pseudopop_iterations(1, num_iteration) = {caTraceTrials_pseudopop};
-    zall_pseudopop_iterations(1, num_iteration) = {zall_array_pseudopop};
     zall_mouse_iterations(1, num_iteration) = {zall_mouse};
     behav_tbl_iter(1, num_iteration) = {behav_tbl_temp};
-    % zall_mean_array(1, num_comparison) = {zall_mean};
+    
 end
 
 % data_for_decoding = caTraceTrials_mouse_iterations;
-data_for_decoding = zall_pseudopop_iterations;
-
+data_for_decoding = caTraceTrials_pseudopop_iterations; 
+varargin_array(iter,:) = varargin;
 %% only run this section if you DO NOT WANT TO decode across time!  
 % attempting to focus decoding on particular epoch. this section takes the mean activity in a "relevant_period" (pre-choice, etc) for each neuron to be decoded, plus its shuffle. 
 % The final data structure is the exact same as
@@ -338,6 +281,7 @@ iter = iter+1;
 ts1 = 1;
 
 data_for_decoding = caTraceTrials_mouse_iterations_means;
+
 
 
 
@@ -395,36 +339,22 @@ for uu = 1:size(data_for_decoding, 2)
                 yTest = y(cv.test(i), :);
                 % model = TreeBagger(numTrees, xTrain, yTrain, 'Method', 'classification');
                 % model = fitglm(xTrain, yTrain, 'Distribution', 'binomial' , 'Link', 'logit');
-                % model = fitcsvm(xTrain, yTrain);
-                model = fitcnb(xTrain, yTrain);
+                model = fitcsvm(xTrain, yTrain);
+                % model = fitcnb(xTrain, yTrain);
                 yPred = predict(model,xTest);
                 accuracy(i) = sum(yPred == yTest)/numel(yTest);
-                precision(i) = sum(yPred == yTest)/[sum(yPred == yTest) + sum(yPred == 1 & yTest == 0)];
-                recall(i) = sum(yPred == yTest)/[sum(yPred == yTest) + sum(yPred ~= 1 & yTest == 1)];
-                F1_score(i) = [2*precision(i)*recall(i)]/[precision(i) + recall(i)];
             end
             accuracy_by_offset(p) = mean(accuracy);
-            precision_by_offset(p) = mean(precision);
-            recall_by_offset(p) = mean(recall);
-            F1_score_by_offset(p) = mean(F1_score);
         end
 
         % figure; plot(ts1, accuracy_by_offset);
         accuracy_at_loop(:, bb) = accuracy_by_offset;
-        precision_at_loop(:, bb) = precision_by_offset;
-        recall_at_loop(:, bb) = recall_by_offset;
-        F1_score_at_loop(:, bb) = F1_score_by_offset;
     end
     accuracy_per_iteration{iter}(uu) = {accuracy_at_loop};
-    precision_per_iteration{iter}(uu) = {precision_at_loop};
-    recall_per_iteration{iter}(uu) = {recall_at_loop};
-    F1_score_per_iteration{iter}(uu) = {F1_score_at_loop};
-    
-    mean_F1_score_per_iteration{iter}(:, uu) = mean(F1_score_at_loop, 2);
     cross_mouse_accuracy_per_iteration{iter}(:, uu) = mean(accuracy_at_loop, 2);
     sem_accuracy_per_iteration{iter}(:, uu) = std(accuracy_at_loop,[],2)/sqrt(size(accuracy_at_loop, 2));
 
-    clear accuracy_at_loop precision_at_loop recall_at_loop
+    clear accuracy_at_loop
 end
 
 
