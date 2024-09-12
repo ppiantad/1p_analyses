@@ -67,80 +67,86 @@ for num_iteration = 1:num_iterations
         iter = 0;
     end
     % disp(['iter: ' string(iter)]);
-    clear neuron_mean neuron_sem neuron_num zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized
+    clear neuron_mean neuron_sem neuron_num zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized caTraceTrials_mouse
 
     
 
 
     neuron_num = 0;
-    
+    tic
 
     sum_trials_per_iter = 0;
     filter_names_idx = cellfun(@ischar,event_to_analyze);
     filter_strings = string(event_to_analyze(filter_names_idx));
+    
     for num_comparison = 1:num_comparisons
         if num_comparison == 1 %num_comparison == 3 num_comparison == 1 % if you want to force shuffle, swap to num_comparisons 3 (if doing 2 comparisons) and change the shuffle below. prob should make this a little more intuitive in the future
-            neuron_num = 0;
-            % neuron_sem = zeros(1, size(ts1, 2));
-            for ii = 1:size(fieldnames(final),1)
-                currentanimal = char(animalIDs(ii));
-                if isfield(final.(currentanimal), session_to_analyze)
-                    BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 0.3); %'OMITALL', 0, 'BLANK_TOUCH', 0
-                    behav_tbl_temp{ii, num_comparison} = BehavData;
-                    trials = cell2mat(trials);
-                    ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
-                    
-                    % use if you want to check an event without copious
-                    % other filters
-                    % ca = ca(respClass_all_array_mouse{ii, 3} == 1, :);
-                    
-                    % uncomment & edit me if you want to examine a subset
-                    % of neurons! make sure to do in both parts of else /
-                    % elseif statement!!
-                    % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
-                    % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
-                    % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+            if num_iteration <= 1
+                neuron_num = 0;
+                % neuron_sem = zeros(1, size(ts1, 2));
+                for ii = 1:size(fieldnames(final),1)
+                    currentanimal = char(animalIDs(ii));
+                    if isfield(final.(currentanimal), session_to_analyze)
+                        BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
+                        [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                        behav_tbl_temp{ii, num_comparison} = BehavData;
+                        trials = cell2mat(trials);
+                        ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
 
-                    % uncomment below if you want to examine a subset of
-                    % neurons that were not responsive to any of the
-                    % Pre_RDT_RM events
-                    % ca = ca(respClass_all_array_mouse_true_neutral{ii, 1} == 1, :);
+                        % use if you want to check an event without copious
+                        % other filters
+                        % ca = ca(respClass_all_array_mouse{ii, 3} == 1, :);
 
-                    num_samples = size(ca, 2);
-                    sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.dt)*100;
-                    time_array = final.(currentanimal).(session_to_analyze).time;
-                    eTS = BehavData.(epoc_to_align); %get time stamps
+                        % uncomment & edit me if you want to examine a subset
+                        % of neurons! make sure to do in both parts of else /
+                        % elseif statement!!
+                        % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
+                        % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
+                        % ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
 
-                    zb_session = mean(ca,2);
-                    zsd_session = std(ca,[],2);
-                    % caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
+                        % uncomment below if you want to examine a subset of
+                        % neurons that were not responsive to any of the
+                        % Pre_RDT_RM events
+                        % ca = ca(respClass_all_array_mouse_true_neutral{ii, 1} == 1, :);
+
+                        num_samples = size(ca, 2);
+                        sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.dt)*100;
+                        time_array = final.(currentanimal).(session_to_analyze).time;
+                        eTS = BehavData.(epoc_to_align); %get time stamps
+
+                        zb_session = mean(ca,2);
+                        zsd_session = std(ca,[],2);
+                        % caTime = uv.dt:uv.dt:length(ca)*uv.dt; %generate time trace
 
 
-                    %calculate time windows for each event
-                    evtWinSpan = max(uv.evtWin) - min(uv.evtWin);
-                    numMeasurements = round(evtWinSpan/uv.dt); %need to round due to odd frame rate
-                    for u = 1:size(ca,1)
-                        neuron_num = neuron_num+1;
-                        % initialize trial matrices
-                        caTraceTrials = NaN(size(eTS,1),numMeasurements); %
-                        unitTrace = ca(u,:); %get trace
-                        [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
+                        %calculate time windows for each event
+                        evtWinSpan = max(uv.evtWin) - min(uv.evtWin);
+                        numMeasurements = round(evtWinSpan/uv.dt); %need to round due to odd frame rate
+                        for u = 1:size(ca,1)
+                            neuron_num = neuron_num+1;
+                            % initialize trial matrices
+                            caTraceTrials = NaN(size(eTS,1),numMeasurements); %
+                            unitTrace = ca(u,:); %get trace
+                            [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
 
-                        caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-                        zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
-                        zall_array{neuron_num} = zall;
-                        zall_mouse{ii, num_comparison}(u) = {zall};
-                        caTraceTrials_mouse{ii, num_comparison}(u) = {caTraceTrials};
-                        zall_mean(neuron_num,:) = mean(zall);
-                        trials_per_mouse{ii, num_comparison} = trials;
-                        clear zall caTraceTrials zb zsd;
+                            caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                            zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                            zall_array{neuron_num} = zall;
+                            zall_mouse{ii, num_comparison}(u) = {zall};
+                            caTraceTrials_mouse{ii, num_comparison}(u) = {caTraceTrials};
+                            zall_mean(neuron_num,:) = mean(zall);
+                            trials_per_mouse{ii, num_comparison} = trials;
+                            clear zall caTraceTrials zb zsd;
+                        end
+
                     end
-
                 end
+
+            % we don't need to repeatedly zscore etc. the actual data - so
+            % after the first iteration, just re-use that data
+            elseif num_iteration > 1
+                caTraceTrials_mouse(:, num_comparison) = caTraceTrials_mouse_iterations{1, 1}(:, 1);
             end
-
-
             % disp(['iter = ' string(iter)])
         elseif num_comparison == 2 %num_comparison == 2 || num_comparison == 1 %use this one on the left if you want to do shuffle vs shuffle
             neuron_num = 0;
@@ -224,7 +230,7 @@ for num_iteration = 1:num_iterations
     caTraceTrials_mouse_iterations(1, num_iteration) = {caTraceTrials_mouse};
     zall_mouse_iterations(1, num_iteration) = {zall_mouse};
     behav_tbl_iter(1, num_iteration) = {behav_tbl_temp};
-    
+    toc
 end
 
 data_for_decoding = caTraceTrials_mouse_iterations;

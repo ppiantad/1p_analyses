@@ -2,7 +2,9 @@
 
 
 % for now just add accuracy_per_iteration from decoding manually
-ZallMean_for_perm_test = {accuracy_per_iteration{1, 1}{1, 1}', accuracy_per_iteration{1, 2}{1, 1}'};  
+% ZallMean_for_perm_test = {accuracy_per_iteration{1, 1}{1, 1}', accuracy_per_iteration{1, 2}{1, 1}'};  
+
+ZallMean_for_perm_test = {aa_large, aa_small}; 
 
 % bCI_tCI_CI_threshold = 0; % use for things that hover around 0 (dF/F for example)
 bCI_tCI_CI_threshold = 0.5; % use for things like decoding
@@ -253,7 +255,7 @@ for vv = 1:size(pairwise_comps, 1)
             f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'linestyle','-');
             % f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.');
             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
-            text(xlims(1),sig_plot_level_v2(vv), comparison_labels_join(vv),'Color',col_rep(vv+1),'FontSize', 6);
+            % text(xlims(1),sig_plot_level_v2(vv), comparison_labels_join(vv),'Color',col_rep(vv+1),'FontSize', 6);
             
             
             
@@ -347,6 +349,12 @@ end
 
 figure; hold on
 
+width = 300; % Width of the figure
+height = 650; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+% xtickformat('%.2f');
+ytickformat('%.2f');
+
 
 for vv = 1:size(comparison, 2)
 
@@ -384,13 +392,16 @@ for vv = 1:size(comparison, 2)
             text(xlims(1),sig_plot_level_v2(vv), arg_string_other(vv),'Color',col_rep(vv), 'FontSize', 6);
 
     end
-    plot([0 0],ylim,'k:')
-    plot(xlim,[0 0],'k--')
-    title('bootstrapped CI: 95% CI does not include 0 dF/F')
-    ylabel('z-scored dF/F', 'FontSize', 12);
-    xlabel('Time from choice (s)');
+    % plot([0 0],ylim,'k:')
+    % plot(xlim,[0 0],'k')
+    % title('bootstrapped CI: 95% CI does not include 0 dF/F')
+    % ylabel('z-scored dF/F', 'FontSize', 12);
+    % xlabel('Time from choice (s)');
     xlim(xlims);
-    set(gcf, 'position', [10, 10, 400, 800]);
+    ylim([.40 sig_plot_level_v2(1)])
+    xlim([-8 8]);
+    % Set X-axis ticks
+    set(gca, 'XTick', [-8, 0, 8]);
     
 end
 

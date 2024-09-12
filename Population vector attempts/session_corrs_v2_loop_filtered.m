@@ -36,6 +36,10 @@ for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
         for ff = 1:size(zall_mouse{select_mouse_index, comparison_arrays(1, 1)}, 2)
             for cc = 1:size(zall_mouse{select_mouse_index,comparison_arrays(1, 1)}{1, ff}, 1)
                 PV_prechoice_all_mouse(cc, ff) = mean(zall_mouse{select_mouse_index, comparison_arrays(1, 1)}{1, ff}(cc, ts1 >= -4 & ts1 <= 0));
+                if isnan(PV_prechoice_all_mouse(cc, ff))
+                    PV_prechoice_all_mouse(cc, ff) = 0;
+                end
+
             end
         end
 
@@ -72,7 +76,9 @@ for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
         for ff = 1:size(zall_mouse{select_mouse_index, comparison_arrays(1, 2)}, 2)
             for cc = 1:size(zall_mouse{select_mouse_index, comparison_arrays(1, 2)}{1, ff}, 1)
                 PV_postchoice_all_mouse(cc, ff) = mean(zall_mouse{select_mouse_index, comparison_arrays(1, 2)}{1, ff}(cc, ts1 >= 0 & ts1 <= 2));
-
+                if isnan(PV_postchoice_all_mouse(cc, ff))
+                    PV_postchoice_all_mouse(cc, ff) = 0;
+                end
             end
 
         end
@@ -109,7 +115,9 @@ for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
         for ff = 1:size(zall_mouse{select_mouse_index, comparison_arrays(1, 3)}, 2)
             for cc = 1:size(zall_mouse{select_mouse_index, comparison_arrays(1, 3)}{1, ff}, 1)
                 PV_consumption_all_mouse(cc, ff) = mean(zall_mouse{select_mouse_index, comparison_arrays(1, 3)}{1, ff}(cc, ts1 >= 1 & ts1 <= 3));
-
+                if isnan(PV_consumption_all_mouse(cc, ff))
+                    PV_consumption_all_mouse(cc, ff) = 0;
+                end
             end
 
         end

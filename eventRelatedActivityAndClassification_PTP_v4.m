@@ -47,7 +47,7 @@ uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-uv.ca_data_type = "S"; % C % C_raw %S
+uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
@@ -57,12 +57,12 @@ uv.ca_data_type = "S"; % C % C_raw %S
 session_to_analyze = 'RDT_D1';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'collectionTime'; % stTime choiceTime collectionTime
+epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
 period_of_interest = 'postchoice';
 
 if strcmp(epoc_to_align, 'stTime')
     period_of_interest = 'trial_start';
-    uv.evtSigWin.outcome = [-3 0]; %for trial start
+    uv.evtSigWin.outcome = [-1 1]; %for trial start
 elseif strcmp(epoc_to_align, 'choiceTime')
     if strcmp(period_of_interest, 'prechoice')
         uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]
@@ -197,7 +197,7 @@ for ii = 1:size(fieldnames(final),1)
                 end
             end
         end
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');
@@ -412,17 +412,17 @@ for ii = 1:size(fieldnames(final),1)
                             (caTraceTrials(:,evtWinIdx));                   %NaN mean of the fluorescent response across trials, within the time window. this gets the within trial mean.
                         empiricalSEM = nansem...
                             (caTraceTrials(:,:));
-                        otherPeriodWin = nanmean...
-                            (caTraceTrials(:, ~evtWinIdx));
-                        otherEventWin1 = nanmean...
-                            (caTraceTrials(:, other_evtWinIdx1{iter,:}));
-                        otherEventWin2 = nanmean...
-                            (caTraceTrials(:, other_evtWinIdx2{iter,:}));
+                        % otherPeriodWin = nanmean...
+                        %     (caTraceTrials(:, ~evtWinIdx));
+                        % otherEventWin1 = nanmean...
+                        %     (caTraceTrials(:, other_evtWinIdx1{iter,:}));
+                        % otherEventWin2 = nanmean...
+                        %     (caTraceTrials(:, other_evtWinIdx2{iter,:}));
                         empiricalWinAvg = nanmean(empiricalTrialWin);                   %across trial mean
                         empiricalSEMAvg = nanmean(empiricalSEM);                   %across trial mean
-                        otherPeriodWinAvg = nanmean(otherPeriodWin);
-                        otherEventWinAvg1 = nanmean(otherEventWin1);
-                        otherEventWinAvg2 = nanmean(otherEventWin2);
+                        % otherPeriodWinAvg = nanmean(otherPeriodWin);
+                        % otherEventWinAvg1 = nanmean(otherEventWin1);
+                        % otherEventWinAvg2 = nanmean(otherEventWin2);
                     elseif uv.chooseFluoresenceOrRate == 2                              %if user selected to classify the event rates
                         nullDist = nullDistEvtRate;                                     %direct transfer
                         empiricalTrialWin = nanmean...

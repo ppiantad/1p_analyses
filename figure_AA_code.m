@@ -229,3 +229,8 @@ figure; imagesc(ts1, [], zall_mouse{8, 4}{1, 7})
 figure; imagesc(ts1, [], zall_mouse{8, 11}{1, 41})
 figure; imagesc(ts1, [], zall_mouse{8, 4}{1, 41})
 
+
+aa_large = zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :);
+aa_small = zall_mean_all_array{1, 13}(respClass_all_array{1, 11}==1, :);
+aa_large = aa_large(~any(isnan(aa_large), 2), :);
+aa_small = aa_small(~any(isnan(aa_small), 2), :);
