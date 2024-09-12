@@ -1,3 +1,10 @@
+function [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
+% data_array is expected to be a 1x# cell array. each cell should the
+% following orientation:
+% rows = neurons
+% columns = time samples
+
 %% Run access_behav_struct_v# and then run the below scripts (choose which CI or permutation-based approach you want)
 
 
@@ -6,14 +13,18 @@
 
 % ZallMean_for_perm_test = {aa_large, aa_small}; 
 
-ZallMean_for_perm_test = {neuron_mean_array{1, 2}(postchoice_reward_block_1==1, :), neuron_mean_array{1, 9}(postchoice_reward_block_1==1, :)}; 
 
-% bCI_tCI_CI_threshold = 0; % use for things that hover around 0 (dF/F for example)
-bCI_tCI_CI_threshold = 0.5; % use for things like decoding
+
+
+ZallMean_for_perm_test = mean_data_array; 
+ZallSEM_for_perm_test = sem_data_array;
+
+bCI_tCI_CI_threshold = 0; % use for things that hover around 0 (dF/F for example)
+% bCI_tCI_CI_threshold = 0.5; % use for things like decoding
 
 
 %% ERT example
-sig = .05;
+sig = 0.001;
 consec_thresh = 3; % 1017.3Hz sample rate / 3Hz filter %340 PRD used 340 because his data WERE NOT DOWNSAMPLED (e.g., they were 1018 samples per sec) our data are 30 samples per sec or so.
 % this means if his threshold is 1017/340 = ~3, ours should be 30/x = 3,
 % which is 10
@@ -29,10 +40,11 @@ comparison = struct;
 
 for ii = 1:size(ZallMean_for_perm_test, 2)
     comparison(ii).data = ZallMean_for_perm_test{1,ii};
+    comparison(ii).sem_data = ZallSEM_for_perm_test{1,ii};
 %     comparison(ii).mean_Cp = mean(comparison(ii).data,1, 'omitnan'); %
     comparison(ii).mean_Cp = mean(comparison(ii).data,1); %
 %     comparison(ii).sem_Cp = nansem(comparison(ii).data); %
-    comparison(ii).sem_Cp = sem(comparison(ii).data); %
+    comparison(ii).sem_Cp = mean(comparison(ii).sem_data, 1); %
     adjust_labels(ii) = max(comparison(ii).mean_Cp)+2*max(comparison(ii).sem_Cp);
     max_mean(ii) = max(comparison(ii).mean_Cp);
     max_SEM(ii) = max(comparison(ii).sem_Cp);
@@ -44,36 +56,36 @@ sig_plot_level = linspace(max_adjustment+2*max(max_SEM), max_adjustment-max(max_
 
 sig_plot_level_v2 = linspace(max_adjustment+0.5, max_adjustment, 6);
 
-arg_string = string(varargin_array);
+% arg_string = string(varargin_array);
 
-arg_string_combine = join(arg_string, '=');
-
+% arg_string_combine = join(arg_string, '=');
+% 
 %% Get labels for each comparison based on the events that the data are filtered on
 
-
-for ii = 1:size(arg_string, 2)
-    for qq = 1:size(arg_string, 1)
-        if arg_string(qq,ii) == 'BLOCK';
-            arg_string_block(qq,:) = join([arg_string(qq,ii) arg_string(qq, ii+1)], '=');
-        end
-    end
-end
-
-cc = 1;
-
-for ii = 1:size(varargin_array, 2)
-    for qq = 1:size(varargin_array, 1)-1
-        if ~isequal(varargin_array(qq,ii), varargin_array(qq+1,ii))
-            if isstring(varargin_array(qq,ii))
-                arg_string_other = join([arg_string(:,ii) arg_string(:, ii+1)], '=')
-                cc = cc+1;
-            elseif ~isstring(varargin_array(qq,ii))
-                arg_string_other = join([arg_string(:,ii-1) arg_string(:, ii)], '=')
-                cc = cc+1;
-            end
-        end
-    end
-end
+% 
+% for ii = 1:size(arg_string, 2)
+%     for qq = 1:size(arg_string, 1)
+%         if arg_string(qq,ii) == 'BLOCK';
+%             arg_string_block(qq,:) = join([arg_string(qq,ii) arg_string(qq, ii+1)], '=');
+%         end
+%     end
+% end
+% 
+% cc = 1;
+% 
+% for ii = 1:size(varargin_array, 2)
+%     for qq = 1:size(varargin_array, 1)-1
+%         if ~isequal(varargin_array(qq,ii), varargin_array(qq+1,ii))
+%             if isstring(varargin_array(qq,ii))
+%                 arg_string_other = join([arg_string(:,ii) arg_string(:, ii+1)], '=')
+%                 cc = cc+1;
+%             elseif ~isstring(varargin_array(qq,ii))
+%                 arg_string_other = join([arg_string(:,ii-1) arg_string(:, ii)], '=')
+%                 cc = cc+1;
+%             end
+%         end
+%     end
+% end
 
 %%
 clear ii
@@ -168,31 +180,31 @@ end
 %% Plot permutation test data
 
 % create a label for each comparison to be made
-if size(arg_string_other, 1) > 2
-    if contains(arg_string_other, 'block', 'IgnoreCase', true)
-        for zz = 1:size(arg_string_block, 1)
-            for hh = 1:size(pairwise_comps, 2)
-                comparison_labels(zz, hh) = arg_string_block(contains(arg_string_block, string(pairwise_comps(zz, hh))));
-            end
-        end
-    elseif ~contains(arg_string_other, 'block', 'IgnoreCase', true)
-        for zz = 1:size(arg_string_other, 1)
-            for hh = 1:size(pairwise_comps, 2)-1
-                comparison_labels(hh, zz) = arg_string_other(zz);
-            end
-        end
-    end
-elseif size(arg_string_other,1) <= 2
-    for zz = 1:size(arg_string_other, 1)
-        for hh = 1:size(pairwise_comps, 2)-1
-            comparison_labels(hh, zz) = arg_string_other(zz);
-        end
-    end
-
-end
-% combine the comparisons made above to directly display what is being
-% % compared
-comparison_labels_join = join(comparison_labels, ' vs ');
+% if size(arg_string_other, 1) > 2
+%     if contains(arg_string_other, 'block', 'IgnoreCase', true)
+%         for zz = 1:size(arg_string_block, 1)
+%             for hh = 1:size(pairwise_comps, 2)
+%                 comparison_labels(zz, hh) = arg_string_block(contains(arg_string_block, string(pairwise_comps(zz, hh))));
+%             end
+%         end
+%     elseif ~contains(arg_string_other, 'block', 'IgnoreCase', true)
+%         for zz = 1:size(arg_string_other, 1)
+%             for hh = 1:size(pairwise_comps, 2)-1
+%                 comparison_labels(hh, zz) = arg_string_other(zz);
+%             end
+%         end
+%     end
+% elseif size(arg_string_other,1) <= 2
+%     for zz = 1:size(arg_string_other, 1)
+%         for hh = 1:size(pairwise_comps, 2)-1
+%             comparison_labels(hh, zz) = arg_string_other(zz);
+%         end
+%     end
+% 
+% end
+% % combine the comparisons made above to directly display what is being
+% % % compared
+% comparison_labels_join = join(comparison_labels, ' vs ');
 % 
 % num_trials_sum_string = string(num_trials_sum)';
 % 
@@ -278,7 +290,7 @@ for vv = 1:size(pairwise_comps, 1)
             % f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.');
             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
             
-            text(xlims(1),sig_plot_level_v2(vv),comparison_labels_join(vv),'Color',col_rep(vv+1), 'FontSize', 6);
+            % text(xlims(1),sig_plot_level_v2(vv),comparison_labels_join(vv),'Color',col_rep(vv+1), 'FontSize', 6);
             
     end
 
@@ -295,6 +307,7 @@ end
     % xlim(xlims);
     set(gcf, 'position', [10, 10, 900, 600]);
     fontsize(16, "pixels")
+    title('perm test')
     % set(gcf, 'resize', 'off' );
 
 %% Plot diff bCI
@@ -319,7 +332,7 @@ for vv = 1:size(pairwise_comps, 1)
             f = plot(timeline, diff_bCIexp_sig(vv,:),'Color',col_rep(vv),'linestyle','-');
             % f = plot(timeline, diff_bCIexp_sig(vv,:),'Color',col_rep(vv),'Marker','.');
             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
-            text(xlims(1),sig_plot_level_v2(vv), comparison_labels_join(vv),'Color',col_rep(vv),'FontSize', 6);
+            % text(xlims(1),sig_plot_level_v2(vv), comparison_labels_join(vv),'Color',col_rep(vv),'FontSize', 6);
             
         end
     elseif size(comparison,2) > 2
@@ -333,7 +346,7 @@ for vv = 1:size(pairwise_comps, 1)
             f = plot(timeline,diff_bCIexp_sig(vv,:),'Color',col_rep(vv),'linestyle','-');
             % f = plot(timeline,diff_bCIexp_sig(vv,:),'Color',col_rep(vv),'Marker','.');
             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
-            text(xlims(1),sig_plot_level_v2(vv),comparison_labels_join(vv),'Color',col_rep(vv), 'FontSize', 6);
+            % text(xlims(1),sig_plot_level_v2(vv),comparison_labels_join(vv),'Color',col_rep(vv), 'FontSize', 6);
 
     end
     plot([0 0],ylim,'k:')
@@ -342,6 +355,7 @@ for vv = 1:size(pairwise_comps, 1)
     xlabel('Time from choice (s)');
     xlim(xlims);
     set(gcf, 'position', [10, 10, 400, 800]);
+    title('diff bCI')
     
 end
     
@@ -375,7 +389,7 @@ for vv = 1:size(comparison, 2)
             % f = plot(timeline,comparison(vv).Cp_bCIexp_sig,'Color',col_rep(vv),'Marker','.');
             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
 %             text(xlims(1),sig_plot_level_v2(vv), comparison_labels(vv),'Color',col_rep(vv),'FontSize', 6);
-            text(xlims(1),sig_plot_level_v2(vv), arg_string_other(vv),'Color',col_rep(vv),'FontSize', 6);
+            % text(xlims(1),sig_plot_level_v2(vv), arg_string_other(vv),'Color',col_rep(vv),'FontSize', 6);
 
         end
     elseif size(comparison,2) > 2
@@ -391,7 +405,7 @@ for vv = 1:size(comparison, 2)
             f = plot(timeline,comparison(vv).Cp_bCIexp_sig,'Color',col_rep(vv),'linestyle','-');
             % f = plot(timeline,comparison(vv).Cp_bCIexp_sig,'Color',col_rep(vv),'Marker','.');
             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
-            text(xlims(1),sig_plot_level_v2(vv), arg_string_other(vv),'Color',col_rep(vv), 'FontSize', 6);
+            % text(xlims(1),sig_plot_level_v2(vv), arg_string_other(vv),'Color',col_rep(vv), 'FontSize', 6);
 
     end
     % plot([0 0],ylim,'k:')
@@ -404,6 +418,7 @@ for vv = 1:size(comparison, 2)
     xlim([-8 8]);
     % Set X-axis ticks
     set(gca, 'XTick', [-8, 0, 8]);
+    title('bCI')
     
 end
 
@@ -432,7 +447,7 @@ for vv = 1:size(comparison, 2)
             % f = plot(timeline,comparison(vv).Cp_tCI_sig,'Color',col_rep(vv),'Marker','.');
             f = plot(timeline,comparison(vv).Cp_tCI_sig,'Color',col_rep(vv),'linestyle','-');
             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
-            text(xlims(1),sig_plot_level_v2(vv), arg_string_other(vv),'Color',col_rep(vv),'FontSize', 6);
+            % text(xlims(1),sig_plot_level_v2(vv), arg_string_other(vv),'Color',col_rep(vv),'FontSize', 6);
 
         end
     elseif size(comparison,2) > 2
@@ -448,7 +463,7 @@ for vv = 1:size(comparison, 2)
             % f = plot(timeline,comparison(vv).Cp_tCI_sig,'Color',col_rep(vv),'Marker','.');
             f = plot(timeline,comparison(vv).Cp_tCI_sig,'Color',col_rep(vv),'linestyle','-');
             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
-            text(xlims(1),sig_plot_level_v2(vv), arg_string_other(vv),'Color',col_rep(vv), 'FontSize', 6);
+            % text(xlims(1),sig_plot_level_v2(vv), arg_string_other(vv),'Color',col_rep(vv), 'FontSize', 6);
 
     end
     plot([0 0],ylim,'k:')
@@ -457,6 +472,7 @@ for vv = 1:size(comparison, 2)
     ylabel('z-scored dF/F', 'FontSize', 12);
     xlabel('Time from choice (s)');
     xlim(xlims);
+    title('tCI')
 
 end
 
@@ -473,28 +489,28 @@ end
 % plot(timeline,mean_Cp,'Color',col_rep(2))
 % errorplot3(mean_Cp-sem_Cp,mean_Cp+sem_Cp,[-8 8],col_rep(2),.15)
 
-%Plor tCI sig
-plot(timeline,comparison(1).Cp_tCI_sig,'Color',col_rep(2),'Marker','.')
-text(xlims(1),sig_plot_level(1),'\bf CS+ tCI','Color',col_rep(2));
-plot(timeline,comparison(2).Cp_tCI_sig,'Color',col_rep(3),'Marker','.')
-text(xlims(1),sig_plot_level(2),'\bf CS- tCI','Color',col_rep(3));
-plot(timeline,diff_tCI_sig,'Color',col_rep(4),'Marker','.')
-text(xlims(1),sig_plot_level(3),'\bf Diff tCI','Color',col_rep(4));
-
-%Plot bCI sig
-plot(timeline,comparison(1).Cp_bCIexp_sig,'Color',col_rep(2),'Marker','.')
-text(xlims(1),sig_plot_level(4),'\bf CS+ bCI','Color',col_rep(2));
-plot(timeline,comparison(2).Cp_bCIexp_sig,'Color',col_rep(3),'Marker','.')
-text(xlims(1),sig_plot_level(5),'\bf CS- bCI','Color',col_rep(3));
-plot(timeline,diff_bCIexp_sig,'Color',col_rep(4),'Marker','.')
-text(xlims(1),sig_plot_level(6),'\bf Diff bCI','Color',col_rep(4));
-
-%Plot permutation test sig
-% plot(timeline,perm_p_sig,'Color',col_rep(1),'Marker','.')
-% text(xlims(1),sig_plot_level(7),'\bf Perm','Color',col_rep(1));
-
-plot([-0.5 -0.5],ylim,'k:')
-plot(xlim,[0 0],'k--')
-
-xlim(xlims);
+% %Plor tCI sig
+% plot(timeline,comparison(1).Cp_tCI_sig,'Color',col_rep(2),'Marker','.')
+% text(xlims(1),sig_plot_level(1),'\bf CS+ tCI','Color',col_rep(2));
+% plot(timeline,comparison(2).Cp_tCI_sig,'Color',col_rep(3),'Marker','.')
+% text(xlims(1),sig_plot_level(2),'\bf CS- tCI','Color',col_rep(3));
+% plot(timeline,diff_tCI_sig,'Color',col_rep(4),'Marker','.')
+% text(xlims(1),sig_plot_level(3),'\bf Diff tCI','Color',col_rep(4));
+% 
+% %Plot bCI sig
+% plot(timeline,comparison(1).Cp_bCIexp_sig,'Color',col_rep(2),'Marker','.')
+% text(xlims(1),sig_plot_level(4),'\bf CS+ bCI','Color',col_rep(2));
+% plot(timeline,comparison(2).Cp_bCIexp_sig,'Color',col_rep(3),'Marker','.')
+% text(xlims(1),sig_plot_level(5),'\bf CS- bCI','Color',col_rep(3));
+% plot(timeline,diff_bCIexp_sig,'Color',col_rep(4),'Marker','.')
+% text(xlims(1),sig_plot_level(6),'\bf Diff bCI','Color',col_rep(4));
+% 
+% %Plot permutation test sig
+% % plot(timeline,perm_p_sig,'Color',col_rep(1),'Marker','.')
+% % text(xlims(1),sig_plot_level(7),'\bf Perm','Color',col_rep(1));
+% 
+% plot([-0.5 -0.5],ylim,'k:')
+% plot(xlim,[0 0],'k--')
+% 
+% xlim(xlims);
 

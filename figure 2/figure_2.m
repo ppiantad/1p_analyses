@@ -1517,3 +1517,9 @@ legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Locat
 ylim([-0.8 0.8]);
 hold off
 
+%%
+
+mean_data_array = {zall_mean_all_array{1, 11}(collect_block_1==1, :), zall_mean_all_array{1, 12}(collect_block_1==1, :)};
+sem_data_array = {sem_all_array{1, 11}(collect_block_1==1, :), sem_all_array{1, 12}(collect_block_1==1, :)};
+
+[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
