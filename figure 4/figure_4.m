@@ -1108,3 +1108,134 @@ end
  sem_data_array = {neuron_sem_array{1, 2}(postchoice_reward_block_1==1, :), neuron_sem_array{1, 9}(postchoice_reward_block_1==1, :)};
 
  [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
+ %%
+ if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11
+    comparison_arrays = [1 2 3; 8 9 10]
+elseif size(respClass_all_array, 2) == 6
+    comparison_arrays = [1 2 3; 4 5 6]
+elseif size(respClass_all_array, 2) == 7
+    comparison_arrays = [1 2 3; 5 6 7]
+end
+
+
+
+arrays_to_examine = [1 8];
+
+inhib_or_excite = 1;
+
+event_for_figures = 1; 
+
+
+
+% prechoice_block_1 = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+prechoice_block_1 = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
+prechoice_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
+
+% postchoice_reward_block_1 = respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+postchoice_reward_block_1 = respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
+postchoice_reward_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
+
+% collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite;
+collect_blocks_2_and_3 = respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite;
+
+% shk_neurons = respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} == inhib_or_excite;
+shk_neurons = 0;
+
+rest_of_neurons = neuron_num - [sum(prechoice_block_1)+sum(postchoice_reward_block_1)+sum(collect_block_1)+sum(shk_neurons)];
+figure; pie([sum(prechoice_block_1), sum(postchoice_reward_block_1), sum(collect_block_1), sum(shk_neurons), rest_of_neurons])
+
+block_1_pre_and_post = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite;
+sum(block_1_pre_and_post)
+block_1_post_and_consumption = respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite;
+sum(block_1_post_and_consumption)
+block_1_pre_and_consumption = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite;
+sum(block_1_pre_and_consumption)
+
+
+block_2_and_3_pre_and_post = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} ~= inhib_or_excite;
+sum(block_2_and_3_pre_and_post)
+block_2_and_3_post_and_consumption = respClass_all_array{1, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite;
+sum(block_2_and_3_post_and_consumption)
+block_2_and_3_pre_and_consumption = respClass_all_array{1, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(2, 3)} == inhib_or_excite;
+sum(block_2_and_3_pre_and_consumption)
+
+
+%%
+% arrays_to_examine = [comparison_arrays(1, 3) comparison_arrays(2, 3)];
+conserved_prechoice = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
+conserved_prechoice_sum = sum(conserved_prechoice)
+
+lost_prechoice = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 ~= event_for_figures;
+lost_prechoice_sum = sum(lost_prechoice)
+
+remapped_prechoice = prechoice_block_1 ~= event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
+remapped_prechoice_sum = sum(remapped_prechoice)
+
+% vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
+
+
+mean_data_array = {neuron_mean_array{1, 1}(conserved_prechoice  ==1, :), neuron_mean_array{1, 8}(conserved_prechoice  ==1, :), neuron_mean_array{1, 8}(lost_prechoice  ==1, :)}
+sem_data_array = {neuron_sem_array{1, 1}(conserved_prechoice  ==1, :), neuron_sem_array{1, 8}(conserved_prechoice  ==1, :), neuron_sem_array{1, 8}(lost_prechoice  ==1, :)}
+[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
+
+%%
+% arrays_to_examine = [comparison_arrays(1, 3) comparison_arrays(2, 3)];
+conserved_postchoice_reward = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
+conserved_postchoice_reward_sum = sum(conserved_postchoice_reward)
+
+lost_postchoice_reward = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 ~= event_for_figures;
+lost_postchoice_reward_sum = sum(lost_postchoice_reward)
+
+remapped_postchoice_reward = postchoice_reward_block_1 ~= event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
+remapped_postchoice_reward_sum = sum(remapped_postchoice_reward)
+
+% vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
+
+
+mean_data_array = {neuron_mean_array{1, 2}(conserved_postchoice_reward  ==1, :), neuron_mean_array{1, 6}(conserved_postchoice_reward  ==1, :), neuron_mean_array{1, 6}(lost_postchoice_reward  ==1, :)}
+sem_data_array = {neuron_sem_array{1, 2}(conserved_postchoice_reward  ==1, :), neuron_sem_array{1, 6}(conserved_postchoice_reward  ==1, :), neuron_sem_array{1, 6}(lost_postchoice_reward  ==1, :)}
+[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
+%%
+% arrays_to_examine = [comparison_arrays(1, 3) comparison_arrays(2, 3)];
+conserved_collection = collect_block_1 == event_for_figures & collect_blocks_2_and_3 == event_for_figures;
+conserved_collection_sum = sum(conserved_collection)
+
+lost_collection = collect_block_1 == event_for_figures & collect_blocks_2_and_3 ~= event_for_figures;
+lost_collection_sum = sum(lost_collection)
+
+remapped_collection = collect_block_1 ~= event_for_figures & collect_blocks_2_and_3 == event_for_figures;
+remapped_collection_sum = sum(remapped_collection)
+
+% vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
+
+
+mean_data_array = {neuron_mean_array{1, 3}(conserved_collection  ==1, :), neuron_mean_array{1, 10}(conserved_collection  ==1, :), neuron_mean_array{1, 10}(lost_collection  ==1, :), neuron_mean_array{1, 10}(remapped_collection  ==1, :)}
+sem_data_array = {neuron_sem_array{1, 3}(conserved_collection  ==1, :), neuron_sem_array{1, 10}(conserved_collection  ==1, :), neuron_sem_array{1, 10}(lost_collection  ==1, :), neuron_sem_array{1, 10}(remapped_collection  ==1, :)}
+[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
+
+%%
+lost_all = [lost_prechoice_sum, lost_postchoice_reward_sum, lost_collection_sum]
+conserved_all = [conserved_prechoice_sum, conserved_postchoice_reward_sum, conserved_collection_sum]
+remapped_all = [remapped_prechoice_sum, remapped_postchoice_reward_sum, remapped_collection_sum]
+
+%% for plotting changes on a donut (specific) and pie (broad) charts
+all_conserved_sum = sum(conserved_all)
+all_lost_sum = sum(lost_all)
+all_remapped_sum = sum(remapped_all)
+remaining_neurons = neuron_num - (all_conserved_sum + all_lost_sum +all_remapped_sum);
+
+figure;
+piechart([all_conserved_sum/neuron_num, all_lost_sum/neuron_num, all_remapped_sum/neuron_num, remaining_neurons/neuron_num])
+
+figure;
+donutchart([conserved_all/neuron_num, lost_all/neuron_num, remapped_all/neuron_num, remaining_neurons/neuron_num])
+
+% all_neurons = [conserved_sum; lost_sum; remapped_sum]
+%all_neurons_2 = [conserved_sum; lost_sum; remapped_sum]
+
+

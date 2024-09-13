@@ -250,6 +250,14 @@ end
 % end
 
 figure; hold on
+width = 200; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-8 8]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8]);
+ytickformat('%.1f');
+
 for vv = 1:size(pairwise_comps, 1)
 
     if size(comparison,2) == 2
@@ -300,13 +308,14 @@ end
     z.Annotation.LegendInformation.IconDisplayStyle = 'off';
     p = plot(xlim,[0 0],'k--');
     p.Annotation.LegendInformation.IconDisplayStyle = 'off';
+    ylim([-0.6 1.5])
     % ylabel('z-scored dF/F', 'FontSize', 12);
     % xlabel('Time from choice (s)');
     % ylim([-1 2.5])
     % yticks(-1:0.5:2.5)
     % xlim(xlims);
-    set(gcf, 'position', [10, 10, 900, 600]);
-    fontsize(16, "pixels")
+    % set(gcf, 'position', [10, 10, 900, 600]);
+    % fontsize(16, "pixels")
     title('perm test')
     % set(gcf, 'resize', 'off' );
 

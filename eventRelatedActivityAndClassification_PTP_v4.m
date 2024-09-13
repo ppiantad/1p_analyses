@@ -54,11 +54,11 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
 epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
-period_of_interest = 'postchoice';
+period_of_interest = 'prechoice';
 
 if strcmp(epoc_to_align, 'stTime')
     period_of_interest = 'trial_start';
@@ -197,7 +197,7 @@ for ii = 1:size(fieldnames(final),1)
                 end
             end
         end
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');
@@ -404,6 +404,30 @@ for ii = 1:size(fieldnames(final),1)
                         %     nullDistEvtRate(g,:) = nanmean(shuffledEvtRate);                %calculate the NaN mean of the shuffled event rates
                     end
                     clear shuffled* g t trialCt
+
+                    
+                    
+                    % % 9/13/2024
+                    % % alternate way of shuffling, maybe worth trying
+                    % [trial_num, sample_num] = size(caTraceTrials);
+                    % % [trial_num, sample_num] = size(caTraceTrials);
+                    % % shift_val = randi(sample_num)
+                    % for g = 1:uv.resamples                                              %for each resampling of the data
+                    %     %sort the data index to create a new list of indices
+                    %     for t = 1:trial_num
+                    % 
+                    %         shift_val = randi(sample_num); %for each trial
+                    %         shuffledTrace(t,:) = circshift(caTraceTrials(t,:), shift_val,2);     %shuffle the calcium trace
+                    %         %         shuffledEvtRate(t,:) = caEvtRateTrials(t,shuffledIDX(t,:)); %shuffle the event rate
+                    %     end
+                    %     nullDistTrace(g,:) = nanmean(shuffledTrace);                    %calculate the NaN mean of the shuffled traces
+                    %     %     nullDistEvtRate(g,:) = nanmean(shuffledEvtRate);                %calculate the NaN mean of the shuffled event rates
+                    % end
+                    % clear shuffled* g t trialCt
+
+
+
+
 
                     %% choose to classify fluoresence or event rates
                     if uv.chooseFluoresenceOrRate == 1                                  %if user selected to classify the fluoresence
