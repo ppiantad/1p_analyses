@@ -1239,3 +1239,19 @@ donutchart([conserved_all/neuron_num, lost_all/neuron_num, remapped_all/neuron_n
 %all_neurons_2 = [conserved_sum; lost_sum; remapped_sum]
 
 
+%%
+lost_arrays = lost_prechoice == 1 | lost_postchoice_reward == 1 | lost_collection == 1; 
+shk_event = respClass_all_array{1,4} == 1;
+
+
+shk_and_lost = shk_event == 1 & lost_arrays == 1;
+
+total_modulated = [(sum(shk_event)/neuron_num)*100 (sum(lost_arrays)/neuron_num)*100];
+A = total_modulated;
+I = (sum(shk_and_lost)/neuron_num)*100;
+K = [A I];
+figure; 
+[H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
+for i = 1:size(K, 2)
+    text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
+end
