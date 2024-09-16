@@ -561,3 +561,21 @@ end
 % Display the p-values
 disp('P-values for each corresponding cell:');
 disp(p_values);
+
+%%
+for kk = 1:size(animalIDs, 1)
+    % prechoice_block_1 = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+    prechoice_block_1_mouse{kk, :} = respClass_all_array_mouse{kk, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 3)} ~= inhib_or_excite;
+    prechoice_blocks_2_and_3_mouse{kk, :} = respClass_all_array_mouse{kk, comparison_arrays(2, 1)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 2)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 3)} ~= inhib_or_excite;
+
+    % postchoice_reward_block_1 = respClass_all_array{1, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+    postchoice_reward_block_1_mouse{kk, :}  = respClass_all_array_mouse{kk, comparison_arrays(1, 2)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 3)} ~= inhib_or_excite;
+    postchoice_reward_blocks_2_and_3_mouse{kk, :}  = respClass_all_array_mouse{kk, comparison_arrays(2, 2)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 3)} ~= inhib_or_excite;
+
+    % collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+    collect_block_1_mouse{kk, :}  = respClass_all_array_mouse{kk, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 2)} ~= inhib_or_excite;
+    collect_blocks_2_and_3_mouse{kk, :}  = respClass_all_array_mouse{kk, comparison_arrays(2, 3)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 2)} ~= inhib_or_excite;
+
+
+
+end
