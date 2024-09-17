@@ -9,7 +9,7 @@ ts1 = (-10:(uv.dt):10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'F:\Behavior Videos\BLA hM4Di vs mCherry';
+metaDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -51,9 +51,9 @@ for zz = 1:size(metafolder_list, 1)
 
     for ii = 1:size(folder_list, 1)
         folder_list_string = strsplit(folder_list{ii}, '\');
-        current_animal = folder_list_string{4}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
+        current_animal = folder_list_string{5}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
         current_animal = matlab.lang.makeValidName(current_animal);
-        current_session = folder_list_string{5};
+        current_session = folder_list_string{6};
         current_session = regexprep(current_session,{' ', '-'}, '_');
         modifiedString = lower(strrep(strrep(folder_list_string{end}, ' ', ''), '-', ''));
         
@@ -91,7 +91,7 @@ for zz = 1:size(metafolder_list, 1)
             %     continue;
             % end
         end
-
+        % check folder inside to get SLEAP file
         folder_to_analyze = find(strcmpi(strrep(strrep(list_folder_names, ' ', ''), '-', ''), modifiedString));
         disp(['Analyzing subfolder: ' list_folder_names{folder_to_analyze,1}]);
         folder_to_analyze_Path = fullfile(folder_list{ii}, list(folder_to_analyze).name);
