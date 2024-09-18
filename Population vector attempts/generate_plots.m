@@ -1,4 +1,4 @@
-figure; plot(time_array, prechoice_similarityOverTime(1, 1:size(time_array, 1)))
+figure; plot(time_array, prechoice_similarityOverTime_prechoice_only(1, 1:size(time_array, 1)))
 xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
 xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
 xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')

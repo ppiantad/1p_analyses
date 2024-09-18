@@ -16,8 +16,14 @@ elseif size(respClass_all_array, 2) == 7
     comparison_arrays_full = [1 2 3; 5 6 7]
 end
 
-ca_data_type = uv.ca_data_type
+% ca_data_type = uv.ca_data_type
 
+% Assume 'ca' is your calcium imaging data, sampled every 100 ms
+% bin_size is the desired bin size in ms
+bin_size = 100;  % Set this as needed
+bin_factor = bin_size / (uv.dt*1000);  % Determine how many samples to bin together
+
+ts1 = (uv.evtWin(1):bin_factor/10:uv.evtWin(2)-0.1);
 %%
 for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
 
@@ -31,6 +37,28 @@ for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
         select_mouse_index = find(strcmp(animalIDs, select_mouse));
         BehavData = final.(select_mouse).(first_session).uv.BehavData;
 
+
+        ca = final.(select_mouse).(first_session).CNMFe_data.(ca_data_type);
+        % ca = ca(prechoice_indices_for_PV{aa, select_mouse_index} == 1, :);
+        % ca_zscored = zscore(ca, [], 2);
+        ca_zscored = normalize(ca, 2);
+        time_array = final.(select_mouse).(first_session).time;
+
+        % Reshape the data and take the mean of each bin
+        [n_neurons, n_samples] = size(ca_zscored);
+        ca_binned = squeeze(mean(reshape(ca_zscored(:, 1:floor(n_samples/bin_factor)*bin_factor), n_neurons, bin_factor, []), 2));
+
+        % Squeeze the data to remove the singleton dimension
+        % ca_binned = squeeze(ca_binned);
+        ca = ca_binned;
+        % Assuming time_array is a 1D array of time points corresponding to each sample
+        time_array_binned = mean(reshape(time_array(1:floor(length(time_array)/bin_factor)*bin_factor), bin_factor, []), 1);
+        time_array = time_array_binned;
+
+
+
+        
+        
         %%
         PV_prechoice_all_mouse = [];
         for ff = 1:size(zall_mouse{select_mouse_index, comparison_arrays(1, 1)}, 2)
@@ -50,12 +78,10 @@ for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
         % mean_PV_prechoice_all_mouse = mean_PV_prechoice_all_mouse(prechoice_indices_for_PV{aa, select_mouse_index} == 1, :);
         mean_PV_prechoice_all_mouse_array{aa, gg} = mean_PV_prechoice_all_mouse;
 
+        
 
-        ca = final.(select_mouse).(first_session).CNMFe_data.(ca_data_type);
-        % ca = ca(prechoice_indices_for_PV{aa, select_mouse_index} == 1, :);
-        % ca_zscored = zscore(ca, [], 2);
-        ca_zscored = normalize(ca, 2);
-        time_array = final.(select_mouse).(first_session).time;
+
+
         prechoice_similarityOverTime = [];
         for t = 1:size(ca_zscored, 2)
             % for i = 1:length(uniqueTypes)
@@ -91,11 +117,7 @@ for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
         mean_PV_postchoice_all_mouse_array{aa, gg} = mean_PV_postchoice_all_mouse;
 
 
-        ca = final.(select_mouse).(session_to_analyze).CNMFe_data.(ca_data_type);
-        % ca = ca(postchoice_indices_for_PV{aa, select_mouse_index} == 1, :);
-        % ca_zscored = zscore(ca, [], 2);
-        ca_zscored = normalize(ca, 2);
-        time_array = final.(select_mouse).(first_session).time;
+
         postchoice_similarityOverTime = [];
         for t = 1:size(ca_zscored, 2)
             % for i = 1:length(uniqueTypes)
@@ -129,11 +151,6 @@ for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
         % mean_PV_consumption_all_mouse = mean_PV_consumption_all_mouse(consumption_indices_for_PV{aa, select_mouse_index} == 1, :);
         mean_PV_consumption_all_mouse_array{aa, gg} = mean_PV_consumption_all_mouse;
 
-        ca = final.(select_mouse).(session_to_analyze).CNMFe_data.(ca_data_type);
-        % ca = ca(consumption_indices_for_PV{aa, select_mouse_index} == 1, :);
-        % ca_zscored = zscore(ca, [], 2);
-        ca_zscored = normalize(ca, 2);
-        time_array = final.(select_mouse).(first_session).time;
         consumption_similarityOverTime = [];
         for t = 1:size(ca_zscored, 2)
             % for i = 1:length(uniqueTypes)
