@@ -1,4 +1,4 @@
-function [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+function [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
 
 % data_array is expected to be a 1x# cell array. each cell should the
 % following orientation:
@@ -308,11 +308,12 @@ end
     z.Annotation.LegendInformation.IconDisplayStyle = 'off';
     p = plot(xlim,[0 0],'k--');
     p.Annotation.LegendInformation.IconDisplayStyle = 'off';
-    ylim([-0.6 1.5])
+    y_limits = [-0.6 1.6];
+    ylim(y_limits)
     % ylabel('z-scored dF/F', 'FontSize', 12);
     % xlabel('Time from choice (s)');
     % ylim([-1 2.5])
-    % yticks(-1:0.5:2.5)
+    yticks(y_limits(1):0.2:y_limits(2))
     % xlim(xlims);
     % set(gcf, 'position', [10, 10, 900, 600]);
     % fontsize(16, "pixels")

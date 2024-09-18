@@ -449,7 +449,7 @@ end
 
 consum_to_shk_ratio = num_consumption_cells./num_shk_cells;
 
-x = max_response;
+x = conserved_ratio;
 y = riskiness;
 % Create a new figure with specific dimensions
 figure;

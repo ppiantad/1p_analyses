@@ -1178,7 +1178,7 @@ remapped_prechoice_sum = sum(remapped_prechoice)
 
 mean_data_array = {neuron_mean_array{1, 1}(conserved_prechoice  ==1, :), neuron_mean_array{1, 8}(conserved_prechoice  ==1, :), neuron_mean_array{1, 8}(lost_prechoice  ==1, :)}
 sem_data_array = {neuron_sem_array{1, 1}(conserved_prechoice  ==1, :), neuron_sem_array{1, 8}(conserved_prechoice  ==1, :), neuron_sem_array{1, 8}(lost_prechoice  ==1, :)}
-[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
 
 
 %%
@@ -1195,9 +1195,9 @@ remapped_postchoice_reward_sum = sum(remapped_postchoice_reward)
 % vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
 
 
-mean_data_array = {neuron_mean_array{1, 2}(conserved_postchoice_reward  ==1, :), neuron_mean_array{1, 6}(conserved_postchoice_reward  ==1, :), neuron_mean_array{1, 6}(lost_postchoice_reward  ==1, :)}
-sem_data_array = {neuron_sem_array{1, 2}(conserved_postchoice_reward  ==1, :), neuron_sem_array{1, 6}(conserved_postchoice_reward  ==1, :), neuron_sem_array{1, 6}(lost_postchoice_reward  ==1, :)}
-[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+mean_data_array = {neuron_mean_array{1, 2}(conserved_postchoice_reward  ==1, :), neuron_mean_array{1, 9}(conserved_postchoice_reward  ==1, :), neuron_mean_array{1, 9}(lost_postchoice_reward  ==1, :)}
+sem_data_array = {neuron_sem_array{1, 2}(conserved_postchoice_reward  ==1, :), neuron_sem_array{1, 9}(conserved_postchoice_reward  ==1, :), neuron_sem_array{1, 9}(lost_postchoice_reward  ==1, :)}
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
 
 %%
 % arrays_to_examine = [comparison_arrays(1, 3) comparison_arrays(2, 3)];
@@ -1215,7 +1215,66 @@ remapped_collection_sum = sum(remapped_collection)
 
 mean_data_array = {neuron_mean_array{1, 3}(conserved_collection  ==1, :), neuron_mean_array{1, 10}(conserved_collection  ==1, :), neuron_mean_array{1, 10}(lost_collection  ==1, :), neuron_mean_array{1, 10}(remapped_collection  ==1, :)}
 sem_data_array = {neuron_sem_array{1, 3}(conserved_collection  ==1, :), neuron_sem_array{1, 10}(conserved_collection  ==1, :), neuron_sem_array{1, 10}(lost_collection  ==1, :), neuron_sem_array{1, 10}(remapped_collection  ==1, :)}
-[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
+
+
+
+%%
+% arrays_to_examine = [comparison_arrays(1, 3) comparison_arrays(2, 3)];
+conserved_prechoice = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
+conserved_prechoice_sum = sum(conserved_prechoice)
+
+lost_prechoice = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 ~= event_for_figures;
+lost_prechoice_sum = sum(lost_prechoice)
+
+remapped_prechoice = prechoice_block_1 ~= event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
+remapped_prechoice_sum = sum(remapped_prechoice)
+
+% vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
+
+
+mean_data_array = {neuron_mean_array{1, 8}(conserved_prechoice  ==1, :), neuron_mean_array{1, 8}(lost_prechoice  ==1, :), neuron_mean_array{1, 8}(remapped_prechoice  ==1, :)}
+sem_data_array = {neuron_sem_array{1, 8}(conserved_prechoice  ==1, :), neuron_sem_array{1, 8}(lost_prechoice  ==1, :), neuron_sem_array{1, 8}(remapped_prechoice  ==1, :)}
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
+
+%%
+% arrays_to_examine = [comparison_arrays(1, 3) comparison_arrays(2, 3)];
+conserved_postchoice_reward = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
+conserved_postchoice_reward_sum = sum(conserved_postchoice_reward)
+
+lost_postchoice_reward = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 ~= event_for_figures;
+lost_postchoice_reward_sum = sum(lost_postchoice_reward)
+
+remapped_postchoice_reward = postchoice_reward_block_1 ~= event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
+remapped_postchoice_reward_sum = sum(remapped_postchoice_reward)
+
+% vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
+
+
+mean_data_array = { neuron_mean_array{1, 6}(conserved_postchoice_reward  ==1, :), neuron_mean_array{1, 9}(lost_postchoice_reward  ==1, :), neuron_mean_array{1, 9}(remapped_postchoice_reward  ==1, :)}
+sem_data_array = {neuron_sem_array{1, 6}(conserved_postchoice_reward  ==1, :), neuron_sem_array{1, 9}(lost_postchoice_reward  ==1, :), neuron_sem_array{1, 9}(remapped_postchoice_reward  ==1, :)}
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
+
+%%
+% arrays_to_examine = [comparison_arrays(1, 3) comparison_arrays(2, 3)];
+conserved_collection = collect_block_1 == event_for_figures & collect_blocks_2_and_3 == event_for_figures;
+conserved_collection_sum = sum(conserved_collection)
+
+lost_collection = collect_block_1 == event_for_figures & collect_blocks_2_and_3 ~= event_for_figures;
+lost_collection_sum = sum(lost_collection)
+
+remapped_collection = collect_block_1 ~= event_for_figures & collect_blocks_2_and_3 == event_for_figures;
+remapped_collection_sum = sum(remapped_collection)
+
+% vars_to_use = {'collect_block_1', 'collect_blocks_2_and_3'};
+
+
+mean_data_array = {neuron_mean_array{1, 10}(conserved_collection  ==1, :), neuron_mean_array{1, 10}(lost_collection  ==1, :), neuron_mean_array{1, 10}(remapped_collection  ==1, :)}
+sem_data_array = {neuron_sem_array{1, 10}(conserved_collection  ==1, :), neuron_sem_array{1, 10}(lost_collection  ==1, :), neuron_sem_array{1, 10}(remapped_collection  ==1, :)}
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
 
 
 %%

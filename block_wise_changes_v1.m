@@ -576,6 +576,99 @@ for kk = 1:size(animalIDs, 1)
     collect_block_1_mouse{kk, :}  = respClass_all_array_mouse{kk, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 2)} ~= inhib_or_excite;
     collect_blocks_2_and_3_mouse{kk, :}  = respClass_all_array_mouse{kk, comparison_arrays(2, 3)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 2)} ~= inhib_or_excite;
 
+end
 
+
+
+
+%%
+for kk = 1:size(animalIDs, 1)
+    % prechoice_block_1 = respClass_all_array{1, comparison_arrays(1, 1)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 3)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
+    prechoice_conserved_mouse{kk, :} = prechoice_block_1_mouse{kk, :} == event_for_figures & prechoice_blocks_2_and_3_mouse{kk, :} == event_for_figures;
+    prechoice_lost_mouse{kk, :} = prechoice_block_1_mouse{kk, :} == event_for_figures & prechoice_blocks_2_and_3_mouse{kk, :} ~= event_for_figures;
+    prechoice_remapped_mouse{kk, :} = prechoice_block_1_mouse{kk, :} ~= event_for_figures & prechoice_blocks_2_and_3_mouse{kk, :} == event_for_figures;
+
+    postchoice_conserved_mouse{kk, :} = postchoice_reward_block_1_mouse{kk, :} == event_for_figures & postchoice_reward_blocks_2_and_3_mouse{kk, :} == event_for_figures;
+    postchoice_lost_mouse{kk, :} = postchoice_reward_block_1_mouse{kk, :} == event_for_figures & postchoice_reward_blocks_2_and_3_mouse{kk, :} ~= event_for_figures;
+    postchoice_remapped_mouse{kk, :} = postchoice_reward_block_1_mouse{kk, :} ~= event_for_figures & postchoice_reward_blocks_2_and_3_mouse{kk, :} == event_for_figures;
+
+    collection_conserved_mouse{kk, :} = collect_block_1_mouse{kk, :} == event_for_figures & collect_blocks_2_and_3_mouse{kk, :} == event_for_figures;
+    collection_lost_mouse{kk, :} = collect_block_1_mouse{kk, :} == event_for_figures & collect_blocks_2_and_3_mouse{kk, :} ~= event_for_figures;
+    collection_remapped_mouse{kk, :} = collect_block_1_mouse{kk, :} ~= event_for_figures & collect_blocks_2_and_3_mouse{kk, :} == event_for_figures;
 
 end
+
+%%
+for kk = 1:size(animalIDs, 1)
+    
+    
+    conserved_sum(kk) = sum([sum(prechoice_conserved_mouse{kk, :}), sum(postchoice_conserved_mouse{kk, :}), sum(collection_conserved_mouse{kk, :})]);
+    lost_sum(kk) = sum([sum(prechoice_lost_mouse{kk, :}), sum(postchoice_lost_mouse{kk, :}), sum(collection_lost_mouse{kk, :})]);
+    remapped_sum(kk) = sum([sum(prechoice_remapped_mouse{kk, :}), sum(postchoice_remapped_mouse{kk, :}), sum(collection_remapped_mouse{kk, :})]);
+    
+    conserved_ratio(kk) = conserved_sum(kk)/size(prechoice_conserved_mouse{kk, :}, 2);
+    lost_ratio(kk) = lost_sum(kk)/size(prechoice_conserved_mouse{kk, :}, 2);
+    remapped_ratio(kk) = remapped_sum(kk)/size(prechoice_conserved_mouse{kk, :}, 2);
+
+    conserved_prechoice_sum(kk) = sum(prechoice_conserved_mouse{kk, :});
+    remapped_prechoice_sum(kk) = sum(prechoice_remapped_mouse{kk, :});
+    lost_prechoice_sum(kk) = sum(prechoice_lost_mouse{kk, :});
+
+    conserved_prechoice_ratio(kk) = conserved_prechoice_sum(kk)/size(prechoice_conserved_mouse{kk, :}, 2);
+    remapped_prechoice_ratio(kk) = remapped_prechoice_sum(kk)/size(prechoice_conserved_mouse{kk, :}, 2);
+    lost_prechoice_ratio(kk) = lost_prechoice_sum(kk)/size(prechoice_conserved_mouse{kk, :}, 2);
+
+
+    conserved_postchoice_sum(kk) = sum(postchoice_conserved_mouse{kk, :});
+    remapped_postchoice_sum(kk) = sum(postchoice_remapped_mouse{kk, :});
+    lost_postchoice_sum(kk) = sum(postchoice_lost_mouse{kk, :});
+
+    conserved_postchoice_ratio(kk) = conserved_postchoice_sum(kk)/size(postchoice_conserved_mouse{kk, :}, 2);
+    remapped_postchoice_ratio(kk) = remapped_postchoice_sum(kk)/size(postchoice_conserved_mouse{kk, :}, 2);
+    lost_postchoice_ratio(kk) = lost_postchoice_sum(kk)/size(postchoice_conserved_mouse{kk, :}, 2);
+
+    conserved_collection_sum(kk) = sum(collection_conserved_mouse{kk, :});
+    remapped_collection_sum(kk) = sum(collection_remapped_mouse{kk, :});
+    lost_collection_sum(kk) = sum(collection_lost_mouse{kk, :});
+
+    conserved_collection_ratio(kk) = conserved_collection_sum(kk)/size(collection_conserved_mouse{kk, :}, 2);
+    remapped_collection_ratio(kk) = remapped_collection_sum(kk)/size(collection_conserved_mouse{kk, :}, 2);
+    lost_collection_ratio(kk) = lost_collection_sum(kk)/size(collection_conserved_mouse{kk, :}, 2);
+end
+
+%%
+x = remapped_prechoice_ratio';
+y = riskiness;
+% Create a new figure with specific dimensions
+figure;
+width = 650; % Width of the figure
+height = 350; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+
+hold on;
+scatter(x, y, 100)
+% Set the axis labels to have 2 decimal places
+xtickformat('%.2f');
+ytickformat('%.2f');
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% can also calculate the r-squared this way
+% Calculate the R^2 value
+[r, pval] = corrcoef(x, y); % Compute correlation coefficient matrix
+rsq = r(1, 2)^2; % Extract and square the correlation coefficient
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared, '%.2f')], 'FontSize', 12);
+text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2f')], 'FontSize', 12, 'Color', 'blue');
+hold off; 
+
