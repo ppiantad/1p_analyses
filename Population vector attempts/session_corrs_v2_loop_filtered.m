@@ -43,7 +43,7 @@ for aa = 1:size(comparison_arrays_full, 1) %size(comparison_arrays_full, 1)
         % ca_zscored = zscore(ca, [], 2);
         ca_zscored = normalize(ca, 2);
         time_array = final.(select_mouse).(first_session).time;
-
+        time_array_all{aa, gg} = time_array;
         % Reshape the data and take the mean of each bin
         [n_neurons, n_samples] = size(ca_zscored);
         ca_binned = squeeze(mean(reshape(ca_zscored(:, 1:floor(n_samples/bin_factor)*bin_factor), n_neurons, bin_factor, []), 2));
@@ -348,6 +348,32 @@ set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bo
 shadedErrorBar(1:90, mean_consumption_over_time(:, 1), sem_consumption_over_time(:, 1), 'lineProps', {'color', 'r'});
 hold on; shadedErrorBar(1:90, mean_consumption_over_time(:, 2), sem_consumption_over_time(:, 2), 'lineProps', {'color', 'k'});
 % hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 8}(conserved_consumption==1, :)), nanmean(neuron_sem_array{1, 8}(conserved_consumption==1, :)), 'lineProps', {'color', 'b'});
+xlim([1 90]);
+% Set X-axis ticks
+set(gca, 'XTick', [1, 30, 60, 90]);
+
+xline(30);
+xline(60)
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+% xlabel('Time from Large Rew Choice (s)');
+% legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+% ylim([-0.8 0.8]);
+% ytickformat('%.1f');
+hold off
+
+%%
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 400; % Width of the figure
+height = 100; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+shadedErrorBar(1:90, mean_prechoice_over_time(:, 1), sem_prechoice_over_time(:, 1), 'lineProps', {'color', 'r'});
+hold on; shadedErrorBar(1:90, mean_postchoice_over_time(:, 1), sem_postchoice_over_time(:, 1), 'lineProps', {'color', 'k'});
+hold on; shadedErrorBar(1:90, mean_consumption_over_time(:, 1), sem_consumption_over_time(:, 1), 'lineProps', {'color', 'b'});
 xlim([1 90]);
 % Set X-axis ticks
 set(gca, 'XTick', [1, 30, 60, 90]);
