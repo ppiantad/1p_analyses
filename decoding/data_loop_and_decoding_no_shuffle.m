@@ -26,7 +26,7 @@ ca_data_type = "C_raw"; % C % C_raw
 use_normalized_time = 0;
 shuffle_confirm = 1; %1 if you want shuffle, 0 if you don't
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
 if strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39'};
@@ -86,7 +86,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0
                     behav_tbl_temp{ii, num_comparison} = BehavData;
                     trials = cell2mat(trials);
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -140,7 +140,7 @@ for num_iteration = 1:num_iterations
                         neuron_sem_mouse{ii, num_comparison}(u,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));
 
                         zall_array{neuron_num} = zall;
-                        zall_array_pseudopop{num_comparisons}(neuron_num) = {zall};
+                        zall_array_pseudopop{num_comparison}(neuron_num) = {zall};
                         zall_mouse{ii, num_comparison}(u) = {zall};
                         caTraceTrials_mouse{ii, num_comparison}(u) = {caTraceTrials};
                         caTraceTrials_pseudopop{num_comparison}(neuron_num) = {caTraceTrials};
@@ -161,7 +161,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 0.3);
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 0.3, 'BLOCK', 1);
                     behav_tbl_temp{ii, num_comparison} = BehavData;
                     trials = cell2mat(trials);
                     % if exist('full_filter_string', 'var')
@@ -256,7 +256,7 @@ for num_iteration = 1:num_iterations
                         zall_mouse{ii, num_comparison}(u) = {zall};
                         caTraceTrials_mouse{ii, num_comparison}(u) = {caTraceTrials};
                         caTraceTrials_pseudopop{num_comparison}(neuron_num) = {caTraceTrials};
-                        zall_array_pseudopop{num_comparisons}(neuron_num) = {zall};
+                        zall_array_pseudopop{num_comparison}(neuron_num) = {zall};
 
                         zall_mean(neuron_num,:) = mean(zall);
 

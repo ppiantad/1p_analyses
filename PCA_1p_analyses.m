@@ -64,22 +64,36 @@ end
 [full_table_all] = get_median_choice_and_collect_fn(behav_tbl_iter);
 full_table = vertcat(full_table_all{:});
 
+median_start_time_large = median(full_table.stTime(full_table.bigSmall == 1.2) - full_table.choiceTime(full_table.bigSmall == 1.2));
+median_start_time_small = median(full_table.stTime(full_table.bigSmall == 0.3) - full_table.choiceTime(full_table.bigSmall == 0.3));
 
 median_start_time_block_1 = median(full_table.stTime(full_table.Block == 1) - full_table.choiceTime(full_table.Block == 1));
 median_start_time_block_2 = median(full_table.stTime(full_table.Block == 2) - full_table.choiceTime(full_table.Block == 2));
 median_start_time_block_3 = median(full_table.stTime(full_table.Block == 3) - full_table.choiceTime(full_table.Block == 3));
 
+median_choice_time_large = median(full_table.choiceTime(full_table.bigSmall == 1.2) - full_table.stTime(full_table.bigSmall == 1.2));
+median_choice_time_small = median(full_table.choiceTime(full_table.bigSmall == 0.3) - full_table.stTime(full_table.bigSmall == 0.3));
+
 median_choice_time_block_1 = median(full_table.choiceTime(full_table.Block == 1) - full_table.stTime(full_table.Block == 1));
 median_choice_time_block_2 = median(full_table.choiceTime(full_table.Block == 2) - full_table.stTime(full_table.Block == 2));
 median_choice_time_block_3 = median(full_table.choiceTime(full_table.Block == 3) - full_table.stTime(full_table.Block == 3));
+
+median_collect_time_large = median(full_table.collectionTime(full_table.bigSmall == 1.2) - full_table.stTime(full_table.bigSmall == 1.2));
+median_collect_time_small = median(full_table.collectionTime(full_table.bigSmall == 0.3) - full_table.stTime(full_table.bigSmall == 0.3));
 
 median_collect_time_block_1 = median(full_table.collectionTime(full_table.Block == 1) - full_table.stTime(full_table.Block == 1));
 median_collect_time_block_2 = median(full_table.collectionTime(full_table.Block == 2) - full_table.stTime(full_table.Block == 2));
 median_collect_time_block_3 = median(full_table.collectionTime(full_table.Block == 3) - full_table.stTime(full_table.Block == 3));
 
+[~, closest_index_start_time_large] = min(abs(ts1 - median_start_time_large));
+[~, closest_index_start_time_small] = min(abs(ts1 - median_start_time_small));
+
 [~, closest_index_start_time_block_1] = min(abs(ts1 - median_start_time_block_1));
 [~, closest_index_start_time_block_2] = min(abs(ts1 - median_start_time_block_2));
 [~, closest_index_start_time_block_3] = min(abs(ts1 - median_start_time_block_3));
+
+[~, closest_index_collect_time_large] = min(abs(ts1 - median_collect_time_large));
+[~, closest_index_collect_time_small] = min(abs(ts1 - median_collect_time_small));
 
 [~, closest_index_collect_time_block_1] = min(abs(ts1 - median_collect_time_block_1));
 [~, closest_index_collect_time_block_2] = min(abs(ts1 - median_collect_time_block_2));
@@ -106,7 +120,7 @@ numConditions = size(neuron_mean_concat, 2)/numMeasurements;
 
 eventIdx = 1:numConditions;
 
-NumPC = 3; %2
+NumPC = 4; %2
 
 array_size = size(neuron_mean_concat, 2);
 
@@ -220,7 +234,7 @@ figure;
 % d3 = PCScore{1,3};
 d1 = smoothforward(PCScore{1,1}, [1,size(PCScore{1,1},2);], 5, 15, 'mono_dir');
 d2 = smoothforward(PCScore{1,2}, [1,size(PCScore{1,2},2);], 5, 15, 'mono_dir');
-d3 = smoothforward(PCScore{1,3}, [1,size(PCScore{1,3},2);], 5, 15, 'mono_dir');
+% d3 = smoothforward(PCScore{1,3}, [1,size(PCScore{1,3},2);], 5, 15, 'mono_dir');
 
 downsampled_array_factor = numMeasurements/size(d1, 2);
 downsampled_start_time = size(d1, 2)/2;
@@ -243,17 +257,17 @@ d_marker_loc = ceil([downsampled_median_choice_time_block_1, downsampled_median_
     p1 = plot(d1(1, :), d1(2, :), 'DisplayName', d_legend{1});
     p1.Color(1: 3) = l_color{1}; p1.Color(4) = l_opacity; p1.LineWidth = l_width;
     p1.Marker = '.'; p1.MarkerFaceColor = p_color{1}; p1.MarkerEdgeColor = p_color{1}; p1.MarkerIndices = [1: p_freq: size(d1, 2)]; p1.MarkerSize = p_size;
-    e11 = scatter(d1(1, closest_index_start_time_block_1), d1(2, closest_index_start_time_block_1), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
+    e11 = scatter(d1(1, closest_index_start_time_large), d1(2, closest_index_start_time_large), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
     e12 = scatter(d1(1, ts1 == 0), d1(2, ts1 == 0), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
-    e13 = scatter(d1(1, closest_index_collect_time_block_1), d1(2, closest_index_collect_time_block_1), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
+    e13 = scatter(d1(1, closest_index_collect_time_large), d1(2, closest_index_collect_time_large), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
 %     e13 = scatter(d1(1, d_marker_loc(3)), d1(2, d_marker_loc(3)), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
     
     p2 = plot(d2(1, :), d2(2, :), 'DisplayName', d_legend{2});
     p2.Color(1: 3) = l_color{2}; p2.Color(4) = l_opacity; p2.LineWidth = l_width;
     p2.Marker = '.'; p2.MarkerFaceColor = p_color{2}; p2.MarkerEdgeColor = p_color{2}; p2.MarkerIndices = [1: p_freq: size(d2, 2)]; p2.MarkerSize = p_size;
-    e14 = scatter(d2(1, closest_index_start_time_block_2), d2(2, closest_index_start_time_block_2), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
+    e14 = scatter(d2(1, closest_index_start_time_small), d2(2, closest_index_start_time_small), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
     e15 = scatter(d2(1, ts1 == 0), d2(2, ts1 == 0), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
-    e16 = scatter(d2(1, closest_index_collect_time_block_2), d2(2, closest_index_collect_time_block_2), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
+    e16 = scatter(d2(1, closest_index_collect_time_small), d2(2, closest_index_collect_time_small), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
 %    
     p3 = plot(d3(1, :), d3(2, :), 'DisplayName', d_legend{3});
     p3.Color(1: 3) = l_color{3}; p3.Color(4) = l_opacity; p3.LineWidth = l_width;

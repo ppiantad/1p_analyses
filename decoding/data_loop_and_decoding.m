@@ -4,7 +4,7 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 load('acton.mat')
 
 %%
-num_iterations = 1; 
+num_iterations = 5; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 % iter = 0;
 uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
@@ -88,7 +88,7 @@ for num_iteration = 1:num_iterations
                     currentanimal = char(animalIDs(ii));
                     if isfield(final.(currentanimal), session_to_analyze)
                         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                        [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                        [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0
                         behav_tbl_temp{ii, num_comparison} = BehavData;
                         trials = cell2mat(trials);
                         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -154,7 +154,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 0.3);
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2, 'BLOCK', 1);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
