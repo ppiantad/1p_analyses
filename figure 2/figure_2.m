@@ -1523,3 +1523,68 @@ mean_data_array = {zall_mean_all_array{1, 11}(collect_block_1==1, :), zall_mean_
 sem_data_array = {sem_all_array{1, 11}(collect_block_1==1, :), sem_all_array{1, 12}(collect_block_1==1, :)};
 
 [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
+%%
+
+%CREATE SCATTER PLOT BASED ON SPECIFIC EVENTS - ASSUMING THEY ARE IN PAIRS.
+%CHECK AND UPDATE START & END TIME DEPENDING ON EVENT OF INTEREST
+paired_neurons = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} == 1;
+start_time = 1; % sub-window start time
+end_time = 3; % sub-window end time
+
+% Find the indices in ts1 that correspond to the sub-window
+sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+
+% Extract the corresponding columns from neuron_mean
+
+
+sub_window_activity_session_1 = zall_mean_all_array{1, 11}(collect_block_1, sub_window_idx);
+sub_window_activity_session_2 = zall_mean_all_array{1, 12}(collect_block_1, sub_window_idx);
+
+mean_sub_window_activity_session_1 = mean(sub_window_activity_session_1, 2);
+mean_sub_window_activity_session_2 = mean(sub_window_activity_session_2, 2);
+
+x = mean_sub_window_activity_session_1;
+y = mean_sub_window_activity_session_2;
+
+
+% Create a scatter plot
+figure;
+set(gcf,'Position',[100 100 200 500])
+% Group 1: respClass_all(1,:) == 1 (Orange)
+% idx_group_1 = (respClass_all_array{1, 1} == 1);
+scatter(x, y, 'o', 'filled', 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k'); % Orange
+
+hold on;
+
+% % Group 2: respClass_all(1,:) == 2 (Light Blue)
+% idx_group_2 = (respClass_all_array{1, 1} == 2);
+% scatter(x(idx_group_2), y(idx_group_2), 'o', 'filled', 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'k'); % Light Blue
+
+% % Group 3: respClass_all(1,:) == 3 (Light Grey)
+% idx_group_3 = (respClass_all_array{1, 1} == 3);
+% scatter(x(idx_group_3), y(idx_group_3), 'o', 'filled', 'MarkerFaceColor', [0.7 0.7 0.7], 'MarkerEdgeColor', 'k'); % Light Grey
+
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+
+% Add labels and a legend (You can keep this part unchanged)
+% xlabel('X-axis Label');
+% ylabel('Y-axis Label');
+% title('Scatter Plot with Regression Line and R^2 Value');
+% legend('Group 1', 'Group 2', 'Group 3', 'Regression Line');
+% ylim([0 1.1])
+% xlim([0 1.1])
+hold off;
