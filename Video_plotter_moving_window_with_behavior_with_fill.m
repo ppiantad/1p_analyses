@@ -10,10 +10,11 @@ ca_data_norm = normalize(ca_data, 2);
 ca_data_denoised_norm = normalize(ca_data_denoised, 2);
 ca_data_spike_inf_norm = normalize(ca_data_spike_inf, 2);
 
-
+stTime = BehavData.TrialPossible(1)-60; 
+stTime_to_frames = round(stTime*10);
 m = 1;
 behavior = 'open';
-selected_neurons = [1];  % Modify this to include more neurons
+
 
 % --- Speed factor for playback ---
 speed_factor = 1000;  % Adjust this factor to speed up playback
@@ -30,6 +31,10 @@ tiff_video_data = zeros(video_height, video_width, num_frames);
 for i = 1:num_frames
     tiff_video_data(:, :, i) = imread(tiff_video_file, i);
 end
+
+%%
+
+selected_neurons = [10, 128, 55];  % Modify this to include more neurons 45
 
 % --- Load the .MPG video ---
 mpg_video_file = 'downsampled_video_insc_40_RDT_D1.avi';  % Replace with your .MPG file
@@ -96,6 +101,7 @@ scaled_behavTrace = (scaled_behavTrace / max_valid_behav) * max_fluorescence;  %
 
 
 %%
+hRedLine = [];  % Initialize an empty array to store line handles
 num_frames = numel(info);  % Number of frames in .tiff file
 video_height = info(1).Height;
 video_width = info(1).Width;
@@ -127,7 +133,7 @@ trace_length = length(behavTrace);
 max_frames = min([end_frame, mpg_num_frames, trace_length]);
 
 % --- Calculate the MPG video start frame based on calcium imaging start frame ---
-mpg_start_frame = round((start_frame / calcium_frame_rate) * mpg_frame_rate);  % Calculate the equivalent MPG frame
+mpg_start_frame = round((start_frame / calcium_frame_rate) * mpg_frame_rate)-stTime_to_frames;  % Calculate the equivalent MPG frame
 mpg_frame_count = max(1, mpg_start_frame);  % Ensure we start from a valid frame (at least frame 1)
 
 % Create color map for neurons
@@ -147,7 +153,7 @@ for i = 1:length(selected_neurons)
     neuron_idx = selected_neurons(i);
     hContour(i) = plot(contours{neuron_idx}(1,:), contours{neuron_idx}(end,:), 'LineWidth', 1, 'Color', cmap(i, :));
 end
-caxis([700 1000]);
+caxis([750 900]);
 colormap(gray);  % Set colormap to gray
 
 % --- MPG video subplot ---
@@ -194,28 +200,33 @@ open(video_writer);
 
 % Error handling for video frame limits
 try
+    % Convert choices_only timestamps (seconds) to frame indices
+    choices_frames = round(choices_only * calcium_frame_rate);  % Convert seconds to frame indices
+
+    % Define the delay in terms of frames (144 frame delay)
+    delay_frames = stTime_to_frames;  % Assuming stTime_to_frames is 144
+    
+    % Initializing the starting frame for calcium and mpg videos
+    calcium_frame_count = start_frame;  % Assume start_frame is given, e.g., 400
+    
+
     % Loop through frames for playback
     while calcium_frame_count <= max_frames && mpg_frame_count <= max_frames
         % Update calcium imaging video
         set(hTiffVideo, 'CData', tiff_video_data(:, :, calcium_frame_count));
 
-        % Update MPG video
-        mpg_frame = read(mpg_video, mpg_frame_count);
-        set(hMpgVideo, 'CData', mpg_frame);
+
+        mpg_frame = read(mpg_video, mpg_frame_count);  % Read current frame from the video
+        set(hMpgVideo, 'CData', mpg_frame);  % Update MPG video
+        mpg_frame_count = mpg_frame_count + 1;  % Increment mpg video frame count
 
         % Update frame number display
         set(hFrameNumber, 'String', sprintf('Frame: %d', calcium_frame_count));
 
         % Calculate window range for the current frame
-        if calcium_frame_count == start_frame  % First frame alignment
-            window_start = max(1, calcium_frame_count - window_size);
-            window_end = min(trace_length, calcium_frame_count + window_size);
-            time_range = (window_start:window_end) - start_frame;  % Centered around start_frame
-        else
-            window_start = max(1, calcium_frame_count - window_size);
-            window_end = min(trace_length, calcium_frame_count + window_size);
-            time_range = (window_start:window_end) - calcium_frame_count;  % Time relative to current frame for scrolling
-        end
+        window_start = max(1, calcium_frame_count - window_size);
+        window_end = min(trace_length, calcium_frame_count + window_size);
+        time_range = (window_start:window_end) - calcium_frame_count;  % Time relative to current frame for scrolling
 
         window_range = window_start:window_end;
 
@@ -227,45 +238,29 @@ try
             max_fluorescence_current = max(max_fluorescence_current, max(fluorescence_data(neuron_idx, window_range) + i * offset));
         end
 
+        % Clear any previous red lines (if any exist)
+        if exist('hRedLine', 'var')
+            delete(hRedLine(:));  % Clear all previous lines
+        end
+
+        % Find all matching frames within the current window range
+        matching_frames = choices_frames(choices_frames >= window_start & choices_frames <= window_end);
+
+        % Plot vertical red lines at all matching frames within the window
+        hRedLine = [];  % Initialize an empty array to store line handles
+        if ~isempty(matching_frames)
+            hold on;
+            for k = 1:length(matching_frames)
+                frame_idx = matching_frames(k);  % Current matching frame index
+                x_pos = frame_idx - calcium_frame_count;  % Position relative to the moving window
+                hRedLine(k) = xline(x_pos, 'r', 'LineWidth', 2);  % Plot a red vertical line for each matching frame
+            end
+            hold off;
+        end
+
         % Update the current frame line position and Y-limits
         max_fluorescence_current = max(max_fluorescence_current, 0);  % Ensure it's at least 0
         set(hCurrentFrameLine, 'YData', [0, max_fluorescence_current]);  % Extend to current max fluorescence height
-
-        % Calculate scaled behavTrace to match middle line height
-        scaled_behavTrace_window = scaled_behavTrace(window_range) * (max_fluorescence_current / max(scaled_behavTrace));
-
-        % Prepare to close the polygon for behavTrace
-        x_data_fill = time_range;
-        y_data_fill = scaled_behavTrace_window;
-
-        % Ensure the polygon starts and ends at the correct points
-        % Close polygon on the left side
-        if x_data_fill(1) > min(time_range)
-            x_data_fill = [min(time_range), x_data_fill];  % Start at the leftmost visible X-axis
-            y_data_fill = [0, y_data_fill];               % Close at Y=0
-        end
-
-        % Close polygon on the right side
-        if x_data_fill(end) < max(time_range)
-            x_data_fill = [x_data_fill, max(time_range)];  % End at the rightmost visible X-axis
-            y_data_fill = [y_data_fill, 0];                % Close at Y=0
-        end
-
-        % Ensure both ends are properly closed, especially when the trace hits 0
-        % Check and close the left side if it exists
-        if x_data_fill(1) <= min(time_range) && y_data_fill(1) > 0
-            x_data_fill = [min(time_range), x_data_fill];
-            y_data_fill = [0, y_data_fill];
-        end
-
-        % Check and close the right side if it exists
-        if x_data_fill(end) >= max(time_range) && y_data_fill(end) > 0
-            x_data_fill = [x_data_fill, max(time_range)];
-            y_data_fill = [y_data_fill, 0];
-        end
-
-        % Update behavior trace fill
-        set(hBehavTrace, 'XData', x_data_fill, 'YData', y_data_fill);
 
         % Update the middle line height
         set(hMiddleLine, 'YData', [0, max_fluorescence_current]);  % Match middle line height to current max
@@ -276,13 +271,12 @@ try
         % Pause to maintain playback speed
         pause(1 / (calcium_frame_rate * speed_factor));  % Speed up the playback
 
-        % Increment frame counters
+        % Increment calcium frame counter
         calcium_frame_count = calcium_frame_count + 1;
-        mpg_frame_count = mpg_frame_count + round(mpg_time_per_frame / calcium_time_per_frame);
 
         % Write the current frame to the video
         frame_image = getframe(gcf);
-        % writeVideo(video_writer, frame_image.cdata);
+        writeVideo(video_writer, frame_image.cdata);
     end
 
     % Close the video writer
