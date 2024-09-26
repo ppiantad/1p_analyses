@@ -1,6 +1,6 @@
 %% Run eventRelatedActivity first for whatever events you want to identify responsive neurons for
 clear zall_first_event zall_second_event zall_third_event sem_first_event sem_second_event sem_third_event zall_fourth_event sem_fourth_event
-select_mouse = 'BLA_Insc_24';
+select_mouse = 'BLA_Insc_35';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
@@ -213,12 +213,12 @@ xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
 [row_count_third, column_count_third] = size(zall_third_event);
 
 % Select 6 neurons from each array
-neurons_to_plot = 3;
-rand_first = randi([1 size(zall_first_event, 1)], 3, 1)
-rand_second = randi([1 size(zall_second_event, 1)], 3, 1)
-rand_third = randi([1 size(zall_third_event, 1)], 3, 1)
-selected_neurons_first = zall_first_event(1:neurons_to_plot, 1:trim_length); %[4 2 5]
-selected_neurons_second = zall_second_event(1:neurons_to_plot, 1:trim_length);
+neurons_to_plot = 2;
+rand_first = randi([1 size(zall_first_event, 1)], neurons_to_plot, 1)
+rand_second = randi([1 size(zall_second_event, 1)], neurons_to_plot, 1)
+rand_third = randi([1 size(zall_third_event, 1)], neurons_to_plot, 1)
+selected_neurons_first = zall_first_event(rand_first, 1:trim_length); %[4 2 5]
+selected_neurons_second = zall_second_event(rand_second, 1:trim_length);
 selected_neurons_third = zall_third_event(1:neurons_to_plot, 1:trim_length); %[10 8 3]
 % selected_neurons_third = zall_neutral_event(1:neurons_to_plot, 1:trim_length);
 
