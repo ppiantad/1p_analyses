@@ -54,11 +54,11 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
 epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
-period_of_interest = 'prechoice';
+period_of_interest = 'postchoice';
 
 if strcmp(epoc_to_align, 'stTime')
     period_of_interest = 'trial_start';
@@ -177,7 +177,7 @@ for ii = 1:size(fieldnames(final),1)
     session_string{iter} = session_to_analyze;
     event_classification_string{iter} = identity_classification_str;
     if isfield(final.(currentanimal), session_to_analyze)
-        BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
+        BehavData = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData; % final.(currentanimal).(session_to_analyze).uv.BehavData;
         % for labeling shock + 1 trials, for subsequent analysis
         if contains(session_to_analyze, 'RDT')
             for BehavDataRow = 1:size(BehavData,1)
@@ -197,7 +197,7 @@ for ii = 1:size(fieldnames(final),1)
                 end
             end
         end
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 2); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');

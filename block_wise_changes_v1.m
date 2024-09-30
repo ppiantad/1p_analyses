@@ -14,7 +14,7 @@
 % compared, i..e, prechoice B1 vs prechoice B2/3, which may correspond to
 % respClass_all_arrays 1 and 4, in the case of arrays of size 6. this code
 % will break and could make invalid comparisons if you do not adjust these values appropriately 
-if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11
+if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11 | size(respClass_all_array, 2) == 12
     comparison_arrays = [1 2 3; 8 9 10]
 elseif size(respClass_all_array, 2) == 6
     comparison_arrays = [1 2 3; 4 5 6]

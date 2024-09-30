@@ -1,8 +1,8 @@
 % Load the video file
-mpg_video = VideoReader('BLA-Insc-40_RDT_D1_2023-05-17T16_06_54.avi');
+mpg_video = VideoReader('BLA-Insc-24_RDT_D12022-08-10T15_37_21.avi');
 
 % Set the output video file properties
-outputVideo = VideoWriter('downsampled_video_insc_40_RDT_D1.avi');
+outputVideo = VideoWriter('downsampled_video_insc_24_RDT_D1.avi');
 outputVideo.FrameRate = 10; % Set the frame rate to 10 Hz
 open(outputVideo);
 

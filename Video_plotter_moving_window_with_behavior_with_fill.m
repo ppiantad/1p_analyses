@@ -2,10 +2,12 @@
 clearvars -except mouseData final
 %%
 
-BehavData = final.BLA_Insc_40.RDT_D1.uv.BehavData;
-ca_data = final.BLA_Insc_40.RDT_D1.CNMFe_data.C_raw;
-ca_data_denoised = final.BLA_Insc_40.RDT_D1.CNMFe_data.C;
-ca_data_spike_inf = final.BLA_Insc_40.RDT_D1.CNMFe_data.spike_prob;
+BehavData = final.BLA_Insc_24.RDT_D1.uv.BehavData;
+velocity_data = final_SLEAP.BLA_Insc_24.RDT_D1.zscored_SLEAP_data_velocity;
+
+ca_data = final.BLA_Insc_24.RDT_D1.CNMFe_data.C_raw;
+ca_data_denoised = final.BLA_Insc_24.RDT_D1.CNMFe_data.C;
+ca_data_spike_inf = final.BLA_Insc_24.RDT_D1.CNMFe_data.spike_prob;
 ca_data_norm = normalize(ca_data, 2);
 ca_data_denoised_norm = normalize(ca_data_denoised, 2);
 ca_data_spike_inf_norm = normalize(ca_data_spike_inf, 2);
@@ -20,7 +22,7 @@ behavior = 'open';
 speed_factor = 1000;  % Adjust this factor to speed up playback
 
 % --- Load the calcium imaging video from the .tiff file ---
-tiff_video_file = 'BLA-Insc-40_RDT_D1_2023-05-17-14-32-20_video_green_motion_corrected.tiff';  % Replace with your .tiff file
+tiff_video_file = 'BLA_INSC_24_RDT_D1__2022-08-10-14-07-58_video_green_motion_corrected.tiff';  % Replace with your .tiff file
 info = imfinfo(tiff_video_file);
 num_frames = numel(info);  % Number of frames in .tiff file
 video_height = info(1).Height;
@@ -34,24 +36,24 @@ end
 
 %%
 
-selected_neurons = [10, 128, 55];  % Modify this to include more neurons 45
+selected_neurons = [21, 1, 42];  % Modify this to include more neurons 10, 128, 55
 
 % --- Load the .MPG video ---
-mpg_video_file = 'downsampled_video_insc_40_RDT_D1.avi';  % Replace with your .MPG file
+mpg_video_file = 'downsampled_video_insc_24_RDT_D1.avi';  % Replace with your .MPG file
 mpg_video = VideoReader(mpg_video_file);
 mpg_num_frames = mpg_video.NumFrames;
 mpg_frame_rate = mpg_video.FrameRate;
 
 % Set frame rate for calcium imaging (adjusted)
-calcium_frame_rate = (final.BLA_Insc_40.RDT_D1.uv.dt)*100;  % Frame rate for the calcium imaging video
+calcium_frame_rate = (final.BLA_Insc_24.RDT_D1.uv.dt)*100;  % Frame rate for the calcium imaging video
 
 
 % Get neural data from mouseData
 
-contours = final.BLA_Insc_40.RDT_D1.CNMFe_data.Coor;
+contours = final.BLA_Insc_24.RDT_D1.CNMFe_data.Coor;
     
 
-fluorescence_data = final.BLA_Insc_40.RDT_D1.CNMFe_data.C_raw;
+fluorescence_data = final.BLA_Insc_24.RDT_D1.CNMFe_data.C_raw;
 fluorescence_data = normalize(fluorescence_data, 2);
 
 choices_only = BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3);
@@ -92,13 +94,13 @@ end
 % Get maximum fluorescence value to scale the traces
 max_fluorescence = max(fluorescence_data(selected_neurons));
 
-% Scale behavTrace to match the max fluorescence range
-scaled_behavTrace = behavTrace;
-scaled_behavTrace = scaled_behavTrace - nanmin(scaled_behavTrace);  % Shift to start from 0
-% Scale based on the max value found in valid behavTrace
-max_valid_behav = nanmax(scaled_behavTrace);
-scaled_behavTrace = (scaled_behavTrace / max_valid_behav) * max_fluorescence;  % Scale to max fluorescence value
-
+% % Scale behavTrace to match the max fluorescence range
+% scaled_behavTrace = behavTrace;
+% scaled_behavTrace = scaled_behavTrace - nanmin(scaled_behavTrace);  % Shift to start from 0
+% % Scale based on the max value found in valid behavTrace
+% max_valid_behav = nanmax(scaled_behavTrace);
+% scaled_behavTrace = (scaled_behavTrace / max_valid_behav) * max_fluorescence;  % Scale to max fluorescence value
+% 
 
 %%
 hRedLine = [];  % Initialize an empty array to store line handles
@@ -117,7 +119,7 @@ defaultans = {num2str(window_size), num2str(num_frames)};
 answer = inputdlg(prompt, dlg_title, num_lines, defaultans);
 start_frame = str2double(answer{1});
 end_frame = str2double(answer{2});
-scaled_behavTrace_2 = scaled_behavTrace(1, 400:end);  % Scale to max fluorescence value
+% scaled_behavTrace_2 = scaled_behavTrace(1, 400:end);  % Scale to max fluorescence value
 
 % Validate frame range
 if isnan(start_frame) || isnan(end_frame) || start_frame < 1 || end_frame > num_frames || start_frame > end_frame
@@ -136,6 +138,9 @@ max_frames = min([end_frame, mpg_num_frames, trace_length]);
 mpg_start_frame = round((start_frame / calcium_frame_rate) * mpg_frame_rate)-stTime_to_frames;  % Calculate the equivalent MPG frame
 mpg_frame_count = max(1, mpg_start_frame);  % Ensure we start from a valid frame (at least frame 1)
 
+velocity_data = velocity_data(:, mpg_start_frame:end);
+
+
 % Create color map for neurons
 cmap = lines(num_neurons);
 
@@ -153,7 +158,7 @@ for i = 1:length(selected_neurons)
     neuron_idx = selected_neurons(i);
     hContour(i) = plot(contours{neuron_idx}(1,:), contours{neuron_idx}(end,:), 'LineWidth', 1, 'Color', cmap(i, :));
 end
-caxis([750 900]);
+caxis([500 700]);
 colormap(gray);  % Set colormap to gray
 
 % --- MPG video subplot ---
@@ -169,6 +174,9 @@ hold on;
 % Initialize behavior trace with fill() (make sure it covers the whole X range)
 hBehavTrace = fill(nan, nan, 'w', 'FaceAlpha', 0.2);  % Initialize behavior trace
 hFluorescence = gobjects(length(selected_neurons), 1);  % Initialize fluorescence traces
+
+hVelocity = plot(nan, nan, 'LineWidth', 1, 'Color', cmap(i, :));  % Initialize traces
+
 for i = 1:length(selected_neurons)
     neuron_idx = selected_neurons(i);
     hFluorescence(i) = plot(nan, nan, 'LineWidth', 1, 'Color', cmap(i, :));  % Initialize traces
@@ -237,7 +245,11 @@ try
             set(hFluorescence(i), 'XData', time_range, 'YData', fluorescence_data(neuron_idx, window_range) + i * offset);
             max_fluorescence_current = max(max_fluorescence_current, max(fluorescence_data(neuron_idx, window_range) + i * offset));
         end
+         % Update velocity plot near the X-axis (remove any offset for velocity)
+         set(hVelocity, 'XData', time_range, 'YData', velocity_data(1, window_range));  % No offset for velocity
 
+
+        
         % Clear any previous red lines (if any exist)
         if exist('hRedLine', 'var')
             delete(hRedLine(:));  % Clear all previous lines
@@ -276,7 +288,7 @@ try
 
         % Write the current frame to the video
         frame_image = getframe(gcf);
-        writeVideo(video_writer, frame_image.cdata);
+        % writeVideo(video_writer, frame_image.cdata);
     end
 
     % Close the video writer
