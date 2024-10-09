@@ -2,7 +2,7 @@
 
 % data_for_clustering = zall_mean_all_array{1,1};
 
-data_for_clustering = neuron_mean_all_unnormalized{1,1};
+data_for_clustering = neuron_mean_array{1, 1}  ;
 
 data_for_clustering = zscore(data_for_clustering, 0, 2);
 

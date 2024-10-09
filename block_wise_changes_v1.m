@@ -120,11 +120,13 @@ lost_all = lost_prechoice == 1 | lost_postchoice == 1 | lost_consumption == 1;
 conserved_prechoice = prechoice_block_1 == event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
 conserved_postchoice = postchoice_reward_block_1 == event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
 conserved_consumption = collect_block_1 == event_for_figures & collect_blocks_2_and_3 == event_for_figures;
+conserved_all = conserved_prechoice == 1 | conserved_postchoice == 1 | conserved_consumption == 1;
+
 
 remapped_prechoice = prechoice_block_1 ~= event_for_figures & prechoice_blocks_2_and_3 == event_for_figures;
 remapped_postchoice = postchoice_reward_block_1 ~= event_for_figures & postchoice_reward_blocks_2_and_3 == event_for_figures;
 remapped_consumption = collect_block_1 ~= event_for_figures & collect_blocks_2_and_3 == event_for_figures;
-
+remapped_all = remapped_prechoice == 1 | remapped_postchoice == 1 | remapped_consumption == 1;
 
 
 sum(lost_all)

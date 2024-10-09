@@ -6,7 +6,7 @@ clear similarityMatrix
 
 data_to_load = {'BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat', 'BLA_C_raw_no_additional_filtering_Pre_RDT_RM_only_completed_sessions_zall_window_base_workspace_10_categories.mat'};
 
-load(data_to_load{1})
+load(data_to_load{2})
 
 if size(respClass_all_array, 2) == 10
     comparison_arrays_full = [1 2 3; 8 9 10]
