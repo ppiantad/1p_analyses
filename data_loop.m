@@ -16,7 +16,7 @@ load('BLA_panneuronal_Risk_2024_03_07_just_CNMFe_and_BehavData.mat')
 % load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
 
 %% Edit these uservariables with what you want to look at
-uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
+uv.evtWin = [-1 5]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
@@ -35,16 +35,37 @@ yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of tr
 
 epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
-animalIDs = (fieldnames(final));
+
 neuron_num = 0;
 use_normalized_time = 0;
 
 clear neuron_mean neuron_sem neuron_num zall_mean zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized sem_all zall_mean_all 
 
+if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
+    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final, fieldsToRemove{i})
+            final = rmfield(final, fieldsToRemove{i});
+        end
+    end
+elseif strcmp('RDT_D2', session_to_analyze)
+
+    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_39'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final, fieldsToRemove{i})
+            final = rmfield(final, fieldsToRemove{i});
+        end
+    end
+end
 
 %% FILTER TO GET UN-SHUFFLED DATA
 iter = iter+1;
 neuron_num = 0;
+animalIDs = (fieldnames(final));
+
+
 for ii = 1:size(animalIDs,1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
@@ -72,7 +93,7 @@ for ii = 1:size(animalIDs,1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 2);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');

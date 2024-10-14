@@ -234,7 +234,7 @@ figure;
 % d3 = PCScore{1,3};
 d1 = smoothforward(PCScore{1,1}, [1,size(PCScore{1,1},2);], 5, 15, 'mono_dir');
 d2 = smoothforward(PCScore{1,2}, [1,size(PCScore{1,2},2);], 5, 15, 'mono_dir');
-% d3 = smoothforward(PCScore{1,3}, [1,size(PCScore{1,3},2);], 5, 15, 'mono_dir');
+d3 = smoothforward(PCScore{1,3}, [1,size(PCScore{1,3},2);], 5, 15, 'mono_dir');
 
 downsampled_array_factor = numMeasurements/size(d1, 2);
 downsampled_start_time = size(d1, 2)/2;

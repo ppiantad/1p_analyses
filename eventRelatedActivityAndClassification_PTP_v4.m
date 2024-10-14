@@ -43,7 +43,8 @@ load('BLA_panneuronal_Risk_2024_04_19_just_CNMFe_and_BehavData.mat')
 
 %% Edit these user variables with what you want to look at
 uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
-uv.BLper = [-10 -5];
+% uv.BLper = [-10 -5];
+uv.BLper = [uv.evtWin(1) uv.evtWin(1)+3];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
@@ -54,11 +55,11 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
 epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
-period_of_interest = 'postchoice';
+period_of_interest = 'prechoice';
 
 if strcmp(epoc_to_align, 'stTime')
     period_of_interest = 'trial_start';
@@ -121,7 +122,8 @@ uv.sigma = 1.5;  %1.5                                                           
 % uv.evtSigWin.collect = [1 3]; %for REW collection [1 3]
 
 uv.resamples = 100                                                         %number of resamples to use in shuffle analysis 1000
-uv.zscore_to = 'window'; %
+uv.zscore_to = 'session'; %
+% 'window'
 % 'baseline'
 % 'session'
 uv.smoothing.method = 'savgol';
@@ -197,7 +199,7 @@ for ii = 1:size(fieldnames(final),1)
                 end
             end
         end
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1 ); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');

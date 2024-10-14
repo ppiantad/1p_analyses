@@ -1318,16 +1318,16 @@ end
 %%
 
 diff_all_mean_prechoice = neuron_mean_array{1, 8}(prechoice_block_1 == 1, :) - neuron_mean_array{1, 1}(prechoice_block_1 == 1, :)
-diff_all_sem_prechoice = neuron_sem_array{1, 8}(prechoice_block_1 == 1, :) - neuron_sem_array{1, 1}(prechoice_block_1 == 1, :)
+diff_all_sem_prechoice = sqrt(neuron_sem_array{1, 8}(prechoice_block_1 == 1, :).^2 + neuron_sem_array{1, 1}(prechoice_block_1 == 1, :).^2)
 
 
 
 diff_all_mean_postchoice = neuron_mean_array{1, 9}(postchoice_reward_block_1 == 1, :) - neuron_mean_array{1, 2}(postchoice_reward_block_1 == 1, :)
-diff_all_sem_postchoice = neuron_sem_array{1, 9}(postchoice_reward_block_1 == 1, :) - neuron_sem_array{1, 2}(postchoice_reward_block_1 == 1, :)
+diff_all_sem_postchoice = sqrt(neuron_sem_array{1, 9}(postchoice_reward_block_1 == 1, :).^2 + neuron_sem_array{1, 2}(postchoice_reward_block_1 == 1, :).^2)
 
 
 diff_all_mean_collect = neuron_mean_array{1, 10}(collect_block_1 == 1, :) - neuron_mean_array{1, 3}(collect_block_1 == 1, :)
-diff_all_sem_collect = neuron_sem_array{1, 10}(collect_block_1 == 1, :) - neuron_sem_array{1, 3}(collect_block_1 == 1, :)
+diff_all_sem_collect = sqrt(neuron_sem_array{1, 10}(collect_block_1 == 1, :).^2 + neuron_sem_array{1, 3}(collect_block_1 == 1, :).^2)
 
 
 trimmed_diff_all_mean_prechoice = diff_all_mean_prechoice(:, ts1 > -4 & ts1 <= 0);
@@ -1380,8 +1380,8 @@ h(1) = shadedErrorBar(ts1, mean(diff_all_mean_prechoice), mean(diff_all_sem_prec
 % h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), nanmean(neuron_sem_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), 'lineProps', {'color', 'b'});
 % legend([h(1).mainLine h(2).mainLine], '1st block', '2nd and 3rd block')
 xlim([-5 1]);
-ylim([-0.35 0.1])
-set(gca, 'YTick', [-.3 -.2 -.1 0 .1]);
+ylim([-0.55 0.2])
+set(gca, 'YTick', [-.5 -.4 -.3 -.2 -.1 0 .1 .2]);
 ytickformat('%.1f');
 % hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
 xline(0);
@@ -1403,8 +1403,8 @@ h(2) = shadedErrorBar(ts1, mean(diff_all_mean_postchoice), mean(diff_all_sem_pos
 % h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), nanmean(neuron_sem_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), 'lineProps', {'color', 'b'});
 % legend([h(1).mainLine h(2).mainLine], '1st block', '2nd and 3rd block')
 xlim([-1 3]);
-ylim([-0.35 0.1])
-set(gca, 'YTick', [-.3 -.2 -.1 0 .1]);
+ylim([-0.55 0.2])
+set(gca, 'YTick', [-.5 -.4 -.3 -.2 -.1 0 .1 .2]);
 ytickformat('%.1f');
 % hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
 xline(0);
@@ -1425,8 +1425,8 @@ h(3) = shadedErrorBar(ts1, mean(diff_all_mean_collect), mean(diff_all_sem_collec
 % h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), nanmean(neuron_sem_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), 'lineProps', {'color', 'b'});
 % legend([h(1).mainLine h(2).mainLine], '1st block', '2nd and 3rd block')
 xlim([0 4]);
-ylim([-0.35 0.1])
-set(gca, 'YTick', [-.3 -.2 -.1 0 .1]);
+ylim([-0.55 0.2])
+set(gca, 'YTick', [-.5 -.4 -.3 -.2 -.1 0 .1 .2]);
 ytickformat('%.1f');
 % hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
 xline(0);

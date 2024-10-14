@@ -32,7 +32,7 @@ for qq = 1:size(data_to_load, 2)
         % collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
         collect_block_1_mouse{kk, :}  = respClass_all_array_mouse{kk, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 2)} ~= inhib_or_excite;
         collect_blocks_2_and_3_mouse{kk, :}  = respClass_all_array_mouse{kk, comparison_arrays(2, 3)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 2)} ~= inhib_or_excite;
-
+        shk_neurons_mouse{kk, :} = respClass_all_array_mouse{kk, 4} == 1;
     end
 
 
@@ -62,10 +62,13 @@ for qq = 1:size(data_to_load, 2)
         conserved_sum(kk) = sum([sum(prechoice_conserved_mouse{kk, :}), sum(postchoice_conserved_mouse{kk, :}), sum(collection_conserved_mouse{kk, :})]);
         lost_sum(kk) = sum([sum(prechoice_lost_mouse{kk, :}), sum(postchoice_lost_mouse{kk, :}), sum(collection_lost_mouse{kk, :})]);
         remapped_sum(kk) = sum([sum(prechoice_remapped_mouse{kk, :}), sum(postchoice_remapped_mouse{kk, :}), sum(collection_remapped_mouse{kk, :})]);
+        shk_sum(kk) = sum(shk_neurons_mouse{kk, :})
 
         conserved_ratio(kk) = conserved_sum(kk)/size(prechoice_conserved_mouse{kk, :}, 2);
         lost_ratio(kk) = lost_sum(kk)/size(prechoice_conserved_mouse{kk, :}, 2);
         remapped_ratio(kk) = remapped_sum(kk)/size(prechoice_conserved_mouse{kk, :}, 2);
+        shk_ratio(kk) = shk_sum(kk)/size(shk_neurons_mouse{kk, :}, 2)
+
 
         conserved_prechoice_sum(kk) = sum(prechoice_conserved_mouse{kk, :});
         remapped_prechoice_sum(kk) = sum(prechoice_remapped_mouse{kk, :});
@@ -94,7 +97,7 @@ for qq = 1:size(data_to_load, 2)
         conserved_ratio_all(kk, qq) = conserved_ratio(kk);
         lost_ratio_all(kk, qq) = lost_ratio(kk);
         remapped_ratio_all(kk, qq) = remapped_ratio(kk);
-
+        
 
         conserved_sum_all(kk, qq) = conserved_sum(kk);
         lost_sum_all(kk, qq) = lost_sum(kk);
