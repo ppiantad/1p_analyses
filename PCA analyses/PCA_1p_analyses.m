@@ -1,7 +1,8 @@
 
-
+load('acton.mat')
+load('batlowW.mat')
 % % use zall array if you want to check how trials compare across block
-% neuron_mean_concat = horzcat(zall_mean_all_array{:});
+neuron_mean_concat = horzcat(zall_mean_all_array{:});
 
 % neuron_mean_concat = horzcat(neuron_mean_array{:});
 
@@ -9,19 +10,21 @@
 % % time
 % neuron_mean_concat = horzcat(neuron_mean_all_unnormalized{:});
 
-% neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
+% neuron_mean_concat = mean_center_columnwise(neuron_mean_concat);
+
+neuron_mean_concat = zscore(neuron_mean_concat, 0 , 1);
 
 % % use below to normalize THEN concatenate, which might be a better
 % approach?
 % Iterate through each cell and apply zscore
-for i = 1:size(neuron_mean_all_unnormalized, 2)
-    % Apply zscore to the data in each cell
-    neuron_mean_all_normalized{i} = zscore(neuron_mean_all_unnormalized{i}, 0, 2);
-    neuron_mean_reformat{i} = neuron_mean_all_unnormalized{i}';
-end
-% % 
-neuron_mean_concat = horzcat(neuron_mean_all_normalized{:});
-neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
+% for i = 1:size(neuron_mean_all_unnormalized, 2)
+%     % Apply zscore to the data in each cell
+%     neuron_mean_all_normalized{i} = zscore(neuron_mean_all_unnormalized{i}, 0, 2);
+%     neuron_mean_reformat{i} = neuron_mean_all_unnormalized{i}';
+% end
+% % % 
+% neuron_mean_concat = horzcat(neuron_mean_all_normalized{:});
+% neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
 
 neuron_mean_reformat_concat = vertcat(neuron_mean_reformat{:});
 neuron_mean_reformat_concat_normalized = zscore(neuron_mean_reformat_concat, 0 , 1);
@@ -102,7 +105,14 @@ median_collect_time_block_3 = median(full_table.collectionTime(full_table.Block 
 for zz = 1:size(concatenatedTable_all, 2)
     median_start_time(1, zz) = median(concatenatedTable_all{1, zz}.stTime - concatenatedTable_all{1, zz}.choiceTime)
     median_collect_time(1, zz) = median(concatenatedTable_all{1, zz}.collectionTime - concatenatedTable_all{1, zz}.stTime)
+    [~, closest_index_start(zz)] = min(abs(ts1 - median_start_time(1, zz)));
+    [~, closest_index_collect(zz)] = min(abs(ts1 - median_collect_time(1, zz)));
 end
+
+
+
+
+
 
 %% PCA
 % Load your data if not already loaded
@@ -191,7 +201,7 @@ end
 
 % Create the scree plot
 figure;
-bar(explained, 'FaceColor', [0.2 0.6 0.8]); % Creates a bar plot with custom color
+bar(explained(1:40, :), 'FaceColor', [0.2 0.6 0.8]); % Creates a bar plot with custom color
 title('Scree Plot');
 xlabel('Principal Component');
 ylabel('Variance Explained (%)');
@@ -223,76 +233,106 @@ hold on
 
 
 %%
-% Create a figure and plot the initial state of the lines
+% % Create a figure and plot the initial state of the lines
+% figure;
+% % d1 = smoothforward(PCScore{1,1}(:,1:5:end), [1,size(PCScore{1,1},2);], 5, 15, 'mono_dir');
+% % d2 = smoothforward(PCScore{1,2}(:,1:5:end), [1,size(PCScore{1,2},2);], 5, 15, 'mono_dir');
+% % d3 = smoothforward(PCScore{1,3}(:,1:5:end), [1,size(PCScore{1,3},2);], 5, 15, 'mono_dir');
+% 
+% % d1 = PCScore{1,1};
+% % d2 = PCScore{1,2};
+% % d3 = PCScore{1,3};
+% d1 = smoothforward(PCScore{1,1}, [1,size(PCScore{1,1},2);], 5, 15, 'mono_dir');
+% d2 = smoothforward(PCScore{1,2}, [1,size(PCScore{1,2},2);], 5, 15, 'mono_dir');
+% % d3 = smoothforward(PCScore{1,3}, [1,size(PCScore{1,3},2);], 5, 15, 'mono_dir');
+% 
+% downsampled_array_factor = numMeasurements/size(d1, 2);
+% downsampled_start_time = size(d1, 2)/2;
+% downsampled_median_choice_time_block_1 = downsampled_start_time+ (median_choice_time_block_1/downsampled_array_factor);
+% downsampled_median_choice_time_block_2 = downsampled_start_time+ (median_choice_time_block_2/downsampled_array_factor);
+% downsampled_median_choice_time_block_3 = downsampled_start_time+ (median_choice_time_block_3/downsampled_array_factor);
+% 
+% downsampled_median_collect_time_block_1 = downsampled_start_time+ (median_collect_time_block_1/downsampled_array_factor);
+% downsampled_median_collect_time_block_2 = downsampled_start_time+ (median_collect_time_block_2/downsampled_array_factor);
+% downsampled_median_collect_time_block_3 = downsampled_start_time+ (median_collect_time_block_3/downsampled_array_factor);
+% 
+% find(ts1 == ceil(median_start_time_block_1))
+% 
+% 
+% d_marker_loc = ceil([downsampled_median_choice_time_block_1, downsampled_median_choice_time_block_2, downsampled_median_choice_time_block_3]);
+% 
+% 
+% 
+%     hold on;
+%     p1 = plot(d1(1, :), d1(2, :), 'DisplayName', d_legend{1});
+%     p1.Color(1: 3) = l_color{1}; p1.Color(4) = l_opacity; p1.LineWidth = l_width;
+%     p1.Marker = '.'; p1.MarkerFaceColor = p_color{1}; p1.MarkerEdgeColor = p_color{1}; p1.MarkerIndices = [1: p_freq: size(d1, 2)]; p1.MarkerSize = p_size;
+%     e11 = scatter(d1(1, closest_index_start_time_large), d1(2, closest_index_start_time_large), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
+%     e12 = scatter(d1(1, ts1 == 0), d1(2, ts1 == 0), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
+%     e13 = scatter(d1(1, closest_index_collect_time_large), d1(2, closest_index_collect_time_large), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
+% %     e13 = scatter(d1(1, d_marker_loc(3)), d1(2, d_marker_loc(3)), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
+% 
+%     p2 = plot(d2(1, :), d2(2, :), 'DisplayName', d_legend{2});
+%     p2.Color(1: 3) = l_color{2}; p2.Color(4) = l_opacity; p2.LineWidth = l_width;
+%     p2.Marker = '.'; p2.MarkerFaceColor = p_color{2}; p2.MarkerEdgeColor = p_color{2}; p2.MarkerIndices = [1: p_freq: size(d2, 2)]; p2.MarkerSize = p_size;
+%     e14 = scatter(d2(1, closest_index_start_time_small), d2(2, closest_index_start_time_small), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
+%     e15 = scatter(d2(1, ts1 == 0), d2(2, ts1 == 0), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
+%     e16 = scatter(d2(1, closest_index_collect_time_small), d2(2, closest_index_collect_time_small), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
+% %    
+%     p3 = plot(d3(1, :), d3(2, :), 'DisplayName', d_legend{3});
+%     p3.Color(1: 3) = l_color{3}; p3.Color(4) = l_opacity; p3.LineWidth = l_width;
+%     p3.Marker = '.'; p3.MarkerFaceColor = p_color{3}; p3.MarkerEdgeColor = p_color{3}; p3.MarkerIndices = [1: p_freq: size(d3, 2)]; p3.MarkerSize = p_size;
+%     e17 = scatter(d3(1, closest_index_start_time_block_3), d3(2, closest_index_start_time_block_3), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
+%     e18 = scatter(d3(1, ts1 == 0), d3(2, ts1 == 0), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
+%     e19 = scatter(d3(1, closest_index_collect_time_block_3), d3(2, closest_index_collect_time_block_3), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
+% %    
+%     hold off;
+% 
+% 
+% 
+% lines = {d1, d2, d3};
+% 
+% line_1 = d1; 
+% line_2 = d2;
+% line_3 = d3;
+% 
+% 
+% % Parameters for animation
+% numLines = size(lines, 2); % Total number of lines
+% numFrames = size(d1, 2); % Total number of frames (assuming 40 data points)
+% pauseTime = 0.1; % Pause time between frames (adjust as needed)
+% 
+
+d_legend = eventNames;
+d_marker_loc = [1, 11, 21];
+d_marker_size = 60;
+d_marker_legend = {'Start', 'CS Onset', 'End'};
+l_color = {[120, 114, 176]/255, [1, 1, 1]/255, [227, 124, 39]/255};
+l_opacity = 0.6;
+l_width = 5;
+p_color = ["black",  "black",  "black"];
+p_size = 5;
+p_freq = 1;
+
+line_color_space = round(linspace(1, size(acton, 1), numConditions));
+
+
 figure;
-% d1 = smoothforward(PCScore{1,1}(:,1:5:end), [1,size(PCScore{1,1},2);], 5, 15, 'mono_dir');
-% d2 = smoothforward(PCScore{1,2}(:,1:5:end), [1,size(PCScore{1,2},2);], 5, 15, 'mono_dir');
-% d3 = smoothforward(PCScore{1,3}(:,1:5:end), [1,size(PCScore{1,3},2);], 5, 15, 'mono_dir');
-
-% d1 = PCScore{1,1};
-% d2 = PCScore{1,2};
-% d3 = PCScore{1,3};
-d1 = smoothforward(PCScore{1,1}, [1,size(PCScore{1,1},2);], 5, 15, 'mono_dir');
-d2 = smoothforward(PCScore{1,2}, [1,size(PCScore{1,2},2);], 5, 15, 'mono_dir');
-d3 = smoothforward(PCScore{1,3}, [1,size(PCScore{1,3},2);], 5, 15, 'mono_dir');
-
-downsampled_array_factor = numMeasurements/size(d1, 2);
-downsampled_start_time = size(d1, 2)/2;
-downsampled_median_choice_time_block_1 = downsampled_start_time+ (median_choice_time_block_1/downsampled_array_factor);
-downsampled_median_choice_time_block_2 = downsampled_start_time+ (median_choice_time_block_2/downsampled_array_factor);
-downsampled_median_choice_time_block_3 = downsampled_start_time+ (median_choice_time_block_3/downsampled_array_factor);
-
-downsampled_median_collect_time_block_1 = downsampled_start_time+ (median_collect_time_block_1/downsampled_array_factor);
-downsampled_median_collect_time_block_2 = downsampled_start_time+ (median_collect_time_block_2/downsampled_array_factor);
-downsampled_median_collect_time_block_3 = downsampled_start_time+ (median_collect_time_block_3/downsampled_array_factor);
-
-find(ts1 == ceil(median_start_time_block_1))
-
-
-d_marker_loc = ceil([downsampled_median_choice_time_block_1, downsampled_median_choice_time_block_2, downsampled_median_choice_time_block_3]);
-
-
-
+for ff = 1:numConditions
+    PCA_traj{ff} = smoothforward(PCScore{1,ff}, [1,size(PCScore{1,ff},2);], 5, 15, 'mono_dir');
     hold on;
-    p1 = plot(d1(1, :), d1(2, :), 'DisplayName', d_legend{1});
-    p1.Color(1: 3) = l_color{1}; p1.Color(4) = l_opacity; p1.LineWidth = l_width;
-    p1.Marker = '.'; p1.MarkerFaceColor = p_color{1}; p1.MarkerEdgeColor = p_color{1}; p1.MarkerIndices = [1: p_freq: size(d1, 2)]; p1.MarkerSize = p_size;
-    e11 = scatter(d1(1, closest_index_start_time_large), d1(2, closest_index_start_time_large), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
-    e12 = scatter(d1(1, ts1 == 0), d1(2, ts1 == 0), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
-    e13 = scatter(d1(1, closest_index_collect_time_large), d1(2, closest_index_collect_time_large), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
+    p1 = plot(PCA_traj{ff}(1, :), PCA_traj{ff}(2, :), 'DisplayName', d_legend{ff});
+    p1.Color(1: 3) = acton(line_color_space(ff), :); 
+    p1.Color(4) = l_opacity; 
+    p1.LineWidth = l_width;
+    p1.Marker = '.'; p1.MarkerFaceColor = p_color{1}; p1.MarkerEdgeColor = p_color{1}; p1.MarkerIndices = [1: p_freq: size(PCA_traj{ff}, 2)]; p1.MarkerSize = p_size;
+    e11 = scatter(PCA_traj{ff}(1, closest_index_start(ff)), PCA_traj{ff}(2, closest_index_start(ff)), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
+    e12 = scatter(PCA_traj{ff}(1, ts1 == 0), PCA_traj{ff}(2, ts1 == 0), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
+    e13 = scatter(PCA_traj{ff}(1, closest_index_collect(ff)), PCA_traj{ff}(2, closest_index_collect(ff)), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
 %     e13 = scatter(d1(1, d_marker_loc(3)), d1(2, d_marker_loc(3)), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
-    
-    p2 = plot(d2(1, :), d2(2, :), 'DisplayName', d_legend{2});
-    p2.Color(1: 3) = l_color{2}; p2.Color(4) = l_opacity; p2.LineWidth = l_width;
-    p2.Marker = '.'; p2.MarkerFaceColor = p_color{2}; p2.MarkerEdgeColor = p_color{2}; p2.MarkerIndices = [1: p_freq: size(d2, 2)]; p2.MarkerSize = p_size;
-    e14 = scatter(d2(1, closest_index_start_time_small), d2(2, closest_index_start_time_small), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
-    e15 = scatter(d2(1, ts1 == 0), d2(2, ts1 == 0), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
-    e16 = scatter(d2(1, closest_index_collect_time_small), d2(2, closest_index_collect_time_small), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
-%    
-    p3 = plot(d3(1, :), d3(2, :), 'DisplayName', d_legend{3});
-    p3.Color(1: 3) = l_color{3}; p3.Color(4) = l_opacity; p3.LineWidth = l_width;
-    p3.Marker = '.'; p3.MarkerFaceColor = p_color{3}; p3.MarkerEdgeColor = p_color{3}; p3.MarkerIndices = [1: p_freq: size(d3, 2)]; p3.MarkerSize = p_size;
-    e17 = scatter(d3(1, closest_index_start_time_block_3), d3(2, closest_index_start_time_block_3), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
-    e18 = scatter(d3(1, ts1 == 0), d3(2, ts1 == 0), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
-    e19 = scatter(d3(1, closest_index_collect_time_block_3), d3(2, closest_index_collect_time_block_3), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
-%    
-    hold off;
+    legend
 
-
-
-lines = {d1, d2, d3};
-
-line_1 = d1; 
-line_2 = d2;
-line_3 = d3;
-
-
-% Parameters for animation
-numLines = size(lines, 2); % Total number of lines
-numFrames = size(d1, 2); % Total number of frames (assuming 40 data points)
-pauseTime = 0.1; % Pause time between frames (adjust as needed)
-
-
+end
 
 
 
@@ -341,4 +381,27 @@ for i = 1:numLines
 end
 
 
+%% based on ChatGPT to find the angle over the first 10 samples of the PCScore arrays
+
+% Initialize an array to store the angles
+angles = zeros(1, 2); % Since PCScore is a 1x2 cell array
+
+for i = 1:2
+    % Extract the first two rows (X and Y coordinates) for each cell
+    X = PCScore{i}(1, :); % First row contains X coordinates
+    Y = PCScore{i}(2, :); % Second row contains Y coordinates
+    
+    % Compute the vector between the first index and the 10th index
+    deltaX = X(10) - X(1);
+    deltaY = Y(10) - Y(1);
+    
+    % Calculate the angle in radians using the arctangent
+    angle = atan2(deltaY, deltaX); % atan2 gives the angle relative to X-axis
+    
+    % Convert the angle to degrees for easier interpretation
+    angles(i) = rad2deg(angle);
+end
+
+% Display the calculated angles for each trajectory
+disp(angles);
 

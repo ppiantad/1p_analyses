@@ -270,4 +270,18 @@ legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Locat
 ylim([-0.6 1.0]);
 hold off
 
+%%
+prechoice_to_shk = prechoice_block_1 == 1 & respClass_all_array{1,4} == 1;
+sum(prechoice_to_shk)
+postchoice_reward_to_shk = postchoice_reward_block_1 == 1 & respClass_all_array{1,4} == 1;
+sum(postchoice_reward_to_shk)
+collect_to_shk = collect_block_1 == 1 & respClass_all_array{1,4} == 1;
+sum(collect_to_shk)
+
+nonresp_all = prechoice_block_1 == 0 & postchoice_reward_block_1 == 0 & collect_block_1 == 0;
+sum(nonresp_all)
+
+sum([sum(nonresp_all) sum(collect_block_1) sum(postchoice_reward_block_1) sum(prechoice_block_1)])
+nonresp_to_shk = nonresp_all == 1 & respClass_all_array{1,4} == 1;
+sum(nonresp_to_shk)
 
