@@ -1,18 +1,24 @@
 
 load('acton.mat')
 load('batlowW.mat')
-% % use zall array if you want to check how trials compare across block
-neuron_mean_concat = horzcat(zall_mean_all_array{:});
 
+% MY APPROACH
+% % use zall array if you want to check how trials compare across block
+% neuron_mean_concat = horzcat(zall_mean_all_array{:});
+% neuron_mean_concat = zscore(neuron_mean_concat, 0 , 1);
+
+
+% neuron_mean_concat = horzcat(reformat_zall_mean_array{:});
 % neuron_mean_concat = horzcat(neuron_mean_array{:});
 
+% RUAIRI APPROACH
 % % use neuron_mean_all_unnorm if you want to check how things differ across
 % % time
-% neuron_mean_concat = horzcat(neuron_mean_all_unnormalized{:});
+neuron_mean_concat = horzcat(neuron_mean_all_unnormalized{:});
 
-% neuron_mean_concat = mean_center_columnwise(neuron_mean_concat);
+neuron_mean_concat = mean_center_columnwise(neuron_mean_concat);
 
-neuron_mean_concat = zscore(neuron_mean_concat, 0 , 1);
+
 
 % % use below to normalize THEN concatenate, which might be a better
 % approach?
@@ -333,6 +339,36 @@ for ff = 1:numConditions
     legend
 
 end
+
+%%
+
+% Initialize a cell array to store the path lengths
+path_lengths = cell(1, 2);
+
+% Loop through each cell in PCA_traj
+for i = 1:length(PCA_traj)
+    % Get the current 4x80 double array
+    data = PCA_traj{i};
+    
+    % Extract the X and Y coordinates (first 2 rows)
+    X = data(1, :);
+    Y = data(2, :);
+    
+    % Calculate the differences between consecutive points
+    deltaX = diff(X);
+    deltaY = diff(Y);
+    
+    % Calculate the Euclidean distances between consecutive points
+    distances = sqrt(deltaX.^2 + deltaY.^2);
+    
+    % Sum the distances to get the total path length
+    path_lengths{i} = sum(distances);
+end
+
+% Display the results
+disp('Path lengths for each trajectory:');
+disp(path_lengths);
+
 
 
 

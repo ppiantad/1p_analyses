@@ -16,7 +16,7 @@ load('BLA_panneuronal_Risk_2024_03_07_just_CNMFe_and_BehavData.mat')
 % load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
 
 %% Edit these uservariables with what you want to look at
-uv.evtWin = [-3 5]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
+uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
@@ -93,7 +93,7 @@ for ii = 1:size(animalIDs,1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 0.3, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3);
         % BehavData = BehavData(1:2, :);
         % trials = trials(1:2, :);
         varargin_strings = string(varargin_identity_class);
@@ -211,6 +211,7 @@ for ii = 1:size(animalIDs,1)
                 sem_mouse{ii, iter}(u) = {nanstd(zall,1)/(sqrt(size(zall, 1)))};
                 caTraceTrials_mouse{ii, iter}(u) = {caTraceTrials(:, 1:size(ts1, 2))};
                 neuron_mean_mouse_unnormalized{ii, iter}(u,: ) = mean(caTraceTrials, 1);
+                unnormalized_by_mouse{ii, iter}(u) = {caTraceTrials(:, 1:size(ts1, 2))};
                 neuron_sem_mouse_unnormalized{ii, iter}(u,: ) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
                 neuron_mean_mouse{ii, iter}(u,: ) = mean(zall, 1);
                 neuron_sem_mouse{ii, iter}(u,: ) = nanstd(zall,1)/(sqrt(size(zall, 1)));

@@ -509,7 +509,7 @@ test = [neuron_mean_array{1, 1}(prechoice_block_1 == 1, :)];
 % test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1, :)];
 test = [test; neuron_mean_array{1, 1}(postchoice_reward_block_1 == 1, :)];
 test = [test; neuron_mean_array{1, 1}(collect_block_1 == 1,:)];
-test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1,3}~=1, :)];
+% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1,3}~=1, :)];
 
 pre_choice_index = [1:sum(prechoice_block_1)];
 post_choice_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(postchoice_reward_block_1)];
@@ -1153,7 +1153,7 @@ variable_to_correlate = delay_to_collect_post_shk_by_mouse;
 
 
 %%
-array_for_means = 2; 
+array_for_means = 1; 
 
 % Initialize the new cell array to store the mean values
 meanZallMouse = cell(size(zall_mouse, 2), 1);
@@ -1299,8 +1299,8 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1==1);
-not_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1~=1);
+only_shk_responsive_corrs = allCorrelations(prechoice_block_1==1);
+not_shk_responsive_corrs = allCorrelations(prechoice_block_1~=1);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
 figure;

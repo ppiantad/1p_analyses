@@ -1,5 +1,5 @@
 animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
 b1_large_path_length = [];
 b2_large_path_length = [];
@@ -130,10 +130,11 @@ for dd = 1:size(animalIDs)
 
             distances_matrix{qq} = distances;
             path_length_array(qq) = path_length;
+            
             clear coordinates distances path_length
         end
-
-
+        
+      
         b1_large_path_length(dd) = mean(path_length_array(1, BehavData.bigSmall == 1.2 & BehavData.Block == 1));
         b2_large_path_length(dd) = mean(path_length_array(1, BehavData.bigSmall == 1.2 & BehavData.Block == 2));
         b3_large_path_length(dd) = mean(path_length_array(1, BehavData.bigSmall == 1.2 & BehavData.Block == 3));
@@ -145,4 +146,8 @@ for dd = 1:size(animalIDs)
         large_path_length_all_blocks(dd) = mean(path_length_array(1, BehavData.bigSmall == 1.2));
         small_path_length_all_blocks(dd) = mean(path_length_array(1, BehavData.bigSmall == 0.3));
     end
+
+    b1_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 1 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
+    b2_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 2 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
+    b3_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 3 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
 end

@@ -234,3 +234,15 @@ aa_large = zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :);
 aa_small = zall_mean_all_array{1, 13}(respClass_all_array{1, 11}==1, :);
 aa_large = aa_large(~any(isnan(aa_large), 2), :);
 aa_small = aa_small(~any(isnan(aa_small), 2), :);
+
+
+%%
+% run data_loop_SLEAP
+% [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0);
+% [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1);
+
+
+mean_data_array = {zall_mean_all_array{1, 1}, zall_mean_all_array{1, 2}};
+sem_data_array = {sem_all_array{1, 1}  , sem_all_array{1, 2}};
+
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
