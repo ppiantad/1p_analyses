@@ -11,7 +11,7 @@ ts1 = (-10:(uv.dt):10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA';
+metaDirectory = 'D:\MATLAB\Sean CNMFe\pan-neuronal BLA';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -385,6 +385,11 @@ for zz = 1:size(metafolder_list, 1)
                                 elseif strcmp(current_animal, 'BLA_Insc_16')
                                     stTime = stTime+0.698;
                                 end
+                            elseif strcmp(current_session, 'RDT_D1')
+                                 if strcmp(current_animal, 'BLA_Insc_26')
+                                    stTime = stTime+1.166;
+                                 end
+
                             elseif strcmp(current_session, 'RDT_D3')
                                  if strcmp(current_animal, 'BLA_Insc_09')
                                     stTime = stTime+1.758;

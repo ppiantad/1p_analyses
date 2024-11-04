@@ -1148,6 +1148,27 @@ for q = 1:length (behav_tbl_iter{1, 1})
 
 end
 
+trial_choice_times_concat = cat(1, trial_choice_times_by_mouse{:});
+rew_collect_times_concat = cat(1, delay_to_collect_post_shk_by_mouse{:});
+
+bar_separation_value = 3;
+
+figure;
+width = 250; % Width of the figure
+height = 500; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+swarmchart(ones(1, length(trial_choice_times_concat)), trial_choice_times_concat)
+hold on
+swarmchart(ones(1, length(rew_collect_times_concat))*bar_separation_value, rew_collect_times_concat)
+
+% yline(mean(only_shk_responsive_corrs), ones(length(only_shk_responsive_corrs)))
+% plot([0.5; 1.5], [mean(only_shk_responsive_corrs); mean(only_shk_responsive_corrs)], 'LineWidth',3)
+% plot([bar_separation_value-.5], [mean(trial_choice_times_concat)], 'LineWidth',3)
+yline(0);
+xtickformat('%.1f');
+ytickformat('%.1f');
+hold off
+
 
 variable_to_correlate = delay_to_collect_post_shk_by_mouse;
 
@@ -1588,3 +1609,6 @@ text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
 % ylim([0 1.1])
 % xlim([0 1.1])
 hold off;
+
+%%
+

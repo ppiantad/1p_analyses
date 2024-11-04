@@ -1,6 +1,6 @@
 %% run eventRelatedActivity and then run data_loop to get AA for Block 1 and Block 2. should continue to update this & do a real probe of AAs
-% actually just load the x10 dataset, then run data_loop with AA, 1, Block,
-% 2 and AA, 1, Block, 3
+% actually just load the x10 dataset, then run data_loop with AA, 1 and AA, 2. plus run
+% eventRelatedActivityAndClassification_PTP_v4.m with AA, 1 as filters
 
 
 
@@ -11,7 +11,7 @@
 % actually overlap minimally overlap (but intersections are 0), and 1 node
 % that has 1 overlap does not overlap at all. 
 shk_ind = find(respClass_all_array{1,4} == 1);
-% pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
+pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
 consum_active_ind = find(respClass_all_array{1,3} == 1);
 consum_active_block_2_3 = find(respClass_all_array{1,10} == 1);
 post_choice_active_ind = find(respClass_all_array{1,2} == 1);
@@ -170,8 +170,8 @@ xlim([-8 8]);
 ylim([-0.5 0.5]);
 % Set X-axis ticks
 set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.5 0 0.5]);
-shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'r'});
-hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 13}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 13}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 11}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 11}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
 
 xline(0);
 xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})

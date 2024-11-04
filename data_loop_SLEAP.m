@@ -50,7 +50,11 @@ for ii = 1:size(animalIDs,1)
         zall(1, 1:size(ts1, 2)) = nan;
         sem_all(ii, 1:size(ts1, 2)) = nan;
         zall_mean_all(ii,1:size(ts1, 2)) = nan;
-
+    elseif isempty(fieldnames(final_SLEAP.(currentanimal).(session_to_analyze)))
+        caTraceTrials(1, 1:size(ts1, 2)) = NaN;
+        zall(1, 1:size(ts1, 2)) = NaN;
+        sem_all(ii, 1:size(ts1, 2)) = NaN;
+        zall_mean_all(ii,1:size(ts1, 2)) = NaN;
     elseif isfield(final_SLEAP.(currentanimal), session_to_analyze)
         BehavData = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData;
         % for labeling shock + 1 trials, for subsequent analysis
@@ -71,7 +75,7 @@ for ii = 1:size(animalIDs,1)
             end
         end
 
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
@@ -120,7 +124,7 @@ for ii = 1:size(animalIDs,1)
         velocity_data = final_SLEAP.(currentanimal).(session_to_analyze).SLEAP_data.vel_filtered_2';
         % comment out below if you don't want to zscore traces prior to the
         % rest of the analysis
-        velocity_data = zscore(velocity_data, 0, 2);
+        % velocity_data = zscore(velocity_data, 0, 2);
 
         num_samples = size(velocity_data, 2);
 
@@ -169,8 +173,11 @@ for ii = 1:size(animalIDs,1)
 
                 zall_array_session{ii} = zall_session(:, 1:size(ts1, 2));
                 neuron_mean_unnormalized(ii,:) = nanmean(caTraceTrials,1);
+                neuron_sem_unnormalized(ii,:) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
                 zall_array{ii} = zall(:, 1:size(ts1, 2));
                 zall_mouse{ii, iter}(u) = {zall(:, 1:size(ts1, 2))};
+                unnormalized_mouse{ii, iter}(u) = {caTraceTrials(:, 1:size(ts1, 2))};
+                unnormalized_sem_mouse{ii, iter}(u) = {nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)))};
                 sem_mouse{ii, iter}(u) = {nanstd(zall,1)/(sqrt(size(zall, 1)))};
                 caTraceTrials_mouse{ii, iter}(u) = {caTraceTrials(:, 1:size(ts1, 2))};
                 neuron_mean_mouse_unnormalized{ii, iter}(u,: ) = mean(caTraceTrials, 1);
@@ -196,6 +203,7 @@ for ii = 1:size(animalIDs,1)
 end
 zall_mean_all_array(iter) = {zall_mean_all};
 neuron_mean_all_unnormalized(iter) = {neuron_mean_unnormalized};
+neuron_sem_all_unnormalized(iter) = {neuron_sem_unnormalized};
 sem_all_array(iter) = {sem_all};
 varargin_list{iter,:} = varargin_identity_class;
 behav_tbl_iter{iter, :} = behav_tbl_temp;
@@ -205,6 +213,47 @@ all_filter_args{iter,:} = filter_args;
 full_filter_string{iter} = strcat(epoc_to_align_all{iter,:}, '.', all_filter_args{iter,:});
 
 clear behav_tbl_temp
+
+
+%% 
+% Get AUCs for the relevant periods for the 3 defined events
+% Define time windows
+pre_choice_window = [-4 0];     % Pre-choice period: -4 to 0 s
+post_choice_window = [0 2];     % Post-choice period: 0 to 2 s
+consumption_window = [2 4];     % Consumption period: 1 to 3 s if using data aligned to collect, do 0 to 2 to keep things consistent
+
+% Find indices corresponding to each time window
+pre_choice_indices = ts1 >= pre_choice_window(1) & ts1 <= pre_choice_window(2);
+post_choice_indices = ts1 >= post_choice_window(1) & ts1 <= post_choice_window(2);
+consumption_indices = ts1 >= consumption_window(1) & ts1 <= consumption_window(2);
+
+
+% Initialize arrays to store AUCs
+% auc_pre_choice = zeros(size(neuron_mean_array));
+% auc_post_choice = zeros(size(neuron_mean_array));
+% auc_consumption = zeros(size(neuron_mean_array));
+pre_choice_neuron_count = 0;
+% Iterate over each element of neuron_mean_array
+for j = 1:size(unnormalized_mouse, 2)
+    for i = 1:size(unnormalized_mouse, 1)
+        % Select data where exclusive_activated_session_1 is 1
+
+
+        selected_data = unnormalized_mouse{i, j}{1, 1};
+        % % Extract time variable (assuming it's named 'ts1')
+        % ts1_data = ts1{i}(exclusive_activated_session_1{i} == 1);
+
+
+
+        % Compute AUC for each time window
+        % AUC(qq,1)=trapz(ZallMean(qq,ts1(1,:) < 0 & ts1(1,:) > -5)); % -0 -2 %proxy for pre-choice
+        auc_pre_choice(i, j) = mean(trapz(selected_data(:, pre_choice_indices), 2));
+        auc_post_choice(i, j) = mean(trapz(selected_data(:, post_choice_indices), 2));
+        auc_consumption(i, j) = mean(trapz(selected_data(:, consumption_indices), 2));
+
+
+    end
+end
 
 %% FILTER TO GET, ALIGNED SHUFFLED CA DATA
 

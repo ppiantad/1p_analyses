@@ -1623,3 +1623,65 @@ xline(0);
 % xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
 % xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from choice (s)');
+
+%%
+%% create correlation matrix heatmap with exclusively active cells
+test = [];
+test = [neuron_mean_array{1, 8}(prechoice_block_1 == 1, :)];
+% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1, :)];
+test = [test; neuron_mean_array{1, 9}(postchoice_reward_block_1 == 1, :)];
+test = [test; neuron_mean_array{1, 10}(collect_block_1 == 1,:)];
+% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1,3}~=1, :)];
+
+pre_choice_index = [1:sum(prechoice_block_1)];
+post_choice_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(postchoice_reward_block_1)];
+consumption_index = [post_choice_index(end)+1:post_choice_index(end)+sum(collect_block_1)];
+neutral_index = [consumption_index(end)+1:consumption_index(end)+sum(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1)];
+
+
+data = test;
+
+alpha = 0.0001;
+
+% Initialize matrices to store correlation coefficients and p-values
+correlation_matrix = zeros(size(data, 1));
+p_value_matrix = zeros(size(data, 1));
+
+% Calculate correlation coefficients and p-values between rows
+for i = 1:size(data, 1)
+    for j = 1:size(data, 1)
+        [corr_coeff, p_value] = corrcoef(data(i, :)', data(j, :)');
+        correlation_matrix(i, j) = corr_coeff(1, 2); % Store correlation coefficient
+        p_value_matrix(i, j) = p_value(1, 2); % Store p-value
+    end
+end
+
+% Plot the correlation matrix
+figure;
+imagesc(correlation_matrix);
+
+axis square; % Make the plot square for better visualization
+% title('Correlation Matrix');
+% xlabel('Neuron Number');
+% ylabel('Neuron Number');
+ylim([1  size(test, 1)])
+% Show row and column indices on the plot
+xticks([1  size(test, 1)]);
+yticks([1  size(test, 1)]);
+
+% If you want to customize the color map, you can use colormap function
+% For example, using a blue-white-red colormap:
+colormap(bluewhitered);
+
+% If you want to limit the color scale to the range [0, 1]
+caxis([-1 1]); % Assuming correlations range from -1 to 1
+% Add a separate axes for the colorbar to associate it only with the upper tile
+c = colorbar('eastoutside');
+set(c, 'YTick', clim); % 
+% % Display p-values as text on the plot
+% for i = 1:size(data, 1)
+%     for j = 1:size(data, 1)
+%         text(j, i, sprintf('p = %.4f', p_value_matrix(i, j)), ...
+%             'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
+%     end
+% end

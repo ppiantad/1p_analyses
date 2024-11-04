@@ -639,7 +639,7 @@ for kk = 1:size(animalIDs, 1)
 end
 
 %%
-x = remapped_prechoice_ratio';
+x = remapped_postchoice_ratio';
 y = riskiness;
 % Create a new figure with specific dimensions
 figure;
