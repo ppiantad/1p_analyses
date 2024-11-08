@@ -1685,3 +1685,41 @@ set(c, 'YTick', clim); %
 %             'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
 %     end
 % end
+
+%%
+prechoice_conserved_and_pun = conserved_prechoice == 1 & respClass_all_array{1, 4} == 1; 
+sum(prechoice_conserved_and_pun)
+
+proportion_prechoice_conserved_and_pun = sum(prechoice_conserved_and_pun)/sum(conserved_prechoice)
+
+prechoice_new_and_pun = remapped_prechoice == 1 & respClass_all_array{1, 4} == 1; 
+sum(prechoice_new_and_pun)
+
+proportion_prechoice_new_and_pun = sum(prechoice_new_and_pun)/sum(remapped_prechoice)
+
+
+n1 = sum(prechoice_conserved_and_pun); N1 = sum(conserved_prechoice);
+
+n2 = sum(prechoice_new_and_pun); N2 = sum(remapped_prechoice);
+
+% n2 = postchoice_and_shk_sum; N2 = postchoice_and_shk_sum+postchoice_not_shk_sum;
+
+% Pooled estimate of proportion
+
+p0 = (n1+n2) / (N1+N2)
+
+% Expected counts under H0 (null hypothesis)
+
+n10 = N1 * p0;
+
+n20 = N2 * p0;
+
+% Chi-square test, by hand
+
+observed = [n1 N1-n1 n2 N2-n2];
+
+expected = [n10 N1-n10 n20 N2-n20];
+
+chi2stat = sum((observed-expected).^2 ./ expected)
+
+p = 1 - chi2cdf(chi2stat,1)

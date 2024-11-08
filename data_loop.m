@@ -16,7 +16,7 @@ load('BLA_panneuronal_Risk_2024_03_07_just_CNMFe_and_BehavData.mat')
 % load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
 
 %% Edit these uservariables with what you want to look at
-uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
+uv.evtWin = [-4 2]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
@@ -93,7 +93,7 @@ for ii = 1:size(animalIDs,1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 2);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'SHK', 1); %'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0
         % BehavData = BehavData(1:2, :);
         % trials = trials(1:2, :);
         varargin_strings = string(varargin_identity_class);

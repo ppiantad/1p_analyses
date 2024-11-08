@@ -12,6 +12,7 @@
 % that has 1 overlap does not overlap at all. 
 shk_ind = find(respClass_all_array{1,4} == 1);
 pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
+pre_choice_active_block_2_3_ind = find(respClass_all_array{1,8} == 1);
 consum_active_ind = find(respClass_all_array{1,3} == 1);
 consum_active_block_2_3 = find(respClass_all_array{1,10} == 1);
 post_choice_active_ind = find(respClass_all_array{1,2} == 1);

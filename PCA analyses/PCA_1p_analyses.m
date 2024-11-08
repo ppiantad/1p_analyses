@@ -2,10 +2,13 @@
 load('acton.mat')
 load('batlowW.mat')
 
+
+%DO NOT CHANGE FROM THESE SETTINGS UNLESS WILLING TO REVERT BACK
+
 % MY APPROACH
 % % use zall array if you want to check how trials compare across block
-% neuron_mean_concat = horzcat(zall_mean_all_array{:});
-% neuron_mean_concat = zscore(neuron_mean_concat, 0 , 1);
+neuron_mean_concat = horzcat(zall_mean_all_array{:});
+neuron_mean_concat = zscore(neuron_mean_concat, 0 , 1);
 
 
 % neuron_mean_concat = horzcat(reformat_zall_mean_array{:});
@@ -14,9 +17,9 @@ load('batlowW.mat')
 % RUAIRI APPROACH
 % % use neuron_mean_all_unnorm if you want to check how things differ across
 % % time
-neuron_mean_concat = horzcat(neuron_mean_all_unnormalized{:});
-
-neuron_mean_concat = mean_center_columnwise(neuron_mean_concat);
+% neuron_mean_concat = horzcat(neuron_mean_all_unnormalized{:});
+% 
+% neuron_mean_concat = mean_center_columnwise(neuron_mean_concat);
 
 
 
@@ -110,9 +113,10 @@ median_collect_time_block_3 = median(full_table.collectionTime(full_table.Block 
 
 for zz = 1:size(concatenatedTable_all, 2)
     median_start_time(1, zz) = median(concatenatedTable_all{1, zz}.stTime - concatenatedTable_all{1, zz}.choiceTime)
-    median_collect_time(1, zz) = median(concatenatedTable_all{1, zz}.collectionTime - concatenatedTable_all{1, zz}.stTime)
+    median_collect_time(1, zz) = median(concatenatedTable_all{1, zz}.collectionTime - concatenatedTable_all{1, zz}.choiceTime)
     [~, closest_index_start(zz)] = min(abs(ts1 - median_start_time(1, zz)));
     [~, closest_index_collect(zz)] = min(abs(ts1 - median_collect_time(1, zz)));
+    [~, closest_index_zero(zz)] = min(abs(ts1 - 0));
 end
 
 
@@ -333,7 +337,7 @@ for ff = 1:numConditions
     p1.LineWidth = l_width;
     p1.Marker = '.'; p1.MarkerFaceColor = p_color{1}; p1.MarkerEdgeColor = p_color{1}; p1.MarkerIndices = [1: p_freq: size(PCA_traj{ff}, 2)]; p1.MarkerSize = p_size;
     e11 = scatter(PCA_traj{ff}(1, closest_index_start(ff)), PCA_traj{ff}(2, closest_index_start(ff)), d_marker_size, [0, 0, 0]/255, 'o', 'filled', 'HandleVisibility', 'off');
-    e12 = scatter(PCA_traj{ff}(1, ts1 == 0), PCA_traj{ff}(2, ts1 == 0), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
+    e12 = scatter(PCA_traj{ff}(1, closest_index_zero(ff)), PCA_traj{ff}(2, closest_index_zero(ff)), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
     e13 = scatter(PCA_traj{ff}(1, closest_index_collect(ff)), PCA_traj{ff}(2, closest_index_collect(ff)), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
 %     e13 = scatter(d1(1, d_marker_loc(3)), d1(2, d_marker_loc(3)), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
     legend

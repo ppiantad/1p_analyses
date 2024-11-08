@@ -674,3 +674,26 @@ text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared, '%.2f')], 'FontSiz
 text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2f')], 'FontSize', 12, 'Color', 'blue');
 hold off; 
 
+
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+conserved_prechoice_ind = find(conserved_prechoice == 1);
+remapped_prechoice_ind = find(remapped_prechoice == 1);
+shk_ind = find(respClass_all_array{1,4} == 1);
+pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
+pre_choice_active_block_2_3_ind = find(respClass_all_array{1,8} == 1);
+consum_active_ind = find(respClass_all_array{1,3} == 1);
+consum_active_block_2_3 = find(respClass_all_array{1,10} == 1);
+post_choice_active_ind = find(respClass_all_array{1,2} == 1);
+aa_active_ind = find(respClass_all_array{1,11} == 1);
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {shk_ind, conserved_prechoice_ind, remapped_prechoice_ind, aa_active_ind};
+setLabels = ["Shk excited", "Prechoice conserved", "Prechoice new", "Approach-Abort excited"];
+figure;
+ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+ve_diagram.ShowIntersectionCounts = true;
+ve_diagram.ShowIntersectionAreas = true;
+% h.SetLabels = [];

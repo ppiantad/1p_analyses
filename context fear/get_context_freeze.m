@@ -45,17 +45,19 @@ mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
     current_mouse = animalIDs{gg};
     
-    if strcmp(final_DLC.(current_mouse).experimental_grp, 'No Shock')
+    if strcmp(final_DLC.(current_mouse).experimental_grp, 'Experimental')
         mouse_count = mouse_count+1;
         mouse_in_cond(mouse_count, :) = current_mouse;
         DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw;
         if any(strcmp('freeze', DLC_data_mouse.Properties.VariableNames))
-            freeze_data = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw.freeze; 
+            freeze_data = DLC_data_mouse.freeze; 
         elseif any(strcmp('freeze_status', DLC_data_mouse.Properties.VariableNames))
-            freeze_data = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw.freeze_status; 
+            freeze_data = DLC_data_mouse.freeze_status;
+        elseif any(strcmp('was_freezing', DLC_data_mouse.Properties.VariableNames))
+            freeze_data = DLC_data_mouse.was_freezing;
         end
         % freeze_data = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw.freeze; 
-        frames_data = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw.frame;
+        frames_data = DLC_data_mouse.frame;
         
         for qq = 1:num_repeats
             safe_context{mouse_count, qq} = freeze_data(stimulus_frames{1, 1}(qq,1)+1:stimulus_frames{1, 1}(qq,2));
@@ -177,7 +179,7 @@ session_long_mean = mean(trimmed_combined_context);
 %%
 % Plotting the data
 figure;
-plot(final_DLC.B46859.D3.DLC_data_raw  .frame, final_DLC.B46859.D3.DLC_data_raw  .freeze);
+plot(final_DLC.B46837.D3.DLC_data_raw.frame, final_DLC.B46837.D3.DLC_data_raw.freeze);
 hold on;
 
 % Define colors and transparency

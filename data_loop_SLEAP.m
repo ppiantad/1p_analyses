@@ -235,6 +235,9 @@ consumption_indices = ts1 >= consumption_window(1) & ts1 <= consumption_window(2
 pre_choice_neuron_count = 0;
 % Iterate over each element of neuron_mean_array
 for j = 1:size(unnormalized_mouse, 2)
+    prechoice_mean(:, j) = mean(neuron_mean_all_unnormalized{1, j}(:, pre_choice_indices), 2);
+    postchoice_mean(:, j) = mean(neuron_mean_all_unnormalized{1, j}(:, post_choice_indices), 2);
+    consumption_mean(:, j) = mean(neuron_mean_all_unnormalized{1, j}(:, consumption_indices), 2);
     for i = 1:size(unnormalized_mouse, 1)
         % Select data where exclusive_activated_session_1 is 1
 
@@ -251,9 +254,15 @@ for j = 1:size(unnormalized_mouse, 2)
         auc_post_choice(i, j) = mean(trapz(selected_data(:, post_choice_indices), 2));
         auc_consumption(i, j) = mean(trapz(selected_data(:, consumption_indices), 2));
 
+        mean_pre_choice(i, j) = mean(mean(selected_data(:, pre_choice_indices), 2));
+        mean_post_choice(i, j) = mean(mean(selected_data(:, post_choice_indices), 2));
+        mean_consumption(i, j) = mean(mean(selected_data(:, consumption_indices), 2));
+
 
     end
 end
+
+
 
 %% FILTER TO GET, ALIGNED SHUFFLED CA DATA
 
