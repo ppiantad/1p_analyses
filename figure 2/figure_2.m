@@ -1447,46 +1447,7 @@ ytickformat('%.1f');
 hold off
 
 
-%% attempting logistic regression to predict large vs. small vs. omit from magnitude of SHK response
 
-
-% Initialize arrays to store the data
-shockResponses = [];
-trialChoices = [];
-
-% Iterate through each level of meanZallMouse
-for i = 1:1 %1:length(meanZallMouse)
-    % Get the current nested cell array of mean values
-    meanNestedCellArray = meanZallMouse{i};
-    
-    % Get the trial choices for the current mouse
-    currentTrialChoices = [behav_tbl_iter{2, 1}{i}.ForceFree behav_tbl_iter{2, 1}{i}.bigSmall];
-    currentTrialChoices = currentTrialChoices(currentTrialChoices(:,1) ~= 1, 2);
-    % Iterate through each cell in the nested cell array
-    for j = 1:length(meanNestedCellArray)
-        meanValues = meanNestedCellArray{j};
-        % Get the current mean values array
-        meanValues = meanNestedCellArray{j};
-        meanValues = meanValues(currentTrialChoices(:,1) ~= 1);
-        
-        % Here we use the meanValues as is, no averaging across trials
-        % Flatten the meanValues to a single row vector, if needed
-        shockResponses = [shockResponses; meanValues];
-        
-        % Append the corresponding trial choice
-        trialChoices = [trialChoices; currentTrialChoices];
-    end
-end
-
-% Convert trialChoices to categorical if not already
-trialChoices = categorical(trialChoices, {'LargeReward', 'SmallReward', 'NoChoice'});
-
-y = trialChoices;
-mdl = fitmnr(shockResponses, y);
-
-% Display the model coefficients
-disp('Model Coefficients:');
-disp(mdl);
 
 %% minor attempts to correlate with MOTION (velocity after shock)
 
