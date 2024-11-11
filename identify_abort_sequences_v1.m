@@ -64,7 +64,7 @@ elseif strcmp('RDT_D2', session_to_analyze)
     end
 end
 
-%%
+%% get trials where shocks were followed by abort (get first abort) or choice (any choice, large/small)
 
 neuron_num = 0;
 animalIDs = (fieldnames(final));
@@ -127,6 +127,65 @@ for ii = 1:size(animalIDs, 1)
 end
 
 
+%% get abort sequences following shocks
+shock_abort_sequence = 0;
+neuron_num = 0;
+animalIDs = (fieldnames(final));
+for ii = 1:size(animalIDs, 1)
+    sequence = 0;
+    currentanimal = char(animalIDs(ii));
+    % Extract the table for easy reference
+    data = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData  ;
+
+    % Initialize counters for trials where a shock is followed by an abort or no abort
+    total_shock_abort_trials = 0;
+    
+    total_shock_no_abort_trials = 0;
+    rows_for_new_table = 1;
+    % Loop through each row
+    i = 1;
+    while i <= height(data) - 1
+        % Check if the current trial is a shock (shock == 1)
+        if data.shock(i) == 1
+            % Initialize a flag to determine if we found a matching condition
+            match_found = false;
+            behav_data_extracted(rows_for_new_table, :) = data(i, :);
+            rows_for_new_table = rows_for_new_table + 1;
+            % Look for a matching condition in the subsequent rows
+            shock_abort_sequence = 0;
+            sequence = sequence + 1;
+            j = i + 1;
+            while j <= height(data) && ~match_found
+                % Check if the trial is an abort (type_binary == 1)
+                if data.type_binary(j) == 1 || data.type_binary(j) == 2
+                    % Increment abort counter and mark as found
+
+                    shock_abort_sequence = shock_abort_sequence + 1;
+                    % behav_data_shk_to_abort(rows_for_new_table+1, :) = data([i, j], :);
+
+                    j = j + 1;
+                    % Check if the trial has a bigSmall event (bigSmall == 1)
+                elseif data.bigSmall(j) == 1.2 || data.bigSmall(j) == 0.3
+                    % Increment no-abort counter and mark as found
+
+                    match_found = true;
+
+                else
+                    j = j + 1;
+                end
+            end
+            shock_abort_sequence_all(sequence) = shock_abort_sequence;
+            % Set `i` to `j` to continue from the row after the found condition
+            i = j;
+        else
+            % Move to the next row if no shock was found
+            i = i + 1;
+        end
+    end
+    behav_data_extracted_array{ii} = behav_data_extracted;
+    shock_abort_sequence_all_array{ii} = shock_abort_sequence_all;
+    clear behav_data_extracted shock_abort_sequence_all
+end
 
 %% Plot https://stackoverflow.com/questions/54528239/boxplot-for-paired-observations
 
@@ -494,3 +553,92 @@ for zz = 1:size(zall_mouse, 1)
 end
 
 figure; plot(ts1, mean(mean_0_trials)); hold on; plot(ts1, mean(mean_1_trials))
+
+%%
+%%
+% Initialize arrays to store the data
+
+shockResponses_all_mice = [];
+trialChoices_all_mice = [];
+animal_IDs_all_mice = [];  
+
+% Iterate through each level of meanZallMouse
+for kk = 1:length(meanZallMouse) %1:length(meanZallMouse)
+    shockResponses = [];
+    trialChoices = [];
+    animal_IDs = [];  
+    % Get the current nested cell array of mean values
+    meanNestedCellArray = meanZallMouse{kk};
+    
+    % comment out if necessary
+    % limit to just SHOCK activated neurons
+    % get this by loading the 10x variable dataset, or similar, where array
+    % 4 is data from SHK == 1
+    meanNestedCellArray = meanNestedCellArray(respClass_all_array_mouse{kk, 4} == 1);
+    
+    % Extract the data for easy reference
+    data = behav_data_extracted_array{1, kk};
+
+
+    % Get the trial choices for the current mouse
+    currentTrialChoices = shock_abort_sequence_all_array{kk}';
+
+    % uncomment to only use trials where an abort occurred
+    % currentTrialChoices = currentTrialChoices(currentTrialChoices(:,1) ~= 0, 1);
+    % Iterate through each cell in the nested cell array
+    for j = 1:length(meanNestedCellArray)
+        
+        meanValues = meanNestedCellArray{j};
+        
+        % uncomment to only use trials where an abort occurred
+        % meanValues = meanValues(currentTrialChoices(:,1) ~= 0, 1);
+        
+        % Here we use the meanValues as is, no averaging across trials
+        % Flatten the meanValues to a single row vector, if needed
+        shockResponses = [shockResponses; meanValues];
+        
+        % Append the corresponding trial choice
+        trialChoices = [trialChoices; currentTrialChoices];
+        animal_IDs = [animal_IDs; repmat(kk, length(meanValues), 1)];
+    end
+    shockResponses_all_mice = [shockResponses_all_mice; shockResponses];
+    trialChoices_all_mice = [trialChoices_all_mice; trialChoices];
+    animal_IDs_all_mice = [animal_IDs_all_mice; animal_IDs];
+end
+
+%%
+% Step 1: Define the predictor and response variables
+X = shockResponses_all_mice;    % Predictor (calcium response)
+y = trialChoices_all_mice;       % Response (count data for choices)
+
+% Step 2: Fit a Poisson regression model
+% Use MATLAB's fitglm function with 'poisson' distribution for count data
+mdl = fitglm(X, y, 'Distribution', 'poisson');
+
+% Display model summary
+disp(mdl);
+
+% Step 3: Calculate the Exponentiated Coefficients (Incidence Rate Ratios)
+% Extract coefficients
+coefficients = mdl.Coefficients.Estimate;
+
+% Calculate incidence rate ratios (IRRs) by exponentiating the coefficients
+% These are analogous to odds ratios in logistic regression
+incidence_rate_ratios = exp(coefficients);
+
+% Display incidence rate ratios
+fprintf('Incidence Rate Ratio for Intercept: %.4f\n', incidence_rate_ratios(1));
+fprintf('Incidence Rate Ratio for Predictor (shockResponses_all_mice): %.4f\n', incidence_rate_ratios(2));
+
+% Step 4: Make predictions
+% Get predicted counts for each trial based on the model
+predictedCounts = predict(mdl, X);
+
+% Optional: Assess model accuracy with a measure of goodness-of-fit
+% Calculate residuals to evaluate how well the model fits
+residuals = y - predictedCounts;
+sse = sum(residuals.^2); % Sum of squared errors
+fprintf('Sum of Squared Errors (SSE): %.2f\n', sse);
+
+
+
