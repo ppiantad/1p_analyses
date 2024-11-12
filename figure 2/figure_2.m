@@ -170,6 +170,8 @@ if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11
     comparison_arrays = [1 2 3; 8 9 10]
 elseif size(respClass_all_array, 2) == 6
     comparison_arrays = [1 2 3; 4 5 6]
+elseif size(respClass_all_array, 2) == 3
+    comparison_arrays = [1 2 3; 1 2 3]
 end
 
 
@@ -1180,8 +1182,8 @@ array_for_means = 1;
 meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
-% timeRange = (ts1 >= -4) & (ts1 <= 0);
-timeRange = (ts1 >= 0) & (ts1 <= 2);
+timeRange = (ts1 >= -4) & (ts1 <= 0);
+% timeRange = (ts1 >= 0) & (ts1 <= 2);
 % timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
@@ -1189,7 +1191,7 @@ timeRange = (ts1 >= 0) & (ts1 <= 2);
 for i = 1:length(zall_mouse)
     % Get the current nested cell array
     nestedCellArray_1 = zall_mouse{i, array_for_means};
-    nestedCellArray_2 = zall_mouse{i, 5};
+    nestedCellArray_2 = zall_mouse{i, 1};
     % Initialize the nested cell array for storing mean values
     meanNestedCellArray = cell(size(nestedCellArray_1));
     
