@@ -20,7 +20,7 @@ load('acton.mat')
 
 % load('BLA_panneuronal_Risk_2024_01_04.mat')
 
-load('BLA_panneuronal_Risk_2024_04_19_just_CNMFe_and_BehavData.mat')
+load('BLA_panneuronal_Risk_2024_08_28_just_CNMFe_and_BehavData.mat')
 
 % load('NAcSh_D2_Cre-OFF_GCAMP_all.mat')
 

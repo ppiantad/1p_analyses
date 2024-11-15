@@ -4,7 +4,7 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 load('acton.mat')
 
 %%
-num_iterations = 5; 
+num_iterations = 1; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 % iter = 0;
 uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
