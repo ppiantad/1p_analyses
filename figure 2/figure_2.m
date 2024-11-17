@@ -1513,8 +1513,8 @@ sem_data_array = {sem_all_array{1, 11}(collect_block_1==1, :), sem_all_array{1, 
 %CREATE SCATTER PLOT BASED ON SPECIFIC EVENTS - ASSUMING THEY ARE IN PAIRS.
 %CHECK AND UPDATE START & END TIME DEPENDING ON EVENT OF INTEREST
 paired_neurons = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} == 1;
-start_time = 1; % sub-window start time
-end_time = 3; % sub-window end time
+start_time = -4;% sub-window start time
+end_time = 0; % sub-window end time
 
 % Find the indices in ts1 that correspond to the sub-window
 sub_window_idx = ts1 >= start_time & ts1 <= end_time;
@@ -1522,8 +1522,12 @@ sub_window_idx = ts1 >= start_time & ts1 <= end_time;
 % Extract the corresponding columns from neuron_mean
 
 
-sub_window_activity_session_1 = zall_mean_all_array{1, 11}(collect_block_1, sub_window_idx);
-sub_window_activity_session_2 = zall_mean_all_array{1, 12}(collect_block_1, sub_window_idx);
+sub_window_activity_session_1 = zall_mean_all_array{1, 11}(prechoice_block_1, sub_window_idx);
+sub_window_activity_session_2 = zall_mean_all_array{1, 12}(prechoice_block_1, sub_window_idx);
+
+% Assume A and B are your 143x21 arrays
+correlation_coefficients = arrayfun(@(i) corr(sub_window_activity_session_1 (i, :)', sub_window_activity_session_2 (i, :)'), 1:size(sub_window_activity_session_1 , 1));
+
 
 mean_sub_window_activity_session_1 = mean(sub_window_activity_session_1, 2);
 mean_sub_window_activity_session_2 = mean(sub_window_activity_session_2, 2);
@@ -1573,5 +1577,46 @@ text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
 % xlim([0 1.1])
 hold off;
 
+
+%% Plot https://stackoverflow.com/questions/54528239/boxplot-for-paired-observations
+
+combined_data = [mean_sub_window_activity_session_1 , mean_sub_window_activity_session_2];
+figure();
+coordLineStyle = 'k.';
+boxplot(combined_data, 'Symbol', coordLineStyle); hold on;
+parallelcoords(combined_data, 'Color', 0.7*[1 1 1], 'LineStyle', '-',...
+  'Marker', '.', 'MarkerSize', 10);
+
+TF = isoutlier(combined_data, 'grubbs');
+
 %%
+ca_data_corresponding_to_large = zall_mouse(:, 11);
+
+behav_data_corresponding_to_large = behav_tbl_iter{11, 1};
+neuron_num = 1; 
+slow_trial_means = []; 
+fast_trial_means = []; 
+for hh = 1:size(behav_data_corresponding_to_large, 1)
+    current_behav = behav_data_corresponding_to_large{hh};
+    current_ca = ca_data_corresponding_to_large{hh}; 
+    current_choice_times = current_behav.choiceTime - current_behav.stTime;
+    fast_trials = current_choice_times <= 2; 
+    slow_trials = current_choice_times >= 4; 
+    for jj = 1:size(current_ca, 2)
+        
+        current_current_ca = current_ca{1, jj}; 
+        slow_trial_means(neuron_num, :) = mean(current_current_ca(fast_trials, :));
+        fast_trial_means(neuron_num, :) = mean(current_current_ca(slow_trials, :));
+        neuron_num = neuron_num + 1; 
+
+    end
+
+
+
+
+
+end
+
+figure; plot(ts1, mean(slow_trial_means(prechoice_block_1, :)))
+hold on; plot(ts1, mean(fast_trial_means(prechoice_block_1, :)))
 

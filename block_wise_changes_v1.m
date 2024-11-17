@@ -577,7 +577,9 @@ for kk = 1:size(animalIDs, 1)
     % collect_block_1 = respClass_all_array{1, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array{1, comparison_arrays(1, 2)} ~= inhib_or_excite & respClass_all_array{1, 4} ~= inhib_or_excite;
     collect_block_1_mouse{kk, :}  = respClass_all_array_mouse{kk, comparison_arrays(1, 3)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 1)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(1, 2)} ~= inhib_or_excite;
     collect_blocks_2_and_3_mouse{kk, :}  = respClass_all_array_mouse{kk, comparison_arrays(2, 3)} == inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 1)} ~= inhib_or_excite & respClass_all_array_mouse{kk, comparison_arrays(2, 2)} ~= inhib_or_excite;
+
     num_cells_mouse(kk) = size(respClass_all_array_mouse{kk, 1}, 2);
+    true_neutral_block_1_mouse{kk, :} = respClass_all_array_mouse{kk, comparison_arrays(1, 1)} == 3 & respClass_all_array_mouse{kk, comparison_arrays(1, 2)} == 3 & respClass_all_array_mouse{kk, comparison_arrays(1, 3)} == 3;
 end
 
 

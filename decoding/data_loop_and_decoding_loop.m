@@ -97,13 +97,13 @@ for dd = 1:size(neuron_subgroup, 1)
                             if strcmp(neuron_subgroup{dd}, 'all')
                                 % ca = ca;
                             elseif strcmp(neuron_subgroup{dd}, 'pre-choice')
-                                ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
+                                ca = ca(prechoice_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'post-choice reward')
-                                ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
+                                ca = ca(postchoice_reward_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'consumption')
-                                ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                                ca = ca(collect_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'true neutral')
-                                ca = ca(respClass_all_array_mouse_true_neutral{ii, 1} == 1, :);
+                                ca = ca(true_neutral_block_1_mouse{ii, 1} == 1, :);
                             end
                             % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                             % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
@@ -170,13 +170,13 @@ for dd = 1:size(neuron_subgroup, 1)
                             if strcmp(neuron_subgroup{dd}, 'all')
                                 % ca = ca;
                             elseif strcmp(neuron_subgroup{dd}, 'pre-choice')
-                                ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
+                                ca = ca(prechoice_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'post-choice reward')
-                                ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
+                                ca = ca(postchoice_reward_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'consumption')
-                                ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                                ca = ca(collect_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'true neutral')
-                                ca = ca(respClass_all_array_mouse_true_neutral{ii, 1} == 1, :);
+                                ca = ca(true_neutral_block_1_mouse{ii, 1} == 1, :);
                             end
                             % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                             % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
@@ -258,13 +258,13 @@ for dd = 1:size(neuron_subgroup, 1)
                             if strcmp(neuron_subgroup{dd}, 'all')
                                 % ca = ca;
                             elseif strcmp(neuron_subgroup{dd}, 'pre-choice')
-                                ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
+                                ca = ca(prechoice_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'post-choice reward')
-                                ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
+                                ca = ca(postchoice_reward_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'consumption')
-                                ca = ca(respClass_all_array_mouse_consumption{ii, 1} == 1, :);
+                                ca = ca(collect_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'true neutral')
-                                ca = ca(respClass_all_array_mouse_true_neutral{ii, 1} == 1, :);
+                                ca = ca(true_neutral_block_1_mouse{ii, 1} == 1, :);
                             end
                             % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                             % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
