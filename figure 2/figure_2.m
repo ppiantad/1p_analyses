@@ -1522,8 +1522,8 @@ sub_window_idx = ts1 >= start_time & ts1 <= end_time;
 % Extract the corresponding columns from neuron_mean
 
 
-sub_window_activity_session_1 = zall_mean_all_array{1, 11}(prechoice_block_1, sub_window_idx);
-sub_window_activity_session_2 = zall_mean_all_array{1, 12}(prechoice_block_1, sub_window_idx);
+sub_window_activity_session_1 = zall_mean_all_array{1, 11}(prechoice_blocks_2_and_3, sub_window_idx);
+sub_window_activity_session_2 = zall_mean_all_array{1, 12}(prechoice_blocks_2_and_3, sub_window_idx);
 
 % Assume A and B are your 143x21 arrays
 correlation_coefficients = arrayfun(@(i) corr(sub_window_activity_session_1 (i, :)', sub_window_activity_session_2 (i, :)'), 1:size(sub_window_activity_session_1 , 1));

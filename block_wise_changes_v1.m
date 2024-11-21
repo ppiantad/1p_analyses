@@ -640,14 +640,44 @@ for kk = 1:size(animalIDs, 1)
     lost_collection_ratio(kk) = lost_collection_sum(kk)/size(collection_conserved_mouse{kk, :}, 2);
 end
 
+
+
+%% change the "y" variable below to broadly check correlations w/ variables defined in the "variables" section
+% Define a cell array of variable names that end with "ratio"
+variables = {'conserved_ratio', 'lost_ratio', 'remapped_ratio', ...
+             'conserved_prechoice_ratio', 'remapped_prechoice_ratio', 'lost_prechoice_ratio', ...
+             'conserved_postchoice_ratio', 'remapped_postchoice_ratio', 'lost_postchoice_ratio', ...
+             'conserved_collection_ratio', 'remapped_collection_ratio', 'lost_collection_ratio'};
+
+% Initialize an empty table to store the results
+correlation_results = table();
+
+% Iterate over each variable
+for i = 1:length(variables)
+    % Extract the variable by its name
+    % x = eval(variables{i})';  % Get the corresponding data for the current variable
+    % y = risk_table.Mean_1_to_3;  % This is the column you want to correlate with
+
+    % for BLA-NAcSh data since there are so few cells uncomment below
+    x = eval(variables{i});
+    x = x(num_cells_mouse > 30)';
+    y = risk_table.Var11(num_cells_mouse > 30);
+    % Compute the correlation coefficient
+    [r, pval] = corrcoef(x, y);
+    
+    % Store the results in the table
+    correlation_results = [correlation_results; table({variables{i}}, r(2), pval(2), 'VariableNames', {'Variable', 'Correlation', 'PValue'})];
+end
+
+
 %%
-% x = remapped_prechoice_ratio';
-% y = risk_table.Mean_1_to_3;
-x = remapped_prechoice_ratio(num_cells_mouse > 20)';
-y = risk_table.Var8(num_cells_mouse > 20);
+x = remapped_prechoice_ratio';
+y = risk_table.Mean_1_to_3;
+% x = remapped_prechoice_ratio(num_cells_mouse > 30)';
+% y = risk_table.Mean_1_to_3(num_cells_mouse > 30);
 % Create a new figure with specific dimensions
 figure;
-width = 650; % Width of the figure
+width = 250; % Width of the figure
 height = 350; % Height of the figure (width is half of height)
 set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
 
@@ -672,11 +702,25 @@ r_squared = ssr / sst;
 % Calculate the R^2 value
 [r, pval] = corrcoef(x, y); % Compute correlation coefficient matrix
 rsq = r(1, 2)^2; % Extract and square the correlation coefficient
+% Get axes limits
+ax = gca;
+xLimits = xlim(ax);
+yLimits = ylim(ax);
+
+% Set text position relative to axes limits
+xPos = xLimits(2) - 0.05 * range(xLimits); % Slightly inside the top-right
+yPos = yLimits(2) - 0.05 * range(yLimits); % Slightly inside the top-right
 
 % Add R-squared value to the plot (You can keep this part unchanged)
-text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared, '%.2f')], 'FontSize', 12);
-text(min(x), max(y) - (max(y)-min(y))/10, ['p = ' num2str(pval(2), '%.2f')], 'FontSize', 12, 'Color', 'blue');
-hold off; 
+text(xPos, yPos, ...
+    {['R^2 = ' num2str(r_squared, '%.2f')], ...
+     ['p = ' num2str(pval(2), '%.2f')]}, ...
+    'FontSize', 12, ...
+    'Color', 'blue', ...
+    'HorizontalAlignment', 'right', ... % Align text to the right
+    'VerticalAlignment', 'top');       % Align text to the top
+
+hold off;
 
 
 %% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
@@ -701,3 +745,38 @@ ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
 ve_diagram.ShowIntersectionCounts = true;
 ve_diagram.ShowIntersectionAreas = true;
 % h.SetLabels = [];
+
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+shk_ind_mouse = [];
+aa_ind_mouse = [];
+shk_ind_mouse = find(respClass_all_array_mouse{6, 4} == 1);
+aa_ind_mouse = find(respClass_all_array_mouse{6, 11} == 1);
+% remapped_prechoice_ind = find(remapped_prechoice == 1);
+% shk_ind = find(respClass_all_array{1,4} == 1);
+% pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
+% pre_choice_active_block_2_3_ind = find(respClass_all_array{1,8} == 1);
+% consum_active_ind = find(respClass_all_array{1,3} == 1);
+% consum_active_block_2_3 = find(respClass_all_array{1,10} == 1);
+% post_choice_active_ind = find(respClass_all_array{1,2} == 1);
+
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {shk_ind_mouse, aa_ind_mouse};
+setLabels = ["Shk excited", "Approach-Abort excited"];
+figure;
+ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+ve_diagram.ShowIntersectionCounts = true;
+ve_diagram.ShowIntersectionAreas = true;
+% h.SetLabels = [];
+
+for dd = 1:size(respClass_all_array_mouse, 1)
+    shk_ind_mouse = find(respClass_all_array_mouse{dd, 4} == 1);
+    aa_ind_mouse = find(respClass_all_array_mouse{dd, 11} == 1);
+    overlap_between_shk_abort_neurons(dd) = size(intersect(shk_ind_mouse, aa_ind_mouse), 2)/size(respClass_all_array_mouse{dd, 4} == 1, 2);
+
+end
+
+

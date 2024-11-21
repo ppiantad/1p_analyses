@@ -2,7 +2,7 @@ function [X_data_corrected, Y_data_corrected] = correct_XY_outliers_v1(X_data, Y
 
 
 % % Define threshold for outlier detection
-threshold = 2.5;
+threshold = 2;
 % 
 % figure;
 % plot(X_data); hold on; plot(Y_data); title('X_data and Y_data before')

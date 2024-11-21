@@ -48,6 +48,12 @@ for gg = 1:size(animalIDs, 1)
     if strcmp(final_DLC.(current_mouse).experimental_grp, 'Experimental')
         mouse_count = mouse_count+1;
         mouse_in_cond(mouse_count, :) = current_mouse;
+        mouse_data = final_DLC.(current_mouse).(session_to_analyze);
+        fields = fieldnames(mouse_data); % Get the field names
+        matchIdx = find(contains(fields, 'DLC')); % Find indices of matches
+        
+
+
         DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw;
         if any(strcmp('freeze', DLC_data_mouse.Properties.VariableNames))
             freeze_data = DLC_data_mouse.freeze; 
@@ -140,10 +146,17 @@ disp(interleaved_means);
 
 % figure; plot(interleaved_means);
 
+test_interleave_mean = zeros(12, 6);
+test_interleave_mean(:, [1 3 5]) = mean_safe_context;
+test_interleave_mean(:, [2 4 6]) = mean_aversive_context;
 
-% figure; shadedErrorBar(1:size(interleaved_means, 2), interleaved_means, interleaved_sems);
+test_interleave_sem = zeros(12, 6);
+test_interleave_sem(:, [1 3 5]) = standard_error_safe;
+test_interleave_sem(:, [2 4 6]) = standard_error_aversive;
+
+figure; shadedErrorBar(1:size(mean(test_interleave_mean), 2), mean(test_interleave_mean), mean(test_interleave_sem));
 % hold on; plot(1:size(interleaved_means, 2), interleaved_raw)
-hold on;shadedErrorBar(1:size(interleaved_means, 2), interleaved_means, interleaved_sems);
+% hold on;shadedErrorBar(1:size(interleaved_means, 2), interleaved_means, interleaved_sems);
 hold off; 
 
 
@@ -179,7 +192,7 @@ session_long_mean = mean(trimmed_combined_context);
 %%
 % Plotting the data
 figure;
-plot(final_DLC.B46837.D3.DLC_data_raw.frame, final_DLC.B46837.D3.DLC_data_raw.freeze);
+plot(final_DLC.C68604.D3.movement_data.frame, final_DLC.C68604.D3.movement_data.was_freezing);
 hold on;
 
 % Define colors and transparency

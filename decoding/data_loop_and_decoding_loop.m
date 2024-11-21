@@ -11,12 +11,30 @@ ca_data_type = "C_raw"; % C % C_raw
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 
+session_to_analyze = 'RDT_D1';
+
 % these are mice that did not complete the entire session - kinda have to
 % toss them to do some comparisons during RDT
-if strcmp('RDT_D1', session_to_analyze)
-    final = rmfield(final, ['BLA_Insc_28'; 'BLA_Insc_38'; 'BLA_Insc_39']);
+if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
+    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final, fieldsToRemove{i})
+            final = rmfield(final, fieldsToRemove{i});
+        end
+    end
+elseif strcmp('RDT_D2', session_to_analyze)
+
+    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_39'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final, fieldsToRemove{i})
+            final = rmfield(final, fieldsToRemove{i});
+        end
+    end
 end
-session_to_analyze = 'Pre_RDT_RM';
+
+
 
 
 
@@ -83,7 +101,7 @@ for dd = 1:size(neuron_subgroup, 1)
                         currentanimal = char(animalIDs(ii));
                         if isfield(final.(currentanimal), session_to_analyze)
                             BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                            [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                            [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0
                             trials = cell2mat(trials);
                             ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
 
@@ -155,7 +173,7 @@ for dd = 1:size(neuron_subgroup, 1)
                         currentanimal = char(animalIDs(ii));
                         if isfield(final.(currentanimal), session_to_analyze)
                             BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                            [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                            [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1);
                             trials = cell2mat(trials);
 
                             ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -243,7 +261,7 @@ for dd = 1:size(neuron_subgroup, 1)
                         currentanimal = char(animalIDs(ii));
                         if isfield(final.(currentanimal), session_to_analyze)
                             BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                            [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                            [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1);
                             trials = cell2mat(trials);
 
                             ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);

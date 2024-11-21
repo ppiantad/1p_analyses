@@ -1,9 +1,9 @@
 %%
 
 
+test_data = final_DLC.C68604.D3.movement_data  ;
 
-
-fixedX = SLEAP_data.x_pix'; 
+fixedX = test_data.mean_x_pix; 
 plot(fixedX)
 pks = findpeaks(fixedX)
 
@@ -14,38 +14,90 @@ for qq = 1:size(fixedX, 1)
 end
 
 
-jump_ind = find(jumps > 70);
+jump_ind = find(jumps > 30);
 
 % Loop through each jump index
-for idx = 1:length(jump_ind)
+idx = 1; % Start with the first jump index
+while idx <= length(jump_ind)
     current_idx = jump_ind(idx);
     
-    % Extract values just prior to, at, and just after the jump index
-    value_prior = fixedX(max(1, current_idx - 1));
-    value_jump = fixedX(current_idx);
-    value_after = fixedX(min(size(fixedX, 1), current_idx + 1));
+    % Store the value prior to the first jump for reference
+    if idx == 1
+        value_prior_to_first_jump = fixedX(max(1, current_idx - 1));
+    end
     
-    % Display options to the user and prompt for input
-    disp(['Index: ', num2str(current_idx)]);
-    disp(['Value just prior to the jump: ', num2str(value_prior)]);
-    disp(['Value at the jump index: ', num2str(value_jump)]);
-    disp(['Value just after the jump: ', num2str(value_after)]);
-    choice = input('Which value to replace the jump with? (1: prior, 2: jump, 3: after): ');
+    % Inner loop to handle decisions for the current jump and subsequent indices
+    while true
+        % Extract values just prior to, at, and just after the current index
+        value_prior = fixedX(max(1, current_idx - 1));
+        value_jump = fixedX(current_idx);
+        value_after = fixedX(min(size(fixedX, 1), current_idx + 1));
+        
+        % Display information and prompt for action
+        disp(['Index: ', num2str(current_idx)]);
+        disp(['Value just prior to the first jump: ', num2str(value_prior_to_first_jump)]);
+        disp(['Value just prior to the current index: ', num2str(value_prior)]);
+        disp(['Value at the current index: ', num2str(value_jump)]);
+        disp(['Value just after the current index: ', num2str(value_after)]);
+        
+        disp('Options:');
+        disp('1: Replace with value prior to the first jump');
+        disp('2: Replace with value prior to the current index');
+        disp('3: Replace with the current value');
+        disp('4: Replace with value after the current index');
+        disp('5: Move to the next index of this jump');
+        disp('6: Skip to the next jump');
+        choice = input('Select an option: ');
+        
+        % Take action based on user choice
+        if choice == 1
+            fixedX(current_idx) = value_prior_to_first_jump;
+            disp('Replaced with value prior to the first jump.');
+            current_idx = current_idx + 1; % Move to the next index automatically
+        elseif choice == 2
+            fixedX(current_idx) = value_prior;
+            disp('Replaced with value prior to the current index.');
+            current_idx = current_idx + 1; % Move to the next index automatically
+        elseif choice == 3
+            fixedX(current_idx) = value_jump;
+            disp('Replaced with the current value.');
+            current_idx = current_idx + 1; % Move to the next index automatically
+        elseif choice == 4
+            fixedX(current_idx) = value_after;
+            disp('Replaced with value after the current index.');
+            current_idx = current_idx + 1; % Move to the next index automatically
+        elseif choice == 5
+            disp('Moving to the next index of this jump...');
+            current_idx = current_idx + 1;
+        elseif choice == 6
+            disp('Skipping to the next jump...');
+            idx = idx + 1; % Move to the next jump index
+            if idx > length(jump_ind)
+                disp('No more jumps to process.');
+                break; % Exit the outer loop
+            else
+                current_idx = jump_ind(idx); % Update to the new jump index
+            end
+        else
+            disp('Invalid choice. Please try again.');
+        end
+        
+        % Check if we have reached the end of the current jump sequence
+        if current_idx > size(fixedX, 1)
+            disp('Reached the end of the data for this jump.');
+            break; % Exit the inner loop
+        end
+    end
     
-    % Replace the jump with the chosen value
-    if choice == 1
-        fixedX(current_idx) = value_prior;
-    elseif choice == 2
-        fixedX(current_idx) = value_jump;
-    elseif choice == 3
-        fixedX(current_idx) = value_after;
-    else
-        disp('Invalid choice. Skipping...');
+    if idx > length(jump_ind)
+        break; % Exit the outer loop if all jumps are processed
     end
 end
 
 % Display or use fixedX as needed
+disp('Final corrected values:');
 disp(fixedX);
+
 
 
 %%

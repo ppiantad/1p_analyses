@@ -1,5 +1,5 @@
 % Define the top-level directory containing all primary subfolders
-top_level_directory = 'F:\Maddy Pilot\Abbreviated_Pilot';  % Replace with your actual directory path
+top_level_directory = 'D:\Maddy Pilot\full_pilot';  % Replace with your actual directory path
 
 % Get a list of primary subfolders in the top-level directory
 primary_subfolders = dir(top_level_directory);
@@ -46,7 +46,7 @@ end
 
 
 %%
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\abbrv_pilot_mice.xlsx');
+experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 animalIDs = fieldnames(final_DLC);
 
 for dd = 1:size(experimental_grps, 1)
@@ -55,6 +55,9 @@ for dd = 1:size(experimental_grps, 1)
     for hh = 1:size(animalIDs, 1)
         if strcmp(current_mouse, animalIDs(hh))
             final_DLC.(current_mouse).experimental_grp = current_mouse_condition;
+            if any("sex" == string(experimental_grps.Properties.VariableNames))
+                final_DLC.(current_mouse).sex = experimental_grps.sex{hh};
+            end
         end
 
     end

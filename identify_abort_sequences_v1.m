@@ -70,62 +70,65 @@ neuron_num = 0;
 animalIDs = (fieldnames(final));
 for ii = 1:size(animalIDs, 1)
     currentanimal = char(animalIDs(ii));
-    % Extract the table for easy reference
-    data = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData  ;
+    if isfield(final.(currentanimal), session_to_analyze)
+        % Extract the table for easy reference
+        data = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData  ;
 
-    % Initialize counters for trials where a shock is followed by an abort or no abort
-    total_shock_abort_trials = 0;
-    total_shock_no_abort_trials = 0;
-    rows_for_new_table = 1;
-    % Loop through each row
-    i = 1;
-    while i <= height(data) - 1
-        % Check if the current trial is a shock (shock == 1)
-        if data.shock(i) == 1
-            % Initialize a flag to determine if we found a matching condition
-            match_found = false;
-            behav_data_extracted(rows_for_new_table, :) = data(i, :);
-            rows_for_new_table = rows_for_new_table + 1;
-            % Look for a matching condition in the subsequent rows
-            j = i + 1;
-            while j <= height(data) && ~match_found
-                % Check if the trial is an abort (type_binary == 1)
-                if data.type_binary(j) == 1 || data.type_binary(j) == 2
-                    % Increment abort counter and mark as found
-                    total_shock_abort_trials = total_shock_abort_trials + 1;
-                    match_found = true;
-                    % behav_data_shk_to_abort(rows_for_new_table+1, :) = data([i, j], :);
-                    behav_data_extracted(rows_for_new_table, :) = data(j, :);
-                    rows_for_new_table = rows_for_new_table + 1;
-                    % Check if the trial has a bigSmall event (bigSmall == 1)
-                elseif data.bigSmall(j) == 1.2 || data.bigSmall(j) == 0.3
-                    % Increment no-abort counter and mark as found
-                    total_shock_no_abort_trials = total_shock_no_abort_trials + 1;
-                    match_found = true;
-                    behav_data_extracted(rows_for_new_table, :) = data(j, :);
-                    rows_for_new_table = rows_for_new_table + 1;
-                else
-                    % Move to the next row if no match is found
-                    j = j + 1;
+        % Initialize counters for trials where a shock is followed by an abort or no abort
+        total_shock_abort_trials = 0;
+        total_shock_no_abort_trials = 0;
+        rows_for_new_table = 1;
+        % Loop through each row
+        i = 1;
+        while i <= height(data) - 1
+            % Check if the current trial is a shock (shock == 1)
+            if data.shock(i) == 1
+                % Initialize a flag to determine if we found a matching condition
+                match_found = false;
+                behav_data_extracted(rows_for_new_table, :) = data(i, :);
+                rows_for_new_table = rows_for_new_table + 1;
+                % Look for a matching condition in the subsequent rows
+                j = i + 1;
+                while j <= height(data) && ~match_found
+                    % Check if the trial is an abort (type_binary == 1)
+                    if data.type_binary(j) == 1 || data.type_binary(j) == 2
+                        % Increment abort counter and mark as found
+                        total_shock_abort_trials = total_shock_abort_trials + 1;
+                        match_found = true;
+                        % behav_data_shk_to_abort(rows_for_new_table+1, :) = data([i, j], :);
+                        behav_data_extracted(rows_for_new_table, :) = data(j, :);
+                        rows_for_new_table = rows_for_new_table + 1;
+                        % Check if the trial has a bigSmall event (bigSmall == 1)
+                    elseif data.bigSmall(j) == 1.2 || data.bigSmall(j) == 0.3
+                        % Increment no-abort counter and mark as found
+                        total_shock_no_abort_trials = total_shock_no_abort_trials + 1;
+                        match_found = true;
+                        behav_data_extracted(rows_for_new_table, :) = data(j, :);
+                        rows_for_new_table = rows_for_new_table + 1;
+                    else
+                        % Move to the next row if no match is found
+                        j = j + 1;
+                    end
                 end
+                % Set `i` to `j` to continue from the row after the found condition
+                i = j;
+            else
+                % Move to the next row if no shock was found
+                i = i + 1;
             end
-            % Set `i` to `j` to continue from the row after the found condition
-            i = j;
-        else
-            % Move to the next row if no shock was found
-            i = i + 1;
         end
-    end
 
-    % Display the results
-    disp(['Total number of trials where a shock was followed by an abort: ', num2str(total_shock_abort_trials)]);
-    disp(['Total number of trials where a shock was followed by a bigSmall event (no abort): ', num2str(total_shock_no_abort_trials)]);
-    total_shock_abort_trials_array(ii) = total_shock_abort_trials;
-    total_shock_no_abort_trials_array(ii) = total_shock_no_abort_trials;
-    behav_data_extracted_array{ii} = behav_data_extracted;
-    clear behav_data_extracted
+        % Display the results
+        disp(['Total number of trials where a shock was followed by an abort: ', num2str(total_shock_abort_trials)]);
+        disp(['Total number of trials where a shock was followed by a bigSmall event (no abort): ', num2str(total_shock_no_abort_trials)]);
+        total_shock_abort_trials_array(ii) = total_shock_abort_trials;
+        total_shock_no_abort_trials_array(ii) = total_shock_no_abort_trials;
+        behav_data_extracted_array{ii} = behav_data_extracted;
+        clear behav_data_extracted
+    end
 end
 
+shk_abort_to_shk_choice_ratio = total_shock_abort_trials_array./total_shock_no_abort_trials_array
 
 %% get abort sequences following shocks
 shock_abort_sequence = 0;
@@ -134,57 +137,59 @@ animalIDs = (fieldnames(final));
 for ii = 1:size(animalIDs, 1)
     sequence = 0;
     currentanimal = char(animalIDs(ii));
-    % Extract the table for easy reference
-    data = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData  ;
+    if isfield(final.(currentanimal), session_to_analyze)
+        % Extract the table for easy reference
+        data = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData  ;
 
-    % Initialize counters for trials where a shock is followed by an abort or no abort
-    total_shock_abort_trials = 0;
-    
-    total_shock_no_abort_trials = 0;
-    rows_for_new_table = 1;
-    % Loop through each row
-    i = 1;
-    while i <= height(data) - 1
-        % Check if the current trial is a shock (shock == 1)
-        if data.shock(i) == 1
-            % Initialize a flag to determine if we found a matching condition
-            match_found = false;
-            behav_data_extracted(rows_for_new_table, :) = data(i, :);
-            rows_for_new_table = rows_for_new_table + 1;
-            % Look for a matching condition in the subsequent rows
-            shock_abort_sequence = 0;
-            sequence = sequence + 1;
-            j = i + 1;
-            while j <= height(data) && ~match_found
-                % Check if the trial is an abort (type_binary == 1)
-                if data.type_binary(j) == 1 || data.type_binary(j) == 2
-                    % Increment abort counter and mark as found
+        % Initialize counters for trials where a shock is followed by an abort or no abort
+        total_shock_abort_trials = 0;
 
-                    shock_abort_sequence = shock_abort_sequence + 1;
-                    % behav_data_shk_to_abort(rows_for_new_table+1, :) = data([i, j], :);
+        total_shock_no_abort_trials = 0;
+        rows_for_new_table = 1;
+        % Loop through each row
+        i = 1;
+        while i <= height(data) - 1
+            % Check if the current trial is a shock (shock == 1)
+            if data.shock(i) == 1
+                % Initialize a flag to determine if we found a matching condition
+                match_found = false;
+                behav_data_extracted(rows_for_new_table, :) = data(i, :);
+                rows_for_new_table = rows_for_new_table + 1;
+                % Look for a matching condition in the subsequent rows
+                shock_abort_sequence = 0;
+                sequence = sequence + 1;
+                j = i + 1;
+                while j <= height(data) && ~match_found
+                    % Check if the trial is an abort (type_binary == 1)
+                    if data.type_binary(j) == 1 || data.type_binary(j) == 2
+                        % Increment abort counter and mark as found
 
-                    j = j + 1;
-                    % Check if the trial has a bigSmall event (bigSmall == 1)
-                elseif data.bigSmall(j) == 1.2 || data.bigSmall(j) == 0.3
-                    % Increment no-abort counter and mark as found
+                        shock_abort_sequence = shock_abort_sequence + 1;
+                        % behav_data_shk_to_abort(rows_for_new_table+1, :) = data([i, j], :);
 
-                    match_found = true;
+                        j = j + 1;
+                        % Check if the trial has a bigSmall event (bigSmall == 1)
+                    elseif data.bigSmall(j) == 1.2 || data.bigSmall(j) == 0.3
+                        % Increment no-abort counter and mark as found
 
-                else
-                    j = j + 1;
+                        match_found = true;
+
+                    else
+                        j = j + 1;
+                    end
                 end
+                shock_abort_sequence_all(sequence) = shock_abort_sequence;
+                % Set `i` to `j` to continue from the row after the found condition
+                i = j;
+            else
+                % Move to the next row if no shock was found
+                i = i + 1;
             end
-            shock_abort_sequence_all(sequence) = shock_abort_sequence;
-            % Set `i` to `j` to continue from the row after the found condition
-            i = j;
-        else
-            % Move to the next row if no shock was found
-            i = i + 1;
         end
+        behav_data_extracted_array{ii} = behav_data_extracted;
+        shock_abort_sequence_all_array{ii} = shock_abort_sequence_all;
+        clear behav_data_extracted shock_abort_sequence_all
     end
-    behav_data_extracted_array{ii} = behav_data_extracted;
-    shock_abort_sequence_all_array{ii} = shock_abort_sequence_all;
-    clear behav_data_extracted shock_abort_sequence_all
 end
 
 %% Plot https://stackoverflow.com/questions/54528239/boxplot-for-paired-observations

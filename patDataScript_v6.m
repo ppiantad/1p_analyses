@@ -7,7 +7,7 @@ ts1 = (-10:.1:10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA';
+metaDirectory = 'D:\MATLAB\Sean CNMFe\pan-neuronal BLA';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -16,7 +16,8 @@ metafolder_list = {};
 for i = 1:length(metaDirectory_subfolders)
     % Check if the item in subfolders is a directory (not "." or "..") or
     % one of the sets of files that I haven't analyzed yet (PR currently)
-    if metaDirectory_subfolders(i).isdir && ~strcmp(metaDirectory_subfolders(i).name, '.') && ~strcmp(metaDirectory_subfolders(i).name, '..') && ~contains(metaDirectory_subfolders(i).name, 'PR') && ~contains(metaDirectory_subfolders(i).name, 'not in final dataset')
+    if metaDirectory_subfolders(i).isdir && ~strcmp(metaDirectory_subfolders(i).name, '.') && ~strcmp(metaDirectory_subfolders(i).name, '..') && ~contains(metaDirectory_subfolders(i).name, 'not in final dataset')
+  % if metaDirectory_subfolders(i).isdir && ~strcmp(metaDirectory_subfolders(i).name, '.') && ~strcmp(metaDirectory_subfolders(i).name, '..') && ~contains(metaDirectory_subfolders(i).name, 'PR') && ~contains(metaDirectory_subfolders(i).name, 'not in final dataset')
         % if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..') && ~contains(lower(subfolders(i).name), 'shock')
         % if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..')
         % Get the full path of the subfolder
@@ -48,7 +49,7 @@ for zz = 1:size(metafolder_list, 1)
     for i = 1:length(subfolders)
         % Check if the item in subfolders is a directory (not "." or "..") or
         % one of the sets of files that I haven't analyzed yet (PR currently)
-        if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..') && ~contains(subfolders(i).name, 'PR')
+        if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..')
             % if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..') && ~contains(lower(subfolders(i).name), 'shock')
             % if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..')
             % Get the full path of the subfolder
@@ -249,7 +250,100 @@ for zz = 1:size(metafolder_list, 1)
                 final.(current_animal).(current_session).CNMFe_data.Coor = neuron.Coor;
                 final.(current_animal).(current_session).CNMFe_data.Cn = neuron.Cn;
 
+            elseif contains(current_session, 'PR')
+                current_session = regexprep(current_session,{' ', '-'}, '_');
+                [BehavData,ABETfile]=ABET2TableFn_PR(ABET_file);
+                ABET_removeheader = ABETfile(2:end,:);
+                tbl_ABET = cell2table(ABET_removeheader);
+                tbl_ABET.Properties.VariableNames = ABETfile(1,:);
+                gpio_tbl = readtable(GPIO_file);
+                % Inscopix stupidly recently updated the way the GPIO pins
+                % are written, so the default values that I used before are
+                % no longer valid. updated this to reflect the new way
+                % things are written - hopefully this works! 
+                % stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
+                stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Value > 5000);
+                frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
+                %check GPIO file to extract each TTL, since the TTL is 1000ms and is
+                %sampled repeatedly. This will only extract events that are separated by >
+                %8sec, so be sure to change this if the TTL or task structure changes
+                %dramatically!
+                pp = 2;
+                ttl_filtered = stTime(1);
+                for kk = 1:size(stTime,1)-1
+                    if abs(stTime(kk)-stTime(kk+1)) > 8
+                        ttl_filtered(pp) = stTime(kk+1);
+                        pp=pp+1;
+                    end
+                end
+                ttl_filtered = ttl_filtered';
+                %Add TTL times received by Inscopix to data table, skipping omitted trials
+                %which do not have a corresponding TTL due to a quirk in the behavioral
+                %program
+                % BehavData.Insc_TTL = zeros(length(BehavData.TrialPossible),1);
+                % dd = 2;
+                % for cc = 1:size(BehavData, 1)
+                %     if BehavData.TrialPossible(cc) > stTime(1)
+                %         BehavData.Insc_TTL(cc) = ttl_filtered(dd);
+                %         dd = dd+1;
+                %     elseif BehavData.TrialPossible(cc) <= stTime(1)
+                %         BehavData.Insc_TTL(cc) = 0;
+                %     end
+                % end
 
+                BehavData.PressTime(:)=BehavData.PressTime(:)+stTime(1);
+                BehavData.rewDeliveryTime(BehavData.rewDeliveryTime > 0) = BehavData.rewDeliveryTime(BehavData.rewDeliveryTime > 0) + stTime(1);
+                BehavData.collectionTime(BehavData.collectionTime > 0) = BehavData.collectionTime(BehavData.collectionTime > 0) + stTime(1);
+
+
+
+                load(currentMatFile);
+                % load(currentMatFile);
+                % ts1 = uv.dt:uv.dt:length(neuron.C_raw)*uv.dt;
+
+                %create array of FRAMES for aligning
+                %NEED TO FIGURE OUT HOW TO MAKE THE FRAMES AUTOMATICALLY = THE SAME SIZE AS
+                %THE neuron.C_ ARRAY LENGTH
+                length_ca_trace = size(neuron.C,2);
+                trim_frames = size(frames(1:2:end),1)-length_ca_trace;
+
+                frames3 = frames(1:2:end-2);  %frames3 = frames(1:2:end-1) %frames3 = frames(1:2:end-2); the number of samples to skip (:#:) corresponds to the degree of temporal downsampling that the video underwent
+
+                % use this if you have specifi sessions within the loop that have
+                % the wrong acquisition rate (10 Hz vs 20 Hz)
+                % if strcmp(current_session,'RM_D1')
+                %     frames3 = frames(1:2:end-2);
+                % else
+                %     frames3 = frames(1:4:end-2);
+                % 
+                % end
+
+                % if strcmp(current_animal,'RG_Insc_1')
+                %     frames3 = frames(1:2:end-2);
+                % elseif strcmp(current_animal,'RG_Insc_2') 
+                %     if strcmp(current_session,'RM_D1')
+                %         frames3 = frames(1:4:end-2);
+                %     else
+                %         frames3 = frames(1:2:end-2);
+                %     end
+                % elseif strcmp(current_animal,'RG_Insc_2')
+                %     frames3 = frames(1:4:end-2);
+                % end
+
+                final.(current_animal).(current_session).time = frames3; %final(i).time = caTime;
+
+                final.(current_animal).(current_session).uv = uv;
+
+                final.(current_animal).(current_session).uv.BehavData = BehavData;
+                %Because the "neuron" data type is a pain in the ass to
+                %work with, we will instead save some of the variables
+                final.(current_animal).(current_session).CNMFe_data.C = neuron.C;
+                final.(current_animal).(current_session).CNMFe_data.C_raw = neuron.C_raw;
+                final.(current_animal).(current_session).CNMFe_data.S = neuron.S;
+                final.(current_animal).(current_session).CNMFe_data.Coor = neuron.Coor;
+                final.(current_animal).(current_session).CNMFe_data.Cn = neuron.Cn;
+
+                
 
             else
 
