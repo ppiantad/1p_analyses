@@ -1,3 +1,6 @@
+function [path_length_array_mouse, Y_data_corrected] = get_path_lengths_fn(X_data, Y_data)
+
+
 animalIDs = (fieldnames(final_SLEAP));
 session_to_analyze = 'Pre_RDT_RM';
 
@@ -160,31 +163,3 @@ for dd = 1:size(animalIDs)
     path_length_array_mouse{dd} = path_length_array; 
 end
 
-
-%%
-% Extract path length array (Y-axis)
-path_length_array = path_length_array_mouse{1, 10};
-
-% Extract the variable to correlate (X-axis)
-variable_x = variable_to_correlate{1, 10};
-
-% Extract the bigSmall column
-bigSmall = behav_tbl_iter{1, 1}{10, 1}.bigSmall;
-
-% Find indices for bigSmall == 0.3 and bigSmall == 1.2
-indices_red = bigSmall == 0.3;
-indices_blue = bigSmall == 1.2;
-figure;
-% Plot red points (bigSmall == 0.3)
-scatter(variable_x(indices_red), path_length_array(indices_red), 'r', 'filled'); 
-hold on;
-
-% Plot blue points (bigSmall == 1.2)
-scatter(variable_x(indices_blue), path_length_array(indices_blue), 'b', 'filled');
-
-% Add labels and legend
-xlabel('Variable to Correlate');
-ylabel('Path Length');
-legend({'bigSmall = 0.3', 'bigSmall = 1.2'}, 'Location', 'Best');
-title('Scatter Plot of Path Length with bigSmall Grouping');
-hold off;

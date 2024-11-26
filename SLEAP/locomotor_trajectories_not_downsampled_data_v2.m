@@ -1,11 +1,11 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'BLA_Insc_27';
+select_mouse = 'BLA_Insc_26';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
 shapeData = final_SLEAP.(select_mouse).(session_to_analyze).shapeData;
 

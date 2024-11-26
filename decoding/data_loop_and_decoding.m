@@ -88,7 +88,7 @@ for num_iteration = 1:num_iterations
                     currentanimal = char(animalIDs(ii));
                     if isfield(final.(currentanimal), session_to_analyze)
                         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                        [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2, 'SHK', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                        [BehavData,trials,varargin]=TrialFilter_test(BehavData,'AA', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0
                         behav_tbl_temp{ii, num_comparison} = BehavData;
                         trials = cell2mat(trials);
                         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -154,7 +154,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2, 'SHK', 0);
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'AA', 1);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -290,7 +290,23 @@ data_for_decoding = caTraceTrials_mouse_iterations_means;
 
 caTraceTrials_current = []
 empty_rows_indices = []
+k = 5; %number of cross-validation folds 10
 
+% Get the 10x2 cell array inside data_for_decoding
+inner_data = data_for_decoding{1, 1};
+
+
+% Loop through each row of the 10x2 cell array
+for i = 1:size(inner_data, 1)
+    % Check the number of rows in both columns for the current row
+    rows_col1(i) = size(inner_data{i, 1}{1, 1}  , 1);
+    rows_col2(i) = size(inner_data{i, 1}{1, 1} , 1);
+    
+
+end
+
+% Keep only the rows that satisfy the condition
+data_for_decoding{1, 1} = inner_data(rows_col1 > k, :);
 
 for uu = 1:size(data_for_decoding, 2)
     caTraceTrials_current = data_for_decoding{:,uu};
@@ -314,7 +330,7 @@ for uu = 1:size(data_for_decoding, 2)
             = flatten_data_for_offset_decoding_fn(caTraceTrials_mouse_decoding, ts1, num_comparisons);
 
         % additions from Ruairi 01/12/2024
-        k = 5; %number of cross-validation folds 10
+
         accuracy_by_offset = zeros(size(trimmed_concatenatedColumns_offsets, 1), 1);
         numTrees = 100; % Number of decision trees in the forest
         for p = 1:size(trimmed_concatenatedColumns_offsets, 1)

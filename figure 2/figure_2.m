@@ -1124,28 +1124,29 @@ legend('Positive correlation', 'Negative correlation', 'No sig correlation');
 %%
 for q = 1:length (behav_tbl_iter{1, 1})
     nestedCellArray_1 = behav_tbl_iter{1, 1}{q};
-    % nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
-    % if size(nestedCellArray_1, 1) > size(nestedCellArray_2, 1)
-    %     delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime(1:end-1,:);
-    % else 
-    %     delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
-    % end
-    % 
+    if ~isempty(nestedCellArray_1)
+        % nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
+        % if size(nestedCellArray_1, 1) > size(nestedCellArray_2, 1)
+        %     delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime(1:end-1,:);
+        % else
+        %     delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
+        % end
+        %
 
-    for zz = 1:size(nestedCellArray_1, 1)
-        valid_start_times = nestedCellArray_1.stTime(2:end);
-        valid_choice_times = nestedCellArray_1.choiceTime(1:end-1);
-        delay_to_initiation = valid_start_times - valid_choice_times;
+        for zz = 1:size(nestedCellArray_1, 1)
+            valid_start_times = nestedCellArray_1.stTime(2:end);
+            valid_choice_times = nestedCellArray_1.choiceTime(1:end-1);
+            delay_to_initiation = valid_start_times - valid_choice_times;
+        end
+
+        trial_choice_times = nestedCellArray_1.choiceTime - nestedCellArray_1.stTime;
+        % delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
+        delay_to_collect_post_shk = nestedCellArray_1.collectionTime - nestedCellArray_1.choiceTime;
+        trial_choice_times_by_mouse{q} = trial_choice_times;
+        delay_to_initiation_by_mouse{q} = delay_to_initiation;
+        delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
+        clear trial_choice_times delay_to_initiation delay_to_collect_post_shk
     end
-
-    trial_choice_times = nestedCellArray_1.choiceTime - nestedCellArray_1.stTime;
-    % delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
-    delay_to_collect_post_shk = nestedCellArray_1.collectionTime - nestedCellArray_1.choiceTime;
-    trial_choice_times_by_mouse{q} = trial_choice_times;
-    delay_to_initiation_by_mouse{q} = delay_to_initiation;
-    delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
-    clear trial_choice_times delay_to_initiation delay_to_collect_post_shk
-
 
 
 end
@@ -1172,7 +1173,7 @@ ytickformat('%.1f');
 hold off
 
 
-variable_to_correlate = delay_to_collect_post_shk_by_mouse;
+variable_to_correlate = path_length_array_mouse;
 
 
 %%
@@ -1256,8 +1257,9 @@ for i = 1:length(meanZallMouse)
     trialIndex = mod(i-1, length(variable_to_correlate)) + 1;
     
     % Get the corresponding trial choice times
-    trialChoiceTimes = variable_to_correlate{i};
-    
+    trialChoiceTimes = variable_to_correlate{i}';
+    % trialChoiceTimes = variable_to_correlate{i};
+
     % Iterate through each cell in the nested cell array
     for j = 1:length(meanNestedCellArray)
         % Get the current mean values array
@@ -1503,8 +1505,8 @@ hold off
 
 %%
 
-mean_data_array = {zall_mean_all_array{1, 11}(collect_block_1==1, :), zall_mean_all_array{1, 12}(collect_block_1==1, :)};
-sem_data_array = {sem_all_array{1, 11}(collect_block_1==1, :), sem_all_array{1, 12}(collect_block_1==1, :)};
+mean_data_array = {zall_mean_all_array{1, 7}(collect_block_1==1, :), zall_mean_all_array{1, 8}(collect_block_1==1, :)};
+sem_data_array = {sem_all_array{1, 7}(collect_block_1==1, :), sem_all_array{1, 8}(collect_block_1==1, :)};
 
 [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
 
@@ -1513,8 +1515,8 @@ sem_data_array = {sem_all_array{1, 11}(collect_block_1==1, :), sem_all_array{1, 
 %CREATE SCATTER PLOT BASED ON SPECIFIC EVENTS - ASSUMING THEY ARE IN PAIRS.
 %CHECK AND UPDATE START & END TIME DEPENDING ON EVENT OF INTEREST
 paired_neurons = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} == 1;
-start_time = -4;% sub-window start time
-end_time = 0; % sub-window end time
+start_time = 1;% sub-window start time
+end_time = 3; % sub-window end time
 
 % Find the indices in ts1 that correspond to the sub-window
 sub_window_idx = ts1 >= start_time & ts1 <= end_time;
@@ -1522,8 +1524,8 @@ sub_window_idx = ts1 >= start_time & ts1 <= end_time;
 % Extract the corresponding columns from neuron_mean
 
 
-sub_window_activity_session_1 = zall_mean_all_array{1, 11}(prechoice_blocks_2_and_3, sub_window_idx);
-sub_window_activity_session_2 = zall_mean_all_array{1, 12}(prechoice_blocks_2_and_3, sub_window_idx);
+sub_window_activity_session_1 = zall_mean_all_array{1, 7}(collect_block_1, sub_window_idx);
+sub_window_activity_session_2 = zall_mean_all_array{1, 8}(collect_block_1, sub_window_idx);
 
 % Assume A and B are your 143x21 arrays
 correlation_coefficients = arrayfun(@(i) corr(sub_window_activity_session_1 (i, :)', sub_window_activity_session_2 (i, :)'), 1:size(sub_window_activity_session_1 , 1));

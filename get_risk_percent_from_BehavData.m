@@ -181,43 +181,54 @@ sem_large = table2array(std(risk_table(:, 1:3), 0, 2) ./ sqrt(size(risk_table(:,
 sem_small = table2array(std(risk_table(:, 4:6), 0, 2) ./ sqrt(size(risk_table(:, 4:6), 2)));
 
 % Calculate means for the bar plot
-cross_sess_large_means = [mean(mean_large_RM_D1), mean(mean_large)];
-cross_sess_large_sems = [mean(sem_large_RM_D1), mean(sem_large)];
+cross_sess_large_means = [mean(mean_large_RM_D1), mean(mean_large)]*100;
+cross_sess_large_sems = [mean(sem_large_RM_D1), mean(sem_large)]*100;
+
+cross_session_large_all = [mean_large_RM_D1, mean_large]*100;
+cross_session_small_all = [mean_small_RM_D1, mean_small]*100;
 
 % Calculate means for the bar plot
-cross_sess_small_means = [mean(mean_small_RM_D1), mean(mean_small)];
-cross_sess_small_sems = [mean(sem_small_RM_D1), mean(sem_small)];
+cross_sess_small_means = [mean(mean_small_RM_D1), mean(mean_small)]*100;
+cross_sess_small_sems = [mean(sem_small_RM_D1), mean(sem_small)]*100;
 
 % X-axis points
 x_points = 1:size(cross_sess_large_means, 2);
+
 
 % Plotting
 figure;
 hold on;
 
+% Set figure size
+width = 550; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(cross_session_large_all, 1)
+    plot(x_points, cross_session_large_all(i, :), '-', ...
+        'Color', [0 0 1 0.6], ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(cross_session_small_all, 1)
+    plot(x_points, cross_session_small_all(i, :), '-', ...
+        'Color', [1 0 0 0.6], ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, cross_sess_large_means, cross_sess_large_sems, 'o-', ...
-    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
+    'LineWidth', 1.5, 'MarkerSize', 18, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
     'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
 
 errorbar(x_points, cross_sess_small_means, cross_sess_small_sems, '^-', ...
-    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
+    'LineWidth', 1.5, 'MarkerSize', 18, 'Color', 'red', 'MarkerFaceColor', 'red', ...
     'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
-% 
-% % Add error bars manually using "line"
-% for i = 1:length(x_points)
-%     % Error bars for "Large"
-%     line([x_points(i), x_points(i)], ...
-%         [cross_sess_large_means(i) - cross_sess_large_sems(i), cross_sess_large_means(i) + cross_sess_large_sems(i)], ...
-%         'Color', 'blue', 'LineWidth', 1.2);
-% 
-%     % Error bars for "Small"
-%     line([x_points(i), x_points(i)], ...
-%         [cross_sess_small_means(i) - cross_sess_small_sems(i), cross_sess_small_means(i) + cross_sess_small_sems(i)], ...
-%         'Color', 'red', 'LineWidth', 1.2);
-% end
 
-% Formatting the X-axis
+% Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
 xticklabels({'Early RM', 'Late RM'}); % Provide labels for each x_point
 xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
@@ -225,6 +236,7 @@ xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
 % Set axis limits, labels, and legend
 ylim([0 1.1 * max([cross_sess_large_means + cross_sess_large_sems, ...
                    cross_sess_small_means + cross_sess_small_sems])]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:100);
 % xlabel('Condition');
 % ylabel('Mean ± SEM');
 % legend('Location', 'Best');
