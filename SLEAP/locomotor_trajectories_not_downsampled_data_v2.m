@@ -1,7 +1,7 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'BLA_Insc_26';
+select_mouse = 'BLA_Insc_35';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
@@ -583,6 +583,11 @@ ylim([y_min_all, y_max_all]);
 %%
 % Loop through each line and plot
 figure;
+% Set figure size
+width = 400; % Width of the figure
+height = 400; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
 for j = 1:size(large_block_1_true_indices , 1) %num_lines
     plot_index = large_block_1_true_indices (j);
     x = [];
@@ -593,20 +598,21 @@ for j = 1:size(large_block_1_true_indices , 1) %num_lines
     x = filtered_motion{plot_index}(1, :);
     y = filtered_motion{plot_index}(2, :);
     
-
+    x = sgolayfilt(x, 3, 11);
+    y = sgolayfilt(y, 3, 11);
     % Plot the line using scatter with varying marker colors
     % scatter(x, y, 50, ">", 'filled');
     hold on;
     plot(x, y, 'Color', 'b');
     % % Add a black square at the start of the line
-    scatter(x(1), y(1), 200, 'b', 's');
+    scatter(x(1), y(1), 200, 'b', 's', 'filled');
 
     % Add a black circke at the choice time
-    scatter(choice_times{1, large_block_1_true_indices(j)}(1), choice_times{1, large_block_1_true_indices(j)}(2), 200, 'b', 'o');
+    scatter(choice_times{1, large_block_1_true_indices(j)}(1), choice_times{1, large_block_1_true_indices(j)}(2), 200, 'b', 'filled');
 
 
     % Add a black triangle at the end of the line
-    scatter(x(end), y(end), 200, 'b', '^');
+    scatter(x(end), y(end), 200, 'b', '^', 'filled');
 end
 
 
@@ -633,6 +639,11 @@ end
 hold off;
 
 figure;
+% Set figure size
+width = 400; % Width of the figure
+height = 400; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
 for j = 1:size(small_block_1_true_indices , 1) %num_lines
     plot_index = small_block_1_true_indices (j);
     x = [];
@@ -642,7 +653,8 @@ for j = 1:size(small_block_1_true_indices , 1) %num_lines
     % Extract X-Y coordinates
     x = filtered_motion{plot_index}(1, :);
     y = filtered_motion{plot_index}(2, :);
-    
+    x = sgolayfilt(x, 3, 11);
+    y = sgolayfilt(y, 3, 11);    
 
 
     % % Plot the line using scatter with varying marker colors
@@ -650,14 +662,14 @@ for j = 1:size(small_block_1_true_indices , 1) %num_lines
     hold on;
     plot(x, y, 'Color', 'r');
     % Add a black square at the start of the line
-    scatter(x(1), y(1), 200, 'r', 's');
+    scatter(x(1), y(1), 200, 'r', 's', 'filled');
 
     % Add a black circke at the choice time
-    scatter(choice_times{1, small_block_1_true_indices(j)}(1), choice_times{1, small_block_1_true_indices(j)}(2), 200, 'r', 'o');
+    scatter(choice_times{1, small_block_1_true_indices(j)}(1), choice_times{1, small_block_1_true_indices(j)}(2), 200, 'r', 'o', 'filled');
 
 
     % Add a black triangle at the end of the line
-    scatter(x(end), y(end), 200, 'r', '^');
+    scatter(x(end), y(end), 200, 'r', '^', 'filled');
 end
 % Plot circles and squares from shapeData
 for k = 1:numel(shapeData)
@@ -685,6 +697,11 @@ hold off
 %%
 % Loop through each line and plot
 figure;
+% Set figure size
+width = 400; % Width of the figure
+height = 400; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
 for j = 1:size(large_block_3_true_indices , 1) %num_lines
     plot_index = large_block_3_true_indices (j);
     x = [];
@@ -694,21 +711,23 @@ for j = 1:size(large_block_3_true_indices , 1) %num_lines
     % Extract X-Y coordinates
     x = filtered_motion{plot_index}(1, :);
     y = filtered_motion{plot_index}(2, :);
-    
+
+    x = sgolayfilt(x, 3, 11);
+    y = sgolayfilt(y, 3, 11);
 
     % Plot the line using scatter with varying marker colors
     % scatter(x, y, 50, ">", 'filled');
     hold on;
     plot(x, y, 'Color', 'b');
     % % Add a black square at the start of the line
-    scatter(x(1), y(1), 200, 'b', 's');
+    scatter(x(1), y(1), 200, 'b', 's', 'filled');
 
     % Add a black circke at the choice time
-    scatter(choice_times{1, large_block_3_true_indices(j)}(1), choice_times{1, large_block_3_true_indices(j)}(2), 200, 'b', 'o');
+    scatter(choice_times{1, large_block_3_true_indices(j)}(1), choice_times{1, large_block_3_true_indices(j)}(2), 200, 'b', 'o', 'filled');
 
 
     % Add a black triangle at the end of the line
-    scatter(x(end), y(end), 200, 'b', '^');
+    scatter(x(end), y(end), 200, 'b', '^', 'filled');
 end
 
 
@@ -738,6 +757,11 @@ hold off;
 figure
 
 hold on;
+% Set figure size
+width = 400; % Width of the figure
+height = 400; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
 for j = 1:size(small_block_3_true_indices , 1) %num_lines
     plot_index = small_block_3_true_indices (j);
     x = [];
@@ -748,21 +772,22 @@ for j = 1:size(small_block_3_true_indices , 1) %num_lines
     x = filtered_motion{plot_index}(1, :);
     y = filtered_motion{plot_index}(2, :);
     
-
+    x = sgolayfilt(x, 3, 11);
+    y = sgolayfilt(y, 3, 11);
 
     % % Plot the line using scatter with varying marker colors
     % scatter(x, y, 50, marker_colors_mapped, 'filled');
     hold on;
     plot(x, y, 'Color', 'r');
     % Add a black square at the start of the line
-    scatter(x(1), y(1), 200, 'r', 's');
+    scatter(x(1), y(1), 200, 'r', 's', 'filled');
 
     % Add a black circke at the choice time
-    scatter(choice_times{1, small_block_3_true_indices(j)}(1), choice_times{1, small_block_3_true_indices(j)}(2), 200, 'r', 'o');
+    scatter(choice_times{1, small_block_3_true_indices(j)}(1), choice_times{1, small_block_3_true_indices(j)}(2), 200, 'r', 'o', 'filled');
 
 
     % Add a black triangle at the end of the line
-    scatter(x(end), y(end), 200, 'r', '^');
+    scatter(x(end), y(end), 200, 'r', '^', 'filled');
 end
 
 

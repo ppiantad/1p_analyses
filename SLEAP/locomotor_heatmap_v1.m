@@ -32,6 +32,7 @@ title('Mouse Heatmap');
 xlabel('X Coordinate');
 ylabel('Y Coordinate');
 
+
 %%
 
 
@@ -116,8 +117,8 @@ block_1_only_real_trials_timestamps = BehavData.stTime((BehavData.bigSmall == 1.
 
 block_1_length = BehavData.TrialPossible(BehavData.Block == 1);
 block_1_ind = SLEAP_data.idx_time > block_1_only_real_trials_timestamps(1) & SLEAP_data.idx_time < block_1_only_real_trials_timestamps(end);
-X_heatmap_block_1 = SLEAP_data.x_pix(block_1_ind);
-Y_heatmap_block_1 = SLEAP_data.y_pix(block_1_ind);
+X_heatmap_block_1 = SLEAP_data.corrected_x_pix(block_1_ind);
+Y_heatmap_block_1 = SLEAP_data.corrected_y_pix(block_1_ind);
 
 
 
@@ -126,8 +127,8 @@ block_3_only_real_trials_timestamps = BehavData.stTime((BehavData.bigSmall == 1.
 block_3_length = BehavData.TrialPossible(BehavData.Block == 3);
 block_3_ind = SLEAP_data.idx_time > block_3_only_real_trials_timestamps(1) & SLEAP_data.idx_time < block_3_only_real_trials_timestamps(end);
 
-X_heatmap_block_3 = SLEAP_data.x_pix(block_3_ind);
-Y_heatmap_block_3 = SLEAP_data.y_pix(block_3_ind);
+X_heatmap_block_3 = SLEAP_data.corrected_x_pix(block_3_ind);
+Y_heatmap_block_3 = SLEAP_data.corrected_y_pix(block_3_ind);
 
 
 
@@ -154,25 +155,49 @@ global_max = max(max(max(xyHistFilt_block_1_rotated)), max(max(xyHistFilt_block_
 
 % Plot subplots with shared color scale
 figure;
+hold on;
+colormap(flipud(gray));
+
 
 % Plot heatmap for block 1
 subplot(1, 2, 1);
 imagesc(xyHistFilt_block_1_rotated);
-colormap hot;
-caxis([global_min, global_max-18]); % Set color limits
+
+caxis([global_min, global_max-30]); % Set color limits
 title('Block 1 Heatmap (Rotated)');
 colorbar;
 
 % Plot heatmap for block 3
 subplot(1, 2, 2);
 imagesc(xyHistFilt_block_3_rotated);
-colormap hot;
-caxis([global_min, global_max-18]); % Set color limits
+
+caxis([global_min, global_max-30]); % Set color limits
 title('Block 3 Heatmap (Rotated)');
 colorbar;
 
 % Adjust subplot layout
 sgtitle('Comparison of Block 1 and Block 3 Heatmaps (Rotated)');
+
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
+
+hold off
 
 %%
 

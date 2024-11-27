@@ -295,8 +295,8 @@ figure;
 hold on
 % Create a histogram for allCorrelations
 
-width = 300; % Width of the figure
-height = 600; % Height of the figure (width is half of height)
+width = 600; % Width of the figure
+height = 300; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 xlim([-8 8]);
 % Set X-axis ticks
@@ -413,8 +413,8 @@ sem_consumption = [std(action_auc_consumption(:))/sqrt(numel(action_auc_consumpt
 
 % Plot the bar graph
 figure;
-width = 300; % Width of the figure
-height = 600; % Height of the figure (width is half of height)
+width = 600; % Width of the figure
+height = 300; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 bar_groups = 1:3; % Number of groups
 bar_width = 0.3; % Width of each bar (adjust as needed)
@@ -551,7 +551,7 @@ yticks([1  size(test, 1)]);
 
 % If you want to customize the color map, you can use colormap function
 % For example, using a blue-white-red colormap:
-colormap(bluewhitered);
+colormap(gray);
 
 % If you want to limit the color scale to the range [0, 1]
 caxis([-1 1]); % Assuming correlations range from -1 to 1
