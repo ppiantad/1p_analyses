@@ -9,7 +9,7 @@ uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
@@ -75,7 +75,7 @@ for ii = 1:size(animalIDs,1)
             end
         end
 
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');

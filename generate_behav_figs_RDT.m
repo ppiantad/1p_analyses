@@ -3,7 +3,9 @@
 % these are mice that did not complete the entire session - kinda have to
 % toss them to do some comparisons during RDT
 
-session_to_analyze = 'RDT_D1'
+final_behavior = final_SLEAP; % for hM4Di data;
+
+session_to_analyze = 'RDT_D1_CNO'
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_13'};
@@ -34,8 +36,11 @@ risk_table = table;
 for ii = 1:size(animalIDs,1) % 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
     if isfield(final_behavior.(currentanimal), session_to_analyze)
-        BehavData = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData;
-
+        if contains(session_to_analyze, 'CNO')
+            BehavData = final_behavior.(currentanimal).(session_to_analyze).BehavData;
+        else
+            BehavData = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData;
+        end
         for BehavDataRow = 1:size(BehavData,1)
             if BehavData.shock(BehavDataRow) == 1
                 kk = 1;

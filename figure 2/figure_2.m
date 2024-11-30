@@ -1,11 +1,11 @@
 load('BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat')
 %% for heatmap, change "plot_num" (what neuron to plot) and array_to_plot (# corresponds to which dataset)
 
-plot_num = 46; 
+plot_num = 10; 
 
 array_to_plot = 1; % depends on the structure of zall
 
-select_mouse = 'BLA_Insc_25';
+select_mouse = 'BLA_Insc_40';
 
 % for RDT D1 BLA_Insc_25:
 %prechoice neuron num 46
@@ -13,9 +13,17 @@ select_mouse = 'BLA_Insc_25';
 %consumption num 39
 %shock num 11
 
+
+% for RDT D1 BLA_Insc_40:
+%prechoice neuron num 12
+%postchoice rew num 70
+%consumption num 10
+%shock num 11
+
+
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-first_session = 'RDT_D1';
+first_session = 'Pre_RDT_RM';
 
 second_session = 'RDT_D1';
 
@@ -57,15 +65,15 @@ Tris = [1:numTrials]';
 % ];
 
 
-custom_colormap = [
-    1, 1, 1;       % white
-    0.9, 0.95, 0.9;
-    0.8, 0.9, 0.8;
-    0.6, 0.8, 0.6;
-    0.4, 0.7, 0.4;
-    0.2, 0.6, 0.2;
-    0.13, 0.55, 0.13; % forest green
-];
+% custom_colormap = [
+%     1, 1, 1;       % white
+%     0.9, 0.95, 0.9;
+%     0.8, 0.9, 0.8;
+%     0.6, 0.8, 0.6;
+%     0.4, 0.7, 0.4;
+%     0.2, 0.6, 0.2;
+%     0.13, 0.55, 0.13; % forest green
+% ];
 
 % custom_colormap = [
 %     1, 1, 1;         % white
@@ -77,15 +85,15 @@ custom_colormap = [
 %     0.0, 0.8, 0.8;   % robin's egg blue
 % ];
 
-% custom_colormap = [
-%     1, 1, 1;         % white
-%     0.9, 0.9, 0.95;
-%     0.8, 0.8, 0.9;
-%     0.6, 0.6, 0.8;
-%     0.4, 0.4, 0.7;
-%     0.2, 0.2, 0.6;
-%     0.0, 0.0, 0.55;   % dark blue
-% ];
+custom_colormap = [
+    1, 1, 1;         % white
+    0.9, 0.9, 0.95;
+    0.8, 0.8, 0.9;
+    0.6, 0.6, 0.8;
+    0.4, 0.4, 0.7;
+    0.2, 0.2, 0.6;
+    0.0, 0.0, 0.55;   % dark blue
+];
 
 % custom_colormap = [
 %     1, 1, 1; % white
@@ -107,7 +115,7 @@ n = 256; % Number of colors
 custom_colormap = interp1(linspace(0, 1, size(custom_colormap, 1)), custom_colormap, linspace(0, 1, n));
 
 % Create a figure with a narrow width and taller height
-figure('Position', [100, 100, 250, 600]); % [left, bottom, width, height]
+figure('Position', [100, 100, 200, 600]); % [left, bottom, width, height]
 
 % Create a tiled layout with 2 rows and 1 column
 tiledlayout(2, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
@@ -156,7 +164,7 @@ end
 meanData = mean(zall_mouse{select_mouse_index, array_to_plot}{1, plot_num});
 plot(ts1, meanData, 'r', 'LineWidth', 2, 'Color', 'k');
 
-ylim([-4 4]);
+ylim([-3 4]);
 xlim([-8 8]);
 % Set X-axis ticks
 set(gca, 'XTick', [-8, 0, 8]);
@@ -1157,23 +1165,44 @@ rew_collect_times_concat = cat(1, delay_to_collect_post_shk_by_mouse{:});
 bar_separation_value = 3;
 
 figure;
-width = 250; % Width of the figure
-height = 500; % Height of the figure (width is half of height)
-set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
-swarmchart(ones(1, length(trial_choice_times_concat)), trial_choice_times_concat)
-hold on
-swarmchart(ones(1, length(rew_collect_times_concat))*bar_separation_value, rew_collect_times_concat)
 
-% yline(mean(only_shk_responsive_corrs), ones(length(only_shk_responsive_corrs)))
-% plot([0.5; 1.5], [mean(only_shk_responsive_corrs); mean(only_shk_responsive_corrs)], 'LineWidth',3)
-% plot([bar_separation_value-.5], [mean(trial_choice_times_concat)], 'LineWidth',3)
+% Adjust figure dimensions for subplots
+width = 400; % Adjusted width for 3 subplots
+height = 500; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Subplot 1: trial_choice_times_concat
+subplot(1, 3, 1); % First subplot
+swarmchart(ones(1, length(trial_choice_times_concat)), trial_choice_times_concat);
+title('Trial Choice Times');
+xlabel('Trial');
+ylabel('Time');
+yline(0); % Add yline if needed
+xtickformat('%.1f');
+ytickformat('%.1f');
+
+% Subplot 2: rew_collect_times_concat
+subplot(1, 3, 2); % Second subplot
+swarmchart(ones(1, length(rew_collect_times_concat)) * bar_separation_value, rew_collect_times_concat);
+title('Reward Collection Times');
+xlabel('Reward Collection');
+ylabel('Time');
 yline(0);
 xtickformat('%.1f');
 ytickformat('%.1f');
-hold off
+
+% Subplot 3: path_length_concat
+subplot(1, 3, 3); % Third subplot
+swarmchart(ones(1, length(path_length_concat)) * bar_separation_value * 1.5, path_length_concat);
+title('Path Length');
+xlabel('Path Length');
+ylabel('Time');
+yline(0);
+xtickformat('%.1f');
+ytickformat('%.1f');
 
 
-variable_to_correlate = path_length_array_mouse;
+variable_to_correlate = trial_choice_times_by_mouse;
 
 
 %%
@@ -1183,8 +1212,8 @@ array_for_means = 1;
 meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
-timeRange = (ts1 >= -4) & (ts1 <= 0);
-% timeRange = (ts1 >= 0) & (ts1 <= 2);
+% timeRange = (ts1 >= -4) & (ts1 <= 0);
+timeRange = (ts1 >= 0) & (ts1 <= 2);
 % timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
@@ -1324,8 +1353,8 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(prechoice_block_1==1);
-not_shk_responsive_corrs = allCorrelations(prechoice_block_1~=1);
+only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1==1);
+not_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1~=1);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
 figure;
@@ -1505,8 +1534,8 @@ hold off
 
 %%
 
-mean_data_array = {zall_mean_all_array{1, 7}(collect_block_1==1, :), zall_mean_all_array{1, 8}(collect_block_1==1, :)};
-sem_data_array = {sem_all_array{1, 7}(collect_block_1==1, :), sem_all_array{1, 8}(collect_block_1==1, :)};
+mean_data_array = {zall_mean_all_array{1, 11}(prechoice_block_1==1, :), zall_mean_all_array{1, 12}(prechoice_block_1==1, :)};
+sem_data_array = {sem_all_array{1, 11}(prechoice_block_1==1, :), sem_all_array{1, 12}(prechoice_block_1==1, :)};
 
 [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
 
@@ -1524,8 +1553,8 @@ sub_window_idx = ts1 >= start_time & ts1 <= end_time;
 % Extract the corresponding columns from neuron_mean
 
 
-sub_window_activity_session_1 = zall_mean_all_array{1, 7}(collect_block_1, sub_window_idx);
-sub_window_activity_session_2 = zall_mean_all_array{1, 8}(collect_block_1, sub_window_idx);
+sub_window_activity_session_1 = zall_mean_all_array{1, 11}(collect_block_1, sub_window_idx);
+sub_window_activity_session_2 = zall_mean_all_array{1, 12}(collect_block_1, sub_window_idx);
 
 % Assume A and B are your 143x21 arrays
 correlation_coefficients = arrayfun(@(i) corr(sub_window_activity_session_1 (i, :)', sub_window_activity_session_2 (i, :)'), 1:size(sub_window_activity_session_1 , 1));
@@ -1540,7 +1569,7 @@ y = mean_sub_window_activity_session_2;
 
 % Create a scatter plot
 figure;
-set(gcf,'Position',[100 100 200 500])
+set(gcf,'Position',[100 100 200 200])
 % Group 1: respClass_all(1,:) == 1 (Orange)
 % idx_group_1 = (respClass_all_array{1, 1} == 1);
 scatter(x, y, 'o', 'filled', 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k'); % Orange
@@ -1584,12 +1613,16 @@ hold off;
 
 combined_data = [mean_sub_window_activity_session_1 , mean_sub_window_activity_session_2];
 figure();
+set(gcf,'Position',[100 100 200 200])
 coordLineStyle = 'k.';
 boxplot(combined_data, 'Symbol', coordLineStyle); hold on;
 parallelcoords(combined_data, 'Color', 0.7*[1 1 1], 'LineStyle', '-',...
   'Marker', '.', 'MarkerSize', 10);
 
 TF = isoutlier(combined_data, 'grubbs');
+
+[h, p] = ttest2(mean_sub_window_activity_session_1, mean_sub_window_activity_session_2)
+
 
 %%
 ca_data_corresponding_to_large = zall_mouse(:, 11);
@@ -1622,3 +1655,72 @@ end
 figure; plot(ts1, mean(slow_trial_means(prechoice_block_1, :)))
 hold on; plot(ts1, mean(fast_trial_means(prechoice_block_1, :)))
 
+
+%% plot scatters for individual neurons & behav variables
+
+%CREATE SCATTER PLOT BASED ON SPECIFIC EVENTS - ASSUMING THEY ARE IN PAIRS.
+%CHECK AND UPDATE START & END TIME DEPENDING ON EVENT OF INTEREST
+paired_neurons = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} == 1;
+start_time = -4;% sub-window start time
+end_time = 0; % sub-window end time
+
+% Find the indices in ts1 that correspond to the sub-window
+sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+
+% Extract the corresponding columns from neuron_mean
+
+
+sub_window_activity_session_1 = zall_mouse{10, 1}{1, 10}(:, sub_window_idx);
+choice_times_mouse = trial_choice_times_by_mouse{1, 10};
+
+% % Assume A and B are your 143x21 arrays
+% correlation_coefficients = arrayfun(@(i) corr(sub_window_activity_session_1 (i, :)', sub_window_activity_session_2 (i, :)'), 1:size(sub_window_activity_session_1 , 1));
+
+
+mean_sub_window_activity_session_1 = mean(sub_window_activity_session_1, 2);
+
+
+x = mean_sub_window_activity_session_1;
+y = choice_times_mouse;
+
+
+% Create a scatter plot
+figure;
+set(gcf,'Position',[100 100 200 200])
+% Group 1: respClass_all(1,:) == 1 (Orange)
+% idx_group_1 = (respClass_all_array{1, 1} == 1);
+scatter(x, y, 'o', 'filled', 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k'); % Orange
+
+hold on;
+
+% % Group 2: respClass_all(1,:) == 2 (Light Blue)
+% idx_group_2 = (respClass_all_array{1, 1} == 2);
+% scatter(x(idx_group_2), y(idx_group_2), 'o', 'filled', 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'k'); % Light Blue
+
+% % Group 3: respClass_all(1,:) == 3 (Light Grey)
+% idx_group_3 = (respClass_all_array{1, 1} == 3);
+% scatter(x(idx_group_3), y(idx_group_3), 'o', 'filled', 'MarkerFaceColor', [0.7 0.7 0.7], 'MarkerEdgeColor', 'k'); % Light Grey
+
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+
+% Add labels and a legend (You can keep this part unchanged)
+% xlabel('X-axis Label');
+% ylabel('Y-axis Label');
+% title('Scatter Plot with Regression Line and R^2 Value');
+% legend('Group 1', 'Group 2', 'Group 3', 'Regression Line');
+% ylim([0 1.1])
+% xlim([0 1.1])
+hold off;

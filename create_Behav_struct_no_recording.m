@@ -12,6 +12,8 @@ metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
 
+%STILL NEED TO ADD THE ABILITY TO ADJUST TIMESTAMPS BASED ON 
+
 % Loop through the list of subfolders
 for i = 1:length(metaDirectory_subfolders)
     % Check if the item in subfolders is a directory (not "." or "..") or
@@ -125,11 +127,11 @@ for zz = 1:size(metafolder_list, 1)
             
         end
 
-        if isempty(matFiles) || ~exist('GPIO_file', 'var') == 1 || ~exist('ABET_file', 'var')  == 1
-            disp('Missing .mat or .csv files, skipping folder');
+        if  ~exist('ABET_file', 'var')  == 1
+            disp('Missing .csv files, skipping folder');
             clear ABET_file GPIO_file matFiles
         else
-            currentMatFile = strcat(folder_list{ii}, '\', matFiles.name);
+
             filesFound = true; % Set the flag to true since .mat files were found
         end
 
@@ -144,80 +146,11 @@ for zz = 1:size(metafolder_list, 1)
                 ABET_removeheader = ABETfile(2:end,:);
                 tbl_ABET = cell2table(ABET_removeheader);
                 tbl_ABET.Properties.VariableNames = ABETfile(1,:);
-                gpio_tbl = readtable(GPIO_file);
 
-                % Inscopix stupidly recently updated the way the GPIO pins
-                % are written, so the default values that I used before are
-                % no longer valid. updated this to reflect the new way
-                % things are written - hopefully this works! 
-                % stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
-                stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Value > 5000);
-
-
-
-                BehavData.TrialPossible(:)=BehavData.TrialPossible(:)+stTime(1);
-                BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+7.39500000000000;
-                % BehavData.collectionTime(:)=BehavData.collectionTime(:)+stTime(1);
-                % BehavData.stTime(:)=BehavData.stTime(:)+stTime(1);
-                % shk_times(:)=shk_times(:)+stTime(1);
-
-                BehavData.choTime2 = BehavData.choiceTime-BehavData.TrialPossible;
-                % BehavData.choTime3 = BehavData.Insc_TTL+BehavData.choTime2;
-
-                %filter based on TrialFilter inputs (see TrialFilter.m for full list of
-                %possibilities)
                 BehavData=TrialFilter(BehavData,'SHK',1);
 
 
                 final_behavior.(current_animal).(current_session).uv.BehavData = BehavData;
-            elseif contains(current_session, 'PR')
-                current_session = regexprep(current_session,{' ', '-'}, '_');
-                [BehavData,ABETfile]=ABET2TableFn_PR(ABET_file);
-                ABET_removeheader = ABETfile(2:end,:);
-                tbl_ABET = cell2table(ABET_removeheader);
-                tbl_ABET.Properties.VariableNames = ABETfile(1,:);
-                gpio_tbl = readtable(GPIO_file);
-                % Inscopix stupidly recently updated the way the GPIO pins
-                % are written, so the default values that I used before are
-                % no longer valid. updated this to reflect the new way
-                % things are written - hopefully this works!
-                % stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
-                stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Value > 5000);
-                frames = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName,'BNC Sync Output') & gpio_tbl.Value == 1);
-                %check GPIO file to extract each TTL, since the TTL is 1000ms and is
-                %sampled repeatedly. This will only extract events that are separated by >
-                %8sec, so be sure to change this if the TTL or task structure changes
-                %dramatically!
-                pp = 2;
-                ttl_filtered = stTime(1);
-                for kk = 1:size(stTime,1)-1
-                    if abs(stTime(kk)-stTime(kk+1)) > 8
-                        ttl_filtered(pp) = stTime(kk+1);
-                        pp=pp+1;
-                    end
-                end
-                ttl_filtered = ttl_filtered';
-                %Add TTL times received by Inscopix to data table, skipping omitted trials
-                %which do not have a corresponding TTL due to a quirk in the behavioral
-                %program
-                % BehavData.Insc_TTL = zeros(length(BehavData.TrialPossible),1);
-                % dd = 2;
-                % for cc = 1:size(BehavData, 1)
-                %     if BehavData.TrialPossible(cc) > stTime(1)
-                %         BehavData.Insc_TTL(cc) = ttl_filtered(dd);
-                %         dd = dd+1;
-                %     elseif BehavData.TrialPossible(cc) <= stTime(1)
-                %         BehavData.Insc_TTL(cc) = 0;
-                %     end
-                % end
-
-                BehavData.PressTime(:)=BehavData.PressTime(:)+stTime(1);
-                BehavData.rewDeliveryTime(BehavData.rewDeliveryTime > 0) = BehavData.rewDeliveryTime(BehavData.rewDeliveryTime > 0) + stTime(1);
-                BehavData.collectionTime(BehavData.collectionTime > 0) = BehavData.collectionTime(BehavData.collectionTime > 0) + stTime(1);
-
-                final_behavior.(current_animal).(current_session).uv.BehavData = BehavData;
-
-
 
             else
 
@@ -231,28 +164,6 @@ for zz = 1:size(metafolder_list, 1)
                 ABET_removeheader = ABETfile(2:end,:);
                 tbl_ABET = cell2table(ABET_removeheader);
                 tbl_ABET.Properties.VariableNames = ABETfile(1,:);
-                gpio_tbl = readtable(GPIO_file);
-
-                % Inscopix stupidly recently updated the way the GPIO pins
-                % are written, so the default values that I used before are
-                % no longer valid. updated this to reflect the new way
-                % things are written - hopefully this works! 
-                % stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Time_s_ > 0);
-                stTime = gpio_tbl.Time_s_(strcmp(gpio_tbl.ChannelName, 'GPIO-2') & gpio_tbl.Value > 5000);
-
-
-
-                BehavData.TrialPossible(:)=BehavData.TrialPossible(:)+stTime(1);
-                BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+7.39500000000000;
-                BehavData.collectionTime(:)=BehavData.collectionTime(:)+stTime(1);
-                BehavData.stTime(:)=BehavData.stTime(:)+stTime(1);
-
-
-
-                % shk_times(:)=shk_times(:)+stTime(1);
-
-                BehavData.choTime2 = BehavData.choiceTime-BehavData.TrialPossible;
-
 
                 final_behavior.(current_animal).(current_session).uv.BehavData = BehavData;
 
@@ -270,4 +181,54 @@ for zz = 1:size(metafolder_list, 1)
     % clearvars -except final
 end
 %%
+% Loop through each file
+for i = 1:size(dataTable, 1)
+    % Get the filename
+    filename = dataTable.FileName{i};
+    adjusted_start_time = dataTable.ChangeTimeInSeconds(i);
+    % Extract the relevant information from the filename
+    parts = strsplit(filename, '_merged_resized_grayscaled.MP4');
+    pattern = '_\d+$';  % Match underscore followed by digits at the end of the string
+    replacement = '';
+    filtered_str = regexprep(parts(1), pattern, replacement);
 
+
+    % Initialize a flag to indicate if the combination exists
+    exists = false;
+
+    % Loop through the first level of the structure
+    fields_level1 = fieldnames(final_behavior);
+    for qq = 1:numel(fields_level1)
+        % Combine the first level field name with each second level field name
+        fields_level2 = fieldnames(final_behavior.(fields_level1{qq}));
+        for j = 1:numel(fields_level2)
+            combination = [fields_level1{qq}, '_', fields_level2{j}];
+            % Check if the combination matches the filtered_str
+            if strcmp(combination, filtered_str)
+                exists = true;
+                
+                BehavData = final_behavior.(fields_level1{qq}).(fields_level2{j}).uv.BehavData;
+                BehavData.TrialPossible(:)=BehavData.TrialPossible(:)+adjusted_start_time(1);
+                BehavData.choiceTime(:)=BehavData.choiceTime(:)+adjusted_start_time(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+stTime(1); %BehavData.choiceTime(:)=BehavData.choiceTime(:)+7.39500000000000;
+                BehavData.collectionTime(:)=BehavData.collectionTime(:)+adjusted_start_time(1);
+                BehavData.stTime(:)=BehavData.stTime(:)+adjusted_start_time(1);
+                final_behavior.(fields_level1{qq}).(fields_level2{j}).uv.BehavData = BehavData; 
+                final_behavior.(fields_level1{qq}).(fields_level2{j}).first_frame = adjusted_start_time; 
+                break; % Break the inner loop if match found
+            end
+        end
+        if exists
+            break; % Break the outer loop if match found
+        end
+    end
+
+    % Output the result
+    if exists
+        disp('The combination exists.');
+    else
+        disp('The combination does not exist.');
+    end
+end
+
+% Save the updated 'final' data structure
+% save('final_updated.mat', 'final');
