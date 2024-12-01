@@ -1,5 +1,5 @@
 % animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
 b1_large_path_length = [];
 b2_large_path_length = [];
@@ -46,9 +46,9 @@ for dd = 1:size(animalIDs)
         % SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data;
 
         
-        % BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
+        BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
         
-        BehavData = behav_tbl_iter{1, 1}{dd};
+        % BehavData = behav_tbl_iter{1, 1}{dd};
         onset_trials = BehavData.stTime';
         choice_trials = BehavData.choiceTime';
         offset_trials = BehavData.collectionTime';
@@ -159,6 +159,79 @@ for dd = 1:size(animalIDs)
     b3_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 3 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
     path_length_array_mouse{dd} = path_length_array; 
 end
+
+
+
+%%
+
+large_path_length = ([b1_large_path_length; b2_large_path_length; b3_large_path_length])';
+small_path_length = ([b1_small_path_length; b2_small_path_length; b3_small_path_length])';
+
+
+
+mean_large_path = nanmean(large_path_length, 1);
+mean_small_path = nanmean(small_path_length, 1);
+
+sem_large = nanstd(large_path_length, 0, 1) ./ sqrt(size(large_path_length, 1));
+sem_small = nanstd(small_path_length, 0, 1) ./ sqrt(size(small_path_length, 1));
+
+
+% X-axis points
+x_points = 1:3;
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_path_length, 1)
+    plot(x_points, large_path_length(i, :), '-', ...
+        'Color', [0 0 1 0.6], ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot individual lines for "Small" data
+for i = 1:size(small_path_length, 1)
+    plot(x_points, small_path_length(i, :), '-', ...
+        'Color', [1 0 0 0.6], ... % 
+        'LineWidth', 1.2);
+end
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large_path, sem_large, 'o-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small_path, sem_small, '^-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50%', '75%'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% % Set axis limits, labels, and legend
+% ylim([0 1.1 * max([mean_large_path + sem_large, ...
+%                    mean_small_path + sem_small])]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:200:1000);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
 
 
 %%

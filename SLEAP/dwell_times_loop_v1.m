@@ -1,8 +1,8 @@
 
 fs_cam = 30; %set sampling rate according to camera, this is hard coded for now
 
-animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'Pre_RDT_RM';
+% animalIDs = (fieldnames(final_SLEAP));
+session_to_analyze = 'RDT_D1';
 
 reward_cup_time = [];
 right_screen_time = [];
@@ -38,7 +38,7 @@ for dd = 1:size(animalIDs)
         BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
         adjusted_start_time = BehavData.TrialPossible(1)-60;
         SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
-
+        
         %%
         % FILTER ALL EXISTING DATA ON THESE TIME RANGES
         % filter streams
@@ -122,7 +122,7 @@ for dd = 1:size(animalIDs)
 
         end
         clear resultArray
-
+        
         mean_reward_cup_large_B1(dd) = mean(reward_cup_time{1, dd}(BehavData.bigSmall == 1.2 & BehavData.Block == 1));
         mean_reward_cup_large_B2(dd) = mean(reward_cup_time{1, dd}(BehavData.bigSmall == 1.2 & BehavData.Block == 2));
         mean_reward_cup_large_B3(dd)= mean(reward_cup_time{1, dd}(BehavData.bigSmall == 1.2 & BehavData.Block == 3));
@@ -175,3 +175,122 @@ mean_left_screen_time_all_blocks = mean([mean_left_screen_time_B1; mean_left_scr
 mean_right_screen_time_all_blocks = mean([mean_right_screen_time_B1; mean_right_screen_time_B2; mean_right_screen_time_B3]);
 mean_reward_cup_all_blocks = mean([mean_reward_cup_B1; mean_reward_cup_B2; mean_reward_cup_B3]);
 mean_other_zone_time_all_blocks = mean([other_zone_time_B1; other_zone_time_B2; other_zone_time_B3]);
+
+large_rew = [];
+
+large_rew = zeros(1, 10); % Initialize a result array
+for i = 1:size(mean_left_screen_time_B1, 2)
+    if mean_right_screen_time_B1(i) > mean_left_screen_time_B1(i)
+        large_rew(i) = 2;
+    elseif mean_right_screen_time_B1(i) < mean_left_screen_time_B1(i)
+        large_rew(i) = 1;
+    else
+        large_rew(i) = 0; % Default for equal values
+    end
+end
+
+
+for ii = 1:size(large_rew, 2)
+    if large_rew(ii) == 2
+        mean_large_screen_time_B1(ii) = mean_right_screen_time_B1(ii)
+        mean_large_screen_time_B2(ii) = mean_right_screen_time_B2(ii)
+        mean_large_screen_time_B3(ii) = mean_right_screen_time_B3(ii)
+
+        mean_small_screen_time_B1(ii) = mean_left_screen_time_B1(ii)
+        mean_small_screen_time_B2(ii) = mean_left_screen_time_B2(ii)
+        mean_small_screen_time_B3(ii) = mean_left_screen_time_B3(ii)
+
+    elseif large_rew(ii) == 1 
+        mean_large_screen_time_B1(ii) = mean_left_screen_time_B1(ii)
+        mean_large_screen_time_B2(ii) = mean_left_screen_time_B2(ii)
+        mean_large_screen_time_B3(ii) = mean_left_screen_time_B3(ii)
+
+
+        mean_small_screen_time_B1(ii) = mean_right_screen_time_B1(ii)
+        mean_small_screen_time_B2(ii) = mean_right_screen_time_B2(ii)
+        mean_small_screen_time_B3(ii) = mean_right_screen_time_B3(ii)
+    end
+end
+
+
+
+%%
+
+large_zone_time = ([mean_large_screen_time_B1; mean_large_screen_time_B2; mean_large_screen_time_B3]*100)';
+small_zone_time = ([mean_small_screen_time_B1; mean_small_screen_time_B2; mean_small_screen_time_B3]*100)';
+rew_cup_zone_time = ([mean_reward_cup_B1; mean_reward_cup_B2; mean_reward_cup_B3]*100)';
+
+
+mean_large_zone = nanmean(large_zone_time, 1);
+mean_small_zone = nanmean(small_zone_time, 1);
+mean_rew_cup_zone = nanmean(rew_cup_zone_time, 1);
+
+sem_large = nanstd(large_zone_time, 0, 1) ./ sqrt(size(large_zone_time, 1));
+sem_small = nanstd(small_zone_time, 0, 1) ./ sqrt(size(small_zone_time, 1));
+sem_rew = nanstd(rew_cup_zone_time, 0, 1) ./ sqrt(size(rew_cup_zone_time, 1));
+
+% X-axis points
+x_points = 1:3;
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_zone_time, 1)
+    plot(x_points, large_zone_time(i, :), '-', ...
+        'Color', [0 0 1 0.6], ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(rew_cup_zone_time, 1)
+    plot(x_points, rew_cup_zone_time(i, :), '-', ...
+        'Color', [0 1 0 0.6], ... % 
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(small_zone_time, 1)
+    plot(x_points, small_zone_time(i, :), '-', ...
+        'Color', [1 0 0 0.6], ... % 
+        'LineWidth', 1.2);
+end
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large_zone, sem_large, 'o-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small_zone, sem_small, '^-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_rew_cup_zone, sem_rew, '^-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'green', 'MarkerFaceColor', 'green', ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50%', '75%'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 1.1 * max([mean_large_zone + sem_large, ...
+                   mean_small_zone + sem_small])]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:100);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;

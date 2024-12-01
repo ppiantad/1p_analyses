@@ -3,9 +3,9 @@
 % these are mice that did not complete the entire session - kinda have to
 % toss them to do some comparisons during RDT
 
-final_behavior = final_SLEAP; % for hM4Di data;
+% final_behavior = final_SLEAP; % for hM4Di data;
 
-session_to_analyze = 'RDT_D1_CNO'
+session_to_analyze = 'RDT_D1'
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_13'};
@@ -122,6 +122,12 @@ for ii = 1:size(animalIDs,1) % 1:size(fieldnames(final),1)
         if ismember('type_binary', BehavData.Properties.VariableNames)
             large_aborts = sum(BehavData.type_binary == 1); %[] sum(BehavData.type_binary == 1)
             small_aborts = sum(BehavData.type_binary == 2);
+            large_aborts_block_1 = sum(BehavData.type_binary == 1 & BehavData.Block == 1);
+            large_aborts_block_2 = sum(BehavData.type_binary == 1 & BehavData.Block == 2);
+            large_aborts_block_3 = sum(BehavData.type_binary == 1 & BehavData.Block == 3);
+            small_aborts_block_1 = sum(BehavData.type_binary == 2 & BehavData.Block == 1);
+            small_aborts_block_2 = sum(BehavData.type_binary == 2 & BehavData.Block == 2);
+            small_aborts_block_3 = sum(BehavData.type_binary == 2 & BehavData.Block == 3);
         else 
             large_aborts = 0;
             small_aborts = 0;
@@ -137,6 +143,12 @@ for ii = 1:size(animalIDs,1) % 1:size(fieldnames(final),1)
             block_3_small_choice_percent,...
             large_aborts,...
             small_aborts,...
+            large_aborts_block_1,...
+            large_aborts_block_2,...
+            large_aborts_block_3,...
+            small_aborts_block_1,...
+            small_aborts_block_2,...
+            small_aborts_block_3,...
             lose_shift_percent,...
             lose_omit_percent,...
             lose_stay_percent,...
@@ -165,6 +177,12 @@ for ii = 1:size(animalIDs,1) % 1:size(fieldnames(final),1)
             "block_3_small",...
             "large_abort",...
             "small_aborts",...
+            "large_aborts_block_1",...
+            "large_aborts_block_2",...
+            "large_aborts_block_3",...
+            "small_aborts_block_1",...
+            "small_aborts_block_2",...
+            "small_aborts_block_3",...
             "lose_shift",...
             "lose_omit",...
             "lose_stay",...
@@ -425,6 +443,222 @@ xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
 % Set axis limits, labels, and legend
 ylim([0 1.1 * max([mean_large + sem_large, ...
                    mean_small + sem_small])]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:100);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%%
+
+large_choice = [risk_table.block_1_large_choice_latency, risk_table.block_2_large_choice_latency, risk_table.block_3_large_choice_latency];
+small_choice = [risk_table.block_1_small_choice_latency, risk_table.block_2_small_choice_latency, risk_table.block_3_small_choice_latency];
+
+mean_large = nanmean(large_choice, 1);
+mean_small = nanmean(small_choice, 1);
+sem_large = nanstd(large_choice, 0, 1) ./ sqrt(size(large_choice, 1));
+sem_small = nanstd(small_choice, 0, 1) ./ sqrt(size(small_choice, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice, 1)
+    plot(x_points, large_choice(i, :), '-', ...
+        'Color', [0 0 1 0.6], ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(small_choice, 1)
+    plot(x_points, small_choice(i, :), '-', ...
+        'Color', [1 0 0 0.6], ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, 'o-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, '^-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50%', '75%'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+% ylim([0 1.1 * max([mean_large + sem_large, ...
+%                    mean_small + sem_small])]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:5:20);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%%
+
+large_choice = [risk_table.block_1_large_collect_latency, risk_table.block_2_large_collect_latency, risk_table.block_3_large_collect_latency];
+small_choice = [risk_table.block_1_small_collect_latency, risk_table.block_2_small_collect_latency, risk_table.block_3_small_collect_latency];
+
+mean_large = nanmean(large_choice, 1);
+mean_small = nanmean(small_choice, 1);
+sem_large = nanstd(large_choice, 0, 1) ./ sqrt(size(large_choice, 1));
+sem_small = nanstd(small_choice, 0, 1) ./ sqrt(size(small_choice, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice, 1)
+    plot(x_points, large_choice(i, :), '-', ...
+        'Color', [0 0 1 0.6], ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(small_choice, 1)
+    plot(x_points, small_choice(i, :), '-', ...
+        'Color', [1 0 0 0.6], ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, 'o-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, '^-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50%', '75%'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+% ylim([0 1.1 * max([mean_large + sem_large, ...
+%                    mean_small + sem_small])]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:1:5);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%%
+
+large_choice = [risk_table.large_aborts_block_1, risk_table.large_aborts_block_2, risk_table.large_aborts_block_3];
+small_choice = [risk_table.small_aborts_block_1, risk_table.small_aborts_block_2, risk_table.small_aborts_block_3];
+
+mean_large = nanmean(large_choice, 1);
+mean_small = nanmean(small_choice, 1);
+sem_large = nanstd(large_choice, 0, 1) ./ sqrt(size(large_choice, 1));
+sem_small = nanstd(small_choice, 0, 1) ./ sqrt(size(small_choice, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice, 1)
+    plot(x_points, large_choice(i, :), '-', ...
+        'Color', [0 0 1 0.6], ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(small_choice, 1)
+    plot(x_points, small_choice(i, :), '-', ...
+        'Color', [1 0 0 0.6], ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, 'o-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, '^-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50%', '75%'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+% ylim([0 1.1 * max([mean_large + sem_large, ...
+%                    mean_small + sem_small])]); % Adjust ylim dynamically
 set(gca, 'ytick', 0:25:100);
 % xlabel('Condition');
 % ylabel('Mean ± SEM');
