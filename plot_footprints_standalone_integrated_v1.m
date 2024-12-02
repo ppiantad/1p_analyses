@@ -97,7 +97,7 @@ min_val = min(Cn_data(:));
 max_val = max(Cn_data(:));
 
 % Define the desired range for the color axis
-new_min = .7;  % Set the minimum value you want to display
+new_min = .75;  % Set the minimum value you want to display
 new_max = 1;  % Set the maximum value you want to display
 
 % Update the color axis scaling
