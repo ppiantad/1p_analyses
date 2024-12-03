@@ -1212,8 +1212,8 @@ array_for_means = 1;
 meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
-% timeRange = (ts1 >= -4) & (ts1 <= 0);
-timeRange = (ts1 >= 0) & (ts1 <= 2);
+timeRange = (ts1 >= -4) & (ts1 <= 0);
+% timeRange = (ts1 >= 0) & (ts1 <= 2);
 % timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
@@ -1353,8 +1353,8 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1==1);
-not_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1~=1);
+only_shk_responsive_corrs = allCorrelations(prechoice_block_1==1);
+not_shk_responsive_corrs = allCorrelations(prechoice_block_1~=1);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
 figure;
@@ -1724,3 +1724,9 @@ text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
 % ylim([0 1.1])
 % xlim([0 1.1])
 hold off;
+
+%% these arrays are just the combined_data = [mean_sub_window_activity_session_1 , mean_sub_window_activity_session_2] arrays from above, but saved for Early & Late
+load('Late_RM_arrays.mat')
+load('RM_D1_arrays.mat')
+small_means_prechoice = [mean(RM_D1_prechoice_combined_data(:, 2))  mean(Late_RM_prechoice_combined_data(:, 2))]
+large_means_prechoice = [mean(RM_D1_prechoice_combined_data(:, 1))  mean(Late_RM_prechoice_combined_data(:, 1))]

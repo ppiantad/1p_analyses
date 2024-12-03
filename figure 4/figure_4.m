@@ -1110,6 +1110,14 @@ end
  [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
 
  %%
+ mean_data_array = {neuron_mean_array{1, 3}(collect_block_1==1, :), neuron_mean_array{1, 10}(collect_block_1==1, :)};
+ sem_data_array = {neuron_sem_array{1, 3}(collect_block_1==1, :), neuron_sem_array{1, 10}(collect_block_1==1, :)};
+
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1);
+
+
+
+ %%
  if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11
     comparison_arrays = [1 2 3; 8 9 10]
 elseif size(respClass_all_array, 2) == 6
@@ -1723,3 +1731,817 @@ expected = [n10 N1-n10 n20 N2-n20];
 chi2stat = sum((observed-expected).^2 ./ expected)
 
 p = 1 - chi2cdf(chi2stat,1)
+
+%% "new" fig 4 analyses below here
+
+
+
+
+
+%%
+ mean_data_array = {neuron_mean_array{1, 1}(prechoice_block_1==1, :), neuron_mean_array{1, 8}(prechoice_block_1==1, :)};
+ sem_data_array = {neuron_sem_array{1, 1}(prechoice_block_1==1, :), neuron_sem_array{1, 8}(prechoice_block_1==1, :)};
+
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1);
+
+
+
+ %%
+ mean_data_array = {neuron_mean_array{1, 2}(postchoice_reward_block_1==1, :), neuron_mean_array{1, 9}(postchoice_reward_block_1==1, :)};
+ sem_data_array = {neuron_sem_array{1, 2}(postchoice_reward_block_1==1, :), neuron_sem_array{1, 9}(postchoice_reward_block_1==1, :)};
+
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
+ %%
+ mean_data_array = {neuron_mean_array{1, 3}(collect_block_1==1, :), neuron_mean_array{1, 10}(collect_block_1==1, :)};
+ sem_data_array = {neuron_sem_array{1, 3}(collect_block_1==1, :), neuron_sem_array{1, 10}(collect_block_1==1, :)};
+
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%% create correlation matrix heatmap with exclusively active cells
+test = [];
+test = [neuron_mean_array{1, 8}(prechoice_block_1 == 1, :)];
+% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1, :)];
+test = [test; neuron_mean_array{1, 9}(postchoice_reward_block_1 == 1, :)];
+test = [test; neuron_mean_array{1, 10}(collect_block_1 == 1,:)];
+% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1,3}~=1, :)];
+
+pre_choice_index = [1:sum(prechoice_block_1)];
+post_choice_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(postchoice_reward_block_1)];
+consumption_index = [post_choice_index(end)+1:post_choice_index(end)+sum(collect_block_1)];
+neutral_index = [consumption_index(end)+1:consumption_index(end)+sum(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1)];
+
+
+data = test;
+
+alpha = 0.0001;
+
+% Initialize matrices to store correlation coefficients and p-values
+correlation_matrix = zeros(size(data, 1));
+p_value_matrix = zeros(size(data, 1));
+
+% Calculate correlation coefficients and p-values between rows
+for i = 1:size(data, 1)
+    for j = 1:size(data, 1)
+        [corr_coeff, p_value] = corrcoef(data(i, :)', data(j, :)');
+        correlation_matrix(i, j) = corr_coeff(1, 2); % Store correlation coefficient
+        p_value_matrix(i, j) = p_value(1, 2); % Store p-value
+    end
+end
+
+% Plot the correlation matrix
+figure;
+imagesc(correlation_matrix);
+
+axis square; % Make the plot square for better visualization
+% title('Correlation Matrix');
+% xlabel('Neuron Number');
+% ylabel('Neuron Number');
+ylim([1  size(test, 1)])
+% Show row and column indices on the plot
+xticks([1  size(test, 1)]);
+yticks([1  size(test, 1)]);
+
+% If you want to customize the color map, you can use colormap function
+% For example, using a blue-white-red colormap:
+colormap(gray);
+
+% If you want to limit the color scale to the range [0, 1]
+caxis([-1 1]); % Assuming correlations range from -1 to 1
+% Add a separate axes for the colorbar to associate it only with the upper tile
+c = colorbar('eastoutside');
+set(c, 'YTick', clim); % 
+% % Display p-values as text on the plot
+% for i = 1:size(data, 1)
+%     for j = 1:size(data, 1)
+%         text(j, i, sprintf('p = %.4f', p_value_matrix(i, j)), ...
+%             'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
+%     end
+% end
+
+%%
+action_p_value_matrix = p_value_matrix(pre_choice_index, pre_choice_index);
+action_correl_matrix = correlation_matrix(pre_choice_index, pre_choice_index);
+
+n = size(pre_choice_index, 2); % Total number of neurons
+k = 2;   % Number of neurons chosen for pairwise combinations
+
+num_combinations = nchoosek(n, k);
+disp(['Number of distinct pairwise combinations: ', num2str(num_combinations)]);
+
+
+% Assuming action_correl_matrix and action_p_value_matrix are your matrices
+
+% Initialize counters
+action_positive_count = 0;
+action_negative_count = 0;
+action_no_correlation_count = 0;
+
+% Get the size of the correlation matrix
+matrix_size = size(action_correl_matrix, 1);
+uu = 1;
+% Loop over the upper triangular part of the correlation matrix
+for i = 1:matrix_size
+    for j = i+1:matrix_size % Start from i+1 to exclude the diagonal
+        % get total pairwise correlations between all possible combos of
+        % neurons
+        action_ensemble_corr_overall(uu) = action_correl_matrix(i, j);
+        uu = uu+1;
+        % Check if p-value is less than 0.01
+        if action_p_value_matrix(i, j) < alpha
+            if action_correl_matrix(i, j) > 0
+                action_positive_count = action_positive_count + 1;
+            elseif action_correl_matrix(i, j) < 0
+                action_negative_count = action_negative_count + 1;
+            end
+        else
+            action_no_correlation_count = action_no_correlation_count + 1;
+        end
+    end
+end
+
+action_comparisons_possible = [action_positive_count + action_negative_count + action_no_correlation_count];
+
+
+disp(['Number of positive correlations: ', num2str(action_positive_count)]);
+disp(['Number of negative correlations: ', num2str(action_negative_count)]);
+disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(action_no_correlation_count)]);
+
+% Assuming you have positive_count, negative_count, and no_correlation_count variables
+
+% Define data for the stacked bar plot
+action_data = [(action_positive_count/action_comparisons_possible)*100, (action_negative_count/action_comparisons_possible)*100, (action_no_correlation_count/action_comparisons_possible)*100];
+figure;
+% Define labels for the bars
+labels = {'Positive Correlation', 'Negative Correlation', 'No Correlation'};
+
+% Create the stacked bar plot
+bar(1, action_data, 'stacked');
+
+% Add labels and title
+xlabel('Counts');
+ylabel('Correlation Type');
+title('Correlation Counts');
+
+% Add legend
+legend(labels);
+
+% Adjust x-axis limits
+xlim([0.5, 1.5]); % since we only have one set of data, we set the limits to center the bars
+
+% Adjust y-axis limits if needed
+% ylim([0, max(data) + 10]); % adjust ylim if needed for better visualization
+
+% Optionally, you can add data labels on each bar
+% text(1:length(data), data, num2str(data'), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+
+% Optionally, you can rotate x-axis labels if needed
+% xticklabels(labels);
+
+% Optionally, you can change bar colors
+% colormap([0.8 0.2 0.2; 0.2 0.8 0.2; 0.2 0.2 0.8]); % customize colors as needed
+
+
+% uu = 1
+% for i = 1:matrix_size
+%     for j = i+1:matrix_size % Start from i+1 to exclude the diagonal
+%         % Check if p-value is less than 0.01
+%         action_ensemble_corr_overall(uu) = action_correl_matrix(i, j);
+%         uu = uu+1;
+%     end
+% end
+
+%%
+post_choice_p_value_matrix = p_value_matrix(post_choice_index, post_choice_index);
+post_choice_correl_matrix = correlation_matrix(post_choice_index, post_choice_index);
+
+n = size(post_choice_index, 2); % Total number of neurons
+k = 2;   % Number of neurons chosen for pairwise combinations
+
+num_combinations = nchoosek(n, k);
+disp(['Number of distinct pairwise combinations: ', num2str(num_combinations)]);
+
+
+% Assuming action_correl_matrix and action_p_value_matrix are your matrices
+
+% Initialize counters
+post_choice_positive_count = 0;
+post_choice_negative_count = 0;
+post_choice_no_correlation_count = 0;
+
+% Get the size of the correlation matrix
+matrix_size = size(post_choice_correl_matrix, 1);
+uu = 1
+% Loop over the upper triangular part of the correlation matrix
+for i = 1:matrix_size
+    for j = i+1:matrix_size % Start from i+1 to exclude the diagonal
+        post_choice_ensemble_corr_overall(uu) = post_choice_correl_matrix(i, j);
+        uu = uu+1;
+        % Check if p-value is less than 0.01
+        if post_choice_p_value_matrix(i, j) < alpha
+            if post_choice_correl_matrix(i, j) > 0
+                post_choice_positive_count = post_choice_positive_count + 1;
+            elseif post_choice_correl_matrix(i, j) < 0
+                post_choice_negative_count = post_choice_negative_count + 1;
+            end
+        else
+            post_choice_no_correlation_count = post_choice_no_correlation_count + 1;
+        end
+    end
+end
+
+post_choice_comparisons_possible = [post_choice_positive_count + post_choice_negative_count + post_choice_no_correlation_count];
+
+
+disp(['Number of positive correlations: ', num2str(post_choice_positive_count)]);
+disp(['Number of negative correlations: ', num2str(post_choice_negative_count)]);
+disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(post_choice_no_correlation_count)]);
+% Assuming you have positive_count, negative_count, and no_correlation_count variables
+
+% Define data for the stacked bar plot
+post_choice_data = [(post_choice_positive_count/post_choice_comparisons_possible)*100, (post_choice_negative_count/post_choice_comparisons_possible)*100, (post_choice_no_correlation_count/post_choice_comparisons_possible)*100];
+figure;
+% Define labels for the bars
+labels = {'Positive Correlation', 'Negative Correlation', 'No Correlation'};
+
+% Create the stacked bar plot
+bar(1, post_choice_data, 'stacked');
+
+% Add labels and title
+xlabel('Counts');
+ylabel('Correlation Type');
+title('Correlation Counts');
+
+% Add legend
+legend(labels);
+
+% Adjust x-axis limits
+xlim([0.5, 1.5]); % since we only have one set of data, we set the limits to center the bars
+
+% Adjust y-axis limits if needed
+% ylim([0, max(data) + 10]); % adjust ylim if needed for better visualization
+
+% Optionally, you can add data labels on each bar
+% text(1:length(data), data, num2str(data'), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+
+% Optionally, you can rotate x-axis labels if needed
+% xticklabels(labels);
+
+% Optionally, you can change bar colors
+% colormap([0.8 0.2 0.2; 0.2 0.8 0.2; 0.2 0.2 0.8]); % customize colors as needed
+
+
+
+
+
+%%
+consumption_p_value_matrix = p_value_matrix(consumption_index, consumption_index);
+consumption_correl_matrix = correlation_matrix(consumption_index, consumption_index);
+
+n = size(consumption_index, 2); % Total number of neurons
+k = 2;   % Number of neurons chosen for pairwise combinations
+
+num_combinations = nchoosek(n, k);
+disp(['Number of distinct pairwise combinations: ', num2str(num_combinations)]);
+
+
+% Assuming action_correl_matrix and action_p_value_matrix are your matrices
+
+% Initialize counters
+consumption_positive_count = 0;
+consumption_negative_count = 0;
+consumption_no_correlation_count = 0;
+
+% Get the size of the correlation matrix
+matrix_size = size(consumption_correl_matrix, 1);
+uu = 1
+% Loop over the upper triangular part of the correlation matrix
+for i = 1:matrix_size
+    for j = i+1:matrix_size % Start from i+1 to exclude the diagonal
+        consumption_ensemble_corr_overall(uu) = consumption_correl_matrix(i, j);
+        uu = uu+1;
+        % Check if p-value is less than 0.01
+        if consumption_p_value_matrix(i, j) < alpha
+            if consumption_correl_matrix(i, j) > 0
+                consumption_positive_count = consumption_positive_count + 1;
+            elseif consumption_correl_matrix(i, j) < 0
+                consumption_negative_count = consumption_negative_count + 1;
+            end
+        else
+            consumption_no_correlation_count = consumption_no_correlation_count + 1;
+        end
+    end
+end
+
+consumption_comparisons_possible = [consumption_positive_count + consumption_negative_count + consumption_no_correlation_count];
+
+
+disp(['Number of positive correlations: ', num2str(consumption_positive_count)]);
+disp(['Number of negative correlations: ', num2str(consumption_negative_count)]);
+disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(consumption_no_correlation_count)]);
+
+% Assuming you have positive_count, negative_count, and no_correlation_count variables
+
+% Define data for the stacked bar plot
+consumption_data = [(consumption_positive_count/consumption_comparisons_possible)*100, (consumption_negative_count/consumption_comparisons_possible)*100, (consumption_no_correlation_count/consumption_comparisons_possible)*100];
+figure;
+% Define labels for the bars
+labels = {'Positive Correlation', 'Negative Correlation', 'No Correlation'};
+
+% Create the stacked bar plot
+bar(1, consumption_data, 'stacked');
+
+% Add labels and title
+xlabel('Counts');
+ylabel('Correlation Type');
+title('Correlation Counts');
+
+% Add legend
+legend(labels);
+
+% Adjust x-axis limits
+xlim([0.5, 1.5]); % since we only have one set of data, we set the limits to center the bars
+
+% Adjust y-axis limits if needed
+% ylim([0, max(data) + 10]); % adjust ylim if needed for better visualization
+
+% Optionally, you can add data labels on each bar
+% text(1:length(data), data, num2str(data'), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+
+% Optionally, you can rotate x-axis labels if needed
+% xticklabels(labels);
+
+% Optionally, you can change bar colors
+% colormap([0.8 0.2 0.2; 0.2 0.8 0.2; 0.2 0.2 0.8]); % customize colors as needed
+
+
+
+%%
+action_post_choice_p_value_matrix = p_value_matrix(pre_choice_index, post_choice_index);
+action_post_choice_correl_matrix = correlation_matrix(pre_choice_index, post_choice_index);
+
+n1 = size(action_post_choice_p_value_matrix, 1); % Number of neurons in the first set
+n2 = size(action_post_choice_p_value_matrix, 2); % Number of neurons in the second set
+k = 2;    % Number of neurons chosen for pairwise combinations
+
+num_combinations = nchoosek(n1, k) * nchoosek(n2, k);
+disp(['Number of unique pairwise combinations: ', num2str(num_combinations)]);
+
+
+
+% Assuming action_correl_matrix and action_p_value_matrix are your matrices
+
+% Initialize counters
+action_post_choice_positive_count = 0;
+action_post_choice_negative_count = 0;
+action_post_choice_no_correlation_count = 0;
+
+% % Initialize counters
+% positive_count = 0;
+% negative_count = 0;
+% no_correlation_count = 0;
+
+% Get the size of the correlation matrix
+[num_neurons_1, num_neurons_2] = size(action_post_choice_correl_matrix);
+
+% Loop through the matrices to count correlations
+for i = 1:num_neurons_1
+    for j = 1:num_neurons_2
+        correlation = action_post_choice_correl_matrix(i, j);
+        p_value = action_post_choice_p_value_matrix(i, j);
+        if p_value < alpha
+            if correlation > 0
+                action_post_choice_positive_count = action_post_choice_positive_count + 1;
+            elseif correlation < 0
+                action_post_choice_negative_count = action_post_choice_negative_count + 1;
+            end
+        else
+            action_post_choice_no_correlation_count = action_post_choice_no_correlation_count + 1;
+        end
+    end
+end
+
+
+disp(['Number of positive correlations: ', num2str(action_post_choice_positive_count)]);
+disp(['Number of negative correlations: ', num2str(action_post_choice_negative_count)]);
+disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(action_post_choice_no_correlation_count)]);
+
+action_post_choice_comparisons_possible = [action_post_choice_positive_count+action_post_choice_negative_count+action_post_choice_no_correlation_count];
+
+
+% Assuming you have positive_count, negative_count, and no_correlation_count variables
+
+% Define data for the stacked bar plot
+action_post_choice_data = [(action_post_choice_positive_count/action_post_choice_comparisons_possible)*100, (action_post_choice_negative_count/action_post_choice_comparisons_possible)*100, (action_post_choice_no_correlation_count/action_post_choice_comparisons_possible)*100];
+figure;
+% Define labels for the bars
+labels = {'Positive Correlation', 'Negative Correlation', 'No Correlation'};
+
+% Create the stacked bar plot
+bar(1, action_post_choice_data, 'stacked');
+
+% Add labels and title
+xlabel('Counts');
+ylabel('Correlation Type');
+title('Correlation Counts');
+
+% Add legend
+legend(labels);
+
+% Adjust x-axis limits
+xlim([0.5, 1.5]); % since we only have one set of data, we set the limits to center the bars
+
+% Adjust y-axis limits if needed
+% ylim([0, max(data) + 10]); % adjust ylim if needed for better visualization
+
+% Optionally, you can add data labels on each bar
+% text(1:length(data), data, num2str(data'), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+
+% Optionally, you can rotate x-axis labels if needed
+% xticklabels(labels);
+
+% Optionally, you can change bar colors
+% colormap([0.8 0.2 0.2; 0.2 0.8 0.2; 0.2 0.2 0.8]); % customize colors as needed
+%%
+action_consumption_p_value_matrix = p_value_matrix(pre_choice_index, consumption_index);
+action_consumption_correl_matrix = correlation_matrix(pre_choice_index, consumption_index);
+
+n1 = size(action_consumption_p_value_matrix, 1); % Number of neurons in the first set
+n2 = size(action_consumption_p_value_matrix, 2); % Number of neurons in the second set
+k = 2;    % Number of neurons chosen for pairwise combinations
+
+num_combinations = nchoosek(n1, k) * nchoosek(n2, k);
+disp(['Number of unique pairwise combinations: ', num2str(num_combinations)]);
+
+
+
+% Assuming action_correl_matrix and action_p_value_matrix are your matrices
+
+% Initialize counters
+action_consumption_positive_count = 0;
+action_consumption_negative_count = 0;
+action_consumption_no_correlation_count = 0;
+
+% % Initialize counters
+% positive_count = 0;
+% negative_count = 0;
+% no_correlation_count = 0;
+
+% Get the size of the correlation matrix
+[num_neurons_1, num_neurons_2] = size(action_consumption_correl_matrix);
+
+% Loop through the matrices to count correlations
+for i = 1:num_neurons_1
+    for j = 1:num_neurons_2
+        correlation = action_consumption_correl_matrix(i, j);
+        p_value = action_consumption_p_value_matrix(i, j);
+        if p_value < alpha
+            if correlation > 0
+                action_consumption_positive_count = action_consumption_positive_count + 1;
+            elseif correlation < 0
+                action_consumption_negative_count = action_consumption_negative_count + 1;
+            end
+        else
+            action_consumption_no_correlation_count = action_consumption_no_correlation_count + 1;
+        end
+    end
+end
+
+
+disp(['Number of positive correlations: ', num2str(action_consumption_positive_count)]);
+disp(['Number of negative correlations: ', num2str(action_consumption_negative_count)]);
+disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(action_consumption_no_correlation_count)]);
+
+action_consumption_comparisons_possible = [action_consumption_positive_count+action_consumption_negative_count+action_consumption_no_correlation_count];
+
+
+% Assuming you have positive_count, negative_count, and no_correlation_count variables
+
+% Define data for the stacked bar plot
+action_consumption_data = [(action_consumption_positive_count/action_consumption_comparisons_possible)*100, (action_consumption_negative_count/action_consumption_comparisons_possible)*100, (action_consumption_no_correlation_count/action_consumption_comparisons_possible)*100];
+figure;
+% Define labels for the bars
+labels = {'Positive Correlation', 'Negative Correlation', 'No Correlation'};
+
+% Create the stacked bar plot
+bar(1, action_consumption_data, 'stacked');
+
+% Add labels and title
+xlabel('Counts');
+ylabel('Correlation Type');
+title('Correlation Counts');
+
+% Add legend
+legend(labels);
+
+% Adjust x-axis limits
+xlim([0.5, 1.5]); % since we only have one set of data, we set the limits to center the bars
+
+% Adjust y-axis limits if needed
+% ylim([0, max(data) + 10]); % adjust ylim if needed for better visualization
+
+% Optionally, you can add data labels on each bar
+% text(1:length(data), data, num2str(data'), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+
+% Optionally, you can rotate x-axis labels if needed
+% xticklabels(labels);
+
+% Optionally, you can change bar colors
+% colormap([0.8 0.2 0.2; 0.2 0.8 0.2; 0.2 0.2 0.8]); % customize colors as needed
+
+%%
+post_choice_consumption_p_value_matrix = p_value_matrix(post_choice_index, consumption_index);
+post_choice_consumption_correl_matrix = correlation_matrix(post_choice_index, consumption_index);
+
+n1 = size(post_choice_consumption_p_value_matrix, 1); % Number of neurons in the first set
+n2 = size(post_choice_consumption_p_value_matrix, 2); % Number of neurons in the second set
+k = 2;    % Number of neurons chosen for pairwise combinations
+
+num_combinations = nchoosek(n1, k) * nchoosek(n2, k);
+disp(['Number of unique pairwise combinations: ', num2str(num_combinations)]);
+
+
+
+% Assuming action_correl_matrix and action_p_value_matrix are your matrices
+
+% Initialize counters
+post_choice_consumption_positive_count = 0;
+post_choice_consumption_negative_count = 0;
+post_choice_consumption_no_correlation_count = 0;
+
+% % Initialize counters
+% positive_count = 0;
+% negative_count = 0;
+% no_correlation_count = 0;
+
+% Get the size of the correlation matrix
+[num_neurons_1, num_neurons_2] = size(post_choice_consumption_correl_matrix);
+
+% Loop through the matrices to count correlations
+for i = 1:num_neurons_1
+    for j = 1:num_neurons_2
+        correlation = post_choice_consumption_correl_matrix(i, j);
+        p_value = post_choice_consumption_p_value_matrix(i, j);
+        if p_value < alpha
+            if correlation > 0
+                post_choice_consumption_positive_count = post_choice_consumption_positive_count + 1;
+            elseif correlation < 0
+                post_choice_consumption_negative_count = post_choice_consumption_negative_count + 1;
+            end
+        else
+            post_choice_consumption_no_correlation_count = post_choice_consumption_no_correlation_count + 1;
+        end
+    end
+end
+
+
+disp(['Number of positive correlations: ', num2str(post_choice_consumption_positive_count)]);
+disp(['Number of negative correlations: ', num2str(post_choice_consumption_negative_count)]);
+disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(post_choice_consumption_no_correlation_count)]);
+
+post_choice_consumption_comparisons_possible = [post_choice_consumption_positive_count+post_choice_consumption_negative_count+post_choice_consumption_no_correlation_count];
+
+
+% Assuming you have positive_count, negative_count, and no_correlation_count variables
+
+% Define data for the stacked bar plot
+post_choice_consumption_data = [(post_choice_consumption_positive_count/post_choice_consumption_comparisons_possible)*100, (post_choice_consumption_negative_count/post_choice_consumption_comparisons_possible)*100, (post_choice_consumption_no_correlation_count/post_choice_consumption_comparisons_possible)*100];
+figure;
+% Define labels for the bars
+labels = {'Positive Correlation', 'Negative Correlation', 'No Correlation'};
+
+% Create the stacked bar plot
+bar(1, post_choice_consumption_data, 'stacked');
+
+% Add labels and title
+xlabel('Counts');
+ylabel('Correlation Type');
+title('Correlation Counts');
+
+% Add legend
+legend(labels);
+
+% Adjust x-axis limits
+xlim([0.5, 1.5]); % since we only have one set of data, we set the limits to center the bars
+
+% Adjust y-axis limits if needed
+% ylim([0, max(data) + 10]); % adjust ylim if needed for better visualization
+
+% Optionally, you can add data labels on each bar
+% text(1:length(data), data, num2str(data'), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+
+% Optionally, you can rotate x-axis labels if needed
+% xticklabels(labels);
+
+% Optionally, you can change bar colors
+% colormap([0.8 0.2 0.2; 0.2 0.8 0.2; 0.2 0.2 0.8]); % customize colors as needed
+
+
+
+%%
+
+% Assuming you have action_data, consumption_data, and action_consumption_data matrices
+
+% Define x-values for each set of bars
+x = 1:6;
+% x = 1:3;
+% Create a new figure
+figure;
+
+% Plot the stacked bar plots for each dataset
+% bar(x, [action_data; post_choice_data; consumption_data; action_post_choice_data; action_consumption_data; post_choice_consumption_data], 'stacked');
+
+barh(x, [action_data; post_choice_data; consumption_data; action_post_choice_data; action_consumption_data; post_choice_consumption_data], 'stacked');
+% bar(x, [action_data; consumption_data; action_consumption_data], 'stacked');
+
+% % Set x-axis tick locations and labels
+% xticks(x);
+% xticklabels({'aa', 'cc', 'ac'});
+% ylabel('% Neuron Pairs');
+% title('Title');
+
+% Add legend
+legend('Positive correlation', 'Negative correlation', 'No sig correlation');
+
+
+
+%%
+lost_prechoice_become_neutral = lost_prechoice == 1 & (collect_blocks_2_and_3 == 0 & postchoice_reward_blocks_2_and_3 == 0)
+lost_prechoice_become_postchoice = lost_prechoice == 1 & postchoice_reward_blocks_2_and_3 == 1
+lost_prechoice_become_collect = lost_prechoice == 1 & collect_blocks_2_and_3 == 1;
+
+lost_postchoice_become_neutral = lost_postchoice == 1 & (prechoice_blocks_2_and_3 == 0 & collect_blocks_2_and_3 == 0);
+lost_postchoice_become_prechoice = lost_postchoice == 1 & prechoice_blocks_2_and_3 == 1;
+lost_postchoice_become_collect = lost_postchoice == 1 & collect_blocks_2_and_3 == 1;
+
+lost_collect_become_neutral = lost_consumption == 1 & (prechoice_blocks_2_and_3 == 0 & postchoice_reward_blocks_2_and_3 == 0);
+lost_collect_become_prechoice = lost_consumption == 1 & prechoice_blocks_2_and_3 == 1;
+lost_collect_become_postchoice = lost_consumption == 1 & postchoice_reward_blocks_2_and_3 == 1;
+
+
+
+
+% Calculate sums for each category
+lost_prechoice_total = sum(lost_prechoice);
+lost_postchoice_total = sum(lost_postchoice);
+lost_consumption_total = sum(lost_consumption);
+
+
+
+% Calculate stacks for each category
+lost_prechoice_stacks = [sum(lost_prechoice_become_neutral), ...
+                         sum(lost_prechoice_become_postchoice), ...
+                         sum(lost_prechoice_become_collect)];
+
+lost_postchoice_stacks = [sum(lost_postchoice_become_neutral), ...
+                          sum(lost_postchoice_become_prechoice), ...
+                          sum(lost_postchoice_become_collect)];
+
+lost_consumption_stacks = [sum(lost_collect_become_neutral), ...
+                           sum(lost_collect_become_prechoice), ...
+                           sum(lost_collect_become_postchoice)];
+
+
+
+% Combine data into a matrix for plotting
+stacked_data = [lost_prechoice_stacks; ...
+                lost_postchoice_stacks; ...
+                lost_consumption_stacks];
+
+% Labels for categories
+categories = {'Lost Prechoice', 'Lost Postchoice', 'Lost Consumption'};
+subcategories = {'Neutral', 'Prechoice', 'Collect'};
+
+% Create stacked bar plot
+figure;
+bar(stacked_data, 'stacked');
+colormap(parula); % Optional: change the color map
+legend(subcategories, 'Location', 'northeastoutside');
+xticks(1:length(categories));
+xticklabels(categories);
+ylabel('Counts');
+title('Stacked Bar Plot of Lost and Remapped Data');
+
+% Add data labels (optional)
+hold on;
+for i = 1:size(stacked_data, 1)
+    total = sum(stacked_data(i, :));
+    text(i, total + max(total)*0.02, num2str(total), 'HorizontalAlignment', 'center', 'FontSize', 10);
+end
+hold off;
+
+
+%%
+remapped_prechoice_was_neutral = remapped_prechoice == 1 & (collect_block_1 == 0 & postchoice_reward_block_1 == 0);
+remapped_prechoice_was_postchoice = remapped_prechoice == 1 & postchoice_reward_block_1 == 1;
+remapped_prechoice_was_collect = remapped_prechoice == 1 & collect_block_1 == 1;
+
+remapped_postchoice_was_neutral = remapped_postchoice == 1 & (collect_block_1 == 0 & prechoice_block_1 == 0);
+remapped_postchoice_was_prechoice = remapped_postchoice == 1 & prechoice_block_1 == 1;
+remapped_postchoice_was_collect = remapped_postchoice == 1 & collect_block_1 == 1;
+
+remapped_consumption_was_neutral = remapped_consumption == 1 & (postchoice_reward_block_1 == 0 & prechoice_block_1 == 0);
+remapped_consumption_was_prechoice = remapped_consumption == 1 & prechoice_block_1 == 1;
+remapped_consumption_was_postchoice = remapped_consumption == 1 & postchoice_reward_block_1 == 1;
+
+% new_prechoice_was_neutral = new_prechoice == 1 & (collect_block_1 == 0 & postchoice_reward_block_1 == 0);
+% new_prechoice_was_postchoice = new_prechoice == 1 & postchoice_reward_block_1 == 1;
+% new_prechoice_was_collect = new_prechoice == 1 & collect_block_1 == 1;
+% 
+% new_postchoice_was_neutral = new_postchoice == 1 & (collect_block_1 == 0 & prechoice_block_1 == 0);
+% new_postchoice_was_prechoice = new_postchoice == 1 & prechoice_block_1 == 1;
+% new_postchoice_was_collect = new_postchoice == 1 & collect_block_1 == 1;
+% 
+% new_consumption_was_neutral = new_consumption == 1 & (postchoice_reward_block_1 == 0 & prechoice_block_1 == 0);
+% new_consumption_was_prechoice = new_consumption == 1 & prechoice_block_1 == 1;
+% new_consumption_was_postchoice = new_consumption == 1 & postchoice_reward_block_1 == 1;
+
+
+
+% % Retrospective stacks for "lost"
+% new_prechoice_retrospective_stack = [sum(new_prechoice_was_neutral), ...
+%                                       sum(new_prechoice_was_postchoice), ...
+%                                       sum(new_prechoice_was_collect)];
+% 
+% new_postchoice_retrospective_stack = [sum(new_postchoice_was_neutral), ...
+%                                        sum(new_postchoice_was_prechoice), ...
+%                                        sum(new_postchoice_was_collect)];
+% 
+% new_consumption_retrospective_stack = [sum(new_consumption_was_neutral), ...
+%                                         sum(new_consumption_was_prechoice), ...
+%                                         sum(new_consumption_was_postchoice)];
+
+% Retrospective stacks for "remapped"
+remapped_prechoice_retrospective_stack = [sum(remapped_prechoice_was_neutral), ...
+                                          sum(remapped_prechoice_was_postchoice), ...
+                                          sum(remapped_prechoice_was_collect)];
+
+remapped_postchoice_retrospective_stack = [sum(remapped_postchoice_was_neutral), ...
+                                           sum(remapped_postchoice_was_prechoice), ...
+                                           sum(remapped_postchoice_was_collect)];
+
+remapped_consumption_retrospective_stack = [sum(remapped_consumption_was_neutral), ...
+                                            sum(remapped_consumption_was_prechoice), ...
+                                            sum(remapped_consumption_was_postchoice)];
+
+% Combine all stacks into a single matrix for plotting
+stacked_data = [remapped_prechoice_retrospective_stack; ...
+                remapped_postchoice_retrospective_stack; ...
+                remapped_consumption_retrospective_stack];
+
+% Update labels for categories
+categories = {'Remapped Prechoice Retrospective', 'Remapped Postchoice Retrospective', 'Remapped Consumption Retrospective'};
+subcategories = {'Neutral', 'Prechoice', 'Collect'};
+
+% Create the stacked bar plot
+figure;
+bar(stacked_data, 'stacked');
+colormap(parula); % Optional: change the color map
+legend(subcategories, 'Location', 'northeastoutside');
+xticks(1:length(categories));
+xticklabels(categories);
+ylabel('Counts');
+title('Stacked Bar Plot of Lost, Remapped, and Retrospective Data');
+
+% Add data labels for the total counts above each bar (optional)
+hold on;
+for i = 1:size(stacked_data, 1)
+    total = sum(stacked_data(i, :));
+    text(i, total + max(max(stacked_data)) * 0.02, num2str(total), ...
+         'HorizontalAlignment', 'center', 'FontSize', 10);
+end
+hold off;

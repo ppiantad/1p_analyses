@@ -1,7 +1,7 @@
 %%
 
 
-test_data = final_DLC.C68604.D3.movement_data  ;
+test_data = final_DLC.B46837.D3.DLC_data_raw  ;
 
 fixedX = test_data.mean_x_pix; 
 plot(fixedX)

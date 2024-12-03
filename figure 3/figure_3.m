@@ -191,6 +191,36 @@ for i = 1:size(K, 2)
 end
 
 
+
+
+shk_event = respClass_all_array{1,4} == 1;
+
+consumption_event = respClass_all_array{1, 10} == 1;
+
+total_modulated = [(sum(shk_event)/neuron_num)*100 (sum(consumption_event)/neuron_num)*100];
+
+shk_and_consum_both_excited = respClass_all_array{1,10} == 1 & respClass_all_array{1,4} == 1;
+% this is the start of checking if neurons are MORE active than during
+% other events, i.e. if you wanted to check if REW activated neurons are
+% significantly differentially activated by SHK. preliminary poking around
+% seems to suggest that few large reward active neurons have their activity
+% increase in response to SHK
+co_activated_indices = find(shk_and_consum_both_excited(1,:) == 1);
+co_activated_indices_sum = numel(co_activated_indices);
+
+
+A = total_modulated;
+I = (co_activated_indices_sum/neuron_num)*100;
+K = [A I];
+figure; 
+[H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
+for i = 1:size(K, 2)
+    text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
+end
+
+
+
+
 for zz = 1:size(respClass_all_array_mouse, 1)
     exclusive_shk_activated_mouse{zz} = respClass_all_array_mouse{zz,4} == 1 & respClass_all_array_mouse{zz,1} == 3 & respClass_all_array_mouse{zz,2} == 3 & respClass_all_array_mouse{zz,3} == 3;
     sum_exclusive_shk_activated_mouse(zz) = sum(exclusive_shk_activated_mouse{zz});

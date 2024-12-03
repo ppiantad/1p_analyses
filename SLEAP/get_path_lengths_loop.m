@@ -1,5 +1,5 @@
 % animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'RM_D1';
 
 b1_large_path_length = [];
 b2_large_path_length = [];

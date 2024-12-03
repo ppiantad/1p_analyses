@@ -1,8 +1,10 @@
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D3';
+session_to_analyze = 'D1_Afternoon';
 
 recorded_fps = 30;
+
+
 
 % Parameters
 stimulus_duration = 2 * 60; % 2 minutes in seconds
