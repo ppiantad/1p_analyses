@@ -2423,28 +2423,31 @@ lost_consumption_total = sum(lost_consumption);
 
 
 % Calculate stacks for each category
-lost_prechoice_stacks = [sum(lost_prechoice_become_neutral), ...
-                         sum(lost_prechoice_become_postchoice), ...
-                         sum(lost_prechoice_become_collect)];
+lost_prechoice_stacks = [sum(lost_prechoice_become_neutral),...
+                        0,... %for prechoice
+                        sum(lost_prechoice_become_postchoice), ...
+                        sum(lost_prechoice_become_collect)];
 
 lost_postchoice_stacks = [sum(lost_postchoice_become_neutral), ...
                           sum(lost_postchoice_become_prechoice), ...
+                          0,... % for postchoice
                           sum(lost_postchoice_become_collect)];
 
 lost_consumption_stacks = [sum(lost_collect_become_neutral), ...
                            sum(lost_collect_become_prechoice), ...
-                           sum(lost_collect_become_postchoice)];
+                           sum(lost_collect_become_postchoice),...
+                           0]; %for collect
 
 
 
 % Combine data into a matrix for plotting
-stacked_data = [lost_prechoice_stacks; ...
-                lost_postchoice_stacks; ...
+stacked_data = [lost_prechoice_stacks;...
+                lost_postchoice_stacks;...
                 lost_consumption_stacks];
 
 % Labels for categories
 categories = {'Lost Prechoice', 'Lost Postchoice', 'Lost Consumption'};
-subcategories = {'Neutral', 'Prechoice', 'Collect'};
+subcategories = {'Neutral', 'Prechoice', 'Post-choice', 'Collect'};
 
 % Create stacked bar plot
 figure;
@@ -2454,7 +2457,7 @@ legend(subcategories, 'Location', 'northeastoutside');
 xticks(1:length(categories));
 xticklabels(categories);
 ylabel('Counts');
-title('Stacked Bar Plot of Lost and Remapped Data');
+title('What were Lost neurons previously?');
 
 % Add data labels (optional)
 hold on;
@@ -2506,17 +2509,20 @@ remapped_consumption_was_postchoice = remapped_consumption == 1 & postchoice_rew
 %                                         sum(new_consumption_was_postchoice)];
 
 % Retrospective stacks for "remapped"
-remapped_prechoice_retrospective_stack = [sum(remapped_prechoice_was_neutral), ...
+remapped_prechoice_retrospective_stack = [sum(remapped_prechoice_was_neutral),...
+                                          0,... %for prechoice
                                           sum(remapped_prechoice_was_postchoice), ...
                                           sum(remapped_prechoice_was_collect)];
 
 remapped_postchoice_retrospective_stack = [sum(remapped_postchoice_was_neutral), ...
                                            sum(remapped_postchoice_was_prechoice), ...
+                                           0,... %for postchoice
                                            sum(remapped_postchoice_was_collect)];
 
 remapped_consumption_retrospective_stack = [sum(remapped_consumption_was_neutral), ...
                                             sum(remapped_consumption_was_prechoice), ...
-                                            sum(remapped_consumption_was_postchoice)];
+                                            sum(remapped_consumption_was_postchoice),...
+                                            0]; %for collect
 
 % Combine all stacks into a single matrix for plotting
 stacked_data = [remapped_prechoice_retrospective_stack; ...
@@ -2525,7 +2531,7 @@ stacked_data = [remapped_prechoice_retrospective_stack; ...
 
 % Update labels for categories
 categories = {'Remapped Prechoice Retrospective', 'Remapped Postchoice Retrospective', 'Remapped Consumption Retrospective'};
-subcategories = {'Neutral', 'Prechoice', 'Collect'};
+subcategories = {'Neutral', 'Prechoice', 'Post-choice', 'Collect'};
 
 % Create the stacked bar plot
 figure;
@@ -2535,7 +2541,7 @@ legend(subcategories, 'Location', 'northeastoutside');
 xticks(1:length(categories));
 xticklabels(categories);
 ylabel('Counts');
-title('Stacked Bar Plot of Lost, Remapped, and Retrospective Data');
+title('What cats do neurons remap to?');
 
 % Add data labels for the total counts above each bar (optional)
 hold on;

@@ -12,6 +12,7 @@
 % that has 1 overlap does not overlap at all. 
 shk_ind = find(respClass_all_array{1,4} == 1);
 pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
+% pre_choice_active_ind = find(prechoice_block_1 == 1);
 pre_choice_active_block_2_3_ind = find(respClass_all_array{1,8} == 1);
 consum_active_ind = find(respClass_all_array{1,3} == 1);
 consum_active_block_2_3 = find(respClass_all_array{1,10} == 1);
@@ -19,8 +20,8 @@ post_choice_active_ind = find(respClass_all_array{1,2} == 1);
 post_choice_active_block_2_3_ind = find(respClass_all_array{1,9} == 1);
 aa_active_ind = find(respClass_all_array{1,11} == 1);
 % consum_inhibited_ind = find(all_consum_inhibited == 1);
-setListData = {shk_ind, consum_active_block_2_3, aa_active_ind};
-setLabels = ["Shk excited", "Consumption excited", "Approach-Abort excited"];
+setListData = {pre_choice_active_ind, aa_active_ind};
+setLabels = ["pre_choice_active_ind", "Approach-Abort excited"];
 figure;
 ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
 
