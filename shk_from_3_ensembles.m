@@ -247,7 +247,7 @@ post_choice_reward_inhibited_to_shk = respClass_all_array{1,2} == 2 & shk_activa
 sum(post_choice_reward_inhibited_to_shk)
 
 consumption_inhibited_to_shk = respClass_all_array{1,3} == 2 & shk_activated == 1;
-sum(consumption_active_to_shk)
+sum(consumption_inhibited_to_shk)
 
 
 pie_slices = [sum(pre_active_choice_to_shk) sum(post_choice_reward_active_to_shk) sum(consumption_active_to_shk) sum(neutral_to_shk)]

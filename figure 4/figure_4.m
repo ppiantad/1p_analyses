@@ -2457,7 +2457,7 @@ legend(subcategories, 'Location', 'northeastoutside');
 xticks(1:length(categories));
 xticklabels(categories);
 ylabel('Counts');
-title('What were Lost neurons previously?');
+title('What are Lost neurons now');
 
 % Add data labels (optional)
 hold on;
@@ -2551,3 +2551,167 @@ for i = 1:size(stacked_data, 1)
          'HorizontalAlignment', 'center', 'FontSize', 10);
 end
 hold off;
+
+%%
+pre_active_choice_to_shk = prechoice_block_1 == 1 & shk_activated == 1;
+sum(pre_active_choice_to_shk)
+post_choice_reward_active_to_shk = postchoice_reward_block_1 == 1 & shk_activated == 1;
+sum(post_choice_reward_active_to_shk)
+consumption_active_to_shk = collect_block_1 == 1 & shk_activated == 1;
+sum(consumption_active_to_shk)
+
+pre_and_post_active_to_shk = block_1_pre_and_post == 1 & shk_activated == 1;
+sum(pre_and_post_active_to_shk)
+post_and_consum_active_to_shk =block_1_post_and_consumption == 1 & shk_activated == 1;
+sum(post_and_consum_active_to_shk)
+pre_and_post_and_consum_active_to_shk = block_1_pre_and_post_and_consumption == 1 & shk_activated == 1;
+sum(pre_and_post_and_consum_active_to_shk)
+
+pre_to_pre_and_shk = conserved_prechoice == 1 & shk_activated == 1;
+sum(pre_to_pre_and_shk)
+pre_to_post_and_shk = remapped_postchoice_was_prechoice == 1 & shk_activated == 1;
+sum(pre_to_post_and_shk)
+pre_to_consum_and_shk = remapped_consumption_was_prechoice == 1 & shk_activated == 1;
+sum(pre_to_consum_and_shk)
+
+post_to_pre_and_shk = remapped_prechoice_was_postchoice == 1 & shk_activated == 1;
+sum(post_to_pre_and_shk)
+post_to_post_and_shk = conserved_postchoice == 1 & shk_activated == 1;
+sum(post_to_post_and_shk)
+post_to_consum_and_shk = remapped_consumption_was_postchoice == 1 & shk_activated == 1;
+sum(post_to_consum_and_shk)
+
+consum_to_pre_and_shk = remapped_prechoice_was_collect == 1 & shk_activated == 1;
+sum(consum_to_pre_and_shk)
+consum_to_post_and_shk = remapped_postchoice_was_collect == 1 & shk_activated == 1;
+sum(consum_to_post_and_shk)
+consum_to_consum_and_shk = conserved_consumption == 1 & shk_activated == 1;
+sum(consum_to_consum_and_shk)
+
+
+
+
+
+
+neutral_to_shk = true_neutral == 1 & shk_activated == 1;
+sum(neutral_to_shk)
+
+pre_inhibited_choice_to_shk = respClass_all_array{1,1} == 2 & shk_activated == 1;
+sum(pre_inhibited_choice_to_shk)
+
+post_choice_reward_inhibited_to_shk = respClass_all_array{1,2} == 2 & shk_activated == 1;
+sum(post_choice_reward_inhibited_to_shk)
+
+consumption_inhibited_to_shk = respClass_all_array{1,3} == 2 & shk_activated == 1;
+sum(consumption_inhibited_to_shk)
+
+
+pie_slices = [sum(pre_active_choice_to_shk) sum(post_choice_reward_active_to_shk) sum(consumption_active_to_shk) sum(neutral_to_shk)]
+figure;
+pie(pie_slices)
+
+
+%%
+
+% Calculate sums
+pre_active_choice_to_shk_sum = sum(prechoice_block_1 == 1 & shk_activated == 1);
+post_choice_reward_active_to_shk_sum = sum(postchoice_reward_block_1 == 1 & shk_activated == 1);
+consumption_active_to_shk_sum = sum(collect_block_1 == 1 & shk_activated == 1);
+
+pre_and_post_active_to_shk_sum = sum(block_1_pre_and_post == 1 & shk_activated == 1);
+post_and_consum_active_to_shk_sum = sum(block_1_post_and_consumption == 1 & shk_activated == 1);
+pre_and_post_and_consum_active_to_shk_sum = sum(block_1_pre_and_post_and_consumption == 1 & shk_activated == 1);
+
+pre_to_pre_and_shk_sum = sum(conserved_prechoice == 1 & shk_activated == 1);
+pre_to_pre_and_shk_sum_redo = sum(prechoice_block_1 == 1 & prechoice_blocks_2_and_3 == 1 & shk_activated == 1);
+pre_to_post_and_shk_sum = sum(remapped_postchoice_was_prechoice == 1 & shk_activated == 1);
+pre_to_consum_and_shk_sum = sum(remapped_consumption_was_prechoice == 1 & shk_activated == 1);
+
+post_to_pre_and_shk_sum = sum(remapped_prechoice_was_postchoice == 1 & shk_activated == 1);
+post_to_post_and_shk_sum = sum(conserved_postchoice == 1 & shk_activated == 1);
+post_to_consum_and_shk_sum = sum(remapped_consumption_was_postchoice == 1 & shk_activated == 1);
+
+consum_to_pre_and_shk_sum = sum(remapped_prechoice_was_collect == 1 & shk_activated == 1);
+consum_to_post_and_shk_sum = sum(remapped_postchoice_was_collect == 1 & shk_activated == 1);
+consum_to_consum_and_shk_sum = sum(conserved_consumption == 1 & shk_activated == 1);
+
+prechoice_to_consum_and_shk = prechoice_block_1 ==1 & collect_blocks_2_and_3 == 1 & shk_activated == 1;
+postchoice_to_consum_and_shk = postchoice_reward_block_1 ==1 & collect_blocks_2_and_3 == 1 & shk_activated == 1;
+consum_to_consum_and_shk = collect_block_1 ==1 & collect_blocks_2_and_3 == 1 & shk_activated == 1;
+neutral_to_consum_and_shk = neutral_to_shk == 1 & collect_blocks_2_and_3 == 1 & shk_activated == 1;
+pre_and_consumption_to_consum_and_shk = block_1_pre_and_consumption == 1 & collect_blocks_2_and_3 == 1 & shk_activated == 1;
+pre_and_post_to_consum_and_shk = block_1_pre_and_post == 1 & collect_blocks_2_and_3 == 1 & shk_activated == 1;
+post_and_consumption_to_consum_and_shk = block_1_post_and_consumption == 1 & collect_blocks_2_and_3 == 1 & shk_activated == 1;
+
+
+
+pie_slices = [
+    sum(prechoice_to_consum_and_shk) 
+    sum(postchoice_to_consum_and_shk) 
+    sum(consum_to_consum_and_shk) 
+    sum(neutral_to_consum_and_shk)
+    sum(pre_and_consumption_to_consum_and_shk)
+    sum(pre_and_post_to_consum_and_shk)
+    sum(post_and_consumption_to_consum_and_shk)];
+figure;
+pie(pie_slices)
+
+
+
+neutral_to_shk_sum = sum(neutral_to_shk);
+
+% Combine into array and calculate percentages
+values = [
+    neutral_to_shk_sum;
+    pre_active_choice_to_shk_sum;
+    post_choice_reward_active_to_shk_sum;
+    consumption_active_to_shk_sum;
+    pre_and_post_active_to_shk_sum;
+    post_and_consum_active_to_shk_sum;
+    pre_and_post_and_consum_active_to_shk_sum;
+    pre_to_pre_and_shk_sum;
+    pre_to_post_and_shk_sum;
+    pre_to_consum_and_shk_sum;
+    post_to_pre_and_shk_sum;
+    post_to_post_and_shk_sum;
+    post_to_consum_and_shk_sum;
+    consum_to_pre_and_shk_sum;
+    consum_to_post_and_shk_sum;
+    consum_to_consum_and_shk_sum
+];
+
+% Convert to percentages
+percentages = (values / neuron_num) * 100;
+
+% Define bar positions
+group_gap = 0.5; % Gap size between groups
+bar_positions = zeros(size(percentages));
+bar_positions(1) = 1; % Neutral bar starts at position 1
+
+% Assign positions for the rest of the bars
+for i = 2:length(bar_positions)
+    if mod(i - 2, 3) == 0 % Start of a new group (after the Neutral bar)
+        bar_positions(i) = bar_positions(i - 1) + group_gap + 1; % Add group gap
+    else
+        bar_positions(i) = bar_positions(i - 1) + 1; % Normal spacing within group
+    end
+end
+
+% Bar plot
+figure;
+bar(bar_positions, percentages, 'FaceColor', 'b');
+
+% Adjust x-ticks and labels
+xticks(bar_positions); % Set x-ticks to match bar positions
+xticklabels({'Neutral', 'PreChoice', 'PostchoiceRew', 'Consumption', ...
+    'Pre & Post', 'Post & Consum', 'Pre, Post & Consum', ...
+    'Pre to Pre', 'Pre to Post', 'Pre to Consum', ...
+    'Post to Pre', 'Post to Post', 'Post to Consum', ...
+    'Consum to Pre', 'Consum to Post', 'Consum to Consum'}); % Labels for bars
+xtickangle(45); % Rotate x-axis labels for better readability
+
+% Add labels and title
+% xlabel('Conditions');
+ylabel('Percentage (%)');
+title('Percent of neurons activated by Pun for each category');
+% grid on;

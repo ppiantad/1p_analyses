@@ -1,7 +1,7 @@
 load('BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat')
 %% for heatmap, change "plot_num" (what neuron to plot) and array_to_plot (# corresponds to which dataset)
 
-plot_num = 10; 
+plot_num = 103 
 
 array_to_plot = 1; % depends on the structure of zall
 

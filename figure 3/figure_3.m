@@ -573,7 +573,7 @@ ytickformat('%.1f');
 hold off
 
 
-variable_to_correlate = delay_to_initiation_by_mouse;
+variable_to_correlate = delay_to_collect_post_shk_by_mouse;
 
 %%
 array_for_means = 1; 
