@@ -1,5 +1,5 @@
 % Define the folder to search recursively
-folder = 'F:\Behavior Videos\BLA hM4Di vs mCherry';
+folder = 'D:\risk videos\BLA stGtACR vs EGFP';
 % Initialize variables to store data for the table
 fileNames = {};
 changeTimes = [];

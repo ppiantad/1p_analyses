@@ -95,6 +95,34 @@ for p = 1:length(primary_subfolders)
         mean_y_pix = mean(SLEAP_raw_data{:, y_pix_columns}, 2, 'omitnan'); % mean across rows
         SLEAP_raw_data.mean_x_pix = mean_x_pix;
         SLEAP_raw_data.mean_y_pix = mean_y_pix;
+        
+        % use body point to calculate velocity
+        body_x_pix = SLEAP_raw_data.body_x_pix; % x-coordinates in pixels
+        body_y_pix = SLEAP_raw_data.body_y_pix; % y-coordinates in pixels
+        % this value is deteremined based on the arena - see
+        % get_distance_from_pixels
+        pixels_per_cm = 7.01; % Conversion factor from pixels to cm
+
+        % Frame rate of the video (e.g., 30 frames per second)
+        frame_rate = 30; % Adjust this to your video's frame rate
+        time_interval = 1 / frame_rate; % Time interval between frames in seconds
+
+        % Convert coordinates from pixels to centimeters
+        mean_x_cm = body_x_pix / pixels_per_cm;
+        mean_y_cm = body_y_pix / pixels_per_cm;
+
+        % Calculate the distance traveled between consecutive frames
+        delta_x = diff(mean_x_cm); % Change in x-coordinates (cm)
+        delta_y = diff(mean_y_cm); % Change in y-coordinates (cm)
+        distance_traveled = sqrt(delta_x.^2 + delta_y.^2); % Euclidean distance (cm)
+
+        % Calculate velocity (distance / time interval)
+        body_velocity= distance_traveled / time_interval; % Velocity in cm/s
+
+        % Pad with NaN or 0 to match the original data length (optional)
+        body_velocity_all = [NaN; body_velocity]; % NaN for the first frame where velocity can't be calculated
+        
+        SLEAP_raw_data.body_velocity = body_velocity_all;
 
         % Define the filename and path for the output .csv file
         output_filename = sprintf('SLEAP_and_freezing_combined_%s.csv', secondary_subfolders(s).name);

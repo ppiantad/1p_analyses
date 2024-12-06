@@ -7,10 +7,10 @@ ts1 = (-10:.1:10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\raw data for WSLS etc\BLA hM4Di vs mCherry';
+metaDirectory = 'I:\MATLAB\raw data for WSLS etc\BLA stGtACR vs EGFP Behavioral Data';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
-
+missing_start_val_count = 0;
 
 %STILL NEED TO ADD THE ABILITY TO ADJUST TIMESTAMPS BASED ON 
 
@@ -130,6 +130,7 @@ for zz = 1:size(metafolder_list, 1)
         if  ~exist('ABET_file', 'var')  == 1
             disp('Missing .csv files, skipping folder');
             clear ABET_file GPIO_file matFiles
+
         else
 
             filesFound = true; % Set the flag to true since .mat files were found
@@ -157,16 +158,27 @@ for zz = 1:size(metafolder_list, 1)
 
                 current_session = regexprep(current_session,{' ', '-'}, '_');
                 [BehavData,ABETfile,Descriptives, block_end, largeRewSide, smallRewSide, forced_trial_start, free_trial_start]=ABET2TableFn_Chamber_A_v6(ABET_file,[]);
+
+
                 if exist('boris_file', 'var')
                     SLEAP_time_range_adjustment = []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; -1.23;
-                    [BehavData, boris_Extract_tbl] = boris_to_table(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment, forced_trial_start, free_trial_start);
+                    if contains(current_animal, '441') & contains(current_session, 'SHOCKED_OUTCOMES')
+                        SLEAP_time_range_adjustment = 7.26 % THIS MOUSE'S VIDEO STARTED LATE, SO THERE IS NO START TIME!
+                        start_val = SLEAP_time_range_adjustment;
+                    end
+                    [BehavData, boris_Extract_tbl, start_val] = boris_to_table(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment, forced_trial_start, free_trial_start);
+
                 end
+                
                 ABET_removeheader = ABETfile(2:end,:);
                 tbl_ABET = cell2table(ABET_removeheader);
                 tbl_ABET.Properties.VariableNames = ABETfile(1,:);
-
+                if isempty(start_val)
+                    missing_start_val_count = missing_start_val_count + 1; 
+                    final_behavior.missing_start_val(missing_start_val_count, :) = {current_animal, current_session};
+                end
                 final_behavior.(current_animal).(current_session).uv.BehavData = BehavData;
-
+                final_behavior.(current_animal).(current_session).uv.session_start_adjustment = start_val;
                 clear unitTS unitTrace unitXTrials unitAVG unitSEM i zall zb zsd zb_window zsd_window zall_window zb_session zsd_session zall_session neuron boris_file ABET_file GPIO_file
             end
 

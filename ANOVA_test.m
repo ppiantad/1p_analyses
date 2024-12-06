@@ -52,3 +52,15 @@ ranovaResults = ranova(rm);
 
 % Display results
 disp(ranovaResults);
+
+
+% Extract average values across trial blocks for between-subject analysis
+mean_data = mean(data, 2); % Average across the 3 blocks for each subject
+
+% Perform one-way ANOVA for Treatment effect
+[p, tbl_between, stats] = anova1(mean_data, tbl.Treatment, 'off'); % Suppress boxplot
+disp('Between-Subject Effect (Treatment):');
+disp(tbl_between);
+
+% Optional: Perform post-hoc test if needed
+c = multcompare(stats, 'Display', 'off'); % Uncomment for post-hoc tests
