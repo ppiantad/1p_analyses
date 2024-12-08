@@ -5,7 +5,7 @@
 
 % final_behavior = final_SLEAP; % for hM4Di data;
 
-session_to_analyze = 'RDT_OPTO_CHOICE'
+session_to_analyze = 'RDT_D1'
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_13'};
@@ -52,6 +52,8 @@ elseif exist('stGtACR_treatment_groups', 'var') == 1
 elseif exist('PdCO_treatment_groups', 'var') == 1
     valid_mice = cellfun(@(sessions) any(strcmp(sessions, session_to_analyze)), valid_sessions);
     valid_animalIDs = stGtACR_IDs(valid_mice);
+else
+    valid_animalIDs = animalIDs;
 
 end
 
@@ -111,6 +113,18 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
         
         % only use rewarded trials for this, otherwise things get wonky
         [BehavData,trials,varargin]=TrialFilter_test(BehavData,'ALL', 1); 
+        large_small_trials_only = BehavData(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3, :);
+        % large_small_trials_only = BehavData((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0, :);
+
+        large_trials_true = large_small_trials_only.bigSmall == 1.2;
+        small_trials_true = large_small_trials_only.bigSmall == 0.3;
+
+        % large_trials_true = large_small_trials_only.bigSmall == 1.2 & large_small_trials_only.ForceFree == 0;
+        % small_trials_true = large_small_trials_only.bigSmall == 0.3 & large_small_trials_only.ForceFree == 0;
+        
+        large_sequences_mouse(ii, :) = large_trials_true;
+        small_sequences_mouse(ii, :) = small_trials_true;
+
         block_1_large_choice_percent = sum(BehavData.bigSmall == 1.2 & BehavData.Block == 1 & BehavData.ForceFree == 0)/sum(((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0) & BehavData.Block == 1); 
         block_1_small_choice_percent = sum(BehavData.bigSmall == 0.3 & BehavData.Block == 1 & BehavData.ForceFree == 0)/sum(((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0) & BehavData.Block == 1); 
         % block_1_mouse(ii,:) = [block_1(1, 1) block_1(end, 2)];
@@ -303,7 +317,66 @@ elseif exist('PdCO_treatment_groups', 'var') == 1
     risk_table_sorted = sortrows(risk_table, 'TreatmentCondition');
 end
 
+% Plot the raw data in grey with transparency
 
+figure;
+% Define a colormap for unique colors
+colors = lines(size(large_sequences_mouse, 1)); % Generates a unique color for each trial
+
+% Plot each trial with a unique color
+for trial = 1:size(large_sequences_mouse, 1)
+    plot(large_sequences_mouse(trial, :), 'Color', colors(trial, :));
+    hold on;
+end
+% Plot the mean as a thick black line
+meanData = mean(large_sequences_mouse);
+plot(meanData, 'b', 'LineWidth', 2, 'Color', 'b');
+
+ylim([-3 4]);
+xlim([-8 8]);
+% Set X-axis ticks
+
+xline(0)
+yline(0)
+fontsize(18, 'points')
+hold off;
+
+
+% Get the number of mice (rows)
+numMice = size(large_sequences_mouse, 1);
+
+% Create the figure and set its size
+figure('Units', 'normalized', 'Position', [0.1 0.1 0.3 1]); % 1 column, height 3x width
+
+% Loop through each mouse and create a subplot
+for mouse = 1:numMice
+    subplot(numMice, 1, mouse); % Create subplot
+    
+    % Plot large_sequences in red
+    plot(large_sequences_mouse(mouse, :), 'b', 'LineWidth', 1.5); 
+    hold on;
+    
+    % Plot small_sequences in blue
+    plot(small_sequences_mouse(mouse, :), 'r', 'LineWidth', 1.5);
+    
+    % Add labels and a title
+    title(['Mouse ', num2str(mouse)]);
+    
+    % Customize axis limits for consistency
+    ylim([-0.1 1.1]);
+    xlim([1 size(large_sequences_mouse, 2)]);
+    xline(0, '--k'); % Optional: Add x=0 line
+    yline(0, '--k'); % Optional: Add y=0 line
+    
+    % Remove x-axis labels for all but the bottom subplot
+    if mouse < numMice
+        set(gca, 'XTickLabel', []);
+    end
+    hold off;
+end
+
+% Add a global label for x-axis
+xlabel('Trial');
 
 %%
 
