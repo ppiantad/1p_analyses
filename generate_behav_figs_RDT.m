@@ -114,13 +114,13 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
         % only use rewarded trials for this, otherwise things get wonky
         [BehavData,trials,varargin]=TrialFilter_test(BehavData,'ALL', 1); 
         large_small_trials_only = BehavData(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3, :);
-        % large_small_trials_only = BehavData((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0, :);
+        large_small_trials_only = BehavData((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0, :);
 
         large_trials_true = large_small_trials_only.bigSmall == 1.2;
         small_trials_true = large_small_trials_only.bigSmall == 0.3;
 
-        % large_trials_true = large_small_trials_only.bigSmall == 1.2 & large_small_trials_only.ForceFree == 0;
-        % small_trials_true = large_small_trials_only.bigSmall == 0.3 & large_small_trials_only.ForceFree == 0;
+        large_trials_true = large_small_trials_only.bigSmall == 1.2 & large_small_trials_only.ForceFree == 0;
+        small_trials_true = large_small_trials_only.bigSmall == 0.3 & large_small_trials_only.ForceFree == 0;
         
         large_sequences_mouse(ii, :) = large_trials_true;
         small_sequences_mouse(ii, :) = small_trials_true;
@@ -321,19 +321,22 @@ end
 
 figure;
 % Define a colormap for unique colors
-colors = lines(size(large_sequences_mouse, 1)); % Generates a unique color for each trial
-
-% Plot each trial with a unique color
-for trial = 1:size(large_sequences_mouse, 1)
-    plot(large_sequences_mouse(trial, :), 'Color', colors(trial, :));
-    hold on;
-end
+% colors = lines(size(large_sequences_mouse, 1)); % Generates a unique color for each trial
+% 
+% % Plot each trial with a unique color
+% for trial = 1:size(large_sequences_mouse, 1)
+%     plot(large_sequences_mouse(trial, :), 'Color', colors(trial, :));
+%     hold on;
+% end
 % Plot the mean as a thick black line
-meanData = mean(large_sequences_mouse);
-plot(meanData, 'b', 'LineWidth', 2, 'Color', 'b');
+meanData_large = mean(large_sequences_mouse);
+plot(meanData_large, 'b', 'LineWidth', 2, 'Color', 'b');
+hold on
+meanData_small = mean(small_sequences_mouse);
+plot(meanData_small, 'r', 'LineWidth', 2, 'Color', 'r');
 
-ylim([-3 4]);
-xlim([-8 8]);
+ylim([-0.1 1.1]);
+% xlim([-8 8]);
 % Set X-axis ticks
 
 xline(0)
