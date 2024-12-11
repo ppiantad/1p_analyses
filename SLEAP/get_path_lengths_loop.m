@@ -1,5 +1,5 @@
 % animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'RM_D1';
+session_to_analyze = 'Pre_RDT_RM';
 
 b1_large_path_length = [];
 b2_large_path_length = [];
@@ -14,6 +14,7 @@ animals_with_sessions = {};
 for dd = 1:size(animalIDs)
 
     select_mouse = animalIDs{dd};
+    path_length_array = [];
     if isfield(final_SLEAP.(select_mouse), session_to_analyze)
         animals_with_sessions{dd} = select_mouse; 
 
@@ -22,6 +23,7 @@ for dd = 1:size(animalIDs)
 
 
         SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data_raw;
+
         X_data = SLEAP_data.corrected_x_pix;
         Y_data = SLEAP_data.corrected_y_pix;
         [X_data, Y_data] = correct_XY_outliers_v1(X_data, Y_data);
@@ -46,9 +48,12 @@ for dd = 1:size(animalIDs)
         % SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data;
 
         
-        BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
-        
-        % BehavData = behav_tbl_iter{1, 1}{dd};
+        % BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
+
+        % uncomment below if you want to run this on specific trials, eg
+        % using the 10x variable data 
+        BehavData = behav_tbl_iter{1, 1}{dd};
+
         onset_trials = BehavData.stTime';
         choice_trials = BehavData.choiceTime';
         offset_trials = BehavData.collectionTime';

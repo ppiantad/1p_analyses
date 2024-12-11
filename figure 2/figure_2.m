@@ -1130,8 +1130,12 @@ legend('Positive correlation', 'Negative correlation', 'No sig correlation');
     % "choiceTime.Outcome_0to2.LOSS_PLUS_ONE_1"
 
 %%
+
+array_for_means = 1; 
+
+
 for q = 1:length (behav_tbl_iter{1, 1})
-    nestedCellArray_1 = behav_tbl_iter{1, 1}{q};
+    nestedCellArray_1 = behav_tbl_iter{array_for_means, 1}{q};
     if ~isempty(nestedCellArray_1)
         % nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
         % if size(nestedCellArray_1, 1) > size(nestedCellArray_2, 1)
@@ -1145,6 +1149,7 @@ for q = 1:length (behav_tbl_iter{1, 1})
             valid_start_times = nestedCellArray_1.stTime(2:end);
             valid_choice_times = nestedCellArray_1.choiceTime(1:end-1);
             delay_to_initiation = valid_start_times - valid_choice_times;
+            trial_types = nestedCellArray_1.bigSmall;
         end
 
         trial_choice_times = nestedCellArray_1.choiceTime - nestedCellArray_1.stTime;
@@ -1153,12 +1158,14 @@ for q = 1:length (behav_tbl_iter{1, 1})
         trial_choice_times_by_mouse{q} = trial_choice_times;
         delay_to_initiation_by_mouse{q} = delay_to_initiation;
         delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
-        clear trial_choice_times delay_to_initiation delay_to_collect_post_shk
+        trial_types_by_mouse{q} = trial_types;
+        clear trial_choice_times delay_to_initiation delay_to_collect_post_shk trial_types
     end
 
 
 end
 
+trial_types_concat = cat(1, trial_types_by_mouse{:});
 trial_choice_times_concat = cat(1, trial_choice_times_by_mouse{:});
 rew_collect_times_concat = cat(1, delay_to_collect_post_shk_by_mouse{:});
 
@@ -1173,7 +1180,17 @@ set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bo
 
 % Subplot 1: trial_choice_times_concat
 subplot(1, 3, 1); % First subplot
-swarmchart(ones(1, length(trial_choice_times_concat)), trial_choice_times_concat);
+hold on;
+% Define colors based on trial_types_concat
+colors = repmat([0.5, 0.5, 0.5], length(trial_choice_times_concat), 1); % Default to gray
+colors(trial_types_concat == 1.2, :) = repmat([0, 0, 1], sum(trial_types_concat == 1.2), 1); % Blue for trial_types_concat == 1.2
+colors(trial_types_concat == 0.3, :) = repmat([1, 0, 0], sum(trial_types_concat == 0.3), 1); % Red for trial_types_concat == 0.3
+
+% Create the swarmchart with colors
+swarmchart(ones(1, length(trial_choice_times_concat)), trial_choice_times_concat, [], colors);
+mean_value = mean(trial_choice_times_concat);
+plot([0.5, 1.5], [mean_value, mean_value], 'r-', 'LineWidth', 2);
+hold off;
 title('Trial Choice Times');
 xlabel('Trial');
 ylabel('Time');
@@ -1183,7 +1200,17 @@ ytickformat('%.1f');
 
 % Subplot 2: rew_collect_times_concat
 subplot(1, 3, 2); % Second subplot
-swarmchart(ones(1, length(rew_collect_times_concat)) * bar_separation_value, rew_collect_times_concat);
+hold on;
+% Define colors based on trial_types_concat
+colors = repmat([0.5, 0.5, 0.5], length(rew_collect_times_concat), 1); % Default to gray
+colors(trial_types_concat == 1.2, :) = repmat([0, 0, 1], sum(trial_types_concat == 1.2), 1); % Blue for trial_types_concat == 1.2
+colors(trial_types_concat == 0.3, :) = repmat([1, 0, 0], sum(trial_types_concat == 0.3), 1); % Red for trial_types_concat == 0.3
+
+% Create the swarmchart with colors
+swarmchart(ones(1, length(rew_collect_times_concat)) * bar_separation_value, rew_collect_times_concat, [], colors);
+mean_value = mean(rew_collect_times_concat);
+plot([bar_separation_value - 0.5, bar_separation_value + 0.5], [mean_value, mean_value], 'r-', 'LineWidth', 2);
+hold off;
 title('Reward Collection Times');
 xlabel('Reward Collection');
 ylabel('Time');
@@ -1193,27 +1220,38 @@ ytickformat('%.1f');
 
 % Subplot 3: path_length_concat
 subplot(1, 3, 3); % Third subplot
-swarmchart(ones(1, length(path_length_concat)) * bar_separation_value * 1.5, path_length_concat);
+hold on;
+% Define colors based on trial_types_concat
+colors = repmat([0.5, 0.5, 0.5], length(path_length_concat), 1); % Default to gray
+colors(trial_types_concat == 1.2, :) = repmat([0, 0, 1], sum(trial_types_concat == 1.2), 1); % Blue for trial_types_concat == 1.2
+colors(trial_types_concat == 0.3, :) = repmat([1, 0, 0], sum(trial_types_concat == 0.3), 1); % Red for trial_types_concat == 0.3
+
+% Create the swarmchart with colors
+swarmchart(ones(1, length(path_length_concat)) * bar_separation_value * 1.5, path_length_concat, [], colors);
+mean_value = mean(path_length_concat);
+plot([bar_separation_value * 1.5 - 0.5, bar_separation_value * 1.5 + 0.5], [mean_value, mean_value], 'r-', 'LineWidth', 2);
+hold off;
 title('Path Length');
 xlabel('Path Length');
-ylabel('Time');
+ylabel('Length (a.u.)');
 yline(0);
 xtickformat('%.1f');
 ytickformat('%.1f');
+
 
 
 variable_to_correlate = trial_choice_times_by_mouse;
 
 
 %%
-array_for_means = 1; 
+
 
 % Initialize the new cell array to store the mean values
 meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
-timeRange = (ts1 >= -4) & (ts1 <= 0);
-% timeRange = (ts1 >= 0) & (ts1 <= 2);
+% timeRange = (ts1 >= -4) & (ts1 <= 0);
+timeRange = (ts1 >= 0) & (ts1 <= 2);
 % timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
@@ -1353,8 +1391,8 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(prechoice_block_1==1);
-not_shk_responsive_corrs = allCorrelations(prechoice_block_1~=1);
+only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 == 1);
+not_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 ~=1);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
 figure;
@@ -1732,6 +1770,22 @@ small_means_prechoice = [mean(RM_D1_prechoice_combined_data(:, 2))  mean(Late_RM
 large_means_prechoice = [mean(RM_D1_prechoice_combined_data(:, 1))  mean(Late_RM_prechoice_combined_data(:, 1))]
 
 
+% combined_data = [mean_sub_window_activity_session_1 , mean_sub_window_activity_session_2];
+figure();
+set(gcf,'Position',[100 100 200 600])
+coordLineStyle = 'k.';
+boxplot(Late_RM_collect_combined_data, 'Symbol', coordLineStyle); hold on;
+parallelcoords(Late_RM_collect_combined_data, 'Color', 0.7*[1 1 1], 'LineStyle', '-',...
+  'Marker', '.', 'MarkerSize', 10);
+ylim([-0.5 1.5]);
+yticks([-0.5 0.0 0.5 1.0 1.5])
+ytickformat('%.2f');
+TF = isoutlier(Late_RM_collect_combined_data, 'grubbs');
+
+[h, p] = ttest2(Late_RM_collect_combined_data(:, 1), Late_RM_collect_combined_data(:, 2))
+
+
+
 %% to compare large vs small early, load 'BLA_RM_D1_small_vs_large_no_yoking_6_categories.mat'
 
 consum_large_and_small_excited = respClass_all_array{1, 3} == 1 & respClass_all_array{1, 6} == 1;
@@ -1994,3 +2048,21 @@ fontsize(18, 'points')
 hold off;
 
 
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+shk_ind = find(respClass_all_array{1,4} == 1);
+pre_choice_active_ind = find(remapped_prechoice == 1);
+% pre_choice_active_ind = find(prechoice_block_1 == 1);
+pre_choice_active_block_2_3_ind = find(conserved_prechoice== 1);
+
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {shk_ind, pre_choice_active_ind, pre_choice_active_block_2_3_ind};
+setLabels = ["shk ind", "remapped prechoice", "conserved prechoice"];
+figure;
+ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+ve_diagram.ShowIntersectionCounts = true;
+ve_diagram.ShowIntersectionAreas = true;
+% h.SetLabels = [];
