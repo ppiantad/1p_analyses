@@ -55,11 +55,11 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'Pre_RDT_RM';
-uv.yoke_data = 1; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
+session_to_analyze = 'RM_D1';
+uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'collectionTime'; % stTime choiceTime collectionTime
-period_of_interest = 'postchoice';
+epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
+period_of_interest = 'prechoice';
 
 if strcmp(epoc_to_align, 'stTime')
     period_of_interest = 'trial_start';
@@ -100,6 +100,16 @@ if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | s
             final = rmfield(final, fieldsToRemove{i});
         end
     end
+elseif strcmp('RM_D1', session_to_analyze)
+
+    fieldsToRemove = {'BLA_Insc_32'}
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final, fieldsToRemove{i})
+            final = rmfield(final, fieldsToRemove{i});
+        end
+    end
+end
 elseif strcmp('RDT_D2', session_to_analyze)
 
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_39'};

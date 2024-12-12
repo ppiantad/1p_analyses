@@ -1,5 +1,5 @@
 % animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RM_D1';
 
 b1_large_path_length = [];
 b2_large_path_length = [];
@@ -165,7 +165,7 @@ for dd = 1:size(animalIDs)
     path_length_array_mouse{dd} = path_length_array; 
 end
 
-
+path_length_concat = cat(2, path_length_array_mouse{:})';
 
 %%
 
@@ -242,7 +242,7 @@ hold off;
 %%
 % Extract path length array (Y-axis)
 path_length_array = path_length_array_mouse{1, 10};
-path_length_concat = cat(2, path_length_array_mouse{:})';
+
 
 % Extract the variable to correlate (X-axis)
 variable_x = variable_to_correlate{1, 10};

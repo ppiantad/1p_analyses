@@ -89,7 +89,7 @@ remapped_all = remapped_prechoice == 1 | remapped_postchoice == 1 | remapped_con
 
 sum(lost_all)
 intersect(lost_prechoice, lost_postchoice)
-
+true_neutral = respClass_all_array{1, comparison_arrays(1, 1)} == 3 & respClass_all_array{1, comparison_arrays(1, 2)} ~= 3 & respClass_all_array{1, comparison_arrays(1, 3)} ~= 3;
 
 %% 
 % Run one cell below, then do all the figure generation in the following
