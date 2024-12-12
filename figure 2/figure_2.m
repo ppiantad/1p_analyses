@@ -2651,3 +2651,196 @@ xlabel('Mean Sub-window Activity Session 1');
 ylabel('Choice Times Mouse');
 title('Scatter Plot with Regression Line and R^2 Value');
 hold off;
+
+
+%% these arrays are just the combined_data = [mean_sub_window_activity_session_1 , mean_sub_window_activity_session_2] arrays from above, but saved for Early & Late
+load('Late_RM_arrays.mat')
+load('RM_D1_arrays.mat')
+
+% Calculate means
+diff_score_prechoice_late = Late_RM_prechoice_combined_data(:, 1) - Late_RM_prechoice_combined_data(:, 2);
+
+diff_score_prechoice_early = RM_D1_prechoice_combined_data(:, 1) - RM_D1_prechoice_combined_data(:, 2); 
+
+% Calculate means
+diff_score_postchoice_late = Late_RM_postchoice_combined_data(:, 1) - Late_RM_postchoice_combined_data(:, 2);
+
+diff_score_postchoice_early = RM_D1_postchoice_combined_data(:, 1) - RM_D1_postchoice_combined_data(:, 2); 
+
+diff_score_collect_late = Late_RM_collect_combined_data(:, 1) - Late_RM_collect_combined_data(:, 2);
+
+diff_score_collect_early = RM_D1_collect_combined_data(:, 1) - RM_D1_collect_combined_data(:, 2); 
+
+figure;
+
+% Define figure size
+width = 300; % Width of the figure
+height = 500; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Prechoice histograms
+data_prechoice = {diff_score_prechoice_early, diff_score_prechoice_late};
+data_postchoice = {diff_score_postchoice_early, diff_score_postchoice_late};
+data_collect = {diff_score_collect_early, diff_score_collect_late};
+
+data_all = {data_prechoice, data_postchoice, data_collect};
+titles = {'Prechoice', 'Postchoice', 'Collect'};
+colors = {'blue', 'red'};
+
+num_rows = 3;
+num_cols = 2;
+
+for i = 1:num_rows
+    for j = 1:num_cols
+        idx = (i - 1) * num_cols + j;
+        subplot(num_rows, num_cols, idx);
+        histogram(data_all{i}{j}, 'Normalization', 'probability', 'FaceColor', colors{j}, 'BinWidth', 0.05, 'LineStyle', 'none');
+        xline(0, 'k-', 'LineWidth', 1); % Add vertical line at x = 0
+        if j == 1
+            ylabel('Probability');
+        end
+        if i == num_rows
+            xlabel('Difference Score');
+        end
+        if j == 1
+            title([titles{i}, ' Early']);
+        else
+            title([titles{i}, ' Late']);
+        end
+    end
+end
+
+% Set shared limits for X and Y axes
+all_axes = findall(gcf, 'Type', 'axes');
+y_limits = [0 max(cellfun(@(ax) max(ylim(ax)), num2cell(all_axes)))];
+x_limits = [min(cellfun(@(ax) min(xlim(ax)), num2cell(all_axes))), max(cellfun(@(ax) max(xlim(ax)), num2cell(all_axes)))];
+for ax = all_axes'
+    ylim(ax, y_limits);
+    xlim(ax, x_limits);
+end
+
+% Perform a Kolmogorov-Smirnov test to compare the first set of prechoice distributions
+[h, p] = kstest2(diff_score_prechoice_late, diff_score_prechoice_early);
+
+% Display the results of the statistical test
+fprintf('Kolmogorov-Smirnov test result:\n');
+fprintf('h = %d (0 means the null hypothesis cannot be rejected, 1 means it can be rejected)\n', h);
+fprintf('p-value = %.4f\n', p);
+
+% Perform a t-test to compare the means of the two distributions
+[h, p, ci, stats] = ttest2(diff_score_prechoice_late, diff_score_prechoice_early);
+
+%%
+array_for_means = 1; 
+array_for_means_second = 5; 
+% Initialize the new cell array to store the mean values
+meanZallMouse = cell(size(zall_mouse, 2), 1);
+
+% Define the time range for 0 to 2 seconds
+timeRange = (ts1 >= -4) & (ts1 <= 0);
+% timeRange = (ts1 >= 0) & (ts1 <= 2);
+% timeRange = (ts1 >= 1) & (ts1 <= 3);
+
+concatenated_zall = {};
+% Iterate through each cell in the zall_mouse array
+for i = 1:length(zall_array)
+    nestedCellArray_1 = [];
+    nestedCellArray_2 = []
+
+    % Get the current nested cell array
+    nestedCellArray_1 = zall_array{array_for_means, i};
+    nestedCellArray_2 = zall_array{array_for_means_second, i};
+
+    concatenated_zall{i} = vertcat(nestedCellArray_1, ...
+        nestedCellArray_2);
+
+
+end
+
+%%
+
+prechoice_concatenated_zall = concatenated_zall(prechoice_block_1 == 1);
+postchoice_concatenated_zall = concatenated_zall(postchoice_reward_block_1 == 1);
+collect_concatenated_zall = concatenated_zall(collect_block_1 == 1);
+
+% Get the number of cells and the number of columns in the arrays
+num_cells = length(prechoice_concatenated_zall);
+num_columns = size(prechoice_concatenated_zall{1}, 2); % Assuming all arrays have the same dimensions
+
+% Initialize variables to store the means for each part
+part1_means = zeros(num_cells, num_columns);
+part2_means = zeros(num_cells, num_columns);
+part3_means = zeros(num_cells, num_columns);
+part4_means = zeros(num_cells, num_columns);
+part5_means = zeros(num_cells, num_columns);
+
+% Loop through each cell in the cell array
+for i = 1:num_cells
+    % Extract the current 90x160 double array
+    current_array = prechoice_concatenated_zall{i};
+    
+    % Compute the mean for each part (18 rows each)
+    part1_means(i, :) = mean(current_array(1:18, :), 1);
+    part2_means(i, :) = mean(current_array(19:36, :), 1);
+    part3_means(i, :) = mean(current_array(37:54, :), 1);
+    part4_means(i, :) = mean(current_array(55:72, :), 1);
+    part5_means(i, :) = mean(current_array(73:90, :), 1);
+end
+
+
+%% big heatmap for categories
+
+
+pre_choice_neurons = neuron_mean_array{1, 1}(prechoice_block_1, :);
+post_choice_reward_neurons = neuron_mean_array{1, 1}(postchoice_reward_block_1, :);
+consumption_neurons = neuron_mean_array{1, 1}(collect_block_1, :);
+
+only_active_array_stacked = [pre_choice_neurons; post_choice_reward_neurons; consumption_neurons];
+
+% Sort the rows of activated_neuron_mean based on peak_times.
+[peak_values, time_of_peak_activity] = max(pre_choice_neurons, [], 2);
+[~, sort_indices] = sort(time_of_peak_activity);
+pre_choice_neurons_sorted = pre_choice_neurons(sort_indices, :);
+
+
+
+% Sort the rows of activated_neuron_mean based on peak_times.
+[peak_values, time_of_peak_activity] = max(post_choice_reward_neurons, [], 2);
+[~, sort_indices] = sort(time_of_peak_activity);
+post_choice_reward_neurons_sorted = post_choice_reward_neurons(sort_indices, :);
+
+
+% Sort the rows of activated_neuron_mean based on peak_times.
+[peak_values, time_of_peak_activity] = max(consumption_neurons, [], 2);
+[~, sort_indices] = sort(time_of_peak_activity);
+consumption_neurons_sorted = consumption_neurons(sort_indices, :);
+
+sorted_only_active_array_stacked = [pre_choice_neurons_sorted; post_choice_reward_neurons_sorted; consumption_neurons_sorted];
+
+% Now, activated_neuron_mean_sorted contains the rows of neuron_mean filtered by respClass_all == 1
+% and sorted by the time of peak activity.
+
+figure;
+% Generate the heatmap
+imagesc(ts1, 1, sorted_only_active_array_stacked);
+
+% Add a colorbar and axis labels
+colorbar;
+xlabel('Time (s)');
+ylabel('Neuron');
+
+% Reverse the y-axis so that the highest mean activity is at the top
+set(gca, 'YDir', 'reverse');
+clim([-1 1])
+xline(0);
+
+
+% If you want to customize the color map, you can use colormap function
+% For example, using a blue-white-red colormap:
+colormap(gray);
+
+% If you want to limit the color scale to the range [0, 1]
+caxis([-1 1]); % Assuming correlations range from -1 to 1
+% Add a separate axes for the colorbar to associate it only with the upper tile
+c = colorbar('eastoutside');
+set(c, 'YTick', clim); % 

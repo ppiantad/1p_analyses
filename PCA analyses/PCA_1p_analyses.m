@@ -2,6 +2,7 @@
 load('acton.mat')
 load('batlowW.mat')
 
+neuron_mean_concat = horzcat(zall_mean_all_array{1, 11}, zall_mean_all_array{1, 12});
 
 %DO NOT CHANGE FROM THESE SETTINGS UNLESS WILLING TO REVERT BACK
 
@@ -444,4 +445,116 @@ end
 
 % Display the calculated angles for each trajectory
 disp(angles);
+
+
+%%
+
+for qq = 1:numConditions
+
+    condition_data{qq} = neuron_mean_concat(:, condition_ranges{1, qq}{1}:condition_ranges{1, qq}{2});
+    % condition_data{qq} = neuron_mean_concat(condition_ranges{1, qq}{1}:condition_ranges{1, qq}{2}, :);
+    
+end
+
+% Use unique to get the unique strings and their indices
+[uniqueStrings, ~, indices] = unique(mouse_cells(1, :));
+
+% Now indices contains the numeric representation of each string
+disp(indices);
+
+data_LOO_first_variable = pca2LOO_new(coef, neuron_mean_concat(:, condition_ranges{1, 1}{1}:condition_ranges{1, 1}{2}), indices, NumPC, neuron_num, numMeasurements);
+
+
+data_LOO_second_variable = pca2LOO_new(coef, neuron_mean_concat(:, condition_ranges{1, 2}{1}:condition_ranges{1, 2}{2}), indices, NumPC, neuron_num, numMeasurements);
+
+
+%% leave one out for length and distance
+% match the number of neurons
+e = ephys.zdata(ephys.cell_labels(:,1)==1,:);
+c = ephys.zdata(ephys.cell_labels(:,1)==0,:);
+idx = randperm(size(c,1),size(e,1));
+idx = sort(idx);
+c = c(idx,:);
+%find neutral tirals that are 0   103:180 just arbitrary
+nc = sum(c(:,105:180),2)==0;
+ne = sum(e(:,105:180),2)==0;
+
+% finding out which neurons coming from which mice
+einfo = ephys.info(ephys.cell_labels(:,1)==1,1);
+cinfo = ephys.info(ephys.cell_labels(:,1)==0,:);
+cinfo = cinfo(idx,:);
+file = [cinfo(~nc,1) ; einfo(~ne,1)];
+
+% data = [c;e];
+% file = [cinfo(:,1) ; einfo(:,1)];
+
+file = string(file);
+f = 0;
+for i = 2: size(file,1)
+    f(i) = strcmp(file(i),file(i-1));
+end
+f = 1-f';
+f_c = find(f(1:col)==1);
+f_e = find(f(col+1:end)==1);
+
+if length(f_c)<length(f_e)
+    K = length(f_c);
+else
+    K = length(f_e);
+end
+f_final = find(f==1);
+
+f_c(length(f_c)+1) = size(c(~nc,:),1);
+f_e(length(f_e)+1) = size(e(~ne,:),1);
+
+cellID_c = [];
+for i = 1:length(f_c)-1
+    cellID_c(f_c(i):f_c(i+1),1) = i;
+end
+
+
+cellID_e = [];
+for i = 1:length(f_e)-1
+    cellID_e(f_e(i):f_e(i+1),1) = i;
+end
+
+% leave one out
+num_pcs = find(cumsum(explained)>=90, 1);
+data_LOO_c = pca2LOO_new(coef(1:size(c(~nc,:),1),:), c(~nc,1:binSize*3), cellID_c, num_pcs, min(diff(f_c)), floor(median(diff(f_c))));
+data_LOO_e = pca2LOO_new(coef(size(c(~nc,:),1)+1:end,:), e(~ne,1:binSize*3), cellID_e, num_pcs, min(diff(f_e)), floor(median(diff(f_e))));
+
+%calculate length and distance using vecnorm
+l_c_reward = zeros(1, size(data_LOO_first_variable, 3));
+l_c_neutral = zeros(1, size(data_LOO_c, 3));
+l_c_shock = zeros(1, size(data_LOO_c, 3));
+l_e_reward = zeros(1, size(data_LOO_second_variable, 3));
+l_e_neutral = zeros(1, size(data_LOO_e, 3));
+l_e_shock = zeros(1, size(data_LOO_e, 3));
+
+
+for i = 1: size(data_LOO_first_variable, 3)
+    for j = 1: size(data_LOO_first_variable, 2)
+        l_c_reward(1, i) = l_c_reward(1, i) + vecnorm(data_LOO_first_variable(:,j,i) - data_LOO_first_variable(:, j, i), 2, 1);
+
+    end
+end
+
+for i = 1: size(data_LOO_second_variable, 3)
+    for j = 1: size(data_LOO_second_variable, 2)
+        l_e_reward(1, i) = l_e_reward(1, i) + vecnorm(data_LOO_second_variable(:,j,i) - data_LOO_second_variable(:, j, i), 2, 1);
+
+    end
+end
+
+% distance
+d_c_reward = zeros(101, nchoosek(size(data_LOO_c, 3), 2));
+counter = 1;
+for i = 1: size(data_LOO_c, 3)
+    for j = i+1: size(data_LOO_c, 3)
+        for k = 1: 101
+            d_c_reward(k, counter) = vecnorm(data_LOO_c(:, k, i) - data_LOO_c(:, k, j));
+        end
+        counter = counter + 1;
+    end
+end
 
