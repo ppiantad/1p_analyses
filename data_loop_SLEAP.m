@@ -4,7 +4,7 @@ iter = 0
 
 
 %% Edit these uservariables with what you want to look at
-uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
+uv.evtWin = [-4 2]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
@@ -75,7 +75,7 @@ for ii = 1:size(animalIDs,1)
             end
         end
 
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
@@ -121,7 +121,7 @@ for ii = 1:size(animalIDs,1)
         behav_tbl_temp{ii,:} = BehavData;
 
 
-        velocity_data = final_SLEAP.(currentanimal).(session_to_analyze).SLEAP_data.vel_filtered_2';
+        velocity_data = final_SLEAP.(currentanimal).(session_to_analyze).SLEAP_data.vel_cm_s'; %velocity_data = final_SLEAP.(currentanimal).(session_to_analyze).SLEAP_data.vel_filtered_2';
         % comment out below if you don't want to zscore traces prior to the
         % rest of the analysis
         % velocity_data = zscore(velocity_data, 0, 2);

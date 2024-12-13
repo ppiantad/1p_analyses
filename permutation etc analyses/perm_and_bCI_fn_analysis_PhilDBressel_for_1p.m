@@ -31,7 +31,7 @@ consec_thresh = 3; % 1017.3Hz sample rate / 3Hz filter %340 PRD used 340 because
 
 % Graphing parameters
 ylims = [-1 2];
-xlims = [-8 8];
+xlims = [ts1(1) round(ts1(end))];
 % sig_plot_level = linspace(4,3.2,7);
 
 ind_2 = ts1;
@@ -93,7 +93,7 @@ clear ii
 for ii = 1:size(comparison, 2)
     [comparison(ii).uv.n_Cp, comparison(ii).uv.ev_win] = size(comparison(ii).data);
 %     [n_Cm,~] = size(ZallMean_small_trunc);
-    timeline = linspace(-8,8,comparison(1).uv.ev_win);
+    timeline = linspace(ts1(1),ts1(end),comparison(1).uv.ev_win);
 
     comparison(ii).uv.Cp_t_crit = tinv(1-sig/2,comparison(ii).uv.n_Cp-1);
 %     Cm_t_crit = tinv(1-sig/2,n_Cm-1);
@@ -253,9 +253,9 @@ figure; hold on
 width = 200; % Width of the figure
 height = 600; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
-xlim([-8 8]);
+xlim(xlims);
 % Set X-axis ticks
-set(gca, 'XTick', [-8, 0, 8]);
+set(gca);
 ytickformat('%.1f');
 
 for vv = 1:size(pairwise_comps, 1)
@@ -308,12 +308,12 @@ end
     z.Annotation.LegendInformation.IconDisplayStyle = 'off';
     p = plot(xlim,[0 0],'k--');
     p.Annotation.LegendInformation.IconDisplayStyle = 'off';
-    y_limits = [-0.6 1.6];
-    ylim(y_limits)
+    % y_limits = [-0.6 1.6];
+    % ylim(y_limits)
     % ylabel('z-scored dF/F', 'FontSize', 12);
     % xlabel('Time from choice (s)');
     % ylim([-1 2.5])
-    yticks(y_limits(1):0.2:y_limits(2))
+    % yticks(y_limits(1):0.2:y_limits(2))
     % xlim(xlims);
     % set(gcf, 'position', [10, 10, 900, 600]);
     % fontsize(16, "pixels")
@@ -425,9 +425,9 @@ for vv = 1:size(comparison, 2)
     % xlabel('Time from choice (s)');
     xlim(xlims);
     ylim([.40 sig_plot_level_v2(1)])
-    xlim([-8 8]);
+
     % Set X-axis ticks
-    set(gca, 'XTick', [-8, 0, 8]);
+
     title('bCI')
     
 end

@@ -2,13 +2,14 @@
 load('acton.mat')
 load('batlowW.mat')
 
-neuron_mean_concat = horzcat(zall_mean_all_array{1, 11}, zall_mean_all_array{1, 12});
+
 
 %DO NOT CHANGE FROM THESE SETTINGS UNLESS WILLING TO REVERT BACK
 
 % MY APPROACH
 % % use zall array if you want to check how trials compare across block
 neuron_mean_concat = horzcat(zall_mean_all_array{:});
+% neuron_mean_concat = horzcat(zall_mean_all_array{1, 11}, zall_mean_all_array{1, 12});
 neuron_mean_concat = zscore(neuron_mean_concat, 0 , 1);
 
 
@@ -36,8 +37,8 @@ neuron_mean_concat = zscore(neuron_mean_concat, 0 , 1);
 % neuron_mean_concat = horzcat(neuron_mean_all_normalized{:});
 % neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
 
-neuron_mean_reformat_concat = vertcat(neuron_mean_reformat{:});
-neuron_mean_reformat_concat_normalized = zscore(neuron_mean_reformat_concat, 0 , 1);
+% neuron_mean_reformat_concat = vertcat(neuron_mean_reformat{:});
+% neuron_mean_reformat_concat_normalized = zscore(neuron_mean_reformat_concat, 0 , 1);
 
 
 %%
@@ -122,22 +123,14 @@ end
 
 
 
-
-
-
 %% PCA
-% Load your data if not already loaded
-% load('neuron_mean_concat.mat');
+
 
 numNeuronsPerCondition = neuron_num;
-% change depending on the number of behaviors to decode!
-% numConditions = size(neuron_mean_concat, 1)/numNeuronsPerCondition;
 
-% numConditions = size(neuron_mean_concat, 2)/numNeuronsPerCondition;
 
 numConditions = size(neuron_mean_concat, 2)/numMeasurements;
 
-% numConditions = numNeuronsPerCondition/numMeasurements;
 
 eventIdx = 1:numConditions;
 
@@ -145,9 +138,6 @@ NumPC = 4; %2
 
 array_size = size(neuron_mean_concat, 2);
 
-
-
-% Initialize an empty cell array for the result
 result = cell(size(varargin_list));
 
 % Loop through the input cell array
@@ -172,11 +162,9 @@ end
 % Convert the result cell array into a 3x1 string array
 eventNames = string(result);
 
-% Display the result
 disp(result)
 
-% Generate the ranges & then use this to loop through and conduct PCA STILL
-% NEED TO FINISH UPDATING CODE BELOW LINE 32
+
 for i = 1:numConditions
     start_index = (i - 1) * numMeasurements + 1;
     end_index = i * numMeasurements;
@@ -198,7 +186,7 @@ for qq = 1:numConditions
 end
 
 
-[coef, ~, ~, ~, explained, ~] = pca(neuron_mean_concat');
+[coef,score, ~, ~, explained, ~] = pca(neuron_mean_concat');
 
 for i = eventIdx
     temp = condition_data{i};
@@ -207,10 +195,7 @@ for i = eventIdx
 
 end
 
-% Assuming explained is a double array with variance explained for each principal component
-% explained = [var1, var2, var3, ...]; % Replace this with your actual explained array
 
-% Create the scree plot
 figure;
 bar(explained(1:40, :), 'FaceColor', [0.2 0.6 0.8]); % Creates a bar plot with custom color
 title('Scree Plot');
@@ -220,30 +205,8 @@ grid on; % Optional: adds a grid to the plot
 
 
 %% plot for publication 3D trajectories
-d_legend = eventNames;
-d_marker_loc = [1, 11, 21];
-d_marker_size = 60;
-d_marker_legend = {'Start', 'CS Onset', 'End'};
-l_color = {[120, 114, 176]/255, [1, 1, 1]/255, [227, 124, 39]/255};
-l_opacity = 0.6;
-l_width = 5;
-p_color = ["black",  "black",  "black"];
-p_size = 5;
-p_freq = 1;
-
-figure ();
-plot3traj_3Dgaussian_hao(PCScore{1,1},PCScore{1,2},PCScore{1,3}, d_legend, d_marker_loc, d_marker_size, d_marker_legend, l_color, l_opacity, l_width, p_color, p_size, p_freq)
-% xlim([-5 10])
-% ylim([-1 2])
-hold on
-%d_marker_size = 20;
-%p_size = 1;
-% plot3traj_3Dgaussian_hao(PCScore{2,1},PCScore{2,2},PCScore{2,3}, d_legend, d_marker_loc, d_marker_size, d_marker_legend, l_color, l_opacity, l_width, p_color, p_size, p_freq)
-%  xlim([0 1.5])
-%  ylim([0 2])
 
 
-%%
 % % Create a figure and plot the initial state of the lines
 % figure;
 % % d1 = smoothforward(PCScore{1,1}(:,1:5:end), [1,size(PCScore{1,1},2);], 5, 15, 'mono_dir');
@@ -376,52 +339,6 @@ disp(path_lengths);
 
 
 
-
-%% animate PCA lines
-
-% Calculate the minimum and maximum x and y values from all lines
-minX = min(cellfun(@(line) min(line(1, :)), lines));
-maxX = max(cellfun(@(line) max(line(1, :)), lines));
-minY = min(cellfun(@(line) min(line(2, :)), lines));
-maxY = max(cellfun(@(line) max(line(2, :)), lines));
-
-
-% Create a figure and axes
-figure;
-ax = gca;
-xlabel('X');
-ylabel('Y');
-grid on;
-
-% Set fixed dimensions for the plot based on the minimum and maximum values
-axis([floor(minX) ceil(maxX) floor(minY) ceil(maxY)]);
-
-% Parameters for animation
-pauseTime = 0.1; % Pause time between animations (adjust as needed)
-
-
-% Initialize empty lines
-lineObj = cell(1, numLines);
-for i = 1:numLines
-    lineObj{i} = line('XData', [], 'YData', [], 'LineWidth', 2);
-end
-
-% Iterate over lines
-for i = 1:numLines
-    % Iterate over frames for the current line
-    for frame = 1:numFrames
-        % Update the current line's data
-        set(lineObj{i}, 'XData', lines{1, i}(1, 1:frame), 'YData', lines{1, i}(2, 1:frame));
-        
-        % Update the figure
-        drawnow;
-        
-        % Pause to control the animation speed
-        pause(pauseTime);
-    end
-end
-
-
 %% based on ChatGPT to find the angle over the first 10 samples of the PCScore arrays
 
 % Initialize an array to store the angles
@@ -446,24 +363,83 @@ end
 % Display the calculated angles for each trajectory
 disp(angles);
 
-
 %%
+% Extract the first two PCs for each dataset
+PC1_set1 = PCScore{1,1}(1:2, :); % 2x160 for dataset 1
+PC1_set2 = PCScore{1,2}(1:2, :); % 2x160 for dataset 2
 
-for qq = 1:numConditions
 
-    condition_data{qq} = neuron_mean_concat(:, condition_ranges{1, qq}{1}:condition_ranges{1, qq}{2});
-    % condition_data{qq} = neuron_mean_concat(condition_ranges{1, qq}{1}:condition_ranges{1, qq}{2}, :);
-    
-end
 
-% Use unique to get the unique strings and their indices
+% Calculate differences between consecutive samples
+diff_set1 = diff(PC1_set1, 1, 2); % Take differences along columns (time)
+
+% Compute Euclidean distances
+distances_set1 = sqrt(sum(diff_set1.^2, 1)); % Sum squares along rows (PCs) and take square root
+
+% Sum the distances to get the total length
+trajectory_length_set1 = sum(distances_set1);
+
+
+% Same calculation for dataset 2
+diff_set2 = diff(PC1_set2, 1, 2); % Differences along columns
+distances_set2 = sqrt(sum(diff_set2.^2, 1)); % Euclidean distances
+trajectory_length_set2 = sum(distances_set2);
+
+
+% Calculate the difference between corresponding points
+diff_trajectories = PC1_set1 - PC1_set2; % Element-wise difference between trajectories
+
+% Compute the Euclidean distance for each bin
+euclidean_distances = sqrt(sum(diff_trajectories.^2, 1)); % Sum squares across PCs, then take square root
+
+figure;
+plot(euclidean_distances, 'LineWidth', 2);
+xlabel('Bin (Time Point)');
+ylabel('Euclidean Distance');
+title('Distance Between PCA Trajectories (Bin-by-Bin)');
+grid on;
+
+diff_trajectories_PC1_only = PC1_set1(1, :) - PC1_set2(1, :); % Element-wise difference between trajectories
+% Compute the Euclidean distance for each bin
+euclidean_distances = sqrt(sum(diff_trajectories_PC1_only.^2, 1)); % Sum squares across PCs, then take square root
+
+figure;
+plot(euclidean_distances, 'LineWidth', 2);
+xlabel('Bin (Time Point)');
+ylabel('Euclidean Distance');
+title('Distance Between PCA Trajectories (Bin-by-Bin)');
+grid on;
+
+figure; plot(ts1, PC1_set1(1, :))
+hold on; plot(ts1, PC1_set2(1, :))
+
+
+diff_trajectories_PC2_only = PC1_set1(2, :) - PC1_set2(2, :); % Element-wise difference between trajectories
+% Compute the Euclidean distance for each bin
+euclidean_distances = sqrt(sum(diff_trajectories_PC2_only.^2, 1)); % Sum squares across PCs, then take square root
+
+figure;
+plot(euclidean_distances, 'LineWidth', 2);
+xlabel('Bin (Time Point)');
+ylabel('Euclidean Distance');
+title('Distance Between PCA Trajectories (Bin-by-Bin)');
+grid on;
+
+figure; plot(ts1, PC1_set1(2, :))
+hold on; plot(ts1, PC1_set2(2, :))
+
+%% Hao code data setup
+
 [uniqueStrings, ~, indices] = unique(mouse_cells(1, :));
 
-% Now indices contains the numeric representation of each string
 disp(indices);
 
-data_LOO_first_variable = pca2LOO_new(coef, neuron_mean_concat(:, condition_ranges{1, 1}{1}:condition_ranges{1, 1}{2}), indices, NumPC, neuron_num, numMeasurements);
+% indices = each cell labeled with the mouse index
+% NumPC = number of PCs from above
+% neuron_num = total # of neurons in the sample
+% numMeasurements = # of samples in window
 
+data_LOO_first_variable = pca2LOO_new(coef, neuron_mean_concat(:, condition_ranges{1, 1}{1}:condition_ranges{1, 1}{2}), indices, NumPC, neuron_num, numMeasurements);
 
 data_LOO_second_variable = pca2LOO_new(coef, neuron_mean_concat(:, condition_ranges{1, 2}{1}:condition_ranges{1, 2}{2}), indices, NumPC, neuron_num, numMeasurements);
 
@@ -557,4 +533,5 @@ for i = 1: size(data_LOO_c, 3)
         counter = counter + 1;
     end
 end
+
 
