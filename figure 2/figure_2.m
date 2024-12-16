@@ -1266,8 +1266,8 @@ variable_to_correlate = trial_choice_times_by_mouse;
 meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
-% timeRange = (ts1 >= -4) & (ts1 <= 0);
-timeRange = (ts1 >= 0) & (ts1 <= 2);
+timeRange = (ts1 >= -4) & (ts1 <= 0);
+% timeRange = (ts1 >= 0) & (ts1 <= 2);
 % timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
@@ -1407,8 +1407,8 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 == 1);
-not_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 ~=1);
+only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
+not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
 % not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
 
 % Now, allCorrelations contains all the correlation coefficients
@@ -1487,35 +1487,6 @@ corr(mean_mean_only_shk_meanNestedCellArray_mat', riskiness)
 
 
 %%
-
-
-
-
-
-% % Plot means as bars
-% figure;
-% hold on;
-% bar(1, mean_only_shk, 'FaceColor', 'r'); % Red bar for 'only_shk_responsive_corrs'
-% bar(2, mean_not_shk, 'FaceColor', 'b'); % Blue bar for 'not_shk_responsive_corrs'
-% 
-% swarmchart(1, only_shk_responsive_corrs, 5)
-% 
-% % Scatter individual data points
-% scatter(ones(size(only_shk_responsive_corrs)), only_shk_responsive_corrs, 'r', 'filled', 'jitter', 'on', 'jitterAmount', 0.15); % Red points with jitter
-% scatter(2 * ones(size(not_shk_responsive_corrs)), not_shk_responsive_corrs, 'b', 'filled', 'jitter', 'on', 'jitterAmount', 0.15); % Blue points with jitter
-% 
-% % Customize plot
-% xlim([0.5, 2.5]);
-% xticks([1 2]);
-% xticklabels({'Only Shk Responsive', 'Not Shk Responsive'});
-% ylabel('Correlation Values');
-% title('Correlation Values and Means');
-% grid on;
-% 
-% % Add legend
-% legend({'Mean Only Shk', 'Mean Not Shk', 'Individual Only Shk', 'Individual Not Shk'}, 'Location', 'best');
-% 
-% hold off;
 
 bar_separation_value = 3;
 
@@ -1712,6 +1683,19 @@ figure; plot(ts1, mean(slow_trial_means(prechoice_block_1, :)))
 hold on; plot(ts1, mean(fast_trial_means(prechoice_block_1, :)))
 
 
+
+
+%%
+high_corrs = find(allCorrelations > 0.5)
+
+
+
+get_mouse_ids_for_high_corrs = mouse_cells(1, high_corrs);
+
+
+select_mouse_index = find(strcmp(animalIDs, select_mouse));
+
+
 %% plot scatters for individual neurons & behav variables
 
 %CREATE SCATTER PLOT BASED ON SPECIFIC EVENTS - ASSUMING THEY ARE IN PAIRS.
@@ -1726,9 +1710,9 @@ sub_window_idx = ts1 >= start_time & ts1 <= end_time;
 % Extract the corresponding columns from neuron_mean
 
 
-sub_window_activity_session_1 = zall_mouse{10, 1}{1, 12}(:, sub_window_idx);
-choice_times_mouse = trial_choice_times_by_mouse{1, 10};
-trial_types = trial_types_by_mouse{1, 10};
+sub_window_activity_session_1 = zall_mouse{1, 1}{1, 4}(:, sub_window_idx);
+choice_times_mouse = trial_choice_times_by_mouse{1, 1};
+trial_types = trial_types_by_mouse{1, 1};
 
 % % Assume A and B are your 143x21 arrays
 % correlation_coefficients = arrayfun(@(i) corr(sub_window_activity_session_1 (i, :)', sub_window_activity_session_2 (i, :)'), 1:size(sub_window_activity_session_1 , 1));

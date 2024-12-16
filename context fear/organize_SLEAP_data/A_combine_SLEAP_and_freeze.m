@@ -1,5 +1,5 @@
 % Define the top-level directory containing all primary subfolders
-top_level_directory = 'D:\Maddy Pilot\full_pilot';  % Replace with your actual directory path
+top_level_directory = 'D:\Context Data\PFC Last\Raw Data\PFC alone\Raw Data';  % Replace with your actual directory path
 
 % Get a list of primary subfolders in the top-level directory
 primary_subfolders = dir(top_level_directory);

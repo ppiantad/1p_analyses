@@ -20,8 +20,33 @@ post_choice_active_ind = find(respClass_all_array{1,2} == 1);
 post_choice_active_block_2_3_ind = find(respClass_all_array{1,9} == 1);
 aa_active_ind = find(respClass_all_array{1,11} == 1);
 % consum_inhibited_ind = find(all_consum_inhibited == 1);
-setListData = {pre_choice_active_ind, aa_active_ind};
+setListData = {pre_choice_active_block_2_3_ind, aa_active_ind};
 setLabels = ["pre_choice_active_ind", "Approach-Abort excited"];
+figure;
+ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+ve_diagram.ShowIntersectionCounts = true;
+ve_diagram.ShowIntersectionAreas = true;
+% h.SetLabels = [];
+
+shk_alone = respClass_all_array{1,4} == 1  & prechoice_block_1 ~=1 & postchoice_reward_block_1 ~= 1 & collect_block_1 ~= 1 & respClass_all_array{1,11} ~= 1;
+
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+shk_ind = find(respClass_all_array{1,4} == 1);
+pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
+% pre_choice_active_ind = find(prechoice_block_1 == 1);
+pre_choice_active_block_2_3_ind = find(respClass_all_array{1,8} == 1);
+consum_active_ind = find(respClass_all_array{1,3} == 1);
+consum_active_block_2_3 = find(respClass_all_array{1,10} == 1);
+post_choice_active_ind = find(respClass_all_array{1,2} == 1);
+post_choice_active_block_2_3_ind = find(respClass_all_array{1,9} == 1);
+aa_active_ind = find(respClass_all_array{1,11} == 1);
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {shk_ind, aa_active_ind, consum_active_block_2_3};
+setLabels = ["SHK", "Approach-Abort", "Consum"];
 figure;
 ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
 
@@ -32,15 +57,15 @@ ve_diagram.ShowIntersectionAreas = true;
 shk_alone = respClass_all_array{1,4} == 1  & prechoice_block_1 ~=1 & postchoice_reward_block_1 ~= 1 & collect_block_1 ~= 1 & respClass_all_array{1,11} ~= 1;
 %% chi-square test of proportions to see if more the proprtion of AA that are also shock cells is greater than consumption that are also shock
 % based on https://www.mathworks.com/matlabcentral/answers/96572-how-can-i-perform-a-chi-square-test-to-determine-how-statistically-different-two-proportions-are-in
-aa_and_shk = respClass_all_array{1,11} == 1 & respClass_all_array{1,4} == 1 & respClass_all_array{1,3} ~= 1;
+aa_and_shk = respClass_all_array{1,11} == 1 & respClass_all_array{1,4} == 1 & respClass_all_array{1,10} ~= 1;
 aa_and_shk_sum = sum(aa_and_shk)
-aa_not_shk = respClass_all_array{1,11} == 1 & respClass_all_array{1,4} ~= 1 & respClass_all_array{1,3} ~= 1;
+aa_not_shk = respClass_all_array{1,11} == 1 & respClass_all_array{1,4} ~= 1 & respClass_all_array{1,10} ~= 1;
 aa_not_shk_sum = sum(aa_not_shk)
 
 % using block 1 consumption neurons
-consumption_and_shk = respClass_all_array{1,3} == 1 & respClass_all_array{1,4} == 1 & respClass_all_array{1,11} ~= 1;
+consumption_and_shk = respClass_all_array{1,10} == 1 & respClass_all_array{1,4} == 1 & respClass_all_array{1,11} ~= 1;
 consumption_and_shk_sum = sum(consumption_and_shk)
-consumption_not_shk = respClass_all_array{1,3} == 1 & respClass_all_array{1,4} ~= 1 & respClass_all_array{1,11} ~= 1;
+consumption_not_shk = respClass_all_array{1,10} == 1 & respClass_all_array{1,4} ~= 1 & respClass_all_array{1,11} ~= 1;
 consumption_not_shk_sum = sum(consumption_not_shk)
 
 
@@ -173,8 +198,8 @@ xlim([-8 8]);
 ylim([-0.5 0.5]);
 % Set X-axis ticks
 set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.5 0 0.5]);
-shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 11}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 11}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'r'});
-hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 13}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 13}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
 
 xline(0);
 xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})

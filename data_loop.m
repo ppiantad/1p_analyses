@@ -16,7 +16,7 @@ load('BLA_panneuronal_Risk_2024_03_07_just_CNMFe_and_BehavData.mat')
 % load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
 
 %% Edit these uservariables with what you want to look at
-uv.evtWin = [-4 2]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
+uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
@@ -29,7 +29,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
@@ -93,7 +93,7 @@ for ii = 1:size(animalIDs,1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1); %'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0; 'LOSS_PLUS_ONE', 1, 'SHK', 0; 'LOSS_PLUS_ONE', 0, 'REW', 1.2, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 3); %'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0; 'LOSS_PLUS_ONE', 1, 'SHK', 0; 'LOSS_PLUS_ONE', 0, 'REW', 1.2, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         % BehavData = BehavData(1:2, :);
         % trials = trials(1:2, :);
         varargin_strings = string(varargin_identity_class);

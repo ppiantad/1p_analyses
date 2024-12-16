@@ -1,6 +1,6 @@
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D1_Afternoon';
+session_to_analyze = 'D3';
 
 recorded_fps = 30;
 
@@ -47,7 +47,7 @@ mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
     current_mouse = animalIDs{gg};
     
-    if strcmp(final_DLC.(current_mouse).experimental_grp, 'Experimental')
+    if strcmp(final_DLC.(current_mouse).experimental_grp, 'One Context')
         mouse_count = mouse_count+1;
         mouse_in_cond(mouse_count, :) = current_mouse;
         mouse_data = final_DLC.(current_mouse).(session_to_analyze);
@@ -56,7 +56,7 @@ for gg = 1:size(animalIDs, 1)
         
 
 
-        DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw;
+        DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).movement_data;
         if any(strcmp('freeze', DLC_data_mouse.Properties.VariableNames))
             freeze_data = DLC_data_mouse.freeze; 
         elseif any(strcmp('freeze_status', DLC_data_mouse.Properties.VariableNames))
@@ -148,11 +148,11 @@ disp(interleaved_means);
 
 % figure; plot(interleaved_means);
 
-test_interleave_mean = zeros(12, 6);
+test_interleave_mean = zeros(size(mean_safe_context, 1), 6);
 test_interleave_mean(:, [1 3 5]) = mean_safe_context;
 test_interleave_mean(:, [2 4 6]) = mean_aversive_context;
 
-test_interleave_sem = zeros(12, 6);
+test_interleave_sem = zeros(size(mean_safe_context, 1), 6);
 test_interleave_sem(:, [1 3 5]) = standard_error_safe;
 test_interleave_sem(:, [2 4 6]) = standard_error_aversive;
 
@@ -220,4 +220,59 @@ for i = 1:total_stimuli
 end
 
 % Finalize the plot
+
 hold off;
+
+%% conditioning
+% experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
+experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+
+
+animalIDs = fieldnames(final_DLC);
+
+session_to_analyze = 'D1_Afternoon';
+
+mouse_count = 0;
+for gg = 1:size(animalIDs, 1)
+    current_mouse = animalIDs{gg};
+    DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).movement_data;
+    freeze_data(gg, :) = DLC_data_mouse.was_freezing(1:21590)';
+end
+
+mean_freeze_experimental = mean(freeze_data(strcmp(experimental_grps.group, 'One Context'), :));
+
+mean_freeze_experimental_percent = mean_freeze_experimental*100;
+figure; plot(mean_freeze_experimental_percent);
+
+%%
+% Number of bins
+num_bins = 48;
+
+% Original number of columns
+num_columns = size(freeze_data, 2);
+
+% Bin size (number of columns per bin)
+bin_size = floor(num_columns / num_bins);
+
+% Preallocate binned data array
+binned_data = zeros(size(freeze_data, 1), num_bins);
+
+% Loop through each bin and calculate the mean for each mouse
+for bin_idx = 1:num_bins
+    % Determine the start and end columns for the current bin
+    start_col = (bin_idx - 1) * bin_size + 1;
+    if bin_idx == num_bins
+        % Ensure the last bin includes any remaining columns
+        end_col = num_columns;
+    else
+        end_col = bin_idx * bin_size;
+    end
+    
+    % Average data within the current bin
+    binned_data(:, bin_idx) = mean(freeze_data(:, start_col:end_col), 2);
+end
+
+%%
+figure; plot(mean(binned_data(strcmp(experimental_grps.group, 'One Context'), :)));
+hold on; plot(mean(binned_data(strcmp(experimental_grps.group, 'Experimental'), :)));
+hold on; plot(mean(binned_data(strcmp(experimental_grps.group, 'No Shock'), :)));

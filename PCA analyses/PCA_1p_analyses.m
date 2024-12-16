@@ -10,6 +10,8 @@ load('batlowW.mat')
 % % use zall array if you want to check how trials compare across block
 neuron_mean_concat = horzcat(zall_mean_all_array{:});
 % neuron_mean_concat = horzcat(zall_mean_all_array{1, 11}, zall_mean_all_array{1, 12});
+%12/14/2024 MAYBE I DONT NEED THIS LINE BELOW? MAYBE IT ARTIFICALLY DEFLATES
+%DIFFERENCES?
 neuron_mean_concat = zscore(neuron_mean_concat, 0 , 1);
 
 
@@ -393,7 +395,7 @@ diff_trajectories = PC1_set1 - PC1_set2; % Element-wise difference between traje
 euclidean_distances = sqrt(sum(diff_trajectories.^2, 1)); % Sum squares across PCs, then take square root
 
 figure;
-plot(euclidean_distances, 'LineWidth', 2);
+plot(ts1, euclidean_distances, 'LineWidth', 2);
 xlabel('Bin (Time Point)');
 ylabel('Euclidean Distance');
 title('Distance Between PCA Trajectories (Bin-by-Bin)');
@@ -404,7 +406,7 @@ diff_trajectories_PC1_only = PC1_set1(1, :) - PC1_set2(1, :); % Element-wise dif
 euclidean_distances = sqrt(sum(diff_trajectories_PC1_only.^2, 1)); % Sum squares across PCs, then take square root
 
 figure;
-plot(euclidean_distances, 'LineWidth', 2);
+plot(ts1, euclidean_distances, 'LineWidth', 2);
 xlabel('Bin (Time Point)');
 ylabel('Euclidean Distance');
 title('Distance Between PCA Trajectories (Bin-by-Bin)');
@@ -419,7 +421,7 @@ diff_trajectories_PC2_only = PC1_set1(2, :) - PC1_set2(2, :); % Element-wise dif
 euclidean_distances = sqrt(sum(diff_trajectories_PC2_only.^2, 1)); % Sum squares across PCs, then take square root
 
 figure;
-plot(euclidean_distances, 'LineWidth', 2);
+plot(ts1, euclidean_distances, 'LineWidth', 2);
 xlabel('Bin (Time Point)');
 ylabel('Euclidean Distance');
 title('Distance Between PCA Trajectories (Bin-by-Bin)');

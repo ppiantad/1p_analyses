@@ -30,6 +30,8 @@ for kk = 1:size(respClass_all_array_mouse, 1)
     collect{kk, 1} = respClass_data{1, 3} == inhib_or_excite & respClass_data{1, 1} ~= inhib_or_excite & respClass_data{1, 2} ~= inhib_or_excite;
     collect_inds{kk, 1} = find(respClass_data{1, 3} == inhib_or_excite & respClass_data{1, 1} ~= inhib_or_excite & respClass_data{1, 2} ~= inhib_or_excite);
 
+    prechoice_no_consumption_mouse{kk, 1} = respClass_data{1, 1} == inhib_or_excite & respClass_data{1, 2} ~= inhib_or_excite & respClass_data{1, 3} == 3;
+    prechoice_no_consumption_mouse_inds{kk, 1} = find(respClass_data{1, 1} == inhib_or_excite & respClass_data{1, 2} ~= inhib_or_excite & respClass_data{1, 3} == 3);
 end
 
 
@@ -62,11 +64,13 @@ count = 1;
 count_prechoice = 1;
 count_postchoice = 1;
 count_collect = 1; 
+count_prechoice_no_collect = 1; 
 for pp = 1:size(only_choice_aligned_array, 1)
     mouse_data = only_choice_aligned_array{pp, 1};
     mouse_data_prechoice = mouse_data(prechoice{pp, 1} == 1);
     mouse_data_postchoice = mouse_data(postchoice{pp, 1} == 1);
     mouse_data_collect = mouse_data(collect{pp, 1} == 1);
+    mouse_data_prechoice_no_consumption = mouse_data(prechoice_no_consumption_mouse{pp, 1} == 1);
     for gg = 1:size(mouse_data_prechoice, 2)
         % cell_data = mouse_data{gg};
         % cell_data = cell_data(logical_index{1, pp}, :);
@@ -108,6 +112,17 @@ for pp = 1:size(only_choice_aligned_array, 1)
 
     end
 
+    for gg = 1:size(mouse_data_prechoice_no_consumption, 2)
+        prechoice_no_consumption_data = mouse_data_prechoice_no_consumption{gg};
+        prechoice_no_consumption_data_long = prechoice_no_consumption_data(logical_index_long_ITI{1, pp}, :);
+        prechoice_no_consumption_data_short = prechoice_no_consumption_data(logical_index_short_ITI{1, pp}, :);
+        prechoice_no_consumption_mean_data_from_cells_long(count_prechoice_no_collect, :) = mean(prechoice_no_consumption_data_long);
+        prechoice_no_consumption_sem_data_from_cells_long(count_prechoice_no_collect, :)= nanstd(prechoice_no_consumption_data_long,1)/(sqrt(size(prechoice_no_consumption_data_long, 1)));
+        prechoice_no_consumption_mean_data_from_cells_short(count_prechoice_no_collect, :) = mean(prechoice_no_consumption_data_short);
+        prechoice_no_consumption_sem_data_from_cells_short(count_prechoice_no_collect, :)= nanstd(prechoice_no_consumption_data_short,1)/(sqrt(size(prechoice_no_consumption_data_short, 1)));
+        count_prechoice_no_collect = count_prechoice_no_collect+1;
+
+    end
     
 end
 
@@ -130,6 +145,25 @@ xline(0);
 % xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
 % xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from choice (s)');
+%%
+
+
+figure;
+width = 450; % Width of the figure
+height = 650; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+hold on;
+h(1) = shadedErrorBar(ts1, nanmean(prechoice_no_consumption_mean_data_from_cells_long), nanmean(prechoice_no_consumption_sem_data_from_cells_long), 'lineProps', {'color', 'r'});
+h(2) = shadedErrorBar(ts1, nanmean(prechoice_no_consumption_mean_data_from_cells_short), nanmean(prechoice_no_consumption_sem_data_from_cells_short), 'lineProps', {'color', 'b'});
+legend([h(1).mainLine h(2).mainLine], 'long ITI', 'short ITI interval')
+xlim([-8 8]);
+ylim([-0.6 0.8])
+% hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+% xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from choice (s)');
+
 
 %%
 
@@ -172,3 +206,24 @@ xlabel('Time from choice (s)');
 %%
 prechoice_no_consumption = respClass_all_array{1,1} == 1 & respClass_all_array{1,3} == 3; 
 prechoice_no_consumption_inds = find(respClass_all_array{1,1} == 1 & respClass_all_array{1,3} == 3); 
+
+
+
+%%
+
+
+figure;
+width = 450; % Width of the figure
+height = 650; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+hold on;
+h(1) = shadedErrorBar(ts1, nanmean(collect_mean_data_from_cells_long), nanmean(collect_sem_data_from_cells_long), 'lineProps', {'color', 'r'});
+h(2) = shadedErrorBar(ts1, nanmean(collect_mean_data_from_cells_short), nanmean(collect_sem_data_from_cells_short), 'lineProps', {'color', 'b'});
+legend([h(1).mainLine h(2).mainLine], '1st block', '2nd and 3rd block')
+xlim([-8 8]);
+ylim([-0.6 0.8])
+% hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+% xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from choice (s)');
