@@ -1,8 +1,9 @@
-%%
-if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11
+if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11 | size(respClass_all_array, 2) == 12
     comparison_arrays = [1 2 3; 8 9 10]
 elseif size(respClass_all_array, 2) == 6
     comparison_arrays = [1 2 3; 4 5 6]
+elseif size(respClass_all_array, 2) == 7
+    comparison_arrays = [1 2 3; 5 6 7]
 end
 
 
@@ -53,11 +54,11 @@ sum(block_2_and_3_pre_and_consumption)
 
 
 
-shk_mean = mean(neuron_mean_array{1, 4}(:, ts1 > 0 & ts1 < 2),  2);
+shk_mean = mean(neuron_mean_array{1, 1}(:, ts1 > 0 & ts1 < 2),  2);
 
 % [peak_values, time_of_peak_activity] = max(neuron_mean_array{1, 1}, [], 2);
 [~, sort_indices] = sort(shk_mean);
-neuron_mean_sorted = neuron_mean_array{1, 4}(sort_indices, :);
+neuron_mean_sorted = neuron_mean_array{1, 1}(sort_indices, :);
 
 
 % Sort the rows of activated_neuron_mean based on peak_times.
@@ -428,8 +429,8 @@ shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1
 % hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
 
 xline(0);
-xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
-xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
 legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
 

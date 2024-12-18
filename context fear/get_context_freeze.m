@@ -230,7 +230,9 @@ experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_DLC_data\
 
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D1_Afternoon';
+session_to_analyze = 'D1_Morning';
+
+group_to_analyze = 'No Shock';
 
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
@@ -238,8 +240,11 @@ for gg = 1:size(animalIDs, 1)
     DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).movement_data;
     freeze_data(gg, :) = DLC_data_mouse.was_freezing(1:21590)';
 end
+samples = final_DLC.B51618.D1_Afternoon.movement_data.frame(1:21590)';
+mean_freeze_experimental = mean(freeze_data(strcmp(experimental_grps.group, group_to_analyze), :));
+std_freeze_experimental = std(freeze_data(strcmp(experimental_grps.group, group_to_analyze), :));
+sem_freeze_experimental = std_freeze_experimental/sqrt(size(freeze_data(strcmp(experimental_grps.group, group_to_analyze)), 1));
 
-mean_freeze_experimental = mean(freeze_data(strcmp(experimental_grps.group, 'One Context'), :));
 
 mean_freeze_experimental_percent = mean_freeze_experimental*100;
 figure; plot(mean_freeze_experimental_percent);
@@ -272,7 +277,28 @@ for bin_idx = 1:num_bins
     binned_data(:, bin_idx) = mean(freeze_data(:, start_col:end_col), 2);
 end
 
+binned_data_std = std(binned_data(strcmp(experimental_grps.group, group_to_analyze), :));
+binned_data_sem = binned_data_std/sqrt(size(binned_data(strcmp(experimental_grps.group, group_to_analyze)), 1));
+
 %%
-figure; plot(mean(binned_data(strcmp(experimental_grps.group, 'One Context'), :)));
-hold on; plot(mean(binned_data(strcmp(experimental_grps.group, 'Experimental'), :)));
+figure; plot(mean(binned_data(strcmp(experimental_grps.group, 'Experimental'), :))); 
+hold on; plot(mean(binned_data(strcmp(experimental_grps.group, 'One Context'), :)));
 hold on; plot(mean(binned_data(strcmp(experimental_grps.group, 'No Shock'), :)));
+
+%%
+figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+hold on;
+h(1) = shadedErrorBar(1:48, mean(binned_data(strcmp(experimental_grps.group, 'Experimental'), :)), binned_data_std/sqrt(size(binned_data(strcmp(experimental_grps.group, 'Experimental')), 1)), 'lineProps', {'color', 'r'});
+h(2) = shadedErrorBar(1:48, mean(binned_data(strcmp(experimental_grps.group, 'One Context'), :)), binned_data_std/sqrt(size(binned_data(strcmp(experimental_grps.group, 'One Context')), 1)), 'lineProps', {'color', 'k'});
+h(2) = shadedErrorBar(1:48, mean(binned_data(strcmp(experimental_grps.group, 'No Shock'), :)), binned_data_std/sqrt(size(binned_data(strcmp(experimental_grps.group, 'No Shock')), 1)), 'lineProps', {'color', 'b'});
+% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(remapped  ==1, :)), nanmean(neuron_sem_array{1, arrays_to_examine(2)}(remapped  ==1, :)), 'lineProps', {'color', 'b'});
+% legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
+
+
+binned_data_mean_experimental = mean(binned_data(strcmp(experimental_grps.group, 'Experimental'), :));
+binned_data_mean_one_context = mean(binned_data(strcmp(experimental_grps.group, 'One Context'), :));
+binned_data_mean_no_shock = mean(binned_data(strcmp(experimental_grps.group, 'No Shock'), :));
+
+binned_data_sem_experimental = binned_data_std/sqrt(size(binned_data(strcmp(experimental_grps.group, 'Experimental')), 1));
+binned_data_sem_one_context = binned_data_std/sqrt(size(binned_data(strcmp(experimental_grps.group, 'One Context')), 1));
+binned_data_sem_no_shock = binned_data_std/sqrt(size(binned_data(strcmp(experimental_grps.group, 'No Shock')), 1));

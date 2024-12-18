@@ -1,7 +1,7 @@
 load('BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat')
 %% for heatmap, change "plot_num" (what neuron to plot) and array_to_plot (# corresponds to which dataset)
 
-plot_num = 103 
+plot_num = 10
 
 array_to_plot = 1; % depends on the structure of zall
 
@@ -2828,3 +2828,84 @@ caxis([-1 1]); % Assuming correlations range from -1 to 1
 % Add a separate axes for the colorbar to associate it only with the upper tile
 c = colorbar('eastoutside');
 set(c, 'YTick', clim); % 
+
+%% load('BLA_Pre_RDT_RM_small_vs_large_yoked_to_small_categories.mat')
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+pre_choice_small_ind = find(respClass_all_array{1,1} == 1);
+pre_choice_large_ind = find(respClass_all_array{1,4} == 1);
+
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {pre_choice_small_ind, pre_choice_large_ind};
+setLabels = ["Pre-choice small", "Pre-choice large"];
+figure;
+h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+h.ShowIntersectionCounts = true;
+h.ShowIntersectionAreas = true;
+% h.SetLabels = [];
+
+figure; 
+plot(ts1, mean(neuron_mean_array{1, 1}(respClass_all_array{1,1} == 1, :)))
+hold on; plot(ts1, mean(neuron_mean_array{1, 1}(respClass_all_array{1,1} ~= 1 & respClass_all_array{1,4} == 1, :)))
+
+figure; 
+plot(ts1, mean(neuron_mean_array{1, 4}(respClass_all_array{1,4} == 1, :)))
+hold on; plot(ts1, mean(neuron_mean_array{1, 4}(respClass_all_array{1,1} == 1 & respClass_all_array{1,4} ~= 1, :)))
+
+
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+postchoice_small_ind = find(respClass_all_array{1,2} == 1);
+postchoice_large_ind = find(respClass_all_array{1,5} == 1);
+
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {postchoice_small_ind, postchoice_large_ind};
+setLabels = ["Post-choice small", "Post-choice large"];
+figure;
+h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+h.ShowIntersectionCounts = true;
+h.ShowIntersectionAreas = true;
+% h.SetLabels = [];
+
+
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+collect_small_ind = find(respClass_all_array{1,3} == 1);
+collect_large_ind = find(respClass_all_array{1,6} == 1);
+
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {collect_small_ind, collect_large_ind};
+setLabels = ["Collect small", "Collect large"];
+figure;
+h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+h.ShowIntersectionCounts = true;
+h.ShowIntersectionAreas = true;
+% h.SetLabels = [];
+
+
+
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+collect_small_ind = find(respClass_all_array{1,3} == 1);
+collect_large_ind = find(respClass_all_array{1,6} == 1);
+
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {pre_choice_small_ind, pre_choice_large_ind, postchoice_small_ind, postchoice_large_ind, collect_small_ind, collect_large_ind};
+setLabels = ["Pre-choice small", "Pre-choice large", "Post-choice small", "Post-choice large", "Collect small", "Collect large"];
+figure;
+h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+h.ShowIntersectionCounts = true;
+h.ShowIntersectionAreas = true;
+% h.SetLabels = [];
