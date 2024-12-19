@@ -247,8 +247,8 @@ ylabel('% large rew choice'); % Label for the right Y-axis
 
 %%
 
-first_data_to_plot = collect_block_1_mean_mouse_array;
-second_data_to_plot = collect_block_2_3_mean_mouse_array;
+first_data_to_plot = prechoice_block_1_mean_mouse_array;
+second_data_to_plot = prechoice_block_2_3_mean_mouse_array;
 behav_sequence_data_to_plot = large_sequences_mouse;
 
 
