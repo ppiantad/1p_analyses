@@ -1,8 +1,9 @@
 % Define the top-level directory
 top_level_directory = 'D:\Context Data\Pilot\data'; % Update this to your top-level directory
 
-% Initialize a list to store matched folders
-matched_folders = {};
+% Initialize lists to store matched folders
+matched_folders_SLEAP = {};
+matched_folders_freeze_vid = {};
 
 % Get the full list of subfolders recursively
 all_subfolders = genpath(top_level_directory);
@@ -10,38 +11,51 @@ all_subfolders = genpath(top_level_directory);
 % Split the list into individual folder paths
 folders = strsplit(all_subfolders, pathsep);
 
-% Loop through each folder and check for the target subfolders
+% Loop through each folder and check for the target subfolders with files
 for i = 1:length(folders)
     current_folder = folders{i};
     if isempty(current_folder)
         continue; % Skip empty entries
     end
 
-    % Check if both "SLEAP_data" and "freeze_vid" exist in the current folder
-    if isfolder(fullfile(current_folder, 'SLEAP_data')) && ...
-       isfolder(fullfile(current_folder, 'freeze_vid')) && ...
-       ~contains(current_folder, 'EPM')
+    % Check for "SLEAP_data" folder with .slp files
+    SLEAP_folder = fullfile(current_folder, 'SLEAP_data');
+    if isfolder(SLEAP_folder)
+        slp_files = dir(fullfile(SLEAP_folder, '*.slp'));
+        if ~isempty(slp_files)
+            matched_folders_SLEAP{end+1} = SLEAP_folder; 
+        end
+    end
 
-        matched_folders{end+1} = current_folder; 
+    % Check for "freeze_vid" folder with .csv files
+    freeze_folder = fullfile(current_folder, 'exports');
+    if isfolder(freeze_folder)
+        csv_files = dir(fullfile(freeze_folder, '*.csv'));
+        if ~isempty(csv_files)
+            matched_folders_freeze_vid{end+1} = freeze_folder; 
+        end
     end
 end
 
-
 % Display the matched folders
-disp('Folders containing both "SLEAP_data" and "freeze_vid":');
-disp(matched_folders);
+disp('Folders containing "SLEAP_data" with .slp files:');
+disp(matched_folders_SLEAP);
+
+disp('Folders containing "freeze_vid" with .csv files:');
+disp(matched_folders_freeze_vid);
 
 %%
 % Loop through each primary subfolder
-for p = 1:length(matched_folders)
+for p = 1:length(matched_folders_SLEAP)
     % Define the path to the current primary subfolder
-    primary_subfolder_path = matched_folders{p};
-    file_name_strings = strsplit(primary_subfolder_path, '\');
+    SLEAP_path = matched_folders_SLEAP{p};
+    freeze_vid_path = matched_folders_freeze_vid{p};
+    file_name_strings = strsplit(SLEAP_path, '\');
     % update this depending on folder structure
-    session_to_append = file_name_strings{8};
+    session_to_append = file_name_strings{6};
 
-    SLEAP_folder = fullfile(primary_subfolder_path, 'SLEAP_data');
-    freeze_folder = fullfile(primary_subfolder_path, 'freeze_vid');
+    SLEAP_folder = fullfile(SLEAP_path);
+    freeze_folder = fullfile(freeze_vid_path);
 
     % Initialize an empty table to store all data for this subfolder
     SLEAP_raw_data = table();
@@ -91,10 +105,10 @@ for p = 1:length(matched_folders)
         freeze_data = readtable(fullfile(freeze_folder, freeze_csv_file.name));
 
         % Check if required columns 'frame' and 'was_freezing' are present
-        if all(ismember({'frame', 'was_freezing'}, freeze_data.Properties.VariableNames))
+        if all(ismember({'frame', 'freeze'}, freeze_data.Properties.VariableNames))
             % Extract data from row 2 to the end for 'frame' and 'was_freezing'
             frame_data = freeze_data.frame(2:end);
-            was_freezing_data = freeze_data.was_freezing(2:end);
+            was_freezing_data = freeze_data.freeze(2:end);
 
             % Create a table with the extracted data and rename the columns
             freeze_table = table(frame_data, was_freezing_data, 'VariableNames', {'frame', 'was_freezing'});
@@ -146,7 +160,7 @@ for p = 1:length(matched_folders)
 
     % Define the filename and path for the output .csv file
     output_filename = strcat(session_to_append, '_SLEAP_and_freezing_combined.csv');
-    output_file = fullfile(primary_subfolder_path, output_filename);
+    output_file = fullfile(SLEAP_path, output_filename);
 
     % Save the SLEAP_raw_data table as a .csv file
     writetable(SLEAP_raw_data, output_file);

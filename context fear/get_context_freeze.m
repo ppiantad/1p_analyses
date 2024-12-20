@@ -225,12 +225,12 @@ hold off;
 
 %% conditioning
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
-experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
 
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D1_Morning';
+session_to_analyze = 'D1_Afternoon';
 
 group_to_analyze = 'No Shock';
 
@@ -240,7 +240,7 @@ for gg = 1:size(animalIDs, 1)
     DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).movement_data;
     freeze_data(gg, :) = DLC_data_mouse.was_freezing(1:21590)';
 end
-samples = final_DLC.B51618.D1_Afternoon.movement_data.frame(1:21590)';
+samples = final_DLC.(current_mouse).(session_to_analyze).movement_data.frame(1:21590)';
 mean_freeze_experimental = mean(freeze_data(strcmp(experimental_grps.group, group_to_analyze), :));
 std_freeze_experimental = std(freeze_data(strcmp(experimental_grps.group, group_to_analyze), :));
 sem_freeze_experimental = std_freeze_experimental/sqrt(size(freeze_data(strcmp(experimental_grps.group, group_to_analyze)), 1));
