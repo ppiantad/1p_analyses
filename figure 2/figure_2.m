@@ -173,6 +173,116 @@ yline(0)
 fontsize(18, 'points')
 hold off;
 
+%% ALTERNATE WAY TO PLOT "REPRESENTATIVE" NEURONS. This checks through the neurons given below, takes the mean for each trial, selects the 5 trials w/ the highest mean, and plots them across rows of a subplot
+% this is done for each ensemble
+
+% for RDT D1 BLA_Insc_40:
+%prechoice neuron num 12
+%postchoice rew num 70
+%consumption num 10
+%shock num 11
+
+pre_choice_window = [-4 0];     % Pre-choice period: -4 to 0 s
+post_choice_window = [0 2];     % Post-choice period: 0 to 2 s
+consumption_window = [1 3];     % Consumption period: 1 to 3 s if using data aligned to collect, do 0 to 2 to keep things consistent
+
+windows = {pre_choice_window, post_choice_window, consumption_window};
+plot_num = [12, 70, 10];
+
+array_to_plot = [1, 1, 3]; % depends on the structure of zall
+
+select_mouse = 'BLA_Insc_40';
+
+% for RDT D1 BLA_Insc_25:
+%prechoice neuron num 46
+%postchoice rew num 38
+%consumption num 39
+%shock num 11
+
+
+% for RDT D1 BLA_Insc_40:
+%prechoice neuron num 12
+%postchoice rew num 70
+%consumption num 10
+%shock num 11
+
+
+select_mouse_index = find(strcmp(animalIDs, select_mouse));
+
+first_session = 'Pre_RDT_RM';
+
+second_session = 'RDT_D1';
+
+
+% Get the number of neurons
+num_neurons = length(plot_num);
+
+% Create a new figure
+figure;
+
+for neuron_idx = 1:num_neurons
+    % Get the current neuron and corresponding time window
+    current_neuron = plot_num(neuron_idx);
+    current_window = windows{neuron_idx};
+    array_to_plot_current = array_to_plot(neuron_idx);
+    % Get the data for the current neuron
+    neuron_data = zall_mouse{select_mouse_index, array_to_plot_current}{1, current_neuron};
+    % Restrict time indices based on the current window
+    time_indices = ts1 >= current_window(1) & ts1 <= current_window(2);
+    restricted_data = neuron_data(:, time_indices);
+    
+    % Compute the mean activity within the restricted window for each trial
+    mean_activity = mean(restricted_data, 2);
+    
+    % Sort trials by mean activity in descending order
+    [~, sorted_trial_indices] = sort(mean_activity, 'descend');
+    
+    % Select the top 5 trials with the highest mean activity
+    selected_trials = sorted_trial_indices(1:min(5, size(neuron_data, 1)));
+    
+    % Determine Y-axis limits for this neuron
+    y_limits = [min(neuron_data(:)), max(neuron_data(:))];
+    
+    for subplot_idx = 1:length(selected_trials)
+        % Calculate subplot position
+        subplot_idx_global = (neuron_idx - 1) * 5 + subplot_idx;
+        subplot(num_neurons, 5, subplot_idx_global);
+        hold on;
+        
+        % Get the selected trial
+        trial = selected_trials(subplot_idx);
+        
+        % Plot the selected trial
+        plot(ts1, neuron_data(trial, :), 'Color', [custom_colormap(end, :), 0.5]);
+        
+        % % Plot the mean as a thick black line
+        % meanData = mean(neuron_data);
+        % plot(ts1, meanData, 'LineWidth', 2, 'Color', 'k');
+        
+        % Set axis limits and labels
+        ylim(y_limits);
+        xlim([-8 8]);
+        set(gca, 'XTick', [-8, 0, 8]);
+        
+        % Add reference lines
+        xline(0, 'k--');
+        yline(0, 'k--');
+        
+        % % Add title for the subplot
+        % if neuron_idx == 1
+        %     title(['Trial ' num2str(trial)]);
+        % end
+        
+        % Adjust font size
+        set(gca, 'FontSize', 12);
+        
+        hold off;
+    end
+    
+    % % Add a label to the Y-axis for the first column in each row
+    % ylabel(['Neuron ' num2str(current_neuron)], 'FontSize', 14);
+end
+
 %%
 if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11
     comparison_arrays = [1 2 3; 8 9 10]

@@ -674,9 +674,162 @@ for i = 1:length(variables)
     correlation_results = [correlation_results; table({variables{i}}, r(2), pval(2), 'VariableNames', {'Variable', 'Correlation', 'PValue'})];
 end
 
+%%
+% use this to get mean activity of prechoice ensemble across mice for
+% Block1 and Blocks2/3
+
+for gg = 1:size(animalIDs, 1) %size(animalIDs, 1)
+    % if gg ~= 2 && gg ~= 3 && gg ~= 6
+    select_mouse = animalIDs{gg};
+
+    select_mouse_index = find(strcmp(animalIDs, select_mouse));
+    BehavData = final_behavior.(select_mouse).(first_session).uv.BehavData;
+
+
+    ca = final.(select_mouse).(first_session).CNMFe_data.(ca_data_type);
+    % ca = ca(prechoice_indices_for_PV{aa, select_mouse_index} == 1, :);
+    % ca_zscored = zscore(ca, [], 2);
+    ca_zscored = normalize(ca, 2);
+    time_array = final.(select_mouse).(first_session).time;
+    % time_array_all{aa, gg} = time_array;
+    % Reshape the data and take the mean of each bin
+    [n_neurons, n_samples] = size(ca_zscored);
+    ca_binned = squeeze(mean(reshape(ca_zscored(:, 1:floor(n_samples/bin_factor)*bin_factor), n_neurons, bin_factor, []), 2));
+
+    % Squeeze the data to remove the singleton dimension
+    % ca_binned = squeeze(ca_binned);
+    ca = ca_binned;
+    % Assuming time_array is a 1D array of time points corresponding to each sample
+    time_array_binned = mean(reshape(time_array(1:floor(length(time_array)/bin_factor)*bin_factor), bin_factor, []), 1);
+    time_array = time_array_binned;
+
+
+
+
+
+    
+    % prechoice_block_1_column_1_data = {};
+    % prechoice_mean_mouse = [];
+    % prechoice_block_1_column_1_data = zall_mouse{select_mouse_index, 11}(prechoice_block_1_mouse{select_mouse_index, 1} == 1);
+    % for cc = 1:size(prechoice_block_1_column_1_data, 2)
+    %     prechoice_data = prechoice_block_1_column_1_data{1, cc};
+    %     prechoice_mean_mouse(:, cc) = mean(prechoice_data (:, ts1 >= -4 & ts1 <= 0), 2);
+    % end
+    % prechoice_block_1_mean_mouse_array{gg} = prechoice_mean_mouse;
+    % 
+    % prechoice_block_2_3_column_1_data = {};
+    % prechoice_mean_mouse = [];
+    % prechoice_block_2_3_column_1_data = zall_mouse{select_mouse_index, 11}(prechoice_blocks_2_and_3_mouse{select_mouse_index, 1} == 1);
+    % 
+    % for cc = 1:size(prechoice_block_2_3_column_1_data, 2)
+    %     prechoice_data = prechoice_block_2_3_column_1_data{1, cc};
+    %     prechoice_mean_mouse(:, cc) = mean(prechoice_data (:, ts1 >= -4 & ts1 <= 0), 2);
+    % end
+    % prechoice_block_2_3_mean_mouse_array{gg} = prechoice_mean_mouse;
+    % 
+    % prechoice_block_all_column_1_data = {};
+    % prechoice_mean_mouse = [];
+    % prechoice_block_all_column_1_data = zall_mouse{select_mouse_index, 11};
+    % 
+    % for cc = 1:size(prechoice_block_all_column_1_data, 2)
+    %     prechoice_data = prechoice_block_all_column_1_data{1, cc};
+    %     prechoice_mean_mouse(:, cc) = mean(prechoice_data (:, ts1 >= -4 & ts1 <= 0), 2);
+    % end
+    % prechoice_all_mean_mouse_array{gg} = prechoice_mean_mouse;
+
+
+    prechoice_remapped_column_1_data = {};
+    prechoice_mean_mouse = [];
+    prechoice_remapped_column_1_data = zall_mouse{select_mouse_index, 8}(prechoice_remapped_mouse{select_mouse_index, 1} == 1);
+    for cc = 1:size(prechoice_remapped_column_1_data, 2)
+        prechoice_data = prechoice_remapped_column_1_data{1, cc};
+        prechoice_mean_mouse(:, cc) = mean(prechoice_data (:, ts1 >= -4 & ts1 <= 0), 2);
+    end
+    prechoice_remapped_mean_mouse_block_2_3_array{gg} = prechoice_mean_mouse;
+
+    prechoice_remapped_column_1_data = {};
+    prechoice_mean_mouse = [];
+    prechoice_remapped_column_1_data = zall_mouse{select_mouse_index, 1}(prechoice_remapped_mouse{select_mouse_index, 1} == 1);
+    for cc = 1:size(prechoice_remapped_column_1_data, 2)
+        prechoice_data = prechoice_remapped_column_1_data{1, cc};
+        prechoice_mean_mouse(:, cc) = mean(prechoice_data (:, ts1 >= -4 & ts1 <= 0), 2);
+    end
+    prechoice_remapped_mean_mouse_block_1_array{gg} = prechoice_mean_mouse;
+
+    
+    % postchoice_block_1_column_1_data = {};
+    % postchoice_mean_mouse = [];
+    % postchoice_block_1_column_1_data = zall_mouse{select_mouse_index, 11}(postchoice_reward_block_1_mouse{select_mouse_index, 1} == 1);
+    % for cc = 1:size(postchoice_block_1_column_1_data, 2)
+    %     postchoice_data = postchoice_block_1_column_1_data{1, cc};
+    %     postchoice_mean_mouse(:, cc) = mean(postchoice_data (:, ts1 >= 0 & ts1 <= 2), 2);
+    % end
+    % postchoice_block_1_mean_mouse_array{gg} = postchoice_mean_mouse;
+    % 
+    % postchoice_block_2_3_column_1_data = {};
+    % postchoice_mean_mouse = [];
+    % postchoice_block_2_3_column_1_data = zall_mouse{select_mouse_index, 11}(postchoice_reward_blocks_2_and_3_mouse{select_mouse_index, 1} == 1);
+    % 
+    % for cc = 1:size(postchoice_block_2_3_column_1_data, 2)
+    %     postchoice_data = postchoice_block_2_3_column_1_data{1, cc};
+    %     postchoice_mean_mouse(:, cc) = mean(postchoice_data (:, ts1 >= 0 & ts1 <= 2), 2);
+    % end
+    % postchoice_block_2_3_mean_mouse_array{gg} = postchoice_mean_mouse;
+    % 
+    % postchoice_block_all_column_1_data = {};
+    % postchoice_mean_mouse = [];
+    % postchoice_block_all_column_1_data = zall_mouse{select_mouse_index, 11};
+    % 
+    % for cc = 1:size(postchoice_block_all_column_1_data, 2)
+    %     postchoice_data = postchoice_block_all_column_1_data{1, cc};
+    %     postchoice_mean_mouse(:, cc) = mean(postchoice_data (:, ts1 >= 0 & ts1 <= 2), 2);
+    % end
+    % postchoice_all_mean_mouse_array{gg} = postchoice_mean_mouse;
+
+    
+    % collect_block_1_column_1_data = {};
+    % collect_mean_mouse = [];
+    % collect_block_1_column_1_data = zall_mouse{select_mouse_index, 12}(collect_block_1_mouse{select_mouse_index, 1} == 1);
+    % for cc = 1:size(collect_block_1_column_1_data, 2)
+    %     collect_data = collect_block_1_column_1_data{1, cc};
+    %     collect_mean_mouse(:, cc) = mean(collect_data (:, ts1 >= 1 & ts1 <= 3), 2);
+    % end
+    % collect_block_1_mean_mouse_array{gg} = collect_mean_mouse;
+    % 
+    % collect_block_2_3_column_1_data = {};
+    % collect_mean_mouse = [];
+    % collect_block_2_3_column_1_data = zall_mouse{select_mouse_index, 12}(collect_blocks_2_and_3_mouse{select_mouse_index, 1} == 1);
+    % 
+    % for cc = 1:size(collect_block_2_3_column_1_data, 2)
+    %     collect_data = collect_block_2_3_column_1_data{1, cc};
+    %     collect_mean_mouse(:, cc) = mean(collect_data (:, ts1 >= 1 & ts1 <= 3), 2);
+    % end
+    % collect_block_2_3_mean_mouse_array{gg} = collect_mean_mouse;
+    % 
+    % collecte_block_all_column_1_data = {};
+    % collect_mean_mouse = [];
+    % collect_block_all_column_1_data = zall_mouse{select_mouse_index, 12};
+    % 
+    % for cc = 1:size(collect_block_all_column_1_data, 2)
+    %     collect_data = collect_block_all_column_1_data{1, cc};
+    %     collect_mean_mouse(:, cc) = mean(collect_data (:, ts1 >= 1 & ts1 <= 3), 2);
+    % end
+    % collect_all_mean_mouse_array{gg} = collect_mean_mouse;
+
+end
+
+for ff = 1:size(prechoice_remapped_mean_mouse_block_1_array, 2)
+
+    mean_prechoice_remapped_mouse_block_1(ff) = mean(mean(prechoice_remapped_mean_mouse_block_1_array{1, ff}))
+    mean_prechoice_remapped_mouse_block_2_3(ff) = mean(mean(prechoice_remapped_mean_mouse_block_2_3_array{1, ff}))
+
+end
+
+diff_risky_vs_safe_prechoice_remapped = mean_prechoice_remapped_mouse_block_2_3-mean_prechoice_remapped_mouse_block_1;
+
 
 %%
-x = remapped_prechoice_ratio';
+x = diff_risky_vs_safe_prechoice_remapped';
 y = risk_table.Mean_1_to_3;
 % x = remapped_prechoice_ratio(num_cells_mouse > 30)';
 % y = risk_table.Mean_1_to_3(num_cells_mouse > 30);
