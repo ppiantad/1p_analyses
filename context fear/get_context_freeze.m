@@ -225,7 +225,7 @@ hold off;
 
 %% conditioning
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
 % Define parameters
 threshold = 1; % Velocity threshold
@@ -237,47 +237,50 @@ min_samples = min_duration / sample_duration;
 
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D2_Afternoon';
+session_to_analyze = 'D2_Morning';
 
 group_to_analyze = 'No Shock';
 
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
     current_mouse = animalIDs{gg};
-    
-    if isfield(final_DLC.(current_mouse), session_to_analyze)
-        mouse_count = mouse_count+1;
-        DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).movement_data;
-        
-        body_velocity = [];
-        labels = [];
-        % Get the body_velocity column
-        body_velocity = final_DLC.(current_mouse).(session_to_analyze).movement_data.body_velocity;
+    if strcmp(session_to_analyze, 'D1_Morning') & strcmp(current_mouse, 'B57417')
+        continue
+    else
+        if isfield(final_DLC.(current_mouse), session_to_analyze)
+            mouse_count = mouse_count+1;
+            DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).movement_data;
 
-        % Initialize the new column
-        labels = zeros(size(body_velocity));
+            body_velocity = [];
+            labels = [];
+            % Get the body_velocity column
+            body_velocity = final_DLC.(current_mouse).(session_to_analyze).movement_data.body_velocity;
 
-        % Find consecutive segments where body_velocity < threshold
-        below_threshold = body_velocity < threshold;
-        start_idx = find(diff([0; below_threshold]) == 1); % Start indices
-        end_idx = find(diff([below_threshold; 0]) == -1); % End indices
+            % Initialize the new column
+            labels = zeros(size(body_velocity));
 
-        % Iterate through each segment and label
-        for i = 1:length(start_idx)
-            segment_length = end_idx(i) - start_idx(i) + 1;
-            if segment_length >= min_samples
-                labels(start_idx(i):end_idx(i)) = 1;
+            % Find consecutive segments where body_velocity < threshold
+            below_threshold = body_velocity < threshold;
+            start_idx = find(diff([0; below_threshold]) == 1); % Start indices
+            end_idx = find(diff([below_threshold; 0]) == -1); % End indices
+
+            % Iterate through each segment and label
+            for i = 1:length(start_idx)
+                segment_length = end_idx(i) - start_idx(i) + 1;
+                if segment_length >= min_samples
+                    labels(start_idx(i):end_idx(i)) = 1;
+                end
             end
+
+            % Add the labels as a new column to the table
+            % final_DLC.B46837.D1_Afternoon.movement_data.freeze_label = labels;
+
+            % Find the row index where the 'mouse' column matches 'current_mouse'
+            row_idx = strcmp(experimental_grps.mouse, current_mouse);
+
+            freeze_data(mouse_count, :) = labels(1:21590)';
+            experimental_grps_updated(mouse_count, :) = experimental_grps(row_idx, :);
         end
-
-        % Add the labels as a new column to the table
-        % final_DLC.B46837.D1_Afternoon.movement_data.freeze_label = labels;
-
-        % Find the row index where the 'mouse' column matches 'current_mouse'
-        row_idx = strcmp(experimental_grps.mouse, current_mouse);
-
-        freeze_data(mouse_count, :) = labels(1:21590)';
-        experimental_grps_updated(mouse_count, :) = experimental_grps(row_idx, :);
     end
 end
 
@@ -345,7 +348,7 @@ h(2) = shadedErrorBar(1:num_bins, mean(one_context_data), one_context_sem, 'line
 h(2) = shadedErrorBar(1:num_bins, mean(no_shock_data), no_shock_sem, 'lineProps', {'color', 'b'});
 % h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(remapped  ==1, :)), nanmean(neuron_sem_array{1, arrays_to_examine(2)}(remapped  ==1, :)), 'lineProps', {'color', 'b'});
 % legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
-
+ylim([0 1]);
 
 binned_data_mean_experimental = mean(binned_data(strcmp(experimental_grps_updated.group, 'Experimental'), :));
 binned_data_mean_one_context = mean(binned_data(strcmp(experimental_grps_updated.group, 'One Context'), :));
