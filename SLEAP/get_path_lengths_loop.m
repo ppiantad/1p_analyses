@@ -51,8 +51,12 @@ for dd = 1:size(animalIDs)
         BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
 
         % uncomment below if you want to run this on specific trials, eg
-        % using the 10x variable data 
+        % using the 10x variable data
+        
         % BehavData = behav_tbl_iter{1, 1}{dd};
+        behav_part_1 = behav_tbl_iter{1, 1}{dd, 1}
+        behav_part_2 = behav_tbl_iter{5, 1}{dd, 1}
+        BehavData = vertcat(behav_part_1, behav_part_2 )
 
         onset_trials = BehavData.stTime';
         choice_trials = BehavData.choiceTime';
@@ -162,10 +166,10 @@ for dd = 1:size(animalIDs)
     b1_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 1 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
     b2_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 2 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
     b3_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 3 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
-    path_length_array_mouse{dd} = path_length_array; 
+    path_length_array_mouse{dd} = path_length_array'; 
 end
 
-path_length_concat = cat(2, path_length_array_mouse{:})';
+path_length_concat = cat(1, path_length_array_mouse{:});
 
 %%
 

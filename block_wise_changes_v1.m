@@ -20,6 +20,8 @@ elseif size(respClass_all_array, 2) == 6
     comparison_arrays = [1 2 3; 4 5 6]
 elseif size(respClass_all_array, 2) == 7
     comparison_arrays = [1 2 3; 5 6 7]
+elseif size(respClass_all_array, 2) == 3
+    comparison_arrays = [1, 2, 3; 1, 2, 3]
 end
 
 

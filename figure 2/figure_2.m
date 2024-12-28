@@ -2222,6 +2222,9 @@ end
 
 trial_types_concat = cat(1, trial_types_by_mouse{:});
 trial_choice_times_concat = cat(1, trial_choice_times_by_mouse{:});
+trial_choice_times_concat = trial_choice_times_concat(trial_types_concat == 1.2);
+trial_types_concat = trial_types_concat(trial_types_concat == 1.2);
+path_length_concat = path_length_concat(trial_types_concat == 1.2);
 rew_collect_times_concat = cat(1, delay_to_collect_post_shk_by_mouse{:});
 
 bar_separation_value = 3;
@@ -2354,8 +2357,10 @@ for i = 1:length(zall_mouse)
         % currentArray = currentArray-currentArray_mean;
         % Compute the mean activity for each row in the time range 0 to 2 seconds
         meanValues = mean(currentArray(:, timeRange), 2);
-        % meanValues = max(currentArray(:, timeRange), [], 2);
         
+        % meanValues = max(currentArray(:, timeRange), [], 2);
+        % meanValues = currentArray(:, timeRange);
+
         % Store the mean values in the corresponding cell of the nested cell array
         meanNestedCellArray{j} = meanValues;
     end
@@ -2509,11 +2514,11 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 
-only_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 == 1);
-not_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 ~= 1);
+only_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 == 1 & postchoice_reward_block_1 ~=1);
+not_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
 
-only_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 == 1);
-not_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 ~= 1);
+only_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 == 1 & postchoice_reward_block_1 ~=1);
+not_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
 
 % Create histograms for SHK responsive correlations for both types
 figure;
@@ -2680,6 +2685,9 @@ hold off;
 
 %CHECK AND UPDATE START & END TIME DEPENDING ON EVENT OF INTEREST
 
+find(correlationResults_Type1_2{9, 1} < -0.3)
+
+
 start_time = -4;% sub-window start time
 end_time = 0; % sub-window end time
 
@@ -2689,15 +2697,18 @@ sub_window_idx = ts1 >= start_time & ts1 <= end_time;
 % update mouse number {10, 1} etc and which zall_mouse arrays to combime
 % (e.g., 10, 1 for mouse 10 prechoice block 1, and 10, 5 for mouse 10
 % prechoice blocks 2/3
-for qq = 1:size(zall_mouse{10, 1}, 2)
-    concatenated_zall{qq} = vertcat(zall_mouse{10, 1}{qq}, ...
-        zall_mouse{10, 5}{qq});
+for qq = 1:size(zall_mouse{9, 1}, 2)
+    concatenated_zall{qq} = vertcat(zall_mouse{9, 1}{qq}, ...
+        zall_mouse{9, 5}{qq});
 end
-
+trial_types = trial_types_by_mouse{1, 9};
 %update  concatenated_zall{1, 37} number after "1," and
-sub_window_activity_session_1 = concatenated_zall{1, 85}(:, sub_window_idx);
-choice_times_mouse = trial_choice_times_by_mouse{1, 10};
-trial_types = trial_types_by_mouse{1, 10};
+% sub_window_activity_session_1 = concatenated_zall{1, 26}(:, sub_window_idx);
+% choice_times_mouse = trial_choice_times_by_mouse{1, 9};
+
+
+sub_window_activity_session_1 = concatenated_zall{1, 25}(trial_types == 1.2, sub_window_idx);
+choice_times_mouse = trial_choice_times_by_mouse{1, 9}(trial_types == 1.2);
 
 % % Assume A and B are your 143x21 arrays
 % correlation_coefficients = arrayfun(@(i) corr(sub_window_activity_session_1 (i, :)', sub_window_activity_session_2 (i, :)'), 1:size(sub_window_activity_session_1 , 1));
@@ -2717,6 +2728,8 @@ y = choice_times_mouse;
 colors = repmat([0.5, 0.5, 0.5], length(trial_types), 1); % Default to gray
 colors(trial_types == 1.2, :) = repmat([0, 0, 1], sum(trial_types == 1.2), 1); % Blue for trial_types == 1.2
 colors(trial_types == 0.3, :) = repmat([1, 0, 0], sum(trial_types == 0.3), 1); % Red for trial_types == 0.3
+
+colors = colors(trial_types == 1.2);
 
 % Create scatter plot
 figure;
