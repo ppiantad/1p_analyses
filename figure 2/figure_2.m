@@ -340,6 +340,7 @@ sum(block_2_and_3_pre_and_consumption)
 % this outputs a ever so slightly wonky diagram. a few nodes that do not
 % actually overlap minimally overlap (but intersections are 0), and 1 node
 % that has 1 overlap does not overlap at all. 
+figure;
 pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
 consum_active_ind = find(respClass_all_array{1,3} == 1);
 post_choice_active_ind = find(respClass_all_array{1,2} == 1);
@@ -3032,3 +3033,155 @@ h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
 h.ShowIntersectionCounts = true;
 h.ShowIntersectionAreas = true;
 % h.SetLabels = [];
+
+%%
+% plot first trial of for a given neuron, trying to show that oppositional
+% nature of prechoice & consumption are intact this early in the session(and maybe not
+% present for Early RM?
+% this is helpful because the worry is that the opposition comes from the
+% fact that mice are chaining trials together rapidly, such that the
+% "prechoice" activity is mostly due to a rebound from the dip
+
+prechoice_neuron_count = 0;
+consumption_neuron_count = 0;
+for qq = 1:size(zall_array, 2)
+    
+    if prechoice_block_1(qq) == 1
+        prechoice_neuron_count = prechoice_neuron_count + 1;
+        prechoice_array(prechoice_neuron_count, :) = zall_array{1, qq}(1, :);
+        prechoice_unnormalized_array(prechoice_neuron_count, :) = caTraceTrials_unnormalized_array{1, qq}(1, :);
+    end
+    if collect_block_1(qq) == 1
+        consumption_neuron_count = consumption_neuron_count + 1;
+        consumption_array(consumption_neuron_count, :) = zall_array{3, qq}(1, :);
+        consumption_unnormalized_array(consumption_neuron_count, :) = caTraceTrials_unnormalized_array{1, qq}(1, :);
+    end
+end
+
+figure; plot(ts1, mean(prechoice_array)) ;
+hold on; plot(ts1, mean(consumption_array));
+
+figure; plot(ts1, mean(prechoice_unnormalized_array)) ;
+hold on; plot(ts1, mean(consumption_unnormalized_array));
+
+figure; plot(ts1, prechoice_array(2, :)) ;
+hold on; plot(ts1, consumption_array(2, :));
+
+
+figure; plot(ts1, prechoice_unnormalized_array(2, :)) ;
+hold on; plot(ts1, consumption_unnormalized_array(2, :));
+
+figure; imagesc(ts1, [], prechoice_array)
+figure; imagesc(ts1, [], consumption_array)
+
+prechoice_neuron_count = 0;
+consumption_neuron_count = 0;
+for qq = 1:size(zall_mouse, 1)
+    zall_mouse_row = zall_mouse{qq, 1};
+    unnormalized_mouse_row = caTraceTrials_mouse{qq, 1};
+    for ff = 1:size(zall_mouse_row, 2)
+        zall_mouse_current = zall_mouse_row{1, ff};
+        zall_mouse_current = zall_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
+        unnormalized_mouse_current = unnormalized_mouse_row{1, ff};
+        unnormalized_mouse_current = unnormalized_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
+        if prechoice_block_1_mouse{qq, 1}(ff) == 1
+            prechoice_neuron_count = prechoice_neuron_count + 1;
+            prechoice_array(prechoice_neuron_count, :) = zall_mouse_current(1, :);
+            prechoice_unnormalized_array(prechoice_neuron_count, :) = unnormalized_mouse_current(1, :);
+        end
+    end
+end
+
+
+
+prechoice_neuron_count = 0;
+consumption_neuron_count = 0;
+for qq = 1:size(zall_mouse, 1)
+    zall_mouse_row = zall_mouse{qq, 3};
+    unnormalized_mouse_row = caTraceTrials_mouse{qq, 3};
+    for ff = 1:size(zall_mouse_row, 2)
+        zall_mouse_current = zall_mouse_row{1, ff};
+        zall_mouse_current = zall_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
+        unnormalized_mouse_current = unnormalized_mouse_row{1, ff};
+        unnormalized_mouse_current = unnormalized_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
+        if collect_block_1_mouse{qq, 1}(ff) == 1
+            consumption_neuron_count = consumption_neuron_count + 1;
+            consumption_array(consumption_neuron_count, :) = zall_mouse_current(1, :);
+            consumption_unnormalized_array(consumption_neuron_count, :) = unnormalized_mouse_current(1, :);
+        end
+    end
+end
+figure; plot(ts1, mean(prechoice_array)) ;
+hold on; plot(ts1, mean(consumption_array));
+
+figure; plot(ts1, mean(prechoice_unnormalized_array)) ;
+hold on; plot(ts1, mean(consumption_unnormalized_array));
+
+figure; plot(ts1, prechoice_array(60, :)) ;
+hold on; plot(ts1, consumption_array(60, :));
+
+
+figure; plot(ts1, prechoice_unnormalized_array(60, :)) ;
+hold on; plot(ts1, consumption_unnormalized_array(60, :));
+
+%%
+% check large vs small early & late (load 3 category datasets for RM_D1 or
+% Pre_RDT_RM
+
+prechoice_neuron_count = 0;
+
+for qq = 1:size(zall_mouse, 1)
+    zall_mouse_row = zall_mouse{qq, 1};
+    unnormalized_mouse_row = caTraceTrials_mouse{qq, 1};
+    for ff = 1:size(zall_mouse_row, 2)
+        zall_mouse_current = zall_mouse_row{1, ff};
+        zall_mouse_current_large = zall_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
+        zall_mouse_current_small = zall_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 0.3, :);
+        % unnormalized_mouse_current = unnormalized_mouse_row{1, ff};
+        % unnormalized_mouse_current = unnormalized_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
+        if prechoice_block_1_mouse{qq, 1}(ff) == 1
+            prechoice_neuron_count = prechoice_neuron_count + 1;
+            prechoice_array_large(prechoice_neuron_count, :) = mean(zall_mouse_current_large);
+            prechoice_array_small(prechoice_neuron_count, :) = mean(zall_mouse_current_small);
+            % prechoice_unnormalized_array(prechoice_neuron_count, :) = unnormalized_mouse_current(1, :);
+        end
+    end
+end
+
+postchoice_rew_neuron_count = 0;
+for qq = 1:size(zall_mouse, 1)
+    zall_mouse_row = zall_mouse{qq, 1};
+    unnormalized_mouse_row = caTraceTrials_mouse{qq, 1};
+    for ff = 1:size(zall_mouse_row, 2)
+        zall_mouse_current = zall_mouse_row{1, ff};
+        zall_mouse_current_large = zall_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
+        zall_mouse_current_small = zall_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 0.3, :);
+        % unnormalized_mouse_current = unnormalized_mouse_row{1, ff};
+        % unnormalized_mouse_current = unnormalized_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
+        if postchoice_reward_block_1_mouse{qq, 1}(ff) == 1
+            postchoice_rew_neuron_count = postchoice_rew_neuron_count + 1;
+            postchoice_array_large(postchoice_rew_neuron_count, :) = mean(zall_mouse_current_large);
+            postchoice_array_small(postchoice_rew_neuron_count, :) = mean(zall_mouse_current_small);
+            % prechoice_unnormalized_array(prechoice_neuron_count, :) = unnormalized_mouse_current(1, :);
+        end
+    end
+end
+
+consumption_neuron_count = 0;
+for qq = 1:size(zall_mouse, 1)
+    zall_mouse_row = zall_mouse{qq, 3};
+    unnormalized_mouse_row = caTraceTrials_mouse{qq, 1};
+    for ff = 1:size(zall_mouse_row, 2)
+        zall_mouse_current = zall_mouse_row{1, ff};
+        zall_mouse_current_large = zall_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
+        zall_mouse_current_small = zall_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 0.3, :);
+        % unnormalized_mouse_current = unnormalized_mouse_row{1, ff};
+        % unnormalized_mouse_current = unnormalized_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
+        if collect_block_1_mouse{qq, 1}(ff) == 1
+            consumption_neuron_count = consumption_neuron_count + 1;
+            collect_array_large(consumption_neuron_count, :) = mean(zall_mouse_current_large);
+            collect_array_small(consumption_neuron_count, :) = mean(zall_mouse_current_small);
+            % prechoice_unnormalized_array(prechoice_neuron_count, :) = unnormalized_mouse_current(1, :);
+        end
+    end
+end
