@@ -3141,12 +3141,21 @@ for qq = 1:size(zall_mouse, 1)
         % unnormalized_mouse_current = unnormalized_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
         if prechoice_block_1_mouse{qq, 1}(ff) == 1
             prechoice_neuron_count = prechoice_neuron_count + 1;
-            prechoice_array_large(prechoice_neuron_count, :) = mean(zall_mouse_current_large);
-            prechoice_array_small(prechoice_neuron_count, :) = mean(zall_mouse_current_small);
+            prechoice_array_large_mean(prechoice_neuron_count, :) = mean(zall_mouse_current_large);
+            prechoice_array_large_sem(prechoice_neuron_count, :) = nanstd(zall_mouse_current_large)/sqrt(size(zall_mouse_current_large, 1));
+            prechoice_array_small_mean(prechoice_neuron_count, :) = mean(zall_mouse_current_small);
+            prechoice_array_small_sem(prechoice_neuron_count, :) = nanstd(zall_mouse_current_small)/sqrt(size(zall_mouse_current_small, 1));
             % prechoice_unnormalized_array(prechoice_neuron_count, :) = unnormalized_mouse_current(1, :);
         end
     end
 end
+
+
+mean_data_array = {prechoice_array_large_mean, prechoice_array_small_mean};
+sem_data_array = {prechoice_array_large_sem, prechoice_array_small_sem};
+
+[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
 
 postchoice_rew_neuron_count = 0;
 for qq = 1:size(zall_mouse, 1)
@@ -3160,12 +3169,22 @@ for qq = 1:size(zall_mouse, 1)
         % unnormalized_mouse_current = unnormalized_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
         if postchoice_reward_block_1_mouse{qq, 1}(ff) == 1
             postchoice_rew_neuron_count = postchoice_rew_neuron_count + 1;
-            postchoice_array_large(postchoice_rew_neuron_count, :) = mean(zall_mouse_current_large);
-            postchoice_array_small(postchoice_rew_neuron_count, :) = mean(zall_mouse_current_small);
+            postchoice_array_large_mean(postchoice_rew_neuron_count, :) = mean(zall_mouse_current_large);
+            postchoice_array_large_sem(postchoice_rew_neuron_count, :) = nanstd(zall_mouse_current_large)/sqrt(size(zall_mouse_current_large, 1));
+            postchoice_array_small_mean(postchoice_rew_neuron_count, :) = mean(zall_mouse_current_small);
+            postchoice_array_small_sem(postchoice_rew_neuron_count, :) = nanstd(zall_mouse_current_small)/sqrt(size(zall_mouse_current_small, 1));
             % prechoice_unnormalized_array(prechoice_neuron_count, :) = unnormalized_mouse_current(1, :);
         end
     end
 end
+
+
+mean_data_array = {postchoice_array_large_mean, postchoice_array_small_mean};
+sem_data_array = {postchoice_array_large_sem, postchoice_array_small_sem};
+
+[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+
+
 
 consumption_neuron_count = 0;
 for qq = 1:size(zall_mouse, 1)
@@ -3179,9 +3198,17 @@ for qq = 1:size(zall_mouse, 1)
         % unnormalized_mouse_current = unnormalized_mouse_current(behav_tbl_iter{1, 1}{qq, 1}.bigSmall == 1.2, :);
         if collect_block_1_mouse{qq, 1}(ff) == 1
             consumption_neuron_count = consumption_neuron_count + 1;
-            collect_array_large(consumption_neuron_count, :) = mean(zall_mouse_current_large);
-            collect_array_small(consumption_neuron_count, :) = mean(zall_mouse_current_small);
+            collect_array_large_mean(consumption_neuron_count, :) = mean(zall_mouse_current_large);
+            collect_array_large_sem(consumption_neuron_count, :) = nanstd(zall_mouse_current_large)/sqrt(size(zall_mouse_current_large, 1));
+            collect_array_small_mean(consumption_neuron_count, :) = mean(zall_mouse_current_small);
+            collect_array_small_sem(consumption_neuron_count, :) = nanstd(zall_mouse_current_small)/sqrt(size(zall_mouse_current_small, 1));
             % prechoice_unnormalized_array(prechoice_neuron_count, :) = unnormalized_mouse_current(1, :);
         end
     end
 end
+
+
+mean_data_array = {collect_array_large_mean, collect_array_small_mean};
+sem_data_array = {collect_array_large_sem, collect_array_small_sem};
+
+[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)

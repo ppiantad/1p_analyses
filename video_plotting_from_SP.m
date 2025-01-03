@@ -5,10 +5,10 @@ clearvars -except mouseData final
 BehavData = final.BLA_Insc_35.RDT_D1.uv.BehavData;
 ca_data = final.BLA_Insc_35.RDT_D1.CNMFe_data.C_raw;
 ca_data_denoised = final.BLA_Insc_35.RDT_D1.CNMFe_data.C;
-ca_data_spike_inf = final.BLA_Insc_35.RDT_D1.CNMFe_data.spike_prob;
+% ca_data_spike_inf = final.BLA_Insc_35.RDT_D1.CNMFe_data.spike_prob;
 ca_data_norm = normalize(ca_data, 2);
 ca_data_denoised_norm = normalize(ca_data_denoised, 2);
-ca_data_spike_inf_norm = normalize(ca_data_spike_inf, 2);
+% ca_data_spike_inf_norm = normalize(ca_data_spike_inf, 2);
 
 m = 1;
 behavior = 'open';

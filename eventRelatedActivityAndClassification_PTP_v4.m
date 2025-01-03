@@ -48,7 +48,7 @@ uv.BLper = [uv.evtWin(1) uv.evtWin(1)+3];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-uv.ca_data_type = "C"; % C % C_raw %S
+uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
@@ -58,7 +58,7 @@ uv.ca_data_type = "C"; % C % C_raw %S
 session_to_analyze = 'Pre_RDT_RM';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
+epoc_to_align = 'collectionTime'; % stTime choiceTime collectionTime
 period_of_interest = 'prechoice';
 
 if strcmp(epoc_to_align, 'stTime')
@@ -138,7 +138,7 @@ uv.sigma = 1.5;  %1.5                                                           
 % uv.evtSigWin.collect = [1 3]; %for REW collection [1 3]
 
 uv.resamples = 100                                                         %number of resamples to use in shuffle analysis 1000
-uv.zscore_to = 'session'; %
+uv.zscore_to = 'window'; %
 % 'window'
 % 'baseline'
 % 'session'
@@ -489,6 +489,7 @@ for ii = 1:size(fieldnames(final),1)
                     end
                     clear empiricalTrialWin otherPeriodWin empiricalSEM otherEventWin1 ootherEventWin2
                     %%
+                    % sdNull = nanstd(nullDist(:,evtWinIdx));                                          %calculate the standard deviation of the null distribution
                     sdNull = nanstd(nullDist(:));                                          %calculate the standard deviation of the null distribution
                     upperSD = nanmean(nullDist(:)) + (uv.sigma*sdNull);                    %calculate upper limit of interval around the mean
                     lowerSD = nanmean(nullDist(:)) - (uv.sigma*sdNull);                    %calculate lower limit of interval around the mean

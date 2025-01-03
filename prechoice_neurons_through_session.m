@@ -42,7 +42,7 @@ figure; imagesc(ts1, [], mean_array)
 % 1. choiceTime 'OMITALL', 0, 'BLANK_TOUCH', 0
 % 2. collectionTime'OMITALL', 0, 'BLANK_TOUCH', 0
 %%
-if size(respClass_all_array, 2) == 10
+if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11 | size(respClass_all_array, 2) == 12
     comparison_arrays_full = [1 2 3; 8 9 10]
 elseif size(respClass_all_array, 2) == 6
     comparison_arrays_full = [1 2 3; 4 5 6]
@@ -98,12 +98,20 @@ for gg = 1:size(animalIDs, 1) %size(animalIDs, 1)
     %%
     prechoice_block_1_column_1_data = {};
     prechoice_mean_mouse = [];
+    prechoice_sd_mouse = [];
+    prechoice_sem_mouse = [];
+    prechoice_iqr = [];
     prechoice_block_1_column_1_data = zall_mouse{select_mouse_index, 11}(prechoice_block_1_mouse{select_mouse_index, 1} == 1);
     for cc = 1:size(prechoice_block_1_column_1_data, 2)
         prechoice_data = prechoice_block_1_column_1_data{1, cc};
         prechoice_mean_mouse(:, cc) = mean(prechoice_data (:, ts1 >= -4 & ts1 <= 0), 2);
+        prechoice_sd_mouse(:, cc) = std(prechoice_data (:, ts1 >= -4 & ts1 <= 0), 0, 2);
+        prechoice_sem_mouse(:, cc) = std(prechoice_data (:, ts1 >= -4 & ts1 <= 0), 0, 2)/sqrt(size(prechoice_data (:, ts1 >= -4 & ts1 <= 0), 2));
+        prechoice_iqr(:, cc) = iqr(prechoice_data (:, ts1 >= -4 & ts1 <= 0), 2);
+        
     end
     prechoice_block_1_mean_mouse_array{gg} = prechoice_mean_mouse;
+    prechoice_block_1_sd_mouse_array{gg} = prechoice_sd_mouse;
 
     prechoice_block_2_3_column_1_data = {};
     prechoice_mean_mouse = [];
@@ -322,4 +330,162 @@ xlabel('Trial');
 
 % Create the legend using the plot handles
 legend([h1, h2, h3], {'Overall Large Rew choice', 'Overall Mean PV Block 1', 'Overall Mean PV Blocks 2/3'}, 'Location', 'best');
+
+%%
+concatenatedData = [];
+concatenatedData = horzcat(prechoice_block_1_mean_mouse_array{:});
+concatenatedData_2 = horzcat(prechoice_block_2_3_mean_mouse_array{:});
+concatenatedData_3 = horzcat(prechoice_remapped_mean_mouse_array{:});
+
+% Assuming concatenatedData is a 90x163 array
+rowsPerPart = size(concatenatedData, 1) / 3; % Determine number of rows per part
+part1 = concatenatedData(1:rowsPerPart, :); % First third
+part2 = concatenatedData(rowsPerPart+1:2*rowsPerPart, :); % Second third
+part3 = concatenatedData(2*rowsPerPart+1:end, :); % Third third
+
+% Calculate the standard deviation for each column in each part
+std_part1 = std(part1);
+std_part2 = std(part2);
+std_part3 = std(part3);
+
+% Combine the results into a single array
+std_per_column = [std_part1; std_part2; std_part3];
+
+std_trials = std(concatenatedData, 0, 2);
+
+figure;
+width = 450; % Width of the figure
+height = 650; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+% xtickformat('%.2f');
+ytickformat('%.2f');
+hold on;
+h(1) = shadedErrorBar(1:90, nanmean(concatenatedData, 2), iqr(concatenatedData, 2), 'lineProps', {'color', acton(1,:)});
+ylim([-0.6 1])
+% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(1)}(remapped  ==1, :)), nanmean(neuron_sem_array{1, arrays_to_examine(1)}(remapped  ==1, :)), 'lineProps', {'color', acton(50,:)});
+
+% Transpose std_per_column for row-wise boxplot
+data_for_boxplot = std_per_column';
+
+% Create a figure
+figure;
+hold on;
+
+% Boxplot for each row (across all columns)
+boxplot(data_for_boxplot, 'Labels', 1:size(std_per_column, 1));
+
+% % Overlay individual data points
+% for i = 1:size(data_for_boxplot, 1) % Loop through each column of std_per_column
+%     plot(1:size(std_per_column, 1), data_for_boxplot(i, :), '-o', 'LineWidth', 1.5);
+% end
+
+% Customize the plot
+xlabel('Row Index (Part)');
+ylabel('Standard Deviation');
+title('Row-wise Boxplots with Individual Data Points');
+legend('show', 'Location', 'bestoutside');
+grid on;
+hold off;
+%%
+% Perform Kruskal-Wallis test
+[p, tbl, stats] = kruskalwallis(data_for_boxplot, [], 'off');
+
+% Display the p-value
+disp(['Kruskal-Wallis Test p-value: ', num2str(p)]);
+
+% Perform pairwise comparisons
+pairwise_results = multcompare(stats);
+
+% Display pairwise results
+disp('Pairwise Comparisons Results:');
+disp(array2table(pairwise_results, ...
+    'VariableNames', {'Group1', 'Group2', 'LowerLimit', 'Estimate', 'UpperLimit', 'pValue'}));
+
+%%
+% trying to find the best way to track, on a trial x trial basis,
+% "ensemble" membership
+%% TO RUN CODE BELOW, load 10x variables then run eventRelatedActivityAndClassification_PTP_v4:
+% 1. choiceTime 'OMITALL', 0, 'BLANK_TOUCH', 0
+% 2. collectionTime'OMITALL', 0, 'BLANK_TOUCH', 0
+
+
+pre_choice_window = [-4 0];     % Pre-choice period: -4 to 0 s
+post_choice_window = [0 2];     % Post-choice period: 0 to 2 s
+consumption_window = [1 3];     % Consumption period: 1 to 3 s if using data aligned to collect, do 0 to 2 to keep things consistent
+
+% Find indices corresponding to each time window
+pre_choice_indices = ts1 >= pre_choice_window(1) & ts1 <= pre_choice_window(2);
+post_choice_indices = ts1 >= post_choice_window(1) & ts1 <= post_choice_window(2);
+consumption_indices = ts1 >= consumption_window(1) & ts1 <= consumption_window(2);
+
+indices_to_use = pre_choice_indices;
+
+% zall(11, :) should contain choice aligned data, all 90 trials
+session_long_data = zall_array(11, :);
+% session_long_data = zall_array(12, :);
+
+
+% get the mean of the first 30 trials for each neuron - this is how Block 1
+% neurons are determined
+
+for gg = 1:size(session_long_data, 2)
+    current_session_long_data = session_long_data{1, gg};
+
+    % 9/13/2024
+    % alternate way of shuffling, maybe worth trying
+    [trial_num, sample_num] = size(current_session_long_data);
+    % [trial_num, sample_num] = size(caTraceTrials);
+    % shift_val = randi(sample_num)
+    for g = 1:uv.resamples                                              %for each resampling of the data
+        %sort the data index to create a new list of indices
+        for t = 1:30
+
+            shift_val = randi(sample_num); %for each trial
+            shuffledTrace(t,:) = circshift(current_session_long_data(t,:), shift_val,2);     %shuffle the calcium trace
+            %         shuffledEvtRate(t,:) = caEvtRateTrials(t,shuffledIDX(t,:)); %shuffle the event rate
+        end
+        nullDistTrace(g,:) = nanmean(shuffledTrace);                    %calculate the NaN mean of the shuffled traces
+        %     nullDistEvtRate(g,:) = nanmean(shuffledEvtRate);                %calculate the NaN mean of the shuffled event rates
+    end
+    clear shuffled* g t trialCt
+    nullDist = nullDistTrace;                                       %direct transfer
+    % empiricalTrialWin = nanmean...
+    %     (current_session_long_data(:,ts1 >= -4 & ts1 <= 0));                   %NaN mean of the fluorescent response across trials, within the time window. this gets the within trial mean.
+    % empiricalSEM = nansem...
+    %     (current_session_long_data(:,:));
+
+    % empiricalWinAvg = nanmean(empiricalTrialWin);                   %across trial mean
+    % empiricalSEMAvg = nanmean(empiricalSEM);
+
+    sdNull = mean(nanstd(nullDist(:, indices_to_use)));   
+    
+    upperSD = nanmean(nullDist(:)) + (uv.sigma*sdNull);                    %calculate upper limit of interval around the mean
+    % lowerSD = nanmean(nullDist(:)) - (uv.sigma*sdNull);
+
+    % prechoice_block_1_mean_mouse(:, gg) = mean(current_session_long_data (:, ts1 >= -4 & ts1 <= 0), 2);
+    prechoice_all_blocks_mean_mouse(:, gg) = mean(current_session_long_data (:, indices_to_use), 2);
+    
+    prechoice_logical_ind(:, gg) = prechoice_all_blocks_mean_mouse(:, gg) > upperSD ;
+
+    % if prechoice_all_blocks_mean_mouse(:, gg) > upperSD  %empiricalWinAvg > upperSD & empiricalWinAvg > otherEventWinAvg1 & empiricalWinAvg > otherEventWinAvg2
+    %     prechoice_logical_ind(:, gg) = 1;
+    %     % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 1;
+    %     % respClass_all_array_mouse{ii, iter}(u) = 1;
+    % % elseif empiricalWinAvg < lowerSD  % empiricalWinAvg < lowerSD & empiricalWinAvg < otherPeriodWinAvg & empiricalWinAvg < otherEventWinAvg2
+    % %     respClass_all(neuron_num) = 2;
+    % %     respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 2;
+    % %     respClass_all_array_mouse{ii, iter}(u) = 2;
+    % else
+    %     prechoice_logical_ind(:, gg) = 0;
+    %     % respClass_mouse.(currentanimal).(session_to_analyze).(epoc_to_align).(identity_classification_str).(filter_args)(u,1) = 3;
+    %     % respClass_all_array_mouse{ii, iter}(u) = 3;
+    % end
+    % 
+    % % prechoice_logical_ind(:, gg) = prechoice_all_blocks_mean_mouse(:, gg) > prechoice_block_1_mean_mouse(:, gg)
+    % 
+
+
+end
+
+only_prechoice_block_1 = prechoice_logical_ind(:, conserved_prechoice == 1);
 

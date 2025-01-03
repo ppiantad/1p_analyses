@@ -2,15 +2,31 @@
 clearvars -except mouseData final
 %%
 
-BehavData = final.BLA_Insc_24.RDT_D1.uv.BehavData;
-velocity_data = final_SLEAP.BLA_Insc_24.RDT_D1.zscored_SLEAP_data_velocity;
+select_mouse = 'BLA_Insc_25';
+first_session = 'Pre_RDT_RM';
 
-ca_data = final.BLA_Insc_24.RDT_D1.CNMFe_data.C_raw;
-ca_data_denoised = final.BLA_Insc_24.RDT_D1.CNMFe_data.C;
-ca_data_spike_inf = final.BLA_Insc_24.RDT_D1.CNMFe_data.spike_prob;
+BehavData = final_behavior.(select_mouse).(first_session).uv.BehavData;
+velocity_data = final_SLEAP.(select_mouse).(first_session).zscored_SLEAP_data_velocity;
+
+ca_data = final.(select_mouse).(first_session).CNMFe_data.C_raw;
+ca_data_denoised = final.(select_mouse).(first_session).CNMFe_data.C;
+% ca_data_spike_inf = final.(select_mouse).(first_session).CNMFe_data.spike_prob;
 ca_data_norm = normalize(ca_data, 2);
 ca_data_denoised_norm = normalize(ca_data_denoised, 2);
-ca_data_spike_inf_norm = normalize(ca_data_spike_inf, 2);
+% ca_data_spike_inf_norm = normalize(ca_data_spike_inf, 2);
+
+% Set frame rate for calcium imaging (adjusted)
+calcium_frame_rate = (final.(select_mouse).(first_session).uv.dt)*100;  % Frame rate for the calcium imaging video
+
+
+% Get neural data from mouseData
+
+contours = final.(select_mouse).(first_session).CNMFe_data.Coor;
+    
+
+fluorescence_data = final.(select_mouse).(first_session).CNMFe_data.C_raw;
+fluorescence_data = normalize(fluorescence_data, 2);
+
 
 stTime = BehavData.TrialPossible(1)-60; 
 stTime_to_frames = round(stTime*10);
@@ -18,11 +34,12 @@ m = 1;
 behavior = 'open';
 
 
+
 % --- Speed factor for playback ---
 speed_factor = 1000;  % Adjust this factor to speed up playback
 
 % --- Load the calcium imaging video from the .tiff file ---
-tiff_video_file = 'BLA_INSC_24_RDT_D1__2022-08-10-14-07-58_video_green_motion_corrected.tiff';  % Replace with your .tiff file
+tiff_video_file = 'BLA_INSC_25_PRERDT_RM_2023-01-04-10-06-20_video_green_motion_corrected.tiff';  % Replace with your .tiff file
 info = imfinfo(tiff_video_file);
 num_frames = numel(info);  % Number of frames in .tiff file
 video_height = info(1).Height;
@@ -36,25 +53,15 @@ end
 
 %%
 
-selected_neurons = [21, 1, 42];  % Modify this to include more neurons 10, 128, 55
+selected_neurons = [29 31 35 38];  % Modify this to include more neurons 10, 128, 55
 
 % --- Load the .MPG video ---
-mpg_video_file = 'downsampled_video_insc_24_RDT_D1.avi';  % Replace with your .MPG file
+mpg_video_file = 'downsampled_video_BLA-Insc-25_PRERDT_RM.avi';  % Replace with your .MPG file
 mpg_video = VideoReader(mpg_video_file);
 mpg_num_frames = mpg_video.NumFrames;
 mpg_frame_rate = mpg_video.FrameRate;
 
-% Set frame rate for calcium imaging (adjusted)
-calcium_frame_rate = (final.BLA_Insc_24.RDT_D1.uv.dt)*100;  % Frame rate for the calcium imaging video
 
-
-% Get neural data from mouseData
-
-contours = final.BLA_Insc_24.RDT_D1.CNMFe_data.Coor;
-    
-
-fluorescence_data = final.BLA_Insc_24.RDT_D1.CNMFe_data.C_raw;
-fluorescence_data = normalize(fluorescence_data, 2);
 
 choices_only = BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3);
 
@@ -158,7 +165,7 @@ for i = 1:length(selected_neurons)
     neuron_idx = selected_neurons(i);
     hContour(i) = plot(contours{neuron_idx}(1,:), contours{neuron_idx}(end,:), 'LineWidth', 1, 'Color', cmap(i, :));
 end
-caxis([500 700]);
+caxis([1700 2500]);
 colormap(gray);  % Set colormap to gray
 
 % --- MPG video subplot ---
