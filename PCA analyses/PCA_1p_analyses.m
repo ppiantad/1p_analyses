@@ -188,7 +188,7 @@ for qq = 1:numConditions
 end
 
 
-[coef,score, ~, ~, explained, ~] = pca(neuron_mean_concat');
+[coef,score, latent, ~, explained, ~] = pca(neuron_mean_concat');
 
 for i = eventIdx
     temp = condition_data{i};

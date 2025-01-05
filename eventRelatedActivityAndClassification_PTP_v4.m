@@ -55,7 +55,7 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
 epoc_to_align = 'collectionTime'; % stTime choiceTime collectionTime

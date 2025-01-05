@@ -18,9 +18,9 @@
 % [peak_values, time_of_peak_activity] = max(activated_rows, [], 2);
 
 % respClass_all = respClass_all_array{1, 8}';
-[peak_values, time_of_peak_activity] = max(neuron_mean_array{1, 1}, [], 2);
+[peak_values, time_of_peak_activity] = max(zall_mean_all_array{1, 1}  , [], 2);
 [~, sort_indices] = sort(time_of_peak_activity);
-neuron_mean_sorted = neuron_mean_array{1, 1}(sort_indices, :);
+neuron_mean_sorted =zall_mean_all_array{1, 2}  (sort_indices, :);
 
 
 % Sort the rows of activated_neuron_mean based on peak_times.
@@ -43,16 +43,16 @@ ylabel('Neuron');
 set(gca, 'YDir', 'reverse');
 clim([-1 1])
 
-[r, lags] = corrcoef(neuron_mean_array{1, 1}, neuron_mean_array{1, 2});
+[r, lags] = corrcoef(zall_mean_all_array{1, 1}, zall_mean_all_array{1, 2});
 
 
 
-[num_cells, num_samples] = size(neuron_mean_array{1, 1});
+[num_cells, num_samples] = size(zall_mean_all_array{1, 1});
 shuffled_data = zeros(num_cells, num_samples); % Preallocate matrix for efficiency
 % shift_val = randi(num_samples); % Generate a random shift value for each signal RUAIRI RECOMMENDED KEEPING THE SAME SHIFT VAL, rather than randomizing per neuron. this is because then you keep the overall correlation b/w the neurons, but disrupt the relationship to the event timestamps
 for i = 1:num_cells
     shift_val = randi(num_samples); % Generate a random shift value for each signal
-    shuffled_data(i,:) = circshift(neuron_mean_array{1, 1}(i,:), shift_val,2); % Perform the circular shuffle
+    shuffled_data(i,:) = circshift(zall_mean_all_array{1, 1}(i,:), shift_val,2); % Perform the circular shuffle
 end
 shuffled_neuron_mean_array = shuffled_data;
 

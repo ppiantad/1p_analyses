@@ -425,23 +425,34 @@ session_long_data = zall_array(11, :);
 % session_long_data = zall_array(12, :);
 
 
+data_for_shuffling = zall_array(8, :);
+% data_for_shuffling = zall_array(10, :);
+% data_for_shuffling = zall_array(12, :);
+
 % get the mean of the first 30 trials for each neuron - this is how Block 1
 % neurons are determined
 
 for gg = 1:size(session_long_data, 2)
     current_session_long_data = session_long_data{1, gg};
+    current_data_for_shuffling = data_for_shuffling{1, gg};
+    % if doing ALL neurons, subselect 30 trials from the larger array
+    % current_data_for_shuffling = current_data_for_shuffling(randperm(size(current_data_for_shuffling, 1), 30), :);
 
     % 9/13/2024
     % alternate way of shuffling, maybe worth trying
-    [trial_num, sample_num] = size(current_session_long_data);
+    [trial_num, sample_num] = size(current_data_for_shuffling);
     % [trial_num, sample_num] = size(caTraceTrials);
     % shift_val = randi(sample_num)
     for g = 1:uv.resamples                                              %for each resampling of the data
         %sort the data index to create a new list of indices
-        for t = 1:30
+        % here I am using the data that were sub-selected to be the same
+        % size as Block 1 (30 trials). You could also replace
+        % current_data_for_shuffling with current_session_long_data and use
+        % 1:30 for Block 1, and 31:90 for Blocks 2/3
+        for t = 1:size(current_data_for_shuffling, 1) %31:90 1:30
 
             shift_val = randi(sample_num); %for each trial
-            shuffledTrace(t,:) = circshift(current_session_long_data(t,:), shift_val,2);     %shuffle the calcium trace
+            shuffledTrace(t,:) = circshift(current_data_for_shuffling(t,:), shift_val,2);     %shuffle the calcium trace
             %         shuffledEvtRate(t,:) = caEvtRateTrials(t,shuffledIDX(t,:)); %shuffle the event rate
         end
         nullDistTrace(g,:) = nanmean(shuffledTrace);                    %calculate the NaN mean of the shuffled traces
@@ -487,5 +498,10 @@ for gg = 1:size(session_long_data, 2)
 
 end
 
-only_prechoice_block_1 = prechoice_logical_ind(:, conserved_prechoice == 1);
+only_prechoice_block_1 = prechoice_logical_ind(:, prechoice_block_1 == 1);
+% only_prechoice_block_1 = prechoice_logical_ind;
 
+hold on
+figure; plot(1:90, mean(only_prechoice_block_1, 2))
+ylim([0.3 .8])
+hold off
