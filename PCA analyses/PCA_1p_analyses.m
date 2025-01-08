@@ -12,7 +12,8 @@ neuron_mean_concat = horzcat(zall_mean_all_array{:});
 % neuron_mean_concat = horzcat(zall_mean_all_array{1, 11}, zall_mean_all_array{1, 12});
 %12/14/2024 MAYBE I DONT NEED THIS LINE BELOW? MAYBE IT ARTIFICALLY DEFLATES
 %DIFFERENCES?
-neuron_mean_concat = zscore(neuron_mean_concat, 0 , 1);
+
+neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
 
 
 % neuron_mean_concat = horzcat(reformat_zall_mean_array{:});
@@ -295,7 +296,8 @@ line_color_space = round(linspace(1, size(acton, 1), numConditions));
 
 figure;
 for ff = 1:numConditions
-    PCA_traj{ff} = smoothforward(PCScore{1,ff}, [1,size(PCScore{1,ff},2);], 5, 15, 'mono_dir');
+    % PCA_traj{ff} = smoothforward(PCScore{1,ff}, [1,size(PCScore{1,ff},2);], 5, 15, 'mono_dir');
+    PCA_traj{ff} = PCScore{1, ff};
     hold on;
     p1 = plot(PCA_traj{ff}(1, :), PCA_traj{ff}(2, :), 'DisplayName', d_legend{ff});
     p1.Color(1: 3) = acton(line_color_space(ff), :); 
@@ -536,4 +538,178 @@ for i = 1: size(data_LOO_c, 3)
     end
 end
 
+%% BRITT EucDistance calculation
 
+eucD1to7= [];
+%here, p = s1 and q = s7
+for i = 1:size(PCScore{1, 1}  ,2)
+    p1 = PCScore{1, 1}(1,i);
+    p2 = PCScore{1, 1}(2,i);
+    p3 = PCScore{1, 1}(3,i);
+
+    q1 = PCScore{1, 2}(1,i);
+    q2 = PCScore{1, 2}(2,i);
+    q3 = PCScore{1, 2}(3,i); 
+
+    eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2 + (q3-p3).^2);
+    % eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2);
+eucD1to7(1,i) = eucDtemp;
+end 
+
+figure; plot(ts1, eucD1to7)
+
+%%
+% Data
+s1_data = PCScore{1,1}; % Data for s1
+s2_data = PCScore{1,2}; % Data for s2
+
+% Time points (adjust based on your sample rate)
+time_points = linspace(-4, 2, size(s1_data, 2));
+
+% Choice and collect times
+choice_time = 0; % Choice happens at time 0
+collect_time_s1 = 0.8790; % Collection time for s1
+collect_time_s2 = 1.1940; % Collection time for s2
+
+% Create the figure
+figure;
+hold on;
+
+% Plot s1 trajectory
+s1_pre_choice = time_points < choice_time;
+plot3(s1_data(1, s1_pre_choice), s1_data(2, s1_pre_choice), s1_data(3, s1_pre_choice), 'b--'); % Dotted line pre-choice
+plot3(s1_data(1, ~s1_pre_choice), s1_data(2, ~s1_pre_choice), s1_data(3, ~s1_pre_choice), 'b-', 'LineWidth', 1.5); % Solid line post-choice
+scatter3(s1_data(1, time_points == collect_time_s1), ...
+         s1_data(2, time_points == collect_time_s1), ...
+         s1_data(3, time_points == collect_time_s1), ...
+         100, 's', 'MarkerEdgeColor', 'b', 'MarkerFaceColor', 'b'); % Collect time marker
+
+% Plot s2 trajectory
+s2_pre_choice = time_points < choice_time;
+plot3(s2_data(1, s2_pre_choice), s2_data(2, s2_pre_choice), s2_data(3, s2_pre_choice), 'r--'); % Dotted line pre-choice
+plot3(s2_data(1, ~s2_pre_choice), s2_data(2, ~s2_pre_choice), s2_data(3, ~s2_pre_choice), 'r-', 'LineWidth', 1.5); % Solid line post-choice
+scatter3(s2_data(1, time_points == collect_time_s2), ...
+         s2_data(2, time_points == collect_time_s2), ...
+         s2_data(3, time_points == collect_time_s2), ...
+         100, 's', 'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'r'); % Collect time marker
+
+% Configure the 3D plot
+grid on;
+xlabel('PC1');
+ylabel('PC2');
+zlabel('PC3');
+title('3D Trajectories of PC Scores');
+legend({'s1 Pre-Choice', 's1 Post-Choice', 's1 Collect', ...
+        's2 Pre-Choice', 's2 Post-Choice', 's2 Collect'}, ...
+        'Location', 'best');
+view(3); % Adjust view angle for better visualization
+
+%%
+% Data
+s1_data = PCScore{1,1}; % Data for s1
+s2_data = PCScore{1,2}; % Data for s2
+
+% Time points (adjust based on your sample rate)
+time_points = linspace(-4, 2, size(s1_data, 2));
+
+% Choice and collect times
+choice_time = 0; % Choice happens at time 0
+collect_time_s1 = 0.8790; % Collection time for s1
+collect_time_s2 = 1.1940; % Collection time for s2
+
+collect_idx_s1 = find(abs(time_points - collect_time_s1) == min(abs(time_points - collect_time_s1)), 1);
+collect_idx_s2 = find(abs(time_points - collect_time_s2) == min(abs(time_points - collect_time_s2)), 1);
+
+
+% Create the figure
+figure;
+hold on;
+grid on;
+xlabel('PC1');
+ylabel('PC2');
+zlabel('PC3');
+title('Animated 3D Trajectories of PC Scores');
+view(3); % 3D perspective
+
+% Initialize plot handles
+s1_line_pre = plot3(nan, nan, nan, 'b--', 'LineWidth', 1.5); % Dotted pre-choice line for s1
+s1_line_post = plot3(nan, nan, nan, 'b-', 'LineWidth', 1.5); % Solid post-choice line for s1
+% s1_collect_marker = scatter3(nan, nan, nan, 100, 's', 'MarkerEdgeColor', 'b', 'MarkerFaceColor', 'b'); % s1 collect marker
+
+s2_line_pre = plot3(nan, nan, nan, 'r--', 'LineWidth', 1.5); % Dotted pre-choice line for s2
+s2_line_post = plot3(nan, nan, nan, 'r-', 'LineWidth', 1.5); % Solid post-choice line for s2
+% s2_collect_marker = scatter3(nan, nan, nan, 100, 's', 'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'r'); % s2 collect marker
+
+for frame = 1:size(s1_data, 2)
+    % Determine current frame
+    current_frame = min(frame, size(s1_data, 2));
+    
+    % Update s1 trajectory
+    pre_choice_frame = time_points < choice_time;
+
+    % Update s1 trajectory
+    valid_indices_pre_s1 = find(pre_choice_frame & (1:length(time_points) <= current_frame));
+    set(s1_line_pre, 'XData', s1_data(1, valid_indices_pre_s1), ...
+        'YData', s1_data(2, valid_indices_pre_s1), ...
+        'ZData', s1_data(3, valid_indices_pre_s1));
+
+    valid_indices_post_s1 = find(~pre_choice_frame & (1:length(time_points) <= current_frame));
+    set(s1_line_post, 'XData', s1_data(1, valid_indices_post_s1), ...
+        'YData', s1_data(2, valid_indices_post_s1), ...
+        'ZData', s1_data(3, valid_indices_post_s1));
+
+    set(s1_collect_marker, 'XData', s1_data(1, collect_idx_s1), ...
+        'YData', s1_data(2, collect_idx_s1), ...
+        'ZData', s1_data(3, collect_idx_s1));
+
+    % Update s2 trajectory
+    valid_indices_pre_s2 = find(pre_choice_frame & (1:length(time_points) <= current_frame));
+    set(s2_line_pre, 'XData', s2_data(1, valid_indices_pre_s2), ...
+        'YData', s2_data(2, valid_indices_pre_s2), ...
+        'ZData', s2_data(3, valid_indices_pre_s2));
+
+    valid_indices_post_s2 = find(~pre_choice_frame & (1:length(time_points) <= current_frame));
+    set(s2_line_post, 'XData', s2_data(1, valid_indices_post_s2), ...
+        'YData', s2_data(2, valid_indices_post_s2), ...
+        'ZData', s2_data(3, valid_indices_post_s2));
+
+    set(s2_collect_marker, 'XData', s2_data(1, collect_idx_s2), ...
+        'YData', s2_data(2, collect_idx_s2), ...
+        'ZData', s2_data(3, collect_idx_s2));
+
+    % Update s1 collect marker
+    if current_frame >= collect_idx_s1
+        scatter3(s1_data(1, collect_idx_s1), s1_data(2, collect_idx_s1), s1_data(3, collect_idx_s1), ...
+            100, 'filled', 'MarkerFaceColor', 'b');
+    else
+        set(s1_collect_marker, ...
+            'XData', nan, 'YData', nan, 'ZData', nan, 'Visible', 'off'); % Hide marker
+    end
+
+    % Update s2 collect marker
+    if current_frame >= collect_idx_s2
+        scatter3(s2_data(1, collect_idx_s2), s2_data(2, collect_idx_s2), s2_data(3, collect_idx_s2), ...
+            100, 'filled', 'MarkerFaceColor', 'r');
+    else
+        set(s2_collect_marker, ...
+            'XData', nan, 'YData', nan, 'ZData', nan, 'Visible', 'off'); % Hide marker
+    end
+
+    % Refresh the plot
+   
+
+    % Update axis limits dynamically
+    xlim([min([s1_data(1,:), s2_data(1,:)]) max([s1_data(1,:), s2_data(1,:)])]);
+    ylim([min([s1_data(2,:), s2_data(2,:)]) max([s1_data(2,:), s2_data(2,:)])]);
+    zlim([min([s1_data(3,:), s2_data(3,:)]) max([s1_data(3,:), s2_data(3,:)])]);
+    
+    % Pause for animation effect
+    pause(0.1);
+end
+
+
+% Optional: Save animation to video
+% video = VideoWriter('3D_Trajectory_Animation.mp4', 'MPEG-4');
+% open(video);
+% writeVideo(video, frames);
+% close(video);

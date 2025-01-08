@@ -5,7 +5,7 @@
 
 % final_behavior = final_SLEAP; % for hM4Di data;
 
-session_to_analyze = 'RM_D1'
+session_to_analyze = 'RDT_OPTO_CHOICE'
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_13'};
@@ -47,6 +47,7 @@ if exist('hM4Di_treatment_groups', 'var') == 1
 elseif exist('stGtACR_treatment_groups', 'var') == 1
     valid_mice = cellfun(@(sessions) any(strcmp(sessions, session_to_analyze)), valid_sessions);
     valid_animalIDs = stGtACR_IDs(valid_mice);
+    valid_animalIDs = valid_animalIDs(~strcmp(valid_animalIDs, 'RRD391'));
 
 
 elseif exist('PdCO_treatment_groups', 'var') == 1
@@ -1530,6 +1531,82 @@ hold off;
 
 large_choice_mCherry = [risk_table.large_aborts_block_1(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.large_aborts_block_2(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.large_aborts_block_3(strcmp('mCherry', risk_table.TreatmentCondition))];
 large_choice_hM4Di = [risk_table.large_aborts_block_1(strcmp('stGtACR', risk_table.TreatmentCondition)), risk_table.large_aborts_block_2(strcmp('stGtACR', risk_table.TreatmentCondition)), risk_table.large_aborts_block_3(strcmp('stGtACR', risk_table.TreatmentCondition))];
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', stGtACR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, stGtACR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', stGtACR_color, 'MarkerFaceColor', stGtACR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 125]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:125);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+
+%% for stGtACR vs mCherry
+
+block_1_abort_sum = risk_table.large_aborts_block_1 + risk_table.small_aborts_block_1;
+block_2_abort_sum = risk_table.large_aborts_block_2 + risk_table.small_aborts_block_2;
+block_3_abort_sum = risk_table.large_aborts_block_3 + risk_table.small_aborts_block_3;
+
+large_choice_mCherry = [block_1_abort_sum(strcmp('mCherry', risk_table.TreatmentCondition)), block_2_abort_sum(strcmp('mCherry', risk_table.TreatmentCondition)), block_3_abort_sum(strcmp('mCherry', risk_table.TreatmentCondition))];
+large_choice_hM4Di = [block_1_abort_sum(strcmp('stGtACR', risk_table.TreatmentCondition)), block_2_abort_sum(strcmp('stGtACR', risk_table.TreatmentCondition)), block_3_abort_sum(strcmp('stGtACR', risk_table.TreatmentCondition))];
 
 mean_large = nanmean(large_choice_mCherry, 1);
 mean_small = nanmean(large_choice_hM4Di, 1);

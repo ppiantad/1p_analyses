@@ -225,8 +225,12 @@ end
 hold off;
 
 %% conditioning
-% experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
+
+experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
+
+% experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+
+% experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 
 % Define parameters
 threshold = 1; % Velocity threshold
@@ -238,7 +242,7 @@ min_samples = min_duration / sample_duration;
 
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D2_Afternoon';
+session_to_analyze = 'D1_Afternoon';
 
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
@@ -323,50 +327,85 @@ no_shock_data_shk_period = avg_freeze_shk_period(strcmp(experimental_grps_update
 no_shock_sem_shk_period = std(no_shock_data_shk_period)/sqrt(size(no_shock_data_shk_period, 1));
 no_shock_mice_shk_period = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
 
-experimental_data_no_shk_period_males = avg_freeze_no_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
-experimental_sem_no_shk_period_males = std(experimental_data_no_shk_period_males)/sqrt(size(experimental_data_no_shk_period_males, 1));
-experimental_mice_no_shk_period_males = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+if any("sex" == string(experimental_grps.Properties.VariableNames))
+    experimental_data_no_shk_period_males = avg_freeze_no_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    experimental_sem_no_shk_period_males = std(experimental_data_no_shk_period_males)/sqrt(size(experimental_data_no_shk_period_males, 1));
+    experimental_mice_no_shk_period_males = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
 
-experimental_data_no_shk_period_females = avg_freeze_no_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
-experimental_sem_no_shk_period_females = std(experimental_data_no_shk_period_females)/sqrt(size(experimental_data_no_shk_period_females, 1));
-experimental_mice_no_shk_period_females = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    experimental_data_no_shk_period_females = avg_freeze_no_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    experimental_sem_no_shk_period_females = std(experimental_data_no_shk_period_females)/sqrt(size(experimental_data_no_shk_period_females, 1));
+    experimental_mice_no_shk_period_females = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
 
-experimental_data_shk_period_males = avg_freeze_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
-experimental_sem_shk_period_males = std(experimental_data_shk_period_males)/sqrt(size(experimental_data_shk_period_males, 1));
-experimental_mice_shk_period_males = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    experimental_data_shk_period_males = avg_freeze_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    experimental_sem_shk_period_males = std(experimental_data_shk_period_males)/sqrt(size(experimental_data_shk_period_males, 1));
+    experimental_mice_shk_period_males = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
 
-experimental_data_shk_period_females = avg_freeze_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
-experimental_sem_shk_period_females = std(experimental_data_shk_period_females)/sqrt(size(experimental_data_shk_period_females, 1));
-experimental_mice_shk_period_females = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
-
+    experimental_data_shk_period_females = avg_freeze_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    experimental_sem_shk_period_females = std(experimental_data_shk_period_females)/sqrt(size(experimental_data_shk_period_females, 1));
+    experimental_mice_shk_period_females = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+end
 
 %%
 % Compute mean data for each group for no_shk_period and shk_period
-no_shk_means = [mean(experimental_data_no_shk_period); ...
-                mean(one_context_data_no_shk_period); ...
-                mean(no_shock_data_no_shk_period)];
-            
-no_shk_sems = [experimental_sem_no_shk_period; ...
-               one_context_sem_no_shk_period; ...
-               no_shock_sem_no_shk_period];
 
-shk_means = [mean(experimental_data_shk_period); ...
-             mean(one_context_data_shk_period); ...
-             mean(no_shock_data_shk_period)];
+if any("sex" == string(experimental_grps.Properties.VariableNames))
 
-shk_sems = [experimental_sem_shk_period; ...
-            one_context_sem_shk_period; ...
-            no_shock_sem_shk_period];
+    no_shk_data = [experimental_data_no_shk_period_males, experimental_data_no_shk_period_females];
+    no_shk_means = [mean(experimental_data_no_shk_period_males); ...
+        mean(experimental_data_no_shk_period_females)];
 
-% Group labels for the x-axis
-group_labels = {'experimental', 'one_context', 'no_shock'};
+    no_shk_sems = [experimental_sem_no_shk_period_males; ...
+        experimental_sem_no_shk_period_females];
 
-% Define custom bar positions
-no_shk_x = [1, 2, 3]; % Closer together for no_shk
-shk_x = [5, 6, 7];    % Closer together for shk
+    shk_data = [experimental_data_shk_period_males, experimental_data_shk_period_females];
+    shk_means = [mean(experimental_data_shk_period_males); ...
+        mean(experimental_data_shk_period_females)];
 
-% Define colors for groups
-group_colors = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250]}; % Blue, Orange, Yellow
+    shk_sems = [experimental_sem_shk_period_males; ...
+        experimental_sem_shk_period_females];
+
+    % Group labels for the x-axis
+    group_labels = {'male experimental', 'female experimental'};
+
+    % Define custom bar positions
+    no_shk_x = [1, 2]; % Closer together for no_shk
+    shk_x = [5, 6];    % Closer together for shk
+
+    % Define colors for groups
+    group_colors = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980]}; % Blue, Orange, Yellow
+
+else
+
+    no_shk_data = {experimental_data_no_shk_period, one_context_data_no_shk_period, no_shock_data_no_shk_period};
+    no_shk_means = [mean(experimental_data_no_shk_period); ...
+        mean(one_context_data_no_shk_period); ...
+        mean(no_shock_data_no_shk_period)];
+
+    no_shk_sems = [experimental_sem_no_shk_period; ...
+        one_context_sem_no_shk_period; ...
+        no_shock_sem_no_shk_period];
+
+    shk_data = {experimental_data_shk_period, one_context_data_shk_period, no_shock_data_shk_period};
+    shk_means = [mean(experimental_data_shk_period); ...
+        mean(one_context_data_shk_period); ...
+        mean(no_shock_data_shk_period)];
+
+    shk_sems = [experimental_sem_shk_period; ...
+        one_context_sem_shk_period; ...
+        no_shock_sem_shk_period];
+
+    % Group labels for the x-axis
+    group_labels = {'experimental', 'one_context', 'no_shock'};
+
+    % Define custom bar positions
+    no_shk_x = [1, 2, 3]; % Closer together for no_shk
+    shk_x = [5, 6, 7];    % Closer together for shk
+
+    % Define colors for groups
+    group_colors = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250]}; % Blue, Orange, Yellow
+
+end
+
 
 % Create a figure
 figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
@@ -385,15 +424,20 @@ end
 errorbar(no_shk_x, no_shk_means, no_shk_sems, 'k', 'LineStyle', 'none', 'LineWidth', 1);
 errorbar(shk_x, shk_means, shk_sems, 'k', 'LineStyle', 'none', 'LineWidth', 1);
 
-% Add scatter points (with jitter)
 jitter_amount = 0.2;
-for i = 1:length(group_labels)
-    % No shock scatter points
-    scatter(no_shk_x(i) + jitter_amount * (rand(size(eval([group_labels{i}, '_data_no_shk_period']), 1), 1) - 0.5), ...
-            eval([group_labels{i}, '_data_no_shk_period']), 30, group_colors{i}, 'filled');
-    % Shock scatter points
-    scatter(shk_x(i) + jitter_amount * (rand(size(eval([group_labels{i}, '_data_shk_period']), 1), 1) - 0.5), ...
-            eval([group_labels{i}, '_data_shk_period']), 30, group_colors{i}, 'filled');
+for i = 1:size(no_shk_data, 2) % Loop over groups (columns)
+    no_shk_data_temp = [];
+    shk_data_temp = [];
+
+    no_shk_data_temp = no_shk_data{1, i};
+    shk_data_temp = shk_data{1, i};
+
+    % Scatter points for no_shk_data
+    scatter(no_shk_x(i) + jitter_amount * (rand(size(no_shk_data_temp, 1), 1) - 0.5), ...
+            no_shk_data_temp, 30, group_colors{i}, 'filled');
+    % Scatter points for shk_data
+    scatter(shk_x(i) + jitter_amount * (rand(size(shk_data_temp, 1), 1) - 0.5), ...
+            shk_data_temp, 30, group_colors{i}, 'filled');
 end
 
 % Customization
@@ -436,46 +480,64 @@ end
 
 
 
-experimental_data = binned_data(strcmp(experimental_grps_updated.group, 'Experimental'), :);
-experimental_sem = std(experimental_data)/sqrt(size(experimental_data, 1));
-experimental_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental'), :);
 
-one_context_data = binned_data(strcmp(experimental_grps_updated.group, 'One Context'), :);
-one_context_sem = std(one_context_data)/sqrt(size(one_context_data, 1));
-one_context_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'One Context'), :);
+if any("sex" == string(experimental_grps.Properties.VariableNames))
+    experimental_data_male = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    experimental_sem_male = std(experimental_data_male)/sqrt(size(experimental_data_male, 1));
+    experimental_mice_male = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
 
-no_shock_data = binned_data(strcmp(experimental_grps_updated.group, 'No Shock'), :);
-no_shock_sem = std(no_shock_data)/sqrt(size(no_shock_data, 1));
-no_shock_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+    experimental_data_female = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    experimental_sem_female = std(experimental_data_female)/sqrt(size(experimental_data_female, 1));
+    experimental_mice_female = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
 
-experimental_data_male = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
-experimental_sem_male = std(experimental_data)/sqrt(size(experimental_data, 1));
-experimental_mice_male = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+    hold on;
 
-experimental_data_female = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
-experimental_sem_female = std(experimental_data)/sqrt(size(experimental_data, 1));
-experimental_mice_female = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_male), experimental_sem_male, 'lineProps', {'color', 'r'});
+    h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_female), experimental_sem_female, 'lineProps', {'color', 'k'});
 
-figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
-hold on;
+    % legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
+    % Adjust x-axis ticks and labels
+    % Adjust x-axis ticks and labels
+    xlim([1 num_bins]); % Set x-axis limits to match the data range
+    xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
+    xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
 
-% h(1) = shadedErrorBar(1:num_bins, mean(experimental_data), experimental_sem, 'lineProps', {'color', 'r'});
-% h(2) = shadedErrorBar(1:num_bins, mean(one_context_data), one_context_sem, 'lineProps', {'color', 'k'});
-% h(2) = shadedErrorBar(1:num_bins, mean(no_shock_data), no_shock_sem, 'lineProps', {'color', 'b'});
+    ylim([0 1]); % Set y-axis limits
 
-h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_male), experimental_sem_male, 'lineProps', {'color', 'r'});
-h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_female), experimental_sem_female, 'lineProps', {'color', 'k'});
-% h(2) = shadedErrorBar(1:num_bins, mean(no_shock_data), no_shock_sem, 'lineProps', {'color', 'b'});
+else
 
-% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(remapped  ==1, :)), nanmean(neuron_sem_array{1, arrays_to_examine(2)}(remapped  ==1, :)), 'lineProps', {'color', 'b'});
-% legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
-% Adjust x-axis ticks and labels
-% Adjust x-axis ticks and labels
-xlim([1 num_bins]); % Set x-axis limits to match the data range
-xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
-xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
+    experimental_data = binned_data(strcmp(experimental_grps_updated.group, 'Experimental'), :);
+    experimental_sem = std(experimental_data)/sqrt(size(experimental_data, 1));
+    experimental_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental'), :);
 
-ylim([0 1]); % Set y-axis limits
+    one_context_data = binned_data(strcmp(experimental_grps_updated.group, 'One Context'), :);
+    one_context_sem = std(one_context_data)/sqrt(size(one_context_data, 1));
+    one_context_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'One Context'), :);
+
+    no_shock_data = binned_data(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+    no_shock_sem = std(no_shock_data)/sqrt(size(no_shock_data, 1));
+    no_shock_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+
+    figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+    hold on;
+
+    h(1) = shadedErrorBar(1:num_bins, mean(experimental_data), experimental_sem, 'lineProps', {'color', 'r'});
+    h(2) = shadedErrorBar(1:num_bins, mean(one_context_data), one_context_sem, 'lineProps', {'color', 'k'});
+    h(2) = shadedErrorBar(1:num_bins, mean(no_shock_data), no_shock_sem, 'lineProps', {'color', 'b'});
+
+    % legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
+    % Adjust x-axis ticks and labels
+    % Adjust x-axis ticks and labels
+    xlim([1 num_bins]); % Set x-axis limits to match the data range
+    xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
+    xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
+
+    ylim([0 1]); % Set y-axis limits
+
+
+end
+
 
 
 
@@ -603,56 +665,66 @@ for ii = 1:size(animalIDs,1)
 
 end
 
-experimental_data = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental'), :);
-experimental_sems_mice = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental'), :);
-experimental_sem = std(experimental_data)/sqrt(size(experimental_data, 1));
-experimental_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental'), :);
+if any("sex" == string(experimental_grps.Properties.VariableNames))
+    experimental_data_males = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    experimental_sems_mice_males = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    experimental_sem_males = std(experimental_data_males)/sqrt(size(experimental_data_males, 1));
+    experimental_mice_males = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
 
-one_context_data = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'One Context'), :);
-one_context_sems_mice = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'One Context'), :);
-one_context_sem = std(one_context_data)/sqrt(size(one_context_data, 1));
-one_context_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'One Context'), :);
+    experimental_data_females = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    experimental_sems_mice_females = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    experimental_sem_females = std(experimental_data_females)/sqrt(size(experimental_data_females, 1));
+    experimental_mice_females = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    
+    figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+    hold on;
 
-no_shock_data = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'No Shock'), :);
-no_shock_sems_mice = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'No Shock'), :);
-no_shock_sem = std(no_shock_data)/sqrt(size(no_shock_data, 1));
-no_shock_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+    h(1) = shadedErrorBar(ts1, mean(experimental_data_males), experimental_sem_males, 'lineProps', {'color', 'r'});
+    h(2) = shadedErrorBar(ts1, mean(experimental_data_females), experimental_sem_females, 'lineProps', {'color', 'k'});
 
+    % legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
+    ylim([0 90]);
 
-experimental_data_males = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
-experimental_sems_mice_males = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
-experimental_sem_males = std(experimental_data_males)/sqrt(size(experimental_data_males, 1));
-experimental_mice_males = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    mean_data_array = {experimental_data_males, experimental_data_females};
+    sem_data_array = {experimental_sems_mice_males, experimental_sems_mice_females};
 
-experimental_data_females = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
-experimental_sems_mice_females = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
-experimental_sem_females = std(experimental_data_females)/sqrt(size(experimental_data_females, 1));
-experimental_mice_females = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    % need to make sure consec_thresh in perm_and_bCI is set to 10!
+    [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1);
+else
 
-figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
-hold on;
+    experimental_data = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental'), :);
+    experimental_sems_mice = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental'), :);
+    experimental_sem = std(experimental_data)/sqrt(size(experimental_data, 1));
+    experimental_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental'), :);
 
-% h(1) = shadedErrorBar(ts1, mean(experimental_data), experimental_sem, 'lineProps', {'color', 'r'});
-% h(2) = shadedErrorBar(ts1, mean(one_context_data), one_context_sem, 'lineProps', {'color', 'k'});
-% h(2) = shadedErrorBar(ts1, mean(no_shock_data), no_shock_sem, 'lineProps', {'color', 'b'});
+    one_context_data = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'One Context'), :);
+    one_context_sems_mice = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'One Context'), :);
+    one_context_sem = std(one_context_data)/sqrt(size(one_context_data, 1));
+    one_context_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'One Context'), :);
 
-h(1) = shadedErrorBar(ts1, mean(experimental_data_males), experimental_sem_males, 'lineProps', {'color', 'r'});
-h(2) = shadedErrorBar(ts1, mean(experimental_data_females), experimental_sem_females, 'lineProps', {'color', 'k'});
-
-% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(remapped  ==1, :)), nanmean(neuron_sem_array{1, arrays_to_examine(2)}(remapped  ==1, :)), 'lineProps', {'color', 'b'});
-% legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
-ylim([0 90]);
-
-% mean_data_array = {experimental_data, one_context_data, no_shock_data};
-% sem_data_array = {experimental_sems_mice, one_context_sems_mice, no_shock_sems_mice};
-
-mean_data_array = {experimental_data_males, experimental_data_females};
-sem_data_array = {experimental_sems_mice_males, experimental_sems_mice_females};
-
-% need to make sure consec_thresh in perm_and_bCI is set to 10!
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1);
+    no_shock_data = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+    no_shock_sems_mice = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+    no_shock_sem = std(no_shock_data)/sqrt(size(no_shock_data, 1));
+    no_shock_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
 
 
+
+    figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+    hold on;
+
+    h(1) = shadedErrorBar(ts1, mean(experimental_data), experimental_sem, 'lineProps', {'color', 'r'});
+    h(2) = shadedErrorBar(ts1, mean(one_context_data), one_context_sem, 'lineProps', {'color', 'k'});
+    h(2) = shadedErrorBar(ts1, mean(no_shock_data), no_shock_sem, 'lineProps', {'color', 'b'});
+
+    ylim([0 90]);
+
+    mean_data_array = {experimental_data, one_context_data, no_shock_data};
+    sem_data_array = {experimental_sems_mice, one_context_sems_mice, no_shock_sems_mice};
+
+    % need to make sure consec_thresh in perm_and_bCI is set to 10!
+    [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1);
+
+end
 %% discrimination sessions
 clear aversive_context safe_context mean_aversive mean_safe mean_aversive_context mean_safe_context
 
@@ -692,10 +764,10 @@ for i = 1:total_stimuli
 end
 
 
-
+% experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
-% experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
+experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
+
 % Define parameters
 threshold = 1; % Velocity threshold
 sample_duration = 0.03; % Duration of each sample in seconds
@@ -712,6 +784,8 @@ mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
     current_mouse = animalIDs{gg};
     if strcmp(session_to_analyze, 'D1_Morning') & strcmp(current_mouse, 'B57417')
+        continue
+    elseif strcmp(session_to_analyze, 'D3') & strcmp(current_mouse, 'B51618')
         continue
     else
         if isfield(final_DLC.(current_mouse), session_to_analyze)
@@ -848,138 +922,158 @@ for pp = 1:size(aversive_context, 1)
     end
 end
 
-
-experimental_data_safe = mean_safe_context(strcmp(experimental_grps_updated.group, 'Experimental'), :);
-experimental_mean_safe = mean(experimental_data_safe);
-experimental_mean_safe_collapsed = mean(experimental_data_safe, 2);
-experimental_sem_safe = std(experimental_data_safe)/sqrt(size(experimental_data_safe, 1));
-experimental_mice_safe = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental'), :);
-
-one_context_data_safe = mean_safe_context(strcmp(experimental_grps_updated.group, 'One Context'), :);
-one_context_mean_safe = mean(one_context_data_safe);
-one_context_mean_safe_collapsed = mean(one_context_data_safe, 2);
-one_context_sem_safe = std(one_context_data_safe)/sqrt(size(one_context_data_safe, 1));
-one_context_mice_safe = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'One Context'), :);
-
-no_shock_data_safe = mean_safe_context(strcmp(experimental_grps_updated.group, 'No Shock'), :);
-no_shock_mean_safe = mean(no_shock_data_safe);
-no_shock_mean_safe_collapsed = mean(no_shock_data_safe, 2);
-no_shock_sem_safe = std(no_shock_data_safe)/sqrt(size(no_shock_data_safe, 1));
-no_shock_mice_safe = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
-
-experimental_data_aversive = mean_aversive_context(strcmp(experimental_grps_updated.group, 'Experimental'), :);
-experimental_mean_aversive = mean(experimental_data_aversive);
-experimental_mean_aversive_collapsed = mean(experimental_data_aversive, 2);
-experimental_sem_aversive = std(experimental_data_aversive)/sqrt(size(experimental_data_aversive, 1));
-experimental_mice_aversive = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental'), :);
-
-one_context_data_aversive = mean_aversive_context(strcmp(experimental_grps_updated.group, 'One Context'), :);
-one_context_mean_aversive = mean(one_context_data_aversive);
-one_context_mean_aversive_collapsed = mean(one_context_data_aversive, 2);
-one_context_sem_aversive = std(one_context_data_aversive)/sqrt(size(one_context_data_aversive, 1));
-one_context_mice_aversive = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'One Context'), :);
-
-no_shock_data_aversive = mean_aversive_context(strcmp(experimental_grps_updated.group, 'No Shock'), :);
-no_shock_mean_aversive = mean(no_shock_data_aversive);
-no_shock_mean_aversive_collapsed = mean(no_shock_data_aversive, 2);
-no_shock_sem_aversive = std(no_shock_data_aversive)/sqrt(size(no_shock_data_aversive, 1));
-no_shock_mice_aversive = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);   
+if any("sex" == string(experimental_grps.Properties.VariableNames))
 
 
-experimental_data_safe_male = mean_safe_context(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
-experimental_mean_safe_male = mean(experimental_data_safe_male);
-experimental_mean_safe_collapsed_male = mean(experimental_data_safe_male, 2);
-experimental_sem_safe_male = std(experimental_data_safe_male)/sqrt(size(experimental_data_safe_male, 1));
-experimental_mice_safe_male = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    experimental_data_safe_male = mean_safe_context(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    experimental_mean_safe_male = mean(experimental_data_safe_male);
+    experimental_mean_safe_collapsed_male = mean(experimental_data_safe_male, 2);
+    experimental_sem_safe_male = std(experimental_data_safe_male)/sqrt(size(experimental_data_safe_male, 1));
+    experimental_mice_safe_male = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
 
-experimental_data_aversive_male = mean_aversive_context(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
-experimental_mean_aversive_male = mean(experimental_data_aversive_male);
-experimental_mean_aversive_collapsed_male = mean(experimental_data_aversive_male, 2);
-experimental_sem_aversive_male = std(experimental_data_aversive_male)/sqrt(size(experimental_data_aversive_male, 1));
-experimental_mice_aversive_male = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    experimental_data_aversive_male = mean_aversive_context(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    experimental_mean_aversive_male = mean(experimental_data_aversive_male);
+    experimental_mean_aversive_collapsed_male = mean(experimental_data_aversive_male, 2);
+    experimental_sem_aversive_male = std(experimental_data_aversive_male)/sqrt(size(experimental_data_aversive_male, 1));
+    experimental_mice_aversive_male = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
 
-experimental_data_safe_female = mean_safe_context(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
-experimental_mean_safe_female = mean(experimental_data_safe_female);
-experimental_mean_safe_collapsed_female = mean(experimental_data_safe_female, 2);
-experimental_sem_safe_female = std(experimental_data_safe_female)/sqrt(size(experimental_data_safe_female, 1));
-experimental_mice_safe_female = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    experimental_data_safe_female = mean_safe_context(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    experimental_mean_safe_female = mean(experimental_data_safe_female);
+    experimental_mean_safe_collapsed_female = mean(experimental_data_safe_female, 2);
+    experimental_sem_safe_female = std(experimental_data_safe_female)/sqrt(size(experimental_data_safe_female, 1));
+    experimental_mice_safe_female = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
 
-experimental_data_aversive_female = mean_aversive_context(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
-experimental_mean_aversive_female = mean(experimental_data_aversive_female);
-experimental_mean_aversive_collapsed_female = mean(experimental_data_aversive_female, 2);
-experimental_sem_aversive_female = std(experimental_data_aversive_female)/sqrt(size(experimental_data_aversive_female, 1));
-experimental_mice_aversive_female = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    experimental_data_aversive_female = mean_aversive_context(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    experimental_mean_aversive_female = mean(experimental_data_aversive_female);
+    experimental_mean_aversive_collapsed_female = mean(experimental_data_aversive_female, 2);
+    experimental_sem_aversive_female = std(experimental_data_aversive_female)/sqrt(size(experimental_data_aversive_female, 1));
+    experimental_mice_aversive_female = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
 
 
+else
+
+    experimental_data_safe = mean_safe_context(strcmp(experimental_grps_updated.group, 'Experimental'), :);
+    experimental_mean_safe = mean(experimental_data_safe);
+    experimental_mean_safe_collapsed = mean(experimental_data_safe, 2);
+    experimental_sem_safe = std(experimental_data_safe)/sqrt(size(experimental_data_safe, 1));
+    experimental_mice_safe = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental'), :);
+
+    one_context_data_safe = mean_safe_context(strcmp(experimental_grps_updated.group, 'One Context'), :);
+    one_context_mean_safe = mean(one_context_data_safe);
+    one_context_mean_safe_collapsed = mean(one_context_data_safe, 2);
+    one_context_sem_safe = std(one_context_data_safe)/sqrt(size(one_context_data_safe, 1));
+    one_context_mice_safe = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'One Context'), :);
+
+    no_shock_data_safe = mean_safe_context(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+    no_shock_mean_safe = mean(no_shock_data_safe);
+    no_shock_mean_safe_collapsed = mean(no_shock_data_safe, 2);
+    no_shock_sem_safe = std(no_shock_data_safe)/sqrt(size(no_shock_data_safe, 1));
+    no_shock_mice_safe = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+
+    experimental_data_aversive = mean_aversive_context(strcmp(experimental_grps_updated.group, 'Experimental'), :);
+    experimental_mean_aversive = mean(experimental_data_aversive);
+    experimental_mean_aversive_collapsed = mean(experimental_data_aversive, 2);
+    experimental_sem_aversive = std(experimental_data_aversive)/sqrt(size(experimental_data_aversive, 1));
+    experimental_mice_aversive = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental'), :);
+
+    one_context_data_aversive = mean_aversive_context(strcmp(experimental_grps_updated.group, 'One Context'), :);
+    one_context_mean_aversive = mean(one_context_data_aversive);
+    one_context_mean_aversive_collapsed = mean(one_context_data_aversive, 2);
+    one_context_sem_aversive = std(one_context_data_aversive)/sqrt(size(one_context_data_aversive, 1));
+    one_context_mice_aversive = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'One Context'), :);
+
+    no_shock_data_aversive = mean_aversive_context(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+    no_shock_mean_aversive = mean(no_shock_data_aversive);
+    no_shock_mean_aversive_collapsed = mean(no_shock_data_aversive, 2);
+    no_shock_sem_aversive = std(no_shock_data_aversive)/sqrt(size(no_shock_data_aversive, 1));
+    no_shock_mice_aversive = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+end
 
 %%
 
 if strcmp(session_to_analyze, 'D3')
-    interleave_mean_experimental = zeros(size(experimental_data_safe, 1), 6);
-    interleave_mean_experimental(:, [1 3 5]) = experimental_data_safe;
-    interleave_mean_experimental(:, [2 4 6]) = experimental_data_aversive;
+    
+    if any("sex" == string(experimental_grps.Properties.VariableNames))
 
-    interleave_mean_one_context = zeros(size(one_context_data_safe, 1), 6);
-    interleave_mean_one_context(:, [1 3 5]) = one_context_data_safe;
-    interleave_mean_one_context(:, [2 4 6]) = one_context_data_aversive;
+        interleave_mean_experimental_male = zeros(size(experimental_data_safe_male, 1), 6);
+        interleave_mean_experimental_male(:, [1 3 5]) = experimental_data_safe_male;
+        interleave_mean_experimental_male(:, [2 4 6]) = experimental_data_aversive_male;
 
-    interleave_mean_no_shock = zeros(size(no_shock_data_safe, 1), 6);
-    interleave_mean_no_shock(:, [1 3 5]) = no_shock_data_safe;
-    interleave_mean_no_shock(:, [2 4 6]) = no_shock_data_aversive;
+        interleave_mean_experimental_female = zeros(size(experimental_data_safe_female, 1), 6);
+        interleave_mean_experimental_female(:, [1 3 5]) = experimental_data_safe_female;
+        interleave_mean_experimental_female(:, [2 4 6]) = experimental_data_aversive_female;
 
-    interleave_mean_experimental_male = zeros(size(experimental_data_safe_male, 1), 6);
-    interleave_mean_experimental_male(:, [1 3 5]) = experimental_data_safe_male;
-    interleave_mean_experimental_male(:, [2 4 6]) = experimental_data_aversive_male;
+    else
 
-    interleave_mean_experimental_female = zeros(size(experimental_data_safe_female, 1), 6);
-    interleave_mean_experimental_female(:, [1 3 5]) = experimental_data_safe_female;
-    interleave_mean_experimental_female(:, [2 4 6]) = experimental_data_aversive_female;
+        interleave_mean_experimental = zeros(size(experimental_data_safe, 1), 6);
+        interleave_mean_experimental(:, [1 3 5]) = experimental_data_safe;
+        interleave_mean_experimental(:, [2 4 6]) = experimental_data_aversive;
 
-    % interleave_sem_experimental = zeros(size(mean_safe_context, 1), 6);
-    % interleave_sem_experimental(:, [1 3 5]) = standard_error_safe;
-    % interleave_sem_experimental(:, [2 4 6]) = standard_error_aversive;
+        interleave_mean_one_context = zeros(size(one_context_data_safe, 1), 6);
+        interleave_mean_one_context(:, [1 3 5]) = one_context_data_safe;
+        interleave_mean_one_context(:, [2 4 6]) = one_context_data_aversive;
 
+        interleave_mean_no_shock = zeros(size(no_shock_data_safe, 1), 6);
+        interleave_mean_no_shock(:, [1 3 5]) = no_shock_data_safe;
+        interleave_mean_no_shock(:, [2 4 6]) = no_shock_data_aversive;
 
+        % interleave_sem_experimental = zeros(size(mean_safe_context, 1), 6);
+        % interleave_sem_experimental(:, [1 3 5]) = standard_error_safe;
+        % interleave_sem_experimental(:, [2 4 6]) = standard_error_aversive;
+
+    end
 
 elseif strcmp(session_to_analyze, 'D4')
-    interleave_mean_experimental = zeros(size(experimental_data_safe, 1), 6);
-    interleave_mean_experimental(:, [1 3 5]) = experimental_data_aversive;
-    interleave_mean_experimental(:, [2 4 6]) = experimental_data_safe;
-
-    interleave_mean_one_context = zeros(size(one_context_data_safe, 1), 6);
-    interleave_mean_one_context(:, [1 3 5]) = one_context_data_aversive;
-    interleave_mean_one_context(:, [2 4 6]) = one_context_data_safe;
-
-    interleave_mean_no_shock = zeros(size(no_shock_data_safe, 1), 6);
-    interleave_mean_no_shock(:, [1 3 5]) = no_shock_data_aversive;
-    interleave_mean_no_shock(:, [2 4 6]) = no_shock_data_safe;
+    
+    if any("sex" == string(experimental_grps.Properties.VariableNames))
 
 
-    interleave_mean_experimental_male = zeros(size(experimental_data_safe_male, 1), 6);
-    interleave_mean_experimental_male(:, [1 3 5]) = experimental_data_aversive_male;
-    interleave_mean_experimental_male(:, [2 4 6]) = experimental_data_safe_male;
+        interleave_mean_experimental_male = zeros(size(experimental_data_safe_male, 1), 6);
+        interleave_mean_experimental_male(:, [1 3 5]) = experimental_data_aversive_male;
+        interleave_mean_experimental_male(:, [2 4 6]) = experimental_data_safe_male;
 
-    interleave_mean_experimental_female = zeros(size(experimental_data_safe_female, 1), 6);
-    interleave_mean_experimental_female(:, [1 3 5]) = experimental_data_aversive_female;
-    interleave_mean_experimental_female(:, [2 4 6]) = experimental_data_safe_female;
+        interleave_mean_experimental_female = zeros(size(experimental_data_safe_female, 1), 6);
+        interleave_mean_experimental_female(:, [1 3 5]) = experimental_data_aversive_female;
+        interleave_mean_experimental_female(:, [2 4 6]) = experimental_data_safe_female;
+    else
 
+        interleave_mean_experimental = zeros(size(experimental_data_safe, 1), 6);
+        interleave_mean_experimental(:, [1 3 5]) = experimental_data_aversive;
+        interleave_mean_experimental(:, [2 4 6]) = experimental_data_safe;
 
+        interleave_mean_one_context = zeros(size(one_context_data_safe, 1), 6);
+        interleave_mean_one_context(:, [1 3 5]) = one_context_data_aversive;
+        interleave_mean_one_context(:, [2 4 6]) = one_context_data_safe;
 
-    % interleave_sem_experimental = zeros(size(mean_safe_context, 1), 6);
-    % interleave_sem_experimental(:, [1 3 5]) = standard_error_safe;
-    % interleave_sem_experimental(:, [2 4 6]) = standard_error_aversive;
+        interleave_mean_no_shock = zeros(size(no_shock_data_safe, 1), 6);
+        interleave_mean_no_shock(:, [1 3 5]) = no_shock_data_aversive;
+        interleave_mean_no_shock(:, [2 4 6]) = no_shock_data_safe;
+
+    end
 end
-% figure; shadedErrorBar(1:size(mean(interleave_mean_experimental), 2), mean(interleave_mean_experimental), std(interleave_mean_experimental));
-% hold on; shadedErrorBar(1:size(mean(interleave_mean_one_context), 2), mean(interleave_mean_one_context), std(interleave_mean_one_context));
-% hold on; shadedErrorBar(1:size(mean(interleave_mean_no_shock), 2), mean(interleave_mean_no_shock), std(interleave_mean_no_shock));
 
-figure; shadedErrorBar(1:size(mean(interleave_mean_experimental_male), 2), mean(interleave_mean_experimental_male), std(interleave_mean_experimental_male));
-hold on; shadedErrorBar(1:size(mean(interleave_mean_experimental_female), 2), mean(interleave_mean_experimental_female), std(interleave_mean_experimental_female));
+if any("sex" == string(experimental_grps.Properties.VariableNames))
+    figure; shadedErrorBar(1:size(mean(interleave_mean_experimental_male), 2), mean(interleave_mean_experimental_male), std(interleave_mean_experimental_male));
+    hold on; shadedErrorBar(1:size(mean(interleave_mean_experimental_female), 2), mean(interleave_mean_experimental_female), std(interleave_mean_experimental_female));
+    hold off;
+    % xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
+    % xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
 
 
-hold off; 
-% xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
-% xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
+
+
+else
+
+    figure; shadedErrorBar(1:size(mean(interleave_mean_experimental), 2), mean(interleave_mean_experimental), std(interleave_mean_experimental));
+    hold on; shadedErrorBar(1:size(mean(interleave_mean_one_context), 2), mean(interleave_mean_one_context), std(interleave_mean_one_context));
+    hold on; shadedErrorBar(1:size(mean(interleave_mean_no_shock), 2), mean(interleave_mean_no_shock), std(interleave_mean_no_shock));
+    hold off;
+    % xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
+    % xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
+
+end
+
+
 
 %%
 % Number of bins
@@ -1010,57 +1104,88 @@ for bin_idx = 1:num_bins
 end
 
 
+if any("sex" == string(experimental_grps.Properties.VariableNames))
 
-experimental_data = binned_data(strcmp(experimental_grps_updated.group, 'Experimental'), :);
-experimental_sem = std(experimental_data)/sqrt(size(experimental_data, 1));
-experimental_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental'), :);
+    experimental_data_male = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    experimental_sem_male = std(experimental_data_male)/sqrt(size(experimental_data_male, 1));
+    experimental_mice_male = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
 
-one_context_data = binned_data(strcmp(experimental_grps_updated.group, 'One Context'), :);
-one_context_sem = std(one_context_data)/sqrt(size(one_context_data, 1));
-one_context_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'One Context'), :);
+    experimental_data_female = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    experimental_sem_female = std(experimental_data_female)/sqrt(size(experimental_data_female, 1));
+    experimental_mice_female = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+ 
+    figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+    hold on;
+    h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_male), experimental_sem_male, 'lineProps', {'color', 'r'});
+    h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_female), experimental_sem_female, 'lineProps', {'color', 'k'});
 
-no_shock_data = binned_data(strcmp(experimental_grps_updated.group, 'No Shock'), :);
-no_shock_sem = std(no_shock_data)/sqrt(size(no_shock_data, 1));
-no_shock_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+    % legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
 
-experimental_data_male = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
-experimental_sem_male = std(experimental_data_male)/sqrt(size(experimental_data_male, 1));
-experimental_mice_male = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'male'), :);
+    % Adjust x-axis ticks and labels
+    xlim([1 num_bins]); % Set x-axis limits to match the data range
+    xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
+    xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
 
-experimental_data_female = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
-experimental_sem_female = std(experimental_data_female)/sqrt(size(experimental_data_female, 1));
-experimental_mice_female = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
+    ylim([0 0.9]); % Set y-axis limits
+    % Add rectangles for freeze periods
+    % x_tick_indices = [1:4:num_bins]
+    % for i = 1:length(x_tick_indices)
+    %     % No additional adjustment needed for freeze indices relative to time_vector
+    %     x_start = x_tick_indices(i);
+    %     x_end = x_tick_indices(i+1);
+    %     rectangle('Position', [x_start, 0, x_end - x_start, 1], ...
+    %               'FaceColor', [0.9, 0.9, 0.9], 'EdgeColor', 'none');
+    % end
+    %
+    %
 
-figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
-hold on;
 
-% h(1) = shadedErrorBar(1:num_bins, mean(experimental_data), experimental_sem, 'lineProps', {'color', 'r'});
-% h(2) = shadedErrorBar(1:num_bins, mean(one_context_data), one_context_sem, 'lineProps', {'color', 'k'});
-% h(2) = shadedErrorBar(1:num_bins, mean(no_shock_data), no_shock_sem, 'lineProps', {'color', 'b'});
+else
 
 
-h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_male), experimental_sem_male, 'lineProps', {'color', 'r'});
-h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_female), experimental_sem_female, 'lineProps', {'color', 'k'});
+    experimental_data = binned_data(strcmp(experimental_grps_updated.group, 'Experimental'), :);
+    experimental_sem = std(experimental_data)/sqrt(size(experimental_data, 1));
+    experimental_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental'), :);
 
-% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(remapped  ==1, :)), nanmean(neuron_sem_array{1, arrays_to_examine(2)}(remapped  ==1, :)), 'lineProps', {'color', 'b'});
-% legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
-% Adjust x-axis ticks and labels
-% Adjust x-axis ticks and labels
-xlim([1 num_bins]); % Set x-axis limits to match the data range
-xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
-xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
+    one_context_data = binned_data(strcmp(experimental_grps_updated.group, 'One Context'), :);
+    one_context_sem = std(one_context_data)/sqrt(size(one_context_data, 1));
+    one_context_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'One Context'), :);
 
-ylim([0 0.9]); % Set y-axis limits
-% Add rectangles for freeze periods
-% x_tick_indices = [1:4:num_bins]
-% for i = 1:length(x_tick_indices)
-%     % No additional adjustment needed for freeze indices relative to time_vector
-%     x_start = x_tick_indices(i); 
-%     x_end = x_tick_indices(i+1); 
-%     rectangle('Position', [x_start, 0, x_end - x_start, 1], ...
-%               'FaceColor', [0.9, 0.9, 0.9], 'EdgeColor', 'none');
-% end
-% 
-% 
+    no_shock_data = binned_data(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+    no_shock_sem = std(no_shock_data)/sqrt(size(no_shock_data, 1));
+    no_shock_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
+
+    figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+    hold on;
+
+    h(1) = shadedErrorBar(1:num_bins, mean(experimental_data), experimental_sem, 'lineProps', {'color', 'r'});
+    h(2) = shadedErrorBar(1:num_bins, mean(one_context_data), one_context_sem, 'lineProps', {'color', 'k'});
+    h(2) = shadedErrorBar(1:num_bins, mean(no_shock_data), no_shock_sem, 'lineProps', {'color', 'b'});
+
+
+    % legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
+
+    % Adjust x-axis ticks and labels
+    xlim([1 num_bins]); % Set x-axis limits to match the data range
+    xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
+    xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
+
+    ylim([0 0.9]); % Set y-axis limits
+    % Add rectangles for freeze periods
+    % x_tick_indices = [1:4:num_bins]
+    % for i = 1:length(x_tick_indices)
+    %     % No additional adjustment needed for freeze indices relative to time_vector
+    %     x_start = x_tick_indices(i);
+    %     x_end = x_tick_indices(i+1);
+    %     rectangle('Position', [x_start, 0, x_end - x_start, 1], ...
+    %               'FaceColor', [0.9, 0.9, 0.9], 'EdgeColor', 'none');
+    % end
+    %
+    %
+
+
+end
+
+
 
 
