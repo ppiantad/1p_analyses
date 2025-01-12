@@ -58,7 +58,7 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 session_to_analyze = 'RDT_D1';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'collectionTime'; % stTime choiceTime collectionTime
+epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
 period_of_interest = 'prechoice';
 
 if strcmp(epoc_to_align, 'stTime')

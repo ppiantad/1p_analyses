@@ -206,6 +206,50 @@ xlabel('Principal Component');
 ylabel('Variance Explained (%)');
 grid on; % Optional: adds a grid to the plot
 
+%% if applying PCA to individual trials (will only work if each mouse has the same # of trials. might be best to investigate how to do this within a mouse
+
+% Example input: zall_array is a 1xN cell array where each cell contains a double array.
+num_cells = numel(zall_array);
+num_rows = size(zall_array{1}, 1); % Number of rows in the double arrays
+num_cols = size(zall_array{1}, 2); % Number of columns in the double arrays
+
+% Initialize the output cell array
+zall_array_trial_concat = cell(num_rows, 1);
+
+% Loop through each row of the double arrays
+for row_idx = 1:num_rows
+    % Initialize an array to concatenate rows from all cells
+    concatenated_rows = [];
+    
+    % Loop through each cell in zall_array
+    for cell_idx = 1:num_cells
+        % Extract the current row and concatenate it
+        concatenated_rows = [concatenated_rows; zall_array{cell_idx}(row_idx, :)];
+    end
+    
+    % Store the concatenated rows in the output cell array
+    zall_array_trial_concat{row_idx} = concatenated_rows;
+end
+
+
+
+
+% apply PCA to each trial
+for q = 1:size(zall_array_trial_concat, 1)
+    temp_trial = zall_array_trial_concat{q, 1};
+    temp_trial = zscore(temp_trial, 0, 2);
+    PCScore_trials{q, 1} = coef(1:size(temp,1), 1: NumPC)'*temp_trial;
+
+
+end
+
+for zz = 1:size(PCScore_trials, 1)
+    PC_1_all_trials(zz, :) = PCScore_trials{zz, 1}(1, :);
+    PC_2_all_trials(zz, :) = PCScore_trials{zz, 1}(2, :);
+    PC_3_all_trials(zz, :) = PCScore_trials{zz, 1}(3, :);
+    PC_4_all_trials(zz, :) = PCScore_trials{zz, 1}(4, :);
+end
+
 
 %% plot for publication 3D trajectories
 

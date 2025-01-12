@@ -421,11 +421,11 @@ consumption_indices = ts1 >= consumption_window(1) & ts1 <= consumption_window(2
 indices_to_use = pre_choice_indices;
 
 % zall(11, :) should contain choice aligned data, all 90 trials
-session_long_data = zall_array(11, :);
+session_long_data = zall_array(1, :);
 % session_long_data = zall_array(12, :);
 
 
-data_for_shuffling = zall_array(8, :);
+data_for_shuffling = zall_array(1, :);
 % data_for_shuffling = zall_array(10, :);
 % data_for_shuffling = zall_array(12, :);
 

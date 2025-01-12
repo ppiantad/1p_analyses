@@ -1,41 +1,8 @@
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D4';
-
-recorded_fps = 30;
+session_to_analyze = 'D3';
 
 
-
-% Parameters
-stimulus_duration = 2 * 60; % 2 minutes in seconds
-num_repeats = 3;
-total_stimuli = 2;
-
-% Initialize variables
-stimulus_times = cell(total_stimuli, 1);
-current_time = 0;
-
-% Loop through each stimulus alternately and calculate start and end times
-for j = 1:num_repeats
-    for i = 1:total_stimuli
-        start_time = current_time;
-        end_time = start_time + stimulus_duration;
-        
-        if isempty(stimulus_times{i})
-            stimulus_times{i} = [start_time, end_time];
-        else
-            stimulus_times{i} = [stimulus_times{i}; start_time, end_time];
-        end
-        
-        current_time = end_time;
-    end
-end
-
-
-% Multiply every value in stimulus_times by the FPS
-for i = 1:total_stimuli
-    stimulus_frames{i} = stimulus_times{i} * recorded_fps;
-end
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
@@ -192,41 +159,10 @@ session_long_mean = mean(trimmed_combined_context);
 
 
 
-%%
-% Plotting the data
-figure;
-plot(final_DLC.C68604.D3.movement_data.frame, final_DLC.C68604.D3.movement_data.was_freezing);
-hold on;
-
-% Define colors and transparency
-color_1 = [0, 0, 1]; % Blue for stimulus 1
-color_2 = [1, 0, 0]; % Red for stimulus 2
-transparency = 0.3; % Transparency level
-
-% Plot rectangles for each stimulus presentation
-for i = 1:total_stimuli
-    for j = 1:num_repeats
-        % Get start and end frames
-        start_frame = stimulus_frames{i}(j, 1);
-        end_frame = stimulus_frames{i}(j, 2);
-        
-        % Determine the Y-axis range
-        y_limits = ylim;
-        
-        % Plot the rectangle
-        rectangle('Position', [start_frame, y_limits(1), end_frame-start_frame, y_limits(2)-y_limits(1)], ...
-                  'FaceColor', [color_1 transparency] * (i == 1) + [color_2 transparency] * (i == 2), ...
-                  'EdgeColor', 'none');
-    end
-end
-
-% Finalize the plot
-
-hold off;
 
 %% conditioning
 
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
+experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
 % experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 
@@ -543,8 +479,12 @@ end
 
 %% plot individual data from a given session - make sure to update variables and indices if using!
 % Load the data
-body_velocity = final_DLC.B46851        .D1_Afternoon.movement_data.body_velocity; % Assuming this is a table column
-freeze_data_extracted = freeze_data(6,:); % Get the first row of freeze_data
+body_velocity = final_DLC.B46837        .D1_Afternoon.movement_data.body_velocity; % Assuming this is a table column
+freeze_data_extracted = freeze_data(1,:); % Get the first row of freeze_data
+
+
+
+
 
 % Trim the data
 start_index = 101; % Omit first 100 indices
@@ -554,15 +494,24 @@ end_index = 21590; % Limit to index 21590
 % Create time vector in minutes
 time_vector = (start_index:end_index) / (frame_rate * 60);
 
+
+
 body_velocity_trimmed = body_velocity(start_index:end_index);
 freeze_data_trimmed = freeze_data_extracted(start_index:end_index);
 
 % Find the maximum velocity for plotting rectangles
 max_velocity = max(body_velocity_trimmed);
 
+
+
+downsample_factor = 1; % Adjust as needed
+time_vector_ds = downsample(time_vector, downsample_factor);
+body_velocity_ds = downsample(body_velocity_trimmed, downsample_factor);
+
+
 % Plot the body velocity
 figure;
-plot(time_vector, body_velocity_trimmed, 'b', 'LineWidth', 1.5);
+plot(time_vector_ds, body_velocity_ds, 'b', 'LineWidth', 1.5);
 hold on;
 
 % Find runs of 1s in freeze_data_trimmed
@@ -572,8 +521,8 @@ freeze_end_indices = find(diff([freeze_data_trimmed, 0]) == -1);
 % Add rectangles for freeze periods
 for i = 1:length(freeze_start_indices)
     % No additional adjustment needed for freeze indices relative to time_vector
-    x_start = time_vector(freeze_start_indices(i)); 
-    x_end = time_vector(freeze_end_indices(i)); 
+    x_start = time_vector_ds(freeze_start_indices(i)); 
+    x_end = time_vector_ds(freeze_end_indices(i)); 
     rectangle('Position', [x_start, 0, x_end - x_start, max_velocity], ...
               'FaceColor', [0.9, 0.9, 0.9], 'EdgeColor', 'none');
 end
@@ -584,9 +533,9 @@ xlabel('Time (min)');
 ylabel('Velocity (cm/s)');
 
 ylim([0, 300]);
-x_ticks = 0:1:max(time_vector); % 1-minute increments
+x_ticks = 0:1:max(time_vector_ds); % 1-minute increments
 xticks(x_ticks);
-xlim([min(time_vector), max(time_vector)]);
+xlim([min(time_vector_ds), max(time_vector_ds)]);
 % legend('Body Velocity', 'Freeze Periods');
 
 %%
@@ -741,6 +690,8 @@ total_stimuli = 2;
 stimulus_times = cell(total_stimuli, 1);
 current_time = 0;
 
+session_length_in_min = 12;
+
 % Loop through each stimulus alternately and calculate start and end times
 for j = 1:num_repeats
     for i = 1:total_stimuli
@@ -766,7 +717,7 @@ end
 
 % experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
+experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
 % Define parameters
 threshold = 1; % Velocity threshold
@@ -778,7 +729,7 @@ min_samples = min_duration / sample_duration;
 
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D3';
+session_to_analyze = 'D4';
 
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
@@ -951,7 +902,7 @@ if any("sex" == string(experimental_grps.Properties.VariableNames))
 
 
 else
-
+    
     experimental_data_safe = mean_safe_context(strcmp(experimental_grps_updated.group, 'Experimental'), :);
     experimental_mean_safe = mean(experimental_data_safe);
     experimental_mean_safe_collapsed = mean(experimental_data_safe, 2);
@@ -1078,7 +1029,9 @@ end
 %%
 % Number of bins
 num_bins = 24;
-
+interval = 2;  
+total_time = 12;
+bins_per_interval = 4; % Number of bins per interval (4 columns per 2 minutes)
 % Original number of columns
 num_columns = size(freeze_data, 2);
 
@@ -1118,26 +1071,17 @@ if any("sex" == string(experimental_grps.Properties.VariableNames))
     hold on;
     h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_male), experimental_sem_male, 'lineProps', {'color', 'r'});
     h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_female), experimental_sem_female, 'lineProps', {'color', 'k'});
-
-    % legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
-
-    % Adjust x-axis ticks and labels
-    xlim([1 num_bins]); % Set x-axis limits to match the data range
-    xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
-    xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
+    
+    % Calculate x-tick positions and labels
+    x_tick_positions = bins_per_interval:bins_per_interval:num_bins; % [4, 8, 12, ...]
+    % time_points = 0:interval:total_time - interval; % Time intervals [0, 2, 4, ...]
+    time_points = interval:interval:total_time; % Time intervals [0, 2, 4, ...]
+    % Set the x-ticks and labels
+    xticks(x_tick_positions); % Exact positions on the axis
+    xticklabels(arrayfun(@num2str, time_points, 'UniformOutput', false)); % Labels for time
+    xlabel('Time (min)');
 
     ylim([0 0.9]); % Set y-axis limits
-    % Add rectangles for freeze periods
-    % x_tick_indices = [1:4:num_bins]
-    % for i = 1:length(x_tick_indices)
-    %     % No additional adjustment needed for freeze indices relative to time_vector
-    %     x_start = x_tick_indices(i);
-    %     x_end = x_tick_indices(i+1);
-    %     rectangle('Position', [x_start, 0, x_end - x_start, 1], ...
-    %               'FaceColor', [0.9, 0.9, 0.9], 'EdgeColor', 'none');
-    % end
-    %
-    %
 
 
 else
@@ -1155,37 +1099,216 @@ else
     no_shock_sem = std(no_shock_data)/sqrt(size(no_shock_data, 1));
     no_shock_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
 
-    figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+    figure('Position', [100, 100, 900, 300]); % [left, bottom, width, height]
     hold on;
 
     h(1) = shadedErrorBar(1:num_bins, mean(experimental_data), experimental_sem, 'lineProps', {'color', 'r'});
     h(2) = shadedErrorBar(1:num_bins, mean(one_context_data), one_context_sem, 'lineProps', {'color', 'k'});
     h(2) = shadedErrorBar(1:num_bins, mean(no_shock_data), no_shock_sem, 'lineProps', {'color', 'b'});
 
+    % Calculate x-tick positions and labels
+    x_tick_positions = bins_per_interval:bins_per_interval:num_bins; % [4, 8, 12, ...]
+    % time_points = 0:interval:total_time - interval; % Time intervals [0, 2, 4, ...]
+    time_points = interval:interval:total_time; % Time intervals [0, 2, 4, ...]
+    % Set the x-ticks and labels
+    xticks(x_tick_positions); % Exact positions on the axis
+    xticklabels(arrayfun(@num2str, time_points, 'UniformOutput', false)); % Labels for time
+    xlabel('Time (min)');
 
-    % legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
 
-    % Adjust x-axis ticks and labels
-    xlim([1 num_bins]); % Set x-axis limits to match the data range
-    xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
-    xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
-
-    ylim([0 0.9]); % Set y-axis limits
-    % Add rectangles for freeze periods
-    % x_tick_indices = [1:4:num_bins]
-    % for i = 1:length(x_tick_indices)
-    %     % No additional adjustment needed for freeze indices relative to time_vector
-    %     x_start = x_tick_indices(i);
-    %     x_end = x_tick_indices(i+1);
-    %     rectangle('Position', [x_start, 0, x_end - x_start, 1], ...
-    %               'FaceColor', [0.9, 0.9, 0.9], 'EdgeColor', 'none');
-    % end
-    %
-    %
-
+    % Set axis limits
+    xlim([1 num_bins]);
+    ylim([0 0.8]); % Set y-axis limits
 
 end
 
+%%
+recorded_fps = 30;
 
 
 
+% Parameters
+stimulus_duration = 2 * 60; % 2 minutes in seconds
+num_repeats = 3;
+total_stimuli = 2;
+
+% Initialize variables
+stimulus_times = cell(total_stimuli, 1);
+current_time = 0;
+
+% Loop through each stimulus alternately and calculate start and end times
+for j = 1:num_repeats
+    for i = 1:total_stimuli
+        start_time = current_time;
+        end_time = start_time + stimulus_duration;
+        
+        if isempty(stimulus_times{i})
+            stimulus_times{i} = [start_time, end_time];
+        else
+            stimulus_times{i} = [stimulus_times{i}; start_time, end_time];
+        end
+        
+        current_time = end_time;
+    end
+end
+
+
+% Multiply every value in stimulus_times by the FPS
+for i = 1:total_stimuli
+    stimulus_frames{i} = stimulus_times{i} * recorded_fps;
+end
+
+%%
+% Define total duration in minutes and number of samples
+total_duration_minutes = 12;
+num_samples = size(freeze_data, 2); % 21,590 samples
+samples_per_minute = num_samples / total_duration_minutes; % Samples per minute
+
+% Plot the data
+figure('Position', [100, 100, 900, 300]); % [left, bottom, width, height]
+plot(linspace(0, total_duration_minutes, num_samples), freeze_data(7, :)); % Scale x-axis
+hold on;
+
+% Define colors and transparency
+color_1 = [0, 0, 0]; % Blue for stimulus 1
+color_2 = [0, 1, 1]; % Red for stimulus 2
+transparency = 0.3; % Transparency level
+
+% Plot rectangles for each stimulus presentation
+for i = 1:total_stimuli
+    for j = 1:num_repeats
+        % Get start and end frames
+        start_frame = stimulus_frames{i}(j, 1);
+        end_frame = stimulus_frames{i}(j, 2);
+
+        % Convert frame indices to minutes
+        start_time_minutes = start_frame * total_duration_minutes / num_samples;
+        end_time_minutes = end_frame * total_duration_minutes / num_samples;
+
+        % Calculate rectangle width in minutes
+        rect_width_minutes = end_time_minutes - start_time_minutes;
+
+        % Determine the Y-axis range
+        y_limits = ylim;
+
+        % Plot the rectangle
+        rectangle('Position', [start_time_minutes, y_limits(1), ...
+                               rect_width_minutes, y_limits(2) - y_limits(1)], ...
+                  'FaceColor', (i == 1) * [color_1 transparency] + ...
+                              (i == 2) * [color_2 transparency], ...
+                  'EdgeColor', 'none');
+    end
+end
+
+% Define x-ticks and labels
+x_ticks = 0:2:12; % Time points in minutes
+xticks(x_ticks);
+xticklabels(arrayfun(@num2str, x_ticks, 'UniformOutput', false));
+xlabel('Time (minutes)');
+xlim([0, total_duration_minutes]); % Set x-axis limits to full time range
+
+hold off;
+
+%%
+load('pilot_D4_freeze.mat')
+load('pilot_D3_freeze.mat')
+% Create a figure
+
+experimental_data_D4_means = [mean(experimental_data_aversive_D4, 2) mean(experimental_data_safe_D4, 2)];
+one_context_data_D4_means = [mean(one_context_data_aversive_D4, 2) mean(one_context_data_safe_D4, 2)];
+no_shock_data_D4_means = [mean(no_shock_data_aversive_D4, 2) mean(no_shock_data_safe_D4, 2)];
+
+experimental_data_D3_means = [mean(experimental_data_aversive_D3, 2) mean(experimental_data_safe_D3, 2)];
+one_context_data_D3_means = [mean(one_context_data_aversive_D3, 2) mean(one_context_data_safe_D3, 2)];
+no_shock_data_D3_means = [mean(no_shock_data_aversive_D3, 2) mean(no_shock_data_safe_D3, 2)];
+
+
+% Combine the datasets for easier handling
+all_data = {experimental_data_D3_means, one_context_data_D3_means, no_shock_data_D3_means};
+
+% Calculate means for bar heights
+means = [mean(experimental_data_D3_means); 
+         mean(one_context_data_D3_means); 
+         mean(no_shock_data_D3_means)];
+
+% Grouped positions for the bars
+x = [1, 2; 3.5, 4.5; 6, 7]; % Adjust spacing as needed
+
+% Bar plot
+figure;
+hold on;
+
+% Loop through each group to plot bars, scatter points, and lines
+for i = 1:3
+    % Bar plot for each group
+    for col = 1:2
+        bar_x = x(i, col); % Position for the current bar
+        bar(bar_x, means(i, col), 0.4, 'FaceAlpha', 0.7); % Plot each bar
+    end
+
+    % Overlay scatter points and connect with lines for the current variable
+    data = all_data{i}; % Current variable's data
+    jittered_x = zeros(size(data)); % To store jittered x-coordinates
+    for j = 1:size(data, 1)
+        % Scatter points for the current row
+        scatter_x = x(i, :) + (rand(1, 2) - 0.5) * 0.2; % Add jitter
+        jittered_x(j, :) = scatter_x; % Store jittered x-coordinates
+        scatter(scatter_x, data(j, :), 40, 'k', 'filled');
+    end
+
+    % Connect scatter points with a line using jittered x-coordinates
+    for j = 1:size(data, 1)
+        plot(jittered_x(j, :), data(j, :), 'k-', 'LineWidth', 0.5);
+    end
+end
+
+% Adjustments for aesthetics
+set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'Experimental', 'One Context', 'No Shock'});
+ylim([0 0.7])
+hold off;
+
+
+
+% Combine the datasets for easier handling
+all_data = {experimental_data_D4_means, one_context_data_D4_means, no_shock_data_D4_means};
+
+% Calculate means for bar heights
+means = [mean(experimental_data_D4_means); 
+         mean(one_context_data_D4_means); 
+         mean(no_shock_data_D4_means)];
+
+% Grouped positions for the bars
+x = [1, 2; 3.5, 4.5; 6, 7]; % Adjust spacing as needed
+
+% Bar plot
+figure;
+hold on;
+
+% Loop through each group to plot bars, scatter points, and lines
+for i = 1:3
+    % Bar plot for each group
+    for col = 1:2
+        bar_x = x(i, col); % Position for the current bar
+        bar(bar_x, means(i, col), 0.4, 'FaceAlpha', 0.7); % Plot each bar
+    end
+
+    % Overlay scatter points and connect with lines for the current variable
+    data = all_data{i}; % Current variable's data
+    jittered_x = zeros(size(data)); % To store jittered x-coordinates
+    for j = 1:size(data, 1)
+        % Scatter points for the current row
+        scatter_x = x(i, :) + (rand(1, 2) - 0.5) * 0.2; % Add jitter
+        jittered_x(j, :) = scatter_x; % Store jittered x-coordinates
+        scatter(scatter_x, data(j, :), 40, 'k', 'filled');
+    end
+
+    % Connect scatter points with a line using jittered x-coordinates
+    for j = 1:size(data, 1)
+        plot(jittered_x(j, :), data(j, :), 'k-', 'LineWidth', 0.5);
+    end
+end
+
+% Adjustments for aesthetics
+set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'Experimental', 'One Context', 'No Shock'});
+ylim([0 0.7])
+hold off;
