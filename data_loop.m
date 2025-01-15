@@ -29,7 +29,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
@@ -65,6 +65,10 @@ iter = iter+1;
 neuron_num = 0;
 animalIDs = (fieldnames(final));
 
+% if running PCA or any other analysis where you want to utilize a median
+% split on riskiness. can get this from running generate_behav_figs_RDT.m
+% animalIDs = animalIDs(risk_table.risky == 1);
+
 
 for ii = 1:size(animalIDs,1)
     currentanimal = char(animalIDs(ii));
@@ -93,7 +97,7 @@ for ii = 1:size(animalIDs,1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0); %'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0; 'LOSS_PLUS_ONE', 1, 'SHK', 0; 'LOSS_PLUS_ONE', 0, 'REW', 1.2, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3); %'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0; 'LOSS_PLUS_ONE', 1, 'SHK', 0; 'LOSS_PLUS_ONE', 0, 'REW', 1.2, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         % BehavData = BehavData(1:2, :);
         % trials = trials(1:2, :);
         varargin_strings = string(varargin_identity_class);
@@ -242,7 +246,7 @@ all_filter_args{iter,:} = filter_args;
 
 full_filter_string{iter} = strcat(epoc_to_align_all{iter,:}, '.', all_filter_args{iter,:});
 
-clear behav_tbl_temp
+clear behav_tbl_temp neuron_mean_unnormalized zall_mean_all sem_all
 
 %% FILTER TO GET, ALIGNED SHUFFLED CA DATA
 

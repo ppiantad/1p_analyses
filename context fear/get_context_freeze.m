@@ -162,11 +162,11 @@ session_long_mean = mean(trimmed_combined_context);
 
 %% conditioning
 
-experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
+% experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
-% experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+% experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 
-% experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
+experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 
 % Define parameters
 threshold = 1; % Velocity threshold
@@ -715,9 +715,9 @@ for i = 1:total_stimuli
 end
 
 
-% experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
-% experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
-experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
+% experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
 % Define parameters
 threshold = 1; % Velocity threshold
@@ -736,7 +736,7 @@ for gg = 1:size(animalIDs, 1)
     current_mouse = animalIDs{gg};
     if strcmp(session_to_analyze, 'D1_Morning') & strcmp(current_mouse, 'B57417')
         continue
-    elseif strcmp(session_to_analyze, 'D3') & strcmp(current_mouse, 'B51618')
+    elseif strcmp(session_to_analyze, 'D3') & strcmp(current_mouse, 'B51618') | strcmp(current_mouse, 'B58215')
         continue
     else
         if isfield(final_DLC.(current_mouse), session_to_analyze)
@@ -1067,11 +1067,11 @@ if any("sex" == string(experimental_grps.Properties.VariableNames))
     experimental_sem_female = std(experimental_data_female)/sqrt(size(experimental_data_female, 1));
     experimental_mice_female = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
  
-    figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+    figure('Position', [100, 100, 900, 300]); % [left, bottom, width, height]
     hold on;
     h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_male), experimental_sem_male, 'lineProps', {'color', 'r'});
     h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_female), experimental_sem_female, 'lineProps', {'color', 'k'});
-    
+
     % Calculate x-tick positions and labels
     x_tick_positions = bins_per_interval:bins_per_interval:num_bins; % [4, 8, 12, ...]
     % time_points = 0:interval:total_time - interval; % Time intervals [0, 2, 4, ...]
@@ -1081,7 +1081,11 @@ if any("sex" == string(experimental_grps.Properties.VariableNames))
     xticklabels(arrayfun(@num2str, time_points, 'UniformOutput', false)); % Labels for time
     xlabel('Time (min)');
 
-    ylim([0 0.9]); % Set y-axis limits
+
+    % Set axis limits
+    xlim([1 num_bins]);
+    ylim([0 0.8]); % Set y-axis limits
+
 
 
 else
@@ -1210,8 +1214,8 @@ xlim([0, total_duration_minutes]); % Set x-axis limits to full time range
 hold off;
 
 %%
-load('pilot_D4_freeze.mat')
-load('pilot_D3_freeze.mat')
+% load('pilot_D4_freeze.mat')
+% load('pilot_D3_freeze.mat')
 % Create a figure
 
 experimental_data_D4_means = [mean(experimental_data_aversive_D4, 2) mean(experimental_data_safe_D4, 2)];
@@ -1264,7 +1268,7 @@ end
 
 % Adjustments for aesthetics
 set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'Experimental', 'One Context', 'No Shock'});
-ylim([0 0.7])
+ylim([0 0.9])
 hold off;
 
 
@@ -1310,5 +1314,106 @@ end
 
 % Adjustments for aesthetics
 set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'Experimental', 'One Context', 'No Shock'});
-ylim([0 0.7])
+ylim([0 0.9])
 hold off;
+
+%%
+% load('pilot_D4_freeze.mat')
+% load('pilot_D3_freeze.mat')
+% Create a figure
+
+
+experimental_data_D3_means_male = [mean(experimental_data_aversive_male_D3, 2) mean(experimental_data_safe_male_D3, 2)];
+one_context_data_D3_means_female = [mean(experimental_data_aversive_female_D3, 2) mean(experimental_data_safe_female_D3, 2)];
+
+experimental_data_D4_means_male = [mean(experimental_data_aversive_male_D4, 2) mean(experimental_data_safe_male_D4, 2)];
+one_context_data_D4_means_female = [mean(experimental_data_aversive_female_D4, 2) mean(experimental_data_safe_female_D4, 2)];
+
+% Combine the datasets for easier handling
+all_data = {experimental_data_D3_means_male, one_context_data_D3_means_female};
+
+% Calculate means for bar heights
+means = [mean(experimental_data_D3_means_male); 
+         mean(one_context_data_D3_means_female)];
+
+% Grouped positions for the bars
+x = [1, 2; 3.5, 4.5; 6, 7]; % Adjust spacing as needed
+
+% Bar plot
+figure;
+hold on;
+
+% Loop through each group to plot bars, scatter points, and lines
+for i = 1:size(all_data, 2)
+    % Bar plot for each group
+    for col = 1:2
+        bar_x = x(i, col); % Position for the current bar
+        bar(bar_x, means(i, col), 0.4, 'FaceAlpha', 0.7); % Plot each bar
+    end
+
+    % Overlay scatter points and connect with lines for the current variable
+    data = all_data{i}; % Current variable's data
+    jittered_x = zeros(size(data)); % To store jittered x-coordinates
+    for j = 1:size(data, 1)
+        % Scatter points for the current row
+        scatter_x = x(i, :) + (rand(1, 2) - 0.5) * 0.2; % Add jitter
+        jittered_x(j, :) = scatter_x; % Store jittered x-coordinates
+        scatter(scatter_x, data(j, :), 40, 'k', 'filled');
+    end
+
+    % Connect scatter points with a line using jittered x-coordinates
+    for j = 1:size(data, 1)
+        plot(jittered_x(j, :), data(j, :), 'k-', 'LineWidth', 0.5);
+    end
+end
+
+% Adjustments for aesthetics
+set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'Males', 'Females'});
+ylim([0 0.9])
+hold off;
+
+
+
+% Combine the datasets for easier handling
+all_data = {experimental_data_D4_means_male, one_context_data_D4_means_female};
+
+% Calculate means for bar heights
+means = [mean(experimental_data_D4_means_male); 
+         mean(one_context_data_D4_means_female)];
+
+% Grouped positions for the bars
+x = [1, 2; 3.5, 4.5; 6, 7]; % Adjust spacing as needed
+
+% Bar plot
+figure;
+hold on;
+
+% Loop through each group to plot bars, scatter points, and lines
+for i = 1:size(all_data, 2)
+    % Bar plot for each group
+    for col = 1:2
+        bar_x = x(i, col); % Position for the current bar
+        bar(bar_x, means(i, col), 0.4, 'FaceAlpha', 0.7); % Plot each bar
+    end
+
+    % Overlay scatter points and connect with lines for the current variable
+    data = all_data{i}; % Current variable's data
+    jittered_x = zeros(size(data)); % To store jittered x-coordinates
+    for j = 1:size(data, 1)
+        % Scatter points for the current row
+        scatter_x = x(i, :) + (rand(1, 2) - 0.5) * 0.2; % Add jitter
+        jittered_x(j, :) = scatter_x; % Store jittered x-coordinates
+        scatter(scatter_x, data(j, :), 40, 'k', 'filled');
+    end
+
+    % Connect scatter points with a line using jittered x-coordinates
+    for j = 1:size(data, 1)
+        plot(jittered_x(j, :), data(j, :), 'k-', 'LineWidth', 0.5);
+    end
+end
+
+% Adjustments for aesthetics
+set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'Males', 'Females'});
+ylim([0 0.9])
+hold off;
+

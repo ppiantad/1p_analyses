@@ -2,13 +2,34 @@
 load('acton.mat')
 load('batlowW.mat')
 
+% match the number of neurons in each group (if necessary - data will stay
+% the same if sizes are equal
+clear idx temp
+for i = 1:length(zall_mean_all_array)
+
+    temp(i) = (size(zall_mean_all_array{1, i},1));
+end
+
+[minSize,minIdx] = min(temp);
+
+for i = 1:length(zall_mean_all_array)
+    if i ~= minIdx
+        idx_for_subsample = randperm(temp(i),minSize);
+        idx_for_subsample = sort(idx_for_subsample);
+        zdataTemp{i} = zall_mean_all_array{1, i}(idx_for_subsample,:);
+    else
+        zdataTemp{i} = zall_mean_all_array{1, i};
+
+    end
+end
+
 
 
 %DO NOT CHANGE FROM THESE SETTINGS UNLESS WILLING TO REVERT BACK
 
 % MY APPROACH
 % % use zall array if you want to check how trials compare across block
-neuron_mean_concat = horzcat(zall_mean_all_array{:});
+neuron_mean_concat = horzcat(zdataTemp{:});
 % neuron_mean_concat = horzcat(zall_mean_all_array{1, 11}, zall_mean_all_array{1, 12});
 %12/14/2024 MAYBE I DONT NEED THIS LINE BELOW? MAYBE IT ARTIFICALLY DEFLATES
 %DIFFERENCES?
@@ -231,9 +252,75 @@ for row_idx = 1:num_rows
     zall_array_trial_concat{row_idx} = concatenated_rows;
 end
 
+%ALSO TRY SPLITTING SESSION INTO 9 PARTS (10 TRIALS EACH) AND RUN PCA 10
+%TIMES
+
+%run PCA separately on risky vs. non-risky mice
+
+for hh = 1:size(zall_array_trial_concat, 1)
+    current_zall_array_trial_concat = zall_array_trial_concat{hh};
+
+    [coef,score, latent, ~, explained, ~] = pca(current_zall_array_trial_concat');
+    coef_by_trial{hh} = coef;
+    score_by_trial{hh} = score;
+    latent_by_trial{hh} = latent;
+    explained_by_trial{hh} = explained;
+    clear coef score latent explained
+
+
+end
 
 
 
+for kk = 1:size(explained_by_trial, 2)
+    current_explained_by_trial = explained_by_trial{kk};
+
+    variance_explained_by_first_10_PCs(kk) = sum(current_explained_by_trial(1:10));
+
+end
+figure; plot(variance_explained_by_first_10_PCs)
+
+% concat_all_trials_all_neurons = horzcat(zall_array_trial_concat{:});
+% 
+% [coef,score, latent, ~, explained, ~] = pca(concat_all_trials_all_neurons');
+
+
+% Initialize array to store the number of PCs for each trial
+num_PCs_for_90_variance = zeros(1, size(explained_by_trial, 2));
+
+for kk = 1:size(explained_by_trial, 2)
+    current_explained_by_trial = explained_by_trial{kk};
+    
+    % Compute cumulative variance
+    cumulative_variance = cumsum(current_explained_by_trial);
+    
+    % Find the number of PCs needed to reach or exceed 90% variance
+    num_PCs_for_90_variance(kk) = find(cumulative_variance >= 90, 1, 'first');
+    num_PCs_for_80_variance(kk) = find(cumulative_variance >= 80, 1, 'first');
+    num_PCs_for_70_variance(kk) = find(cumulative_variance >= 70, 1, 'first');
+    num_PCs_for_60_variance(kk) = find(cumulative_variance >= 60, 1, 'first');
+    num_PCs_for_50_variance(kk) = find(cumulative_variance >= 50, 1, 'first');
+    num_PCs_for_40_variance(kk) = find(cumulative_variance >= 40, 1, 'first');
+end
+
+% Plot the result
+figure;
+plot(num_PCs_for_90_variance);
+hold on; plot(num_PCs_for_80_variance);
+hold on; plot(num_PCs_for_70_variance);
+hold on; plot(num_PCs_for_60_variance);
+hold on; plot(num_PCs_for_50_variance);
+hold on; plot(num_PCs_for_40_variance);
+xlabel('Trial #');
+ylabel('Number of PCs required for variance threshold');
+ylim([10 20]);
+legend({'90%', '80%', '70%', '60%', '50%', '40%'})
+
+
+
+
+
+%%
 % apply PCA to each trial
 for q = 1:size(zall_array_trial_concat, 1)
     temp_trial = zall_array_trial_concat{q, 1};
@@ -248,6 +335,66 @@ for zz = 1:size(PCScore_trials, 1)
     PC_2_all_trials(zz, :) = PCScore_trials{zz, 1}(2, :);
     PC_3_all_trials(zz, :) = PCScore_trials{zz, 1}(3, :);
     PC_4_all_trials(zz, :) = PCScore_trials{zz, 1}(4, :);
+end
+
+
+% Define the bin size
+num_bins_for_pcs = 30;
+
+% Initialize arrays to store the binned data
+PC_1_binned = [];
+PC_2_binned = [];
+PC_3_binned = [];
+PC_4_binned = [];
+
+% Determine the number of bins
+num_rows = size(PC_1_all_trials, 1);
+num_bins = floor(num_rows / num_bins_for_pcs);
+
+% Bin the data for each array
+for i = 1:num_bins
+    % Compute the row indices for the current bin
+    row_start = (i-1) * num_bins_for_pcs + 1;
+    row_end = row_start + num_bins_for_pcs - 1;
+    
+    % Calculate the mean across the rows for each principal component array
+    PC_1_binned(i, :) = mean(PC_1_all_trials(row_start:row_end, :), 1);
+    PC_2_binned(i, :) = mean(PC_2_all_trials(row_start:row_end, :), 1);
+    PC_3_binned(i, :) = mean(PC_3_all_trials(row_start:row_end, :), 1);
+    PC_4_binned(i, :) = mean(PC_4_all_trials(row_start:row_end, :), 1);
+end
+
+% Check that ts1 matches the number of columns in PC_1_binned
+if length(ts1) ~= size(PC_1_binned, 2)
+    error('The length of ts1 must match the number of columns in the binned data.');
+end
+
+% Define an array of PC data for easier looping
+PC_binned_data = {PC_1_binned, PC_2_binned, PC_3_binned, PC_4_binned};
+titles = {'PC 1', 'PC 2', 'PC 3', 'PC 4'};
+
+% Loop through each PC binned data array
+for pc_idx = 1:length(PC_binned_data)
+    % Get the current PC binned data
+    PC_binned = PC_binned_data{pc_idx};
+    
+    % Create a new figure
+    figure;
+    hold on;
+    
+    % Plot each bin
+    for bin_idx = 1:size(PC_binned, 1)
+        plot(ts1, PC_binned(bin_idx, :), 'DisplayName', sprintf('Bin #%d', bin_idx));
+    end
+    
+    % Add legend, title, and labels
+    legend('show', 'Location', 'best');
+    title(titles{pc_idx});
+    xlabel('Time (s)');
+    ylabel('PC data');
+    
+
+    hold off;
 end
 
 
