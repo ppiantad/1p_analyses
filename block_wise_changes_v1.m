@@ -93,6 +93,10 @@ sum(lost_all)
 intersect(lost_prechoice, lost_postchoice)
 true_neutral = respClass_all_array{1, comparison_arrays(1, 1)} == 3 & respClass_all_array{1, comparison_arrays(1, 2)} ~= 3 & respClass_all_array{1, comparison_arrays(1, 3)} ~= 3;
 
+
+neurons_per_mouse = cellfun(@(x) size(x, 2), zall_mouse(:, 1));
+
+
 %% 
 % Run one cell below, then do all the figure generation in the following
 % code. Then run the next cell below, and do the same figure generation

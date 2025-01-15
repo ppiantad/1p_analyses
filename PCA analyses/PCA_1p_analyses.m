@@ -503,6 +503,56 @@ for ff = 1:numConditions
 
 end
 
+
+%% in order to do euclidean distance comparisons (using data from Britt's type of calculation) as Ruairi did in Shana's paper, need to have a shuffled condition
+%  this is my initial attempt at creating shuffled distributon. basically,
+%  run PCA on a shuffled array some # of times
+
+resample_neural_data_number = 10;
+sample_num = size(neuron_mean_concat, 2);
+
+for g = 1:resample_neural_data_number                                              %for each resampling of the data
+    %sort the data index to create a new list of indices
+    % here I am using the data that were sub-selected to be the same
+    % size as Block 1 (30 trials). You could also replace
+    % current_data_for_shuffling with current_session_long_data and use
+    % 1:30 for Block 1, and 31:90 for Blocks 2/3
+    for t = 1:size(neuron_mean_concat, 1) %31:90 1:30
+
+        shift_val = randi(sample_num); %for each trial
+        shuffledTrace(t,:) = circshift(neuron_mean_concat(t,:), shift_val,2);     %shuffle the calcium trace
+        %         shuffledEvtRate(t,:) = caEvtRateTrials(t,shuffledIDX(t,:)); %shuffle the event rate
+    end
+    shuffled_traces_for_PCA{g} = shuffledTrace;
+    clear shuffledTrace shift_val
+
+    %     nullDistEvtRate(g,:) = nanmean(shuffledEvtRate);                %calculate the NaN mean of the shuffled event rates
+end
+
+
+for hh = 1:size(shuffled_traces_for_PCA, 2)
+    current_shuffled_traces_for_PCA = shuffled_traces_for_PCA{hh};
+
+    [coef,score, latent, ~, explained, ~] = pca(current_shuffled_traces_for_PCA');
+
+    for qq = 1:numConditions
+
+        condition_data_shuffled{qq} = current_shuffled_traces_for_PCA(:, condition_ranges{1, qq}{1}:condition_ranges{1, qq}{2});
+        % condition_data{qq} = neuron_mean_concat(condition_ranges{1, qq}{1}:condition_ranges{1, qq}{2}, :);
+
+    end
+
+    for i = eventIdx
+        temp = condition_data_shuffled{i};
+
+        PCScore_shuffle{i} = coef(1:size(temp,1), 1: NumPC)'*temp;
+
+    end
+    PCScore_all{hh} = PCScore_shuffle;
+    clear PCScore_shuffle
+end
+
+
 %%
 
 % Initialize a cell array to store the path lengths
@@ -741,13 +791,88 @@ for i = 1:size(PCScore{1, 1}  ,2)
     q1 = PCScore{1, 2}(1,i);
     q2 = PCScore{1, 2}(2,i);
     q3 = PCScore{1, 2}(3,i); 
-
+    
+    % PC1-3 inter-trajectory distance
     eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2 + (q3-p3).^2);
+
+    % PC1-2 inter-trajectory distance
     % eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2);
+
+    % PC1 inter-trajectory distance
+    % eucDtemp = sqrt((q1-p1).^2);
 eucD1to7(1,i) = eucDtemp;
 end 
 
+hold on;
 figure; plot(ts1, eucD1to7)
+
+
+
+% this seems close to what Hao describes for getting the length in his
+% methods?
+
+% Initialize variables to store total lengths
+trajectoryLength1 = 0; % For PCScore{1,1}
+trajectoryLength2 = 0; % For PCScore{1,2}
+
+% Calculate the total length for PCScore{1,1}
+for i = 1:(size(PCScore{1,1}, 2) - 1)
+    % Calculate the Euclidean distance between consecutive points
+    p1 = PCScore{1,1}(:, i);
+    p2 = PCScore{1,1}(:, i+1);
+    distance = sqrt(sum((p2 - p1).^2));
+    
+    % Add to the total length
+    trajectoryLength1 = trajectoryLength1 + distance;
+end
+
+% Calculate the total length for PCScore{1,2}
+for i = 1:(size(PCScore{1,2}, 2) - 1)
+    % Calculate the Euclidean distance between consecutive points
+    q1 = PCScore{1,2}(:, i);
+    q2 = PCScore{1,2}(:, i+1);
+    distance = sqrt(sum((q2 - q1).^2));
+    
+    % Add to the total length
+    trajectoryLength2 = trajectoryLength2 + distance;
+end
+
+% Display the total lengths
+disp(['Total length of trajectory 1: ', num2str(trajectoryLength1)]);
+disp(['Total length of trajectory 2: ', num2str(trajectoryLength2)]);
+
+%% DISTANCES FOR SHUFFLE - still a work in progress
+for ff = 1:size(PCScore_all, 2)
+    input_data = PCScore_all{1, ff};
+    eucD1to7= [];
+    %here, p = s1 and q = s7
+    for i = 1:size(input_data{1, 1}  ,2)
+        p1 = input_data{1, 1}(1,i);
+        p2 = input_data{1, 1}(2,i);
+        p3 = input_data{1, 1}(3,i);
+
+        q1 = input_data{1, 2}(1,i);
+        q2 = input_data{1, 2}(2,i);
+        q3 = input_data{1, 2}(3,i);
+
+        % PC1-3 inter-trajectory distance
+        eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2 + (q3-p3).^2);
+
+        % PC1-2 inter-trajectory distance
+        % eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2);
+
+        % PC1 inter-trajectory distance
+        % eucDtemp = sqrt((q1-p1).^2);
+        eucD1to7(1,i) = eucDtemp;
+    end
+    shuffled_distances(ff, :) = eucD1to7;
+
+end
+
+mean_shuffled_distances = mean(shuffled_distances);
+
+hold on;
+figure; plot(ts1, mean(shuffled_distances))
 
 %%
 % Data
