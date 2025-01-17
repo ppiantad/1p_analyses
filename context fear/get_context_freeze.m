@@ -164,9 +164,9 @@ session_long_mean = mean(trimmed_combined_context);
 
 % experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
-% experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 
-experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
+% experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 
 % Define parameters
 threshold = 1; % Velocity threshold
@@ -204,10 +204,14 @@ for gg = 1:size(animalIDs, 1)
             end_idx = find(diff([below_threshold; 0]) == -1); % End indices
 
             % Iterate through each segment and label
+            valid_freeze_bin = 0;
             for i = 1:length(start_idx)
                 segment_length = end_idx(i) - start_idx(i) + 1;
                 if segment_length >= min_samples
+                    valid_freeze_bin = valid_freeze_bin + 1;
                     labels(start_idx(i):end_idx(i)) = 1;
+                    freeze_frames_mouse{gg}(1, valid_freeze_bin) = start_idx(i);
+                    freeze_frames_mouse{gg}(2, valid_freeze_bin) = end_idx(i);
                 end
             end
 
@@ -479,7 +483,7 @@ end
 
 %% plot individual data from a given session - make sure to update variables and indices if using!
 % Load the data
-body_velocity = final_DLC.B46837        .D1_Afternoon.movement_data.body_velocity; % Assuming this is a table column
+body_velocity = final_DLC.B51618        .D1_Afternoon.movement_data.body_velocity; % Assuming this is a table column
 freeze_data_extracted = freeze_data(1,:); % Get the first row of freeze_data
 
 
@@ -715,8 +719,8 @@ for i = 1:total_stimuli
 end
 
 
-% experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
-experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
+experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+% experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 % experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
 % Define parameters
@@ -729,7 +733,7 @@ min_samples = min_duration / sample_duration;
 
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D4';
+session_to_analyze = 'D3';
 
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)

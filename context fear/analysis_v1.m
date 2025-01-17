@@ -27,7 +27,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 
-session_to_analyze = 'D1_Afternoon';
+session_to_analyze = 'D3';
 
 % Parameters
 session_duration = 12 * 60; % seconds

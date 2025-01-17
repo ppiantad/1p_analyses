@@ -508,7 +508,7 @@ end
 %  this is my initial attempt at creating shuffled distributon. basically,
 %  run PCA on a shuffled array some # of times
 
-resample_neural_data_number = 10;
+resample_neural_data_number = 100;
 sample_num = size(neuron_mean_concat, 2);
 
 for g = 1:resample_neural_data_number                                              %for each resampling of the data
@@ -844,7 +844,7 @@ disp(['Total length of trajectory 2: ', num2str(trajectoryLength2)]);
 %% DISTANCES FOR SHUFFLE - still a work in progress
 for ff = 1:size(PCScore_all, 2)
     input_data = PCScore_all{1, ff};
-    eucD1to7= [];
+    eucD1to7_shuff= [];
     %here, p = s1 and q = s7
     for i = 1:size(input_data{1, 1}  ,2)
         p1 = input_data{1, 1}(1,i);
@@ -856,16 +856,16 @@ for ff = 1:size(PCScore_all, 2)
         q3 = input_data{1, 2}(3,i);
 
         % PC1-3 inter-trajectory distance
-        eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2 + (q3-p3).^2);
+        eucDtemp_shuff = sqrt((q1-p1).^2 + (q2-p2).^2 + (q3-p3).^2);
 
         % PC1-2 inter-trajectory distance
         % eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2);
 
         % PC1 inter-trajectory distance
         % eucDtemp = sqrt((q1-p1).^2);
-        eucD1to7(1,i) = eucDtemp;
+        eucD1to7_shuff(1,i) = eucDtemp_shuff;
     end
-    shuffled_distances(ff, :) = eucD1to7;
+    shuffled_distances(ff, :) = eucD1to7_shuff;
 
 end
 
@@ -873,6 +873,12 @@ mean_shuffled_distances = mean(shuffled_distances);
 
 hold on;
 figure; plot(ts1, mean(shuffled_distances))
+
+% get proprtion of shuffled distances that are > 'real' euclid distances
+inds = shuffled_distances > eucD1to7;
+
+prop_inds = sum(inds)/size(inds, 1);
+
 
 %%
 % Data

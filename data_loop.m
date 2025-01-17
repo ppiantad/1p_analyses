@@ -97,7 +97,7 @@ for ii = 1:size(animalIDs,1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1); %'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0; 'LOSS_PLUS_ONE', 1, 'SHK', 0; 'LOSS_PLUS_ONE', 0, 'REW', 1.2, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 1); %'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0; 'LOSS_PLUS_ONE', 1, 'SHK', 0; 'LOSS_PLUS_ONE', 0, 'REW', 1.2, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         % BehavData = BehavData(1:2, :);
         % trials = trials(1:2, :);
         varargin_strings = string(varargin_identity_class);
