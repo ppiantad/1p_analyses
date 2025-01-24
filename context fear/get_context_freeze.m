@@ -483,7 +483,7 @@ end
 
 %% plot individual data from a given session - make sure to update variables and indices if using!
 % Load the data
-body_velocity = final_DLC.B51618        .D1_Afternoon.movement_data.body_velocity; % Assuming this is a table column
+body_velocity = final_DLC.D04991        .D1_Afternoon.movement_data.body_velocity; % Assuming this is a table column
 freeze_data_extracted = freeze_data(1,:); % Get the first row of freeze_data
 
 

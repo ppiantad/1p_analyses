@@ -5,7 +5,7 @@
 
 % final_behavior = final_SLEAP; % for hM4Di data;
 
-session_to_analyze = 'RDT_D1'
+session_to_analyze = 'Pre_RDT_RM'
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_13'};
@@ -622,6 +622,48 @@ set(gca, 'ytick', 0:25:100);
 
 hold off;
 
+%%
+mean_latency_large = mean([risk_table.block_1_large_choice_latency, risk_table.block_2_large_choice_latency, risk_table.block_3_large_choice_latency], 2)
+mean_latency_small = mean([risk_table.block_1_small_choice_latency, risk_table.block_2_small_choice_latency, risk_table.block_3_small_choice_latency], 2)
+
+latencies_for_boxplot = [mean_latency_large mean_latency_small]; 
+
+mean_collect_latency_large = mean([risk_table.block_1_large_collect_latency, risk_table.block_2_large_collect_latency, risk_table.block_3_large_collect_latency], 2)
+mean_collect_latency_small = mean([risk_table.block_1_small_collect_latency, risk_table.block_2_small_collect_latency, risk_table.block_3_small_collect_latency], 2)
+
+collect_latencies_for_boxplot = [mean_collect_latency_large mean_collect_latency_small]; 
+
+mean_consum_latency_large = mean([risk_table.large_consum_duration_block_1, risk_table.large_consum_duration_block_2, risk_table.large_consum_duration_block_3], 2)
+mean_consum_latency_small = mean([risk_table.small_consum_duration_block_1, risk_table.small_consum_duration_block_2, risk_table.small_consum_duration_block_3], 2)
+
+consum_latencies_for_boxplot = [mean_consum_latency_large mean_consum_latency_small]; 
+
+hold on
+figure;
+tiledlayout(3, 1)
+
+% First boxplot
+nexttile;
+boxplot(latencies_for_boxplot, 'Orientation', 'horizontal');
+xlim([0 10]);
+xticks([0 10]); % Set x-ticks to the first and last values
+xticklabels({'0', '10'}); % Label the x-ticks
+
+% Second boxplot
+nexttile;
+boxplot(collect_latencies_for_boxplot, 'Orientation', 'horizontal');
+xlim([0 5]);
+xticks([0 5]); % Set x-ticks to the first and last values
+xticklabels({'0', '5'}); % Label the x-ticks
+
+% Third boxplot
+nexttile;
+boxplot(consum_latencies_for_boxplot, 'Orientation', 'horizontal');
+xlim([0 5]);
+xticks([0 5]); % Set x-ticks to the first and last values
+xticklabels({'0', '5'}); % Label the x-ticks
+
+hold off
 
 %%
 

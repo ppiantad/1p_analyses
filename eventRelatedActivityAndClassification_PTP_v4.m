@@ -55,11 +55,11 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
-period_of_interest = 'prechoice';
+epoc_to_align = 'collectionTime'; % stTime choiceTime collectionTime
+period_of_interest = 'postchoice';
 
 if strcmp(epoc_to_align, 'stTime')
     period_of_interest = 'trial_start';
@@ -138,7 +138,7 @@ uv.sigma = 1.5;  %1.5                                                           
 % uv.evtSigWin.collect = [1 3]; %for REW collection [1 3]
 
 uv.resamples = 100                                                         %number of resamples to use in shuffle analysis 1000
-uv.zscore_to = 'window'; %
+uv.zscore_to = 'luthi'; %
 % 'window'
 % 'baseline'
 % 'session'
@@ -362,7 +362,7 @@ for ii = 1:size(fieldnames(final),1)
                 caTraceTrials(1, 1:size(ts1, 2)) = NaN;
                 zall(1, 1:size(ts1, 2)) = NaN;
             else
-                [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
+                [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials, zall_luthi] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 % [caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_only(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
 
@@ -373,6 +373,8 @@ for ii = 1:size(fieldnames(final),1)
                 elseif strcmp(uv.zscore_to, 'baseline') 
                     zall = zall_baselined(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                 % zall = zscored_caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                elseif strcmp(uv.zscore_to, 'luthi')
+                    zall = zall_luthi(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                 end
                 % for some events, the mice have no trials, therefore there are
                 % no traces. this line basically skips those neurons (adding 0

@@ -1,4 +1,4 @@
-function [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+function [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, x_limits)
 
 % data_array is expected to be a 1x# cell array. each cell should the
 % following orientation:
@@ -31,7 +31,8 @@ consec_thresh = 3; % 1017.3Hz sample rate / 3Hz filter %340 PRD used 340 because
 
 % Graphing parameters
 ylims = [-1 2];
-xlims = [ts1(1) round(ts1(end))];
+% xlims = [ts1(1) round(ts1(end))];
+xlims = x_limits;
 % sig_plot_level = linspace(4,3.2,7);
 
 ind_2 = ts1;
@@ -312,7 +313,7 @@ end
     % ylim(y_limits)
     % ylabel('z-scored dF/F', 'FontSize', 12);
     % xlabel('Time from choice (s)');
-    % ylim([-1 2.5])
+    ylim(ylims)
     % yticks(y_limits(1):0.2:y_limits(2))
     % xlim(xlims);
     % set(gcf, 'position', [10, 10, 900, 600]);

@@ -27,7 +27,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 
-session_to_analyze = 'D3';
+session_to_analyze = 'D1_Afternoon';
 
 % Parameters
 session_duration = 12 * 60; % seconds
@@ -102,41 +102,41 @@ animalIDs = (fieldnames(final));
 for ii = 1:size(animalIDs,1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
-        if exist('full_filter_string', 'var')
-            if yoke_data == 1
-
-                for i = 1:size(full_filter_string, 2)
-                    fprintf('%d. %s\n', i, full_filter_string{1, i});
-                end
-
-                % Prompt the user for input
-                user_selection = input('Which data would you like to match trials to?: ');
-
-                % Check if the input is valid
-                if user_selection >= 1 && user_selection <= size(full_filter_string, 2)
-                    selected_data = full_filter_string{1, user_selection};
-                    fprintf('You have selected: %s\n', selected_data);
-                else
-                    disp('Invalid selection. Please run the script again and enter a valid number.');
-                end
-                size_to_downsample_to = size(trials_per_mouse{ii, user_selection}, 1);
-                if size(BehavData, 1) > size_to_downsample_to
-                    % Randomly select rows from BehavData
-                    rand_indices = randperm(size(BehavData, 1), size_to_downsample_to);
-                    BehavData = BehavData(rand_indices, :);
-                    trials = trials(rand_indices, :);
-                    trials = sortrows(trials);
-                    % Sort the filtered BehavData by the Trial column
-                    BehavData = sortrows(BehavData, 'Trial');
-                else
-                    % If the size is not greater, keep BehavData as it is
-                    disp('No downsampling needed.');
-                end
-
-            else
-
-            end
-        end
+        % if exist('full_filter_string', 'var')
+        %     if yoke_data == 1
+        % 
+        %         for i = 1:size(full_filter_string, 2)
+        %             fprintf('%d. %s\n', i, full_filter_string{1, i});
+        %         end
+        % 
+        %         % Prompt the user for input
+        %         user_selection = input('Which data would you like to match trials to?: ');
+        % 
+        %         % Check if the input is valid
+        %         if user_selection >= 1 && user_selection <= size(full_filter_string, 2)
+        %             selected_data = full_filter_string{1, user_selection};
+        %             fprintf('You have selected: %s\n', selected_data);
+        %         else
+        %             disp('Invalid selection. Please run the script again and enter a valid number.');
+        %         end
+        %         size_to_downsample_to = size(trials_per_mouse{ii, user_selection}, 1);
+        %         if size(BehavData, 1) > size_to_downsample_to
+        %             % Randomly select rows from BehavData
+        %             rand_indices = randperm(size(BehavData, 1), size_to_downsample_to);
+        %             BehavData = BehavData(rand_indices, :);
+        %             trials = trials(rand_indices, :);
+        %             trials = sortrows(trials);
+        %             % Sort the filtered BehavData by the Trial column
+        %             BehavData = sortrows(BehavData, 'Trial');
+        %         else
+        %             % If the size is not greater, keep BehavData as it is
+        %             disp('No downsampling needed.');
+        %         end
+        % 
+        %     else
+        % 
+        %     end
+        % end
         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
         % comment out below if you don't want to zscore traces prior to the
         % rest of the analysis

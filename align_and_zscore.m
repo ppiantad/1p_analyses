@@ -1,4 +1,4 @@
-function [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time)
+function [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials, zall_luthi] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time)
 
 for t = 1:size(eTS,1)
     % set each trial's temporal boundaries
@@ -31,6 +31,7 @@ for t = 1:size(eTS,1)
                 zall_baselined(t,tmp) = (caTraceTrials(t,j) - zb(t))/zsd(t);
                 zall_window(t,tmp) = (caTraceTrials(t,j) - zb_window(t))/zsd_window(t);
                 zall_session(t,tmp) = (caTraceTrials(t,j) - zb_session(u))/zsd_session(u);
+                zall_luthi(t, tmp) = (caTraceTrials(t,j) - zb_window(t))/zb_session(u);
             end
             clear j;
     

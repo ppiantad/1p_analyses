@@ -184,12 +184,12 @@ hold off;
 
 pre_choice_window = [-4 0];     % Pre-choice period: -4 to 0 s
 post_choice_window = [0 2];     % Post-choice period: 0 to 2 s
-consumption_window = [1 3];     % Consumption period: 1 to 3 s if using data aligned to collect, do 0 to 2 to keep things consistent
+consumption_window = [2 5];     % Consumption period: 1 to 3 s if using data aligned to collect, do 0 to 2 to keep things consistent. if you want to show that consum neurons peak after collect, use something like 2-5
 
 windows = {pre_choice_window, post_choice_window, consumption_window};
 plot_num = [12, 70, 10];
 
-array_to_plot = [1, 1, 3]; % depends on the structure of zall
+array_to_plot = [1, 1, 1]; % depends on the structure of zall
 
 select_mouse = 'BLA_Insc_40';
 
@@ -200,7 +200,7 @@ select_mouse = 'BLA_Insc_40';
 %shock num 11
 
 
-% for RDT D1 BLA_Insc_40:
+% for Pre RDT RM BLA_Insc_40:
 %prechoice neuron num 12
 %postchoice rew num 70
 %consumption num 10
@@ -1242,7 +1242,7 @@ legend('Positive correlation', 'Negative correlation', 'No sig correlation');
 
 %%
 
-array_for_means = 1; 
+array_for_means = 3; 
 
 
 for q = 1:length (behav_tbl_iter{1, 1})
@@ -1266,11 +1266,14 @@ for q = 1:length (behav_tbl_iter{1, 1})
         trial_choice_times = nestedCellArray_1.choiceTime - nestedCellArray_1.stTime;
         % delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
         delay_to_collect_post_shk = nestedCellArray_1.collectionTime - nestedCellArray_1.choiceTime;
+        
         trial_choice_times_by_mouse{q} = trial_choice_times;
         delay_to_initiation_by_mouse{q} = delay_to_initiation;
         delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
         trial_types_by_mouse{q} = trial_types;
-        clear trial_choice_times delay_to_initiation delay_to_collect_post_shk trial_types
+        consum_times = nestedCellArray_1.collectionTime_end - nestedCellArray_1.collectionTime;
+        consum_times_by_mouse{q} = consum_times;
+        clear trial_choice_times delay_to_initiation delay_to_collect_post_shk trial_types consum_times
     end
 
 
@@ -1279,6 +1282,7 @@ end
 trial_types_concat = cat(1, trial_types_by_mouse{:});
 trial_choice_times_concat = cat(1, trial_choice_times_by_mouse{:});
 rew_collect_times_concat = cat(1, delay_to_collect_post_shk_by_mouse{:});
+consum_times_concat = cat(1, consum_times_by_mouse{:});
 
 bar_separation_value = 3;
 
@@ -1367,7 +1371,7 @@ yline(0);
 xtickformat('%.1f');
 ytickformat('%.1f');
 
-variable_to_correlate = trial_choice_times_by_mouse;
+variable_to_correlate = consum_times_by_mouse;
 
 
 %%
@@ -1377,9 +1381,9 @@ variable_to_correlate = trial_choice_times_by_mouse;
 meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
-timeRange = (ts1 >= -4) & (ts1 <= 0);
+% timeRange = (ts1 >= -4) & (ts1 <= 0);
 % timeRange = (ts1 >= 0) & (ts1 <= 2);
-% timeRange = (ts1 >= 1) & (ts1 <= 3);
+timeRange = (ts1 >= 0) & (ts1 <= 2);
 
 
 % Iterate through each cell in the zall_mouse array
@@ -1518,9 +1522,9 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
-not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
-% not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
+only_shk_responsive_corrs = allCorrelations(collect_block_1 == 1);
+% not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
+not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
 
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
@@ -3153,8 +3157,9 @@ end
 
 mean_data_array = {prechoice_array_large_mean, prechoice_array_small_mean};
 sem_data_array = {prechoice_array_large_sem, prechoice_array_small_sem};
+prechoice_x_limits = [-8 8];
 
-[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, prechoice_x_limits)
 
 
 postchoice_rew_neuron_count = 0;
@@ -3178,11 +3183,11 @@ for qq = 1:size(zall_mouse, 1)
     end
 end
 
-
+consum_x_limits = [-8 8];
 mean_data_array = {postchoice_array_large_mean, postchoice_array_small_mean};
 sem_data_array = {postchoice_array_large_sem, postchoice_array_small_sem};
 
-[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, consum_x_limits)
 
 
 
@@ -3207,8 +3212,8 @@ for qq = 1:size(zall_mouse, 1)
     end
 end
 
-
+consum_x_limits = [-8 8];
 mean_data_array = {collect_array_large_mean, collect_array_small_mean};
 sem_data_array = {collect_array_large_sem, collect_array_small_sem};
 
-[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+[comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, consum_x_limits)

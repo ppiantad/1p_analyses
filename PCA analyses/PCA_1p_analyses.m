@@ -36,6 +36,11 @@ neuron_mean_concat = horzcat(zdataTemp{:});
 
 neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
 
+% if you want to 
+
+% clear neuron_mean_concat
+% neuron_mean_concat = zscore(zall_mean_all_array{1, 11}, 0 , 2);
+% neuron_mean_concat = neuron_mean_concat(lost_prechoice == 1, :);
 
 % neuron_mean_concat = horzcat(reformat_zall_mean_array{:});
 % neuron_mean_concat = horzcat(neuron_mean_array{:});
@@ -210,6 +215,30 @@ for qq = 1:numConditions
 end
 
 
+covx = cov(neuron_mean_concat');
+% covx = (neuron_mean_concat*neuron_mean_concat')/(array_size-1);    % covariance matrix
+% PTP: lambda (the diagonal) corresponds to 'latent' from PCA
+[v lambda] = eig(covx);
+% for consistency with pca, sort the eigenvalues and permute
+% the columns of the eigenvector matrix to match.
+[lambda, ind] = sort(diag(lambda),'descend');
+% columns are eigenvectors, v_new is ordered so the eigenvector associated
+% with the highest eigenvalue is in column 1, 2, 3, etc etc
+% AH! just realizing that v_new corresponds to coef from PCA, but its not a
+% square vector because the # of components gets truncated, whereas
+% creating the covariance matrix manually ends up calculating PCs for all
+% features (# of neurons)
+v_new = v(:,ind);
+% get the index for PC1 corresponding to the neuron that contributes most
+% to the PC (the most "PC1-like" neuron)
+% need to figure out how to decide if max or min is the best, maybe even
+% abs?
+
+[M I] = min(v_new(:, 4))
+figure; plot(ts1, mean(zall_array{1, I}))
+
+
+
 [coef,score, latent, ~, explained, ~] = pca(neuron_mean_concat');
 
 for i = eventIdx
@@ -219,6 +248,14 @@ for i = eventIdx
 
 end
 
+[M I] = max(coef(:, 1))
+figure; plot(ts1, mean(zall_array{1, I}))
+
+[highest_contributor_PC1 highest_contributor_PC1_indexes]  = sort(coef(:, 1), 'descend');
+figure; plot(ts1, mean(zall_array{1, highest_contributor_PC1_indexes(2)}))
+
+[highest_contributor_PC4 highest_contributor_PC4_indexes]  = sort(coef(:, 4), 'descend');
+figure; plot(ts1, mean(zall_array{1, highest_contributor_PC4_indexes(1)}))
 
 figure;
 bar(explained(1:40, :), 'FaceColor', [0.2 0.6 0.8]); % Creates a bar plot with custom color
@@ -227,7 +264,109 @@ xlabel('Principal Component');
 ylabel('Variance Explained (%)');
 grid on; % Optional: adds a grid to the plot
 
+% gather eigenvalues that correspond to each of our ensembles &
+% sub-ensembles across some # of PCs (specified by variable
+% num_coefs_to_gather
+num_coefs_to_gather = 10;
+
+for hh = 1:num_coefs_to_gather
+    coef_temp = coef(:, hh);
+    prechoice_all_coefs(hh) = mean(coef_temp(prechoice_block_1 == 1));
+    prechoice_conserved_coefs(hh) = mean(coef_temp(conserved_prechoice == 1));
+    prechoice_remapped_coefs(hh) = mean(coef_temp(remapped_prechoice == 1));
+    prechoice_lost_coefs(hh) = mean(coef_temp(lost_prechoice == 1));
+
+    postchoice_all_coefs(hh) = mean(coef_temp(postchoice_reward_block_1 == 1));
+    postchoice_conserved_coefs(hh) = mean(coef_temp(conserved_postchoice == 1));
+    postchoice_remapped_coefs(hh) = mean(coef_temp(remapped_postchoice == 1));
+    postchoice_lost_coefs(hh) = mean(coef_temp(lost_postchoice == 1)); 
+
+    collect_all_coefs(hh) = mean(coef_temp(collect_block_1 == 1));
+    collect_conserved_coefs(hh) = mean(coef_temp(conserved_consumption == 1));
+    collect_remapped_coefs(hh) = mean(coef_temp(remapped_consumption == 1));
+    collect_lost_coefs(hh) = mean(coef_temp(lost_consumption == 1)); 
+
+end
+
+figure; plot(1:10, prechoice_all_coefs); hold on; plot(1:10, prechoice_conserved_coefs); hold on; plot(1:10, prechoice_remapped_coefs); hold on; plot(1:10, prechoice_lost_coefs); 
+legend('prechoice all', 'prechoiceconserved', 'prechoice remapped', 'prechoice lost')
+
+figure; plot(1:10, postchoice_all_coefs); hold on; plot(1:10, postchoice_conserved_coefs); hold on; plot(1:10, postchoice_remapped_coefs); hold on; plot(1:10, postchoice_lost_coefs); 
+legend('postchoice all', 'postchoice conserved', 'postchoice remapped', 'postchoice lost')
+
+figure; plot(1:10, collect_all_coefs); hold on; plot(1:10, collect_conserved_coefs); hold on; plot(1:10, collect_remapped_coefs); hold on; plot(1:10, collect_lost_coefs); 
+legend('collect all', 'collect conserved', 'collect remapped', 'collect lost')
+
+
+
+
+
+bar_separation_value = 3;
+
+figure;
+width = 250; % Width of the figure
+height = 500; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Swarm chart for Type 1.2 correlations
+swarmchart(ones(1, length(coef_temp(conserved_prechoice == 1))), coef_temp(conserved_prechoice == 1), 'o', 'MarkerFaceColor', 'red');
+hold on;
+swarmchart(ones(1, length(coef_temp(remapped_prechoice == 1))) * bar_separation_value, coef_temp(remapped_prechoice == 1), 'o', 'MarkerFaceColor', 'blue');
+hold on;
+swarmchart(ones(1, length(coef_temp(lost_prechoice == 1))) * bar_separation_value + 2, coef_temp(lost_prechoice == 1), 'o', 'MarkerFaceColor', 'blue');
+
+% Plot mean lines for Type 1.2 correlations
+plot([0.5; 1.5], [mean(coef_temp(conserved_prechoice == 1)); mean(coef_temp(conserved_prechoice == 1))], 'LineWidth', 3, 'Color', 'red');
+plot([bar_separation_value - 0.5; bar_separation_value + 0.5], [mean(coef_temp(remapped_prechoice == 1)); mean(coef_temp(remapped_prechoice == 1))], 'LineWidth', 3, 'Color', 'blue');
+plot([bar_separation_value+2 - 0.5; bar_separation_value+2 + 0.5], [mean(coef_temp(lost_prechoice == 1)); mean(coef_temp(lost_prechoice == 1))], 'LineWidth', 3, 'Color', 'blue');
+legend('prechoice_conserved', 'prechoice remapped', 'prechoice lost')
+
+bar_separation_value = 3;
+
+figure;
+width = 250; % Width of the figure
+height = 500; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Swarm chart for Type 1.2 correlations
+swarmchart(ones(1, length(coef_temp(conserved_postchoice == 1))), coef_temp(conserved_postchoice == 1), 'o', 'MarkerFaceColor', 'red');
+hold on;
+swarmchart(ones(1, length(coef_temp(remapped_postchoice == 1))) * bar_separation_value, coef_temp(remapped_postchoice == 1), 'o', 'MarkerFaceColor', 'blue');
+hold on;
+swarmchart(ones(1, length(coef_temp(lost_postchoice == 1))) * bar_separation_value + 2, coef_temp(lost_postchoice == 1), 'o', 'MarkerFaceColor', 'blue');
+
+% Plot mean lines for Type 1.2 correlations
+plot([0.5; 1.5], [mean(coef_temp(conserved_postchoice == 1)); mean(coef_temp(conserved_postchoice == 1))], 'LineWidth', 3, 'Color', 'red');
+plot([bar_separation_value - 0.5; bar_separation_value + 0.5], [mean(coef_temp(remapped_postchoice == 1)); mean(coef_temp(remapped_postchoice == 1))], 'LineWidth', 3, 'Color', 'blue');
+plot([bar_separation_value+2 - 0.5; bar_separation_value+2 + 0.5], [mean(coef_temp(lost_postchoice == 1)); mean(coef_temp(lost_postchoice == 1))], 'LineWidth', 3, 'Color', 'blue');
+legend('prechoice_conserved', 'prechoice remapped', 'prechoice lost')
+
+bar_separation_value = 3;
+
+figure;
+width = 250; % Width of the figure
+height = 500; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Swarm chart for Type 1.2 correlations
+swarmchart(ones(1, length(coef_temp(conserved_consumption == 1))), coef_temp(conserved_consumption == 1), 'o', 'MarkerFaceColor', 'red');
+hold on;
+swarmchart(ones(1, length(coef_temp(remapped_consumption == 1))) * bar_separation_value, coef_temp(remapped_consumption == 1), 'o', 'MarkerFaceColor', 'blue');
+hold on;
+swarmchart(ones(1, length(coef_temp(lost_consumption == 1))) * bar_separation_value + 2, coef_temp(lost_consumption == 1), 'o', 'MarkerFaceColor', 'blue');
+
+% Plot mean lines for Type 1.2 correlations
+plot([0.5; 1.5], [mean(coef_temp(conserved_consumption == 1)); mean(coef_temp(conserved_consumption == 1))], 'LineWidth', 3, 'Color', 'red');
+plot([bar_separation_value - 0.5; bar_separation_value + 0.5], [mean(coef_temp(remapped_consumption == 1)); mean(coef_temp(remapped_consumption == 1))], 'LineWidth', 3, 'Color', 'blue');
+plot([bar_separation_value+2 - 0.5; bar_separation_value+2 + 0.5], [mean(coef_temp(lost_consumption == 1)); mean(coef_temp(lost_consumption == 1))], 'LineWidth', 3, 'Color', 'blue');
+legend('prechoice_conserved', 'prechoice remapped', 'prechoice lost')
+
+
 %% if applying PCA to individual trials (will only work if each mouse has the same # of trials. might be best to investigate how to do this within a mouse
+
+% uncomment below if you want to subselect individual pops of neurons to
+% run PCA on
+% zall_array = zall_array(:, lost_prechoice == 1)
 
 % Example input: zall_array is a 1xN cell array where each cell contains a double array.
 num_cells = numel(zall_array);
@@ -320,7 +459,8 @@ legend({'90%', '80%', '70%', '60%', '50%', '40%'})
 
 
 
-%%
+%% need to create zall_array_trial_concat from code segment above
+
 % apply PCA to each trial
 for q = 1:size(zall_array_trial_concat, 1)
     temp_trial = zall_array_trial_concat{q, 1};
@@ -555,123 +695,123 @@ end
 
 %%
 
-% Initialize a cell array to store the path lengths
-path_lengths = cell(1, 2);
-
-% Loop through each cell in PCA_traj
-for i = 1:length(PCA_traj)
-    % Get the current 4x80 double array
-    data = PCA_traj{i};
-    
-    % Extract the X and Y coordinates (first 2 rows)
-    X = data(1, :);
-    Y = data(2, :);
-    
-    % Calculate the differences between consecutive points
-    deltaX = diff(X);
-    deltaY = diff(Y);
-    
-    % Calculate the Euclidean distances between consecutive points
-    distances = sqrt(deltaX.^2 + deltaY.^2);
-    
-    % Sum the distances to get the total path length
-    path_lengths{i} = sum(distances);
-end
-
-% Display the results
-disp('Path lengths for each trajectory:');
-disp(path_lengths);
-
+% % Initialize a cell array to store the path lengths
+% path_lengths = cell(1, 2);
+% 
+% % Loop through each cell in PCA_traj
+% for i = 1:length(PCA_traj)
+%     % Get the current 4x80 double array
+%     data = PCA_traj{i};
+% 
+%     % Extract the X and Y coordinates (first 2 rows)
+%     X = data(1, :);
+%     Y = data(2, :);
+% 
+%     % Calculate the differences between consecutive points
+%     deltaX = diff(X);
+%     deltaY = diff(Y);
+% 
+%     % Calculate the Euclidean distances between consecutive points
+%     distances = sqrt(deltaX.^2 + deltaY.^2);
+% 
+%     % Sum the distances to get the total path length
+%     path_lengths{i} = sum(distances);
+% end
+% 
+% % Display the results
+% disp('Path lengths for each trajectory:');
+% disp(path_lengths);
+% 
 
 
 %% based on ChatGPT to find the angle over the first 10 samples of the PCScore arrays
 
-% Initialize an array to store the angles
-angles = zeros(1, 2); % Since PCScore is a 1x2 cell array
-
-for i = 1:2
-    % Extract the first two rows (X and Y coordinates) for each cell
-    X = PCScore{i}(1, :); % First row contains X coordinates
-    Y = PCScore{i}(2, :); % Second row contains Y coordinates
-    
-    % Compute the vector between the first index and the 10th index
-    deltaX = X(10) - X(1);
-    deltaY = Y(10) - Y(1);
-    
-    % Calculate the angle in radians using the arctangent
-    angle = atan2(deltaY, deltaX); % atan2 gives the angle relative to X-axis
-    
-    % Convert the angle to degrees for easier interpretation
-    angles(i) = rad2deg(angle);
-end
-
-% Display the calculated angles for each trajectory
-disp(angles);
+% % Initialize an array to store the angles
+% angles = zeros(1, 2); % Since PCScore is a 1x2 cell array
+% 
+% for i = 1:2
+%     % Extract the first two rows (X and Y coordinates) for each cell
+%     X = PCScore{i}(1, :); % First row contains X coordinates
+%     Y = PCScore{i}(2, :); % Second row contains Y coordinates
+% 
+%     % Compute the vector between the first index and the 10th index
+%     deltaX = X(10) - X(1);
+%     deltaY = Y(10) - Y(1);
+% 
+%     % Calculate the angle in radians using the arctangent
+%     angle = atan2(deltaY, deltaX); % atan2 gives the angle relative to X-axis
+% 
+%     % Convert the angle to degrees for easier interpretation
+%     angles(i) = rad2deg(angle);
+% end
+% 
+% % Display the calculated angles for each trajectory
+% disp(angles);
 
 %%
-% Extract the first two PCs for each dataset
-PC1_set1 = PCScore{1,1}(1:2, :); % 2x160 for dataset 1
-PC1_set2 = PCScore{1,2}(1:2, :); % 2x160 for dataset 2
-
-
-
-% Calculate differences between consecutive samples
-diff_set1 = diff(PC1_set1, 1, 2); % Take differences along columns (time)
-
-% Compute Euclidean distances
-distances_set1 = sqrt(sum(diff_set1.^2, 1)); % Sum squares along rows (PCs) and take square root
-
-% Sum the distances to get the total length
-trajectory_length_set1 = sum(distances_set1);
-
-
-% Same calculation for dataset 2
-diff_set2 = diff(PC1_set2, 1, 2); % Differences along columns
-distances_set2 = sqrt(sum(diff_set2.^2, 1)); % Euclidean distances
-trajectory_length_set2 = sum(distances_set2);
-
-
-% Calculate the difference between corresponding points
-diff_trajectories = PC1_set1 - PC1_set2; % Element-wise difference between trajectories
-
-% Compute the Euclidean distance for each bin
-euclidean_distances = sqrt(sum(diff_trajectories.^2, 1)); % Sum squares across PCs, then take square root
-
-figure;
-plot(ts1, euclidean_distances, 'LineWidth', 2);
-xlabel('Bin (Time Point)');
-ylabel('Euclidean Distance');
-title('Distance Between PCA Trajectories (Bin-by-Bin)');
-grid on;
-
-diff_trajectories_PC1_only = PC1_set1(1, :) - PC1_set2(1, :); % Element-wise difference between trajectories
-% Compute the Euclidean distance for each bin
-euclidean_distances = sqrt(sum(diff_trajectories_PC1_only.^2, 1)); % Sum squares across PCs, then take square root
-
-figure;
-plot(ts1, euclidean_distances, 'LineWidth', 2);
-xlabel('Bin (Time Point)');
-ylabel('Euclidean Distance');
-title('Distance Between PCA Trajectories (Bin-by-Bin)');
-grid on;
-
-figure; plot(ts1, PC1_set1(1, :))
-hold on; plot(ts1, PC1_set2(1, :))
-
-
-diff_trajectories_PC2_only = PC1_set1(2, :) - PC1_set2(2, :); % Element-wise difference between trajectories
-% Compute the Euclidean distance for each bin
-euclidean_distances = sqrt(sum(diff_trajectories_PC2_only.^2, 1)); % Sum squares across PCs, then take square root
-
-figure;
-plot(ts1, euclidean_distances, 'LineWidth', 2);
-xlabel('Bin (Time Point)');
-ylabel('Euclidean Distance');
-title('Distance Between PCA Trajectories (Bin-by-Bin)');
-grid on;
-
-figure; plot(ts1, PC1_set1(2, :))
-hold on; plot(ts1, PC1_set2(2, :))
+% % Extract the first two PCs for each dataset
+% PC1_set1 = PCScore{1,1}(1:2, :); % 2x160 for dataset 1
+% PC1_set2 = PCScore{1,2}(1:2, :); % 2x160 for dataset 2
+% 
+% 
+% 
+% % Calculate differences between consecutive samples
+% diff_set1 = diff(PC1_set1, 1, 2); % Take differences along columns (time)
+% 
+% % Compute Euclidean distances
+% distances_set1 = sqrt(sum(diff_set1.^2, 1)); % Sum squares along rows (PCs) and take square root
+% 
+% % Sum the distances to get the total length
+% trajectory_length_set1 = sum(distances_set1);
+% 
+% 
+% % Same calculation for dataset 2
+% diff_set2 = diff(PC1_set2, 1, 2); % Differences along columns
+% distances_set2 = sqrt(sum(diff_set2.^2, 1)); % Euclidean distances
+% trajectory_length_set2 = sum(distances_set2);
+% 
+% 
+% % Calculate the difference between corresponding points
+% diff_trajectories = PC1_set1 - PC1_set2; % Element-wise difference between trajectories
+% 
+% % Compute the Euclidean distance for each bin
+% euclidean_distances = sqrt(sum(diff_trajectories.^2, 1)); % Sum squares across PCs, then take square root
+% 
+% figure;
+% plot(ts1, euclidean_distances, 'LineWidth', 2);
+% xlabel('Bin (Time Point)');
+% ylabel('Euclidean Distance');
+% title('Distance Between PCA Trajectories (Bin-by-Bin)');
+% grid on;
+% 
+% diff_trajectories_PC1_only = PC1_set1(1, :) - PC1_set2(1, :); % Element-wise difference between trajectories
+% % Compute the Euclidean distance for each bin
+% euclidean_distances = sqrt(sum(diff_trajectories_PC1_only.^2, 1)); % Sum squares across PCs, then take square root
+% 
+% figure;
+% plot(ts1, euclidean_distances, 'LineWidth', 2);
+% xlabel('Bin (Time Point)');
+% ylabel('Euclidean Distance');
+% title('Distance Between PCA Trajectories (Bin-by-Bin)');
+% grid on;
+% 
+% figure; plot(ts1, PC1_set1(1, :))
+% hold on; plot(ts1, PC1_set2(1, :))
+% 
+% 
+% diff_trajectories_PC2_only = PC1_set1(2, :) - PC1_set2(2, :); % Element-wise difference between trajectories
+% % Compute the Euclidean distance for each bin
+% euclidean_distances = sqrt(sum(diff_trajectories_PC2_only.^2, 1)); % Sum squares across PCs, then take square root
+% 
+% figure;
+% plot(ts1, euclidean_distances, 'LineWidth', 2);
+% xlabel('Bin (Time Point)');
+% ylabel('Euclidean Distance');
+% title('Distance Between PCA Trajectories (Bin-by-Bin)');
+% grid on;
+% 
+% figure; plot(ts1, PC1_set1(2, :))
+% hold on; plot(ts1, PC1_set2(2, :))
 
 %% Hao code data setup
 
@@ -793,13 +933,13 @@ for i = 1:size(PCScore{1, 1}  ,2)
     q3 = PCScore{1, 2}(3,i); 
     
     % PC1-3 inter-trajectory distance
-    eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2 + (q3-p3).^2);
+    % eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2 + (q3-p3).^2);
 
     % PC1-2 inter-trajectory distance
     % eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2);
 
     % PC1 inter-trajectory distance
-    % eucDtemp = sqrt((q1-p1).^2);
+    eucDtemp = sqrt((q1-p1).^2);
 eucD1to7(1,i) = eucDtemp;
 end 
 
@@ -812,34 +952,34 @@ figure; plot(ts1, eucD1to7)
 % methods?
 
 % Initialize variables to store total lengths
-trajectoryLength1 = 0; % For PCScore{1,1}
-trajectoryLength2 = 0; % For PCScore{1,2}
+trajectoryLength1_real = 0; % For PCScore{1,1}
+trajectoryLength2_real = 0; % For PCScore{1,2}
 
 % Calculate the total length for PCScore{1,1}
 for i = 1:(size(PCScore{1,1}, 2) - 1)
     % Calculate the Euclidean distance between consecutive points
-    p1 = PCScore{1,1}(:, i);
-    p2 = PCScore{1,1}(:, i+1);
+    p1 = PCScore{1,1}(1:2, i);
+    p2 = PCScore{1,1}(1:2, i+1);
     distance = sqrt(sum((p2 - p1).^2));
     
     % Add to the total length
-    trajectoryLength1 = trajectoryLength1 + distance;
+    trajectoryLength1_real = trajectoryLength1_real + distance;
 end
 
 % Calculate the total length for PCScore{1,2}
 for i = 1:(size(PCScore{1,2}, 2) - 1)
     % Calculate the Euclidean distance between consecutive points
-    q1 = PCScore{1,2}(:, i);
-    q2 = PCScore{1,2}(:, i+1);
+    q1 = PCScore{1,2}(1:2, i);
+    q2 = PCScore{1,2}(1:2, i+1);
     distance = sqrt(sum((q2 - q1).^2));
     
     % Add to the total length
-    trajectoryLength2 = trajectoryLength2 + distance;
+    trajectoryLength2_real = trajectoryLength2_real + distance;
 end
 
 % Display the total lengths
-disp(['Total length of trajectory 1: ', num2str(trajectoryLength1)]);
-disp(['Total length of trajectory 2: ', num2str(trajectoryLength2)]);
+disp(['Total length of trajectory 1: ', num2str(trajectoryLength1_real)]);
+disp(['Total length of trajectory 2: ', num2str(trajectoryLength2_real)]);
 
 %% DISTANCES FOR SHUFFLE - still a work in progress
 for ff = 1:size(PCScore_all, 2)
@@ -856,13 +996,14 @@ for ff = 1:size(PCScore_all, 2)
         q3 = input_data{1, 2}(3,i);
 
         % PC1-3 inter-trajectory distance
-        eucDtemp_shuff = sqrt((q1-p1).^2 + (q2-p2).^2 + (q3-p3).^2);
+        % eucDtemp_shuff = sqrt((q1-p1).^2 + (q2-p2).^2 + (q3-p3).^2);
 
         % PC1-2 inter-trajectory distance
-        % eucDtemp = sqrt((q1-p1).^2 + (q2-p2).^2);
+        % eucDtemp_shuff = sqrt((q1-p1).^2 + (q2-p2).^2);
 
         % PC1 inter-trajectory distance
-        % eucDtemp = sqrt((q1-p1).^2);
+        eucDtemp_shuff = sqrt((q1-p1).^2);
+
         eucD1to7_shuff(1,i) = eucDtemp_shuff;
     end
     shuffled_distances(ff, :) = eucD1to7_shuff;
@@ -870,14 +1011,86 @@ for ff = 1:size(PCScore_all, 2)
 end
 
 mean_shuffled_distances = mean(shuffled_distances);
+% sem_shuffled_distances = nansem(shuffled_distances);
+std_shuffled_distances = std(shuffled_distances);
+sem_shuffled_distances = std(shuffled_distances)/sqrt(size(shuffled_distances, 1));
 
 hold on;
-figure; plot(ts1, mean(shuffled_distances))
+figure; plot(ts1, mean(shuffled_distances));
+hold on; plot(ts1, eucD1to7);
 
 % get proprtion of shuffled distances that are > 'real' euclid distances
 inds = shuffled_distances > eucD1to7;
 
 prop_inds = sum(inds)/size(inds, 1);
+
+
+% plot fig
+
+% Find the maximum Y value from the plot (for mean_shuffled_distances or another relevant dataset)
+max_y_value = max(eucD1to7);
+
+% Find the indices where prop_inds <= 0.001
+valid_indices = prop_inds <= 0.001;
+valid_indices_plot = valid_indices * max_y_value;
+valid_indices_plot(valid_indices_plot == 0) = NaN;
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-4 2]);
+% Set X-axis ticks
+% set(gca, 'XTick', [-4, 0, 2]);
+shadedErrorBar(ts1, mean_shuffled_distances, std_shuffled_distances, 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, eucD1to7, zeros(1, size(eucD1to7, 2)), 'lineProps', {'color', 'k'});
+% hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(collect_block_1==1, :)), nanmean(neuron_sem_array{1, 1}(collect_block_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
+plot(ts1, valid_indices_plot, 'k-', 'LineWidth', 2);
+% ylim([-0.8 0.8]);
+
+hold off
+
+% trying to also do a shuffle for trajectory length: 
+
+
+for gg = 1:size(PCScore_all, 2)
+    current_shuffled_PC_score = PCScore_all{1, gg};
+    trajectoryLength1 = 0; % For PCScore{1,1}
+    trajectoryLength2 = 0; % For PCScore{1,2}
+    for i = 1:(size(current_shuffled_PC_score{1,1}, 2) - 1)
+        % Calculate the Euclidean distance between consecutive points
+        p1 = current_shuffled_PC_score{1,1}(1:2, i);
+        p2 = current_shuffled_PC_score{1,1}(1:2, i+1);
+        distance = sqrt(sum((p2 - p1).^2));
+
+        % Add to the total length
+        trajectoryLength1 = trajectoryLength1 + distance;
+    end
+
+    % Calculate the total length for PCScore{1,2}
+    for i = 1:(size(current_shuffled_PC_score{1,2}, 2) - 1)
+        % Calculate the Euclidean distance between consecutive points
+        q1 = current_shuffled_PC_score{1,2}(1:2, i);
+        q2 = current_shuffled_PC_score{1,2}(1:2, i+1);
+        distance = sqrt(sum((q2 - q1).^2));
+
+        % Add to the total length
+        trajectoryLength2 = trajectoryLength2 + distance;
+    end
+    trajectoryLength1_iteration(gg) = trajectoryLength1;
+    trajectoryLength2_iteration(gg) = trajectoryLength2;
+    clear trajectoryLength1 trajectoryLength2
+end
+
+diff_trajectory_1_to_2 = trajectoryLength1_iteration - trajectoryLength2_iteration;
+
+diff_real_trajectory_1_to_2 = trajectoryLength1_real - trajectoryLength2_real;
+
+% get proprtion of shuffled distances that are > 'real' euclid distances
+trajectory_length_inds = diff_trajectory_1_to_2 > diff_real_trajectory_1_to_2;
 
 
 %%
@@ -956,11 +1169,11 @@ view(3); % 3D perspective
 % Initialize plot handles
 s1_line_pre = plot3(nan, nan, nan, 'b--', 'LineWidth', 1.5); % Dotted pre-choice line for s1
 s1_line_post = plot3(nan, nan, nan, 'b-', 'LineWidth', 1.5); % Solid post-choice line for s1
-% s1_collect_marker = scatter3(nan, nan, nan, 100, 's', 'MarkerEdgeColor', 'b', 'MarkerFaceColor', 'b'); % s1 collect marker
+s1_collect_marker = scatter3(nan, nan, nan, 100, 's', 'MarkerEdgeColor', 'b', 'MarkerFaceColor', 'b'); % s1 collect marker
 
 s2_line_pre = plot3(nan, nan, nan, 'r--', 'LineWidth', 1.5); % Dotted pre-choice line for s2
 s2_line_post = plot3(nan, nan, nan, 'r-', 'LineWidth', 1.5); % Solid post-choice line for s2
-% s2_collect_marker = scatter3(nan, nan, nan, 100, 's', 'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'r'); % s2 collect marker
+s2_collect_marker = scatter3(nan, nan, nan, 100, 's', 'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'r'); % s2 collect marker
 
 for frame = 1:size(s1_data, 2)
     % Determine current frame
