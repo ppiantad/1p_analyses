@@ -534,11 +534,13 @@ for q = 1:length (behav_tbl_iter{1, 1})
         end
 
 
-        % for zz = 1:size(nestedCellArray_1, 1)
-        %     valid_start_times = nestedCellArray_1.stTime(2:end);
-        %     valid_choice_times = nestedCellArray_1.choiceTime(1:end-1);
-        %     delay_to_initiation = valid_start_times - valid_choice_times;
-        % end
+        for zz = 1:size(nestedCellArray_1, 1)
+            valid_start_times = nestedCellArray_1.stTime(2:end);
+            valid_choice_times = nestedCellArray_1.choiceTime(1:end-1);
+            % delay_to_initiation = valid_start_times - valid_choice_times;
+            trial_types = nestedCellArray_1.bigSmall;
+            trial_types_2 = nestedCellArray_2.bigSmall;
+        end
 
         trial_choice_times = nestedCellArray_1.choiceTime - nestedCellArray_1.stTime;
         % delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
@@ -546,7 +548,9 @@ for q = 1:length (behav_tbl_iter{1, 1})
         trial_choice_times_by_mouse{q} = trial_choice_times;
         delay_to_initiation_by_mouse{q} = delay_to_initiation;
         delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
-        clear trial_choice_times delay_to_initiation delay_to_collect_post_shk
+        trial_types_by_mouse{q} = trial_types;
+        trial_types_second_var_by_mouse{q} = trial_types_2;
+        clear trial_choice_times delay_to_initiation delay_to_collect_post_shk trial_types trial_types_2
     end
 
 
@@ -574,7 +578,7 @@ ytickformat('%.1f');
 hold off
 
 
-variable_to_correlate = delay_to_collect_post_shk_by_mouse;
+variable_to_correlate = delay_to_initiation_by_mouse;
 
 %%
 array_for_means = 1; 
@@ -584,7 +588,7 @@ meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
 % timeRange = (ts1 >= -4) & (ts1 <= 0);
-timeRange = (ts1 >= 0) & (ts1 <= 2);
+timeRange = (ts1 >= 0) & (ts1 <= 5); % use a longer time window here so that the entirety of the shk activity can be used
 % timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
@@ -722,7 +726,7 @@ hold off;
 %%
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
 only_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}  ==1);
-not_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}  ~=1);
+not_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}  ==3);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
 figure;
@@ -829,3 +833,90 @@ ytickformat('%.1f');
 hold off
 
 
+%%
+high_corrs = find(allCorrelations > 0.5)
+
+
+
+get_mouse_ids_for_high_corrs = mouse_cells(1, high_corrs);
+
+
+select_mouse_index = find(strcmp(animalIDs, select_mouse));
+
+
+%% plot scatters for individual neurons & behav variables
+
+
+%shk representative:
+find(correlationResults{5, 1} > 0.5)
+start_time = 0;% sub-window start time
+end_time = 5; % sub-window end time
+sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+sub_window_activity_session_1 = zall_mouse{5, 1}{1, 80}(:, sub_window_idx);
+choice_times_mouse = variable_to_correlate{1, 5};
+% trial_types = trial_types_by_mouse{1, 5};
+trial_types = trial_types_second_var_by_mouse{1, 5};
+
+
+
+%CREATE SCATTER PLOT BASED ON SPECIFIC EVENTS - ASSUMING THEY ARE IN PAIRS.
+%CHECK AND UPDATE START & END TIME DEPENDING ON EVENT OF INTEREST
+paired_neurons = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} == 1;
+% start_time = 0;% sub-window start time
+% end_time = 2; % sub-window end time
+
+% Extract the corresponding columns from neuron_mean
+
+
+% sub_window_activity_session_1 = zall_mouse{5, 1}{1, 104}(:, sub_window_idx);
+% choice_times_mouse = trial_choice_times_by_mouse{1, 5};
+% trial_types = trial_types_by_mouse{1, 5};
+
+% % Assume A and B are your 143x21 arrays
+% correlation_coefficients = arrayfun(@(i) corr(sub_window_activity_session_1 (i, :)', sub_window_activity_session_2 (i, :)'), 1:size(sub_window_activity_session_1 , 1));
+
+
+mean_sub_window_activity_session_1 = mean(sub_window_activity_session_1, 2);
+
+
+x = mean_sub_window_activity_session_1;
+y = choice_times_mouse;
+
+
+% x = mean_sub_window_activity_session_1(trial_types == 1.2);
+% y = choice_times_mouse(trial_types == 1.2);
+% trial_types = trial_types(trial_types == 1.2);
+
+
+% Define colors based on trial types
+colors = repmat([0.5, 0.5, 0.5], length(trial_types), 1); % Default to gray
+colors(trial_types == 1.2, :) = repmat([0, 0, 1], sum(trial_types == 1.2), 1); % Blue for trial_types == 1.2
+colors(trial_types == 0.3, :) = repmat([1, 0, 0], sum(trial_types == 0.3), 1); % Red for trial_types == 0.3
+
+% Create scatter plot
+figure;
+set(gcf, 'Position', [100, 100, 200, 200]); % Adjust figure position and size
+scatter(x, y, 36, colors, 'filled', 'MarkerEdgeColor', 'k'); % Use 'colors' for MarkerFaceColor
+
+hold on;
+
+% Add a regression line
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% Add R-squared value to the plot
+text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+
+% Add labels and a legend if needed
+xlabel('Mean Sub-window Activity Session 1');
+ylabel('Choice Times Mouse');
+title('Scatter Plot with Regression Line and R^2 Value');
+hold off;

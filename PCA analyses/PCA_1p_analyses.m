@@ -264,6 +264,11 @@ xlabel('Principal Component');
 ylabel('Variance Explained (%)');
 grid on; % Optional: adds a grid to the plot
 
+
+% TO RUN BELOW, data_loop to get data (say, 90 trial days), then run up to
+% this point as is. then load x10 dataset, run block_wise_changes, then run
+% below
+
 % gather eigenvalues that correspond to each of our ensembles &
 % sub-ensembles across some # of PCs (specified by variable
 % num_coefs_to_gather
@@ -940,6 +945,7 @@ for i = 1:size(PCScore{1, 1}  ,2)
 
     % PC1 inter-trajectory distance
     eucDtemp = sqrt((q1-p1).^2);
+
 eucD1to7(1,i) = eucDtemp;
 end 
 
@@ -1248,3 +1254,103 @@ end
 % open(video);
 % writeVideo(video, frames);
 % close(video);
+
+
+%% trying to get explained variance by each specific type of ensemble, this could potentially work?
+
+groups = {'prechoice conserved', 'prechoice new', 'prechoice lost'}
+
+for dd = 1:size(groups, 2)
+
+    for hh = 1:size(zall_array_trial_concat, 1)
+        if strcmp(groups{dd}, 'prechoice conserved')
+            current_zall_array_trial_concat = zall_array_trial_concat{hh};
+            current_zall_array_trial_concat = current_zall_array_trial_concat(conserved_prechoice == 1, :);
+            [coef,score, latent, ~, explained, ~] = pca(current_zall_array_trial_concat');
+            coef_by_trial{dd, hh} = coef;
+            score_by_trial{dd, hh} = score;
+            latent_by_trial{dd, hh} = latent;
+            explained_by_trial{dd, hh} = explained;
+            clear coef score latent explained
+        elseif strcmp(groups{dd}, 'prechoice new')
+            current_zall_array_trial_concat = zall_array_trial_concat{hh};
+            current_zall_array_trial_concat = current_zall_array_trial_concat(remapped_prechoice == 1, :);
+            [coef,score, latent, ~, explained, ~] = pca(current_zall_array_trial_concat');
+            coef_by_trial{dd, hh} = coef;
+            score_by_trial{dd, hh} = score;
+            latent_by_trial{dd, hh} = latent;
+            explained_by_trial{dd, hh} = explained;
+            clear coef score latent explained
+
+        elseif strcmp(groups{dd}, 'prechoice lost')
+            current_zall_array_trial_concat = zall_array_trial_concat{hh};
+            current_zall_array_trial_concat = current_zall_array_trial_concat(lost_prechoice == 1, :);
+            [coef,score, latent, ~, explained, ~] = pca(current_zall_array_trial_concat');
+            coef_by_trial{dd, hh} = coef;
+            score_by_trial{dd, hh} = score;
+            latent_by_trial{dd, hh} = latent;
+            explained_by_trial{dd, hh} = explained;
+            clear coef score latent explained
+
+        end
+
+    end
+end
+
+%%
+groups = {'prechoice conserved', 'prechoice new', 'prechoice lost'}
+
+for dd = 1:size(groups, 2)
+
+    if strcmp(groups{dd}, 'prechoice conserved')
+        neuron_mean_concat = horzcat(zall_mean_all_array{1, 11});
+
+        % neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
+        neuron_mean_concat = neuron_mean_concat(conserved_prechoice == 1, :);
+        [coef,score, latent, ~, explained, ~] = pca(neuron_mean_concat');
+
+        coef_by_trial{dd} = coef;
+        score_by_trial{dd} = score;
+        latent_by_trial{dd} = latent;
+        explained_by_trial{dd} = explained;
+        clear coef score latent explained
+    elseif strcmp(groups{dd}, 'prechoice new')
+        neuron_mean_concat = horzcat(zall_mean_all_array{1, 11});
+
+        % neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
+        neuron_mean_concat = neuron_mean_concat(remapped_prechoice == 1, :);
+        [coef,score, latent, ~, explained, ~] = pca(neuron_mean_concat');
+
+        coef_by_trial{dd} = coef;
+        score_by_trial{dd} = score;
+        latent_by_trial{dd} = latent;
+        explained_by_trial{dd} = explained;
+        clear coef score latent explained
+    elseif strcmp(groups{dd}, 'prechoice lost')
+        neuron_mean_concat = horzcat(zall_mean_all_array{1, 11});
+
+        % neuron_mean_concat = zscore(neuron_mean_concat, 0 , 2);
+        neuron_mean_concat = neuron_mean_concat(lost_prechoice == 1, :);
+        [coef,score, latent, ~, explained, ~] = pca(neuron_mean_concat');
+
+        coef_by_trial{dd} = coef;
+        score_by_trial{dd} = score;
+        latent_by_trial{dd} = latent;
+        explained_by_trial{dd} = explained;
+        clear coef score latent explained
+    end
+
+end
+
+
+conserved_cum_sum = cumsum(explained_by_trial{1, 1})
+remapped_cum_sum = cumsum(explained_by_trial{1, 2})
+lost_cum_sum = cumsum(explained_by_trial{1, 3})
+
+figure; plot(1:10, conserved_cum_sum(1:10));
+hold on; plot(1:10, remapped_cum_sum(1:10));
+hold on; plot(1:10, lost_cum_sum(1:10));
+
+figure; plot(1:10, explained_by_trial{1, 1}(1:10));
+hold on; plot(1:10, explained_by_trial{1, 2}(1:10));
+hold on; plot(1:10, explained_by_trial{1, 3}(1:10));

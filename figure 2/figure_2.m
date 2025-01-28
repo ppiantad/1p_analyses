@@ -1242,7 +1242,7 @@ legend('Positive correlation', 'Negative correlation', 'No sig correlation');
 
 %%
 
-array_for_means = 3; 
+array_for_means = 8; 
 
 
 for q = 1:length (behav_tbl_iter{1, 1})
@@ -1271,8 +1271,8 @@ for q = 1:length (behav_tbl_iter{1, 1})
         delay_to_initiation_by_mouse{q} = delay_to_initiation;
         delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
         trial_types_by_mouse{q} = trial_types;
-        consum_times = nestedCellArray_1.collectionTime_end - nestedCellArray_1.collectionTime;
-        consum_times_by_mouse{q} = consum_times;
+        % consum_times = nestedCellArray_1.collectionTime_end - nestedCellArray_1.collectionTime;
+        % consum_times_by_mouse{q} = consum_times;
         clear trial_choice_times delay_to_initiation delay_to_collect_post_shk trial_types consum_times
     end
 
@@ -1282,7 +1282,7 @@ end
 trial_types_concat = cat(1, trial_types_by_mouse{:});
 trial_choice_times_concat = cat(1, trial_choice_times_by_mouse{:});
 rew_collect_times_concat = cat(1, delay_to_collect_post_shk_by_mouse{:});
-consum_times_concat = cat(1, consum_times_by_mouse{:});
+% consum_times_concat = cat(1, consum_times_by_mouse{:});
 
 bar_separation_value = 3;
 
@@ -1371,7 +1371,7 @@ yline(0);
 xtickformat('%.1f');
 ytickformat('%.1f');
 
-variable_to_correlate = consum_times_by_mouse;
+variable_to_correlate = trial_choice_times_by_mouse;
 
 
 %%
@@ -1381,9 +1381,9 @@ variable_to_correlate = consum_times_by_mouse;
 meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
-% timeRange = (ts1 >= -4) & (ts1 <= 0);
+timeRange = (ts1 >= -4) & (ts1 <= 0);
 % timeRange = (ts1 >= 0) & (ts1 <= 2);
-timeRange = (ts1 >= 0) & (ts1 <= 2);
+% timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
 % Iterate through each cell in the zall_mouse array
@@ -1439,7 +1439,7 @@ end
 
 % Initialize the new cell array to store the correlation results
 correlationResults = cell(size(meanZallMouse));
-
+correlationResults_sig = cell(size(meanZallMouse));
 
 
 % Iterate through each level of meanZallMouse
@@ -1449,7 +1449,8 @@ for i = 1:length(meanZallMouse)
     
     % Initialize the nested cell array for storing correlation results
     correlationNestedArray = zeros(size(meanNestedCellArray));
-    
+    corr_sig_NestedArray = zeros(size(meanNestedCellArray));
+
     % Determine the corresponding index in trial_choice_times_by_mouse
     % Adjust this logic based on how the indices are mapped
     trialIndex = mod(i-1, length(variable_to_correlate)) + 1;
@@ -1458,28 +1459,36 @@ for i = 1:length(meanZallMouse)
     trialChoiceTimes = variable_to_correlate{i}';
     % trialChoiceTimes = variable_to_correlate{i};
 
+    % trialChoiceTimes =  trialChoiceTimes(trial_types_by_mouse{1, i} == 1.2);
+        
     % Iterate through each cell in the nested cell array
     for j = 1:length(meanNestedCellArray)
         % Get the current mean values array
         meanValues = meanNestedCellArray{j};
         
+        % meanValues = meanValues(trial_types_by_mouse{1, i} == 1.2)
+        
+
+
         % Check if trialChoiceTimes has the same length as meanValues
         if length(trialChoiceTimes) == length(meanValues)
             % Compute the correlation
-            correlationCoeff = corr(meanValues, trialChoiceTimes(:));
+            [correlationCoeff, corr_sig_vals] = corr(meanValues, trialChoiceTimes(:));
         elseif length(trialChoiceTimes) < length(meanValues)
-            correlationCoeff = corr(meanValues(1:end-1), trialChoiceTimes(:));
+            [correlationCoeff, corr_sig_vals] = corr(meanValues(1:end-1), trialChoiceTimes(:));
         else
             % If lengths do not match, handle the mismatch (e.g., set correlation to NaN)
-            correlationCoeff = NaN;
+            [correlationCoeff, corr_sig_vals] = NaN;
         end
         
         % Store the correlation coefficient in the nested cell array
         correlationNestedArray(j) = correlationCoeff;
+        corr_sig_NestedArray(j) = corr_sig_vals;
     end
     clear meanValues
     % Store the nested cell array of correlation coefficients in the main cell array
     correlationResults{i} = correlationNestedArray;
+    correlationResults_sig{i} = corr_sig_NestedArray;
 end
 
 % Now, correlationResults contains the correlation coefficients for each nested structure in meanZallMouse
@@ -1522,7 +1531,7 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(collect_block_1 == 1);
+only_shk_responsive_corrs = allCorrelations(prechoice_blocks_2_and_3 == 1);
 % not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
 not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
 
@@ -1813,21 +1822,50 @@ select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
 %% plot scatters for individual neurons & behav variables
 
+
+
+% prechoice representative: 
+% find(correlationResults{5, 1} < -0.3)
+% start_time = -4;% sub-window start time
+% end_time = 0; % sub-window end time
+% 
+% sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+% sub_window_activity_session_1 = zall_mouse{5, 1}{1, 63}(:, sub_window_idx);
+% choice_times_mouse = trial_choice_times_by_mouse{1, 5};
+% trial_types = trial_types_by_mouse{1, 5};
+
+% postchoice representative:
+% find(correlationResults{5, 1} < -0.3)
+% start_time = 0;% sub-window start time
+% end_time = 2; % sub-window end time
+% sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+% sub_window_activity_session_1 = zall_mouse{5, 1}{1, 104}(:, sub_window_idx);
+% choice_times_mouse = trial_choice_times_by_mouse{1, 5};
+% trial_types = trial_types_by_mouse{1, 5};
+
+%consumption representative:
+find(correlationResults{5, 1} > 0.3)
+start_time = 1;% sub-window start time
+end_time = 3; % sub-window end time
+sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+sub_window_activity_session_1 = zall_mouse{5, 3}{1, 1}(:, sub_window_idx);
+choice_times_mouse = consum_times_by_mouse{1, 5};
+trial_types = trial_types_by_mouse{1, 5};
+
+
+
 %CREATE SCATTER PLOT BASED ON SPECIFIC EVENTS - ASSUMING THEY ARE IN PAIRS.
 %CHECK AND UPDATE START & END TIME DEPENDING ON EVENT OF INTEREST
 paired_neurons = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} == 1;
-start_time = -4;% sub-window start time
-end_time = 0; % sub-window end time
-
-% Find the indices in ts1 that correspond to the sub-window
-sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+% start_time = 0;% sub-window start time
+% end_time = 2; % sub-window end time
 
 % Extract the corresponding columns from neuron_mean
 
 
-sub_window_activity_session_1 = zall_mouse{1, 1}{1, 4}(:, sub_window_idx);
-choice_times_mouse = trial_choice_times_by_mouse{1, 1};
-trial_types = trial_types_by_mouse{1, 1};
+% sub_window_activity_session_1 = zall_mouse{5, 1}{1, 104}(:, sub_window_idx);
+% choice_times_mouse = trial_choice_times_by_mouse{1, 5};
+% trial_types = trial_types_by_mouse{1, 5};
 
 % % Assume A and B are your 143x21 arrays
 % correlation_coefficients = arrayfun(@(i) corr(sub_window_activity_session_1 (i, :)', sub_window_activity_session_2 (i, :)'), 1:size(sub_window_activity_session_1 , 1));
@@ -1840,7 +1878,9 @@ x = mean_sub_window_activity_session_1;
 y = choice_times_mouse;
 
 
-
+% x = mean_sub_window_activity_session_1(trial_types == 1.2);
+% y = choice_times_mouse(trial_types == 1.2);
+% trial_types = trial_types(trial_types == 1.2);
 
 
 % Define colors based on trial types

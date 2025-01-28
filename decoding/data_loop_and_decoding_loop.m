@@ -11,7 +11,7 @@ ca_data_type = "C_raw"; % C % C_raw
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 
 % these are mice that did not complete the entire session - kinda have to
 % toss them to do some comparisons during RDT
@@ -524,23 +524,47 @@ for i = 1:5
     end
 end
 
-% Define positions for the bars within each group
-barWidth = 0.15; % Width of each bar
-groupGap = 0.4; % Gap between groups
-barPositions = repmat(1:4:17, 4, 1) + repmat((0:3)', 1, 5) * (barWidth + groupGap);
+% Define proper Y positions for horizontal bars
+num_groups = size(group_means, 1); % Number of groups (5 in this case)
+num_items_per_group = size(group_means, 2); % Number of items per group (4 in this case)
+group_spacing = 1.5; % Space between groups
+item_spacing = 0.3; % Space between items within a group
 
-% Plot grouped bar graph with error bars
+% Compute Y positions for all items in all groups
+barPositions = zeros(num_items_per_group, num_groups);
+for group_idx = 1:num_groups
+    start_pos = (group_idx - 1) * group_spacing;
+    for item_idx = 1:num_items_per_group
+        barPositions(item_idx, group_idx) = start_pos + (item_idx - 1) * item_spacing;
+    end
+end
+
+% Reverse the order of the groups in barPositions
+barPositions = fliplr(barPositions); % Reverse column order for groups
+barPositions = flip(barPositions);
+% group_means = flip(group_means, 2);
+
+
+% Reverse group labels for proper Y-axis
+group_labels = {'All', 'Pre-choice', 'Post-choice reward', 'Consum.', 'Non-responsive'};
+
+% Plot horizontal bars using errorbar
 figure;
 hold on;
-for i = 1:4
-    errorbar(barPositions(i, :), group_means(:, i)', group_stddevs(:, i)', '.', 'LineWidth', 1);
+for i = 1:num_items_per_group
+    % Horizontal error bars
+    errorbar(group_means(:, i), barPositions(i, :), group_stddevs(:, i), 'horizontal', '.', 'LineWidth', 1, 'DisplayName', sprintf('Epoch %d', i));
 end
 hold off;
 
 % Customize the plot
-xlabel('Group');
-ylabel('Mean Accuracy');
-title('Mean Accuracy by Group');
-xticks(mean(barPositions, 1));
-xticklabels({'All neurons', 'Pre-choice active', 'Post-choice reward active', 'Consumption active', 'Non-responsive'});
-legend('Pre-choice epoch', 'Post-choice epoch', 'Consumption epoch', 'Shuffle (Consumption)');
+% xlabel('Mean Accuracy');
+% ylabel('Group');
+% title('Mean Accuracy by Group');
+
+% Compute Y-tick positions in ascending order for the reversed group order
+yticks(mean(flip(barPositions, 2), 1)); % Flip the columns back to get ascending order for ticks
+yticklabels(flip(group_labels)); % Correct order of labels
+xlim([0.5 1])
+xticks([0.5 0.75 1])
+legend('Pre-choice epoch', 'Post-choice epoch', 'Consumption epoch', 'Shuffle (Consumption)', 'Location', 'eastoutside');
