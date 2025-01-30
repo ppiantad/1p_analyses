@@ -1242,10 +1242,10 @@ legend('Positive correlation', 'Negative correlation', 'No sig correlation');
 
 %%
 
-array_for_means = 8; 
+array_for_means = 1; 
 
 
-for q = 1:length (behav_tbl_iter{1, 1})
+for q = 1:length (behav_tbl_iter{array_for_means, 1})
     nestedCellArray_1 = behav_tbl_iter{array_for_means, 1}{q};
     if ~isempty(nestedCellArray_1)
         % nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
@@ -1531,7 +1531,7 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(prechoice_blocks_2_and_3 == 1);
+only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
 % not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
 not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
 
@@ -1825,14 +1825,14 @@ select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
 
 % prechoice representative: 
-% find(correlationResults{5, 1} < -0.3)
-% start_time = -4;% sub-window start time
-% end_time = 0; % sub-window end time
-% 
-% sub_window_idx = ts1 >= start_time & ts1 <= end_time;
-% sub_window_activity_session_1 = zall_mouse{5, 1}{1, 63}(:, sub_window_idx);
-% choice_times_mouse = trial_choice_times_by_mouse{1, 5};
-% trial_types = trial_types_by_mouse{1, 5};
+find(correlationResults{5, 1} < -0.3)
+start_time = -4;% sub-window start time
+end_time = 0; % sub-window end time
+
+sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+sub_window_activity_session_1 = zall_mouse{5, 1}{1, 63}(:, sub_window_idx);
+choice_times_mouse = trial_choice_times_by_mouse{1, 5};
+trial_types = trial_types_by_mouse{1, 5};
 
 % postchoice representative:
 % find(correlationResults{5, 1} < -0.3)
@@ -1844,13 +1844,13 @@ select_mouse_index = find(strcmp(animalIDs, select_mouse));
 % trial_types = trial_types_by_mouse{1, 5};
 
 %consumption representative:
-find(correlationResults{5, 1} > 0.3)
-start_time = 1;% sub-window start time
-end_time = 3; % sub-window end time
-sub_window_idx = ts1 >= start_time & ts1 <= end_time;
-sub_window_activity_session_1 = zall_mouse{5, 3}{1, 1}(:, sub_window_idx);
-choice_times_mouse = consum_times_by_mouse{1, 5};
-trial_types = trial_types_by_mouse{1, 5};
+% find(correlationResults{5, 1} > 0.3)
+% start_time = 1;% sub-window start time
+% end_time = 3; % sub-window end time
+% sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+% sub_window_activity_session_1 = zall_mouse{5, 3}{1, 1}(:, sub_window_idx);
+% choice_times_mouse = consum_times_by_mouse{1, 5};
+% trial_types = trial_types_by_mouse{1, 5};
 
 
 
@@ -1916,6 +1916,35 @@ ylabel('Choice Times Mouse');
 title('Scatter Plot with Regression Line and R^2 Value');
 hold off;
 
+
+% prechoice representative: 
+find(correlationResults{5, 1} < -0.5)
+start_time = -4;% sub-window start time
+end_time = 0; % sub-window end time
+
+sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+sub_window_activity_session_1 = mean(zall_mouse{5, 1}{1, 63}(:, sub_window_idx), 2);
+
+data_to_sort = zall_mouse{5, 1}{1, 63}(:, sub_window_idx);
+choice_times_mouse = trial_choice_times_by_mouse{1, 5};
+trial_types = trial_types_by_mouse{1, 5};
+
+
+trials_for_scatter = 1:size(choice_times_mouse_sorted, 1)
+
+[choice_times_mouse_sorted, sort_indices_choice_times] = sort(choice_times_mouse);
+choice_times_mouse_sorted = choice_times_mouse_sorted * -1;
+data_to_sort_sorted = data_to_sort(sort_indices_choice_times, :);
+figure;
+imagesc(ts1, [], data_to_sort_sorted); % Plot the heatmap
+hold on;
+
+% Plot the scatter points with transparency and smaller marker size
+scatter(choice_times_mouse_sorted, trials_for_scatter, 'Marker', 's', ...
+    'MarkerFaceColor', 'red', 'MarkerEdgeColor', 'none', 'MarkerFaceAlpha', 0.5);
+xline(0)
+xlim([-8 1])
+hold off;
 
 %% these arrays are just the combined_data = [mean_sub_window_activity_session_1 , mean_sub_window_activity_session_2] arrays from above, but saved for Early & Late
 load('Late_RM_arrays.mat')

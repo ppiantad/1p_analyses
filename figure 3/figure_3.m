@@ -224,8 +224,38 @@ for i = 1:size(K, 2)
     text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
 end
 
+% Calculate different groups as percentages
+only_shk = (sum(shk_event)/neuron_num)*100 - (co_activated_indices_sum/neuron_num)*100; % SHK only
+only_consumption = (sum(consumption_event)/neuron_num)*100 - (co_activated_indices_sum/neuron_num)*100; % Consumption only
+both = (co_activated_indices_sum/neuron_num)*100; % Overlap between SHK and Consumption
+not_modulated = 100 - (only_shk + only_consumption + both); % Unmodulated neurons
 
+% Data for the stacked bar (bottom to top: Not modulated, Consumption only, Both, SHK only)
+data_for_bar_plot = [not_modulated, only_consumption, both, only_shk];
 
+% Create the stacked bar plot
+figure;
+bar(1, data_for_bar_plot, 'stacked'); % Single bar at x = 1
+colormap([0.7 0.7 0.7; 0 0 1; 0.8 0.8 0; 1 0 0]); % Grey (Unmodulated), Blue (Consumption), Yellow (Both), Red (SHK)
+
+% Formatting
+xticks(1); % Single bar on x-axis
+xticklabels({'Neuron Modulation'});
+ylabel('Percentage of Neurons (%)');
+title('Neuron Modulation by Events');
+ylim([0 100]); % Ensure the bar always reaches 100%
+legend({'Not Modulated', 'Consumption Only', 'Both', 'SHK Only'}, 'Location', 'eastoutside');
+
+% Adding percentage labels
+y_offset = 0; % Start at the base of the bar
+for i = 1:length(data_for_bar_plot)
+    if data_for_bar_plot(i) > 0  % Only add labels for non-zero sections
+        text(1, y_offset + data_for_bar_plot(i)/2, sprintf('%.1f%%', data_for_bar_plot(i)), ...
+            'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', ...
+            'Color', 'white', 'FontWeight', 'bold');
+        y_offset = y_offset + data_for_bar_plot(i); % Move up for next section
+    end
+end
 
 for zz = 1:size(respClass_all_array_mouse, 1)
     exclusive_shk_activated_mouse{zz} = respClass_all_array_mouse{zz,4} == 1 & respClass_all_array_mouse{zz,1} == 3 & respClass_all_array_mouse{zz,2} == 3 & respClass_all_array_mouse{zz,3} == 3;
@@ -558,27 +588,37 @@ end
 
 trial_choice_times_concat = cat(1, trial_choice_times_by_mouse{:});
 rew_collect_times_concat = cat(1, delay_to_collect_post_shk_by_mouse{:});
+delay_to_initiation_concat = cat(1, delay_to_initiation_by_mouse{:});
+delay_to_collect_concat = cat(1, delay_to_collect_post_shk_by_mouse{:});
 
 bar_separation_value = 3;
 
 figure;
-width = 250; % Width of the figure
+width = 100; % Width of the figure
 height = 500; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
-swarmchart(ones(1, length(trial_choice_times_concat)), trial_choice_times_concat)
-hold on
-swarmchart(ones(1, length(rew_collect_times_concat))*bar_separation_value, rew_collect_times_concat)
 
-% yline(mean(only_shk_responsive_corrs), ones(length(only_shk_responsive_corrs)))
-% plot([0.5; 1.5], [mean(only_shk_responsive_corrs); mean(only_shk_responsive_corrs)], 'LineWidth',3)
-% plot([bar_separation_value-.5], [mean(trial_choice_times_concat)], 'LineWidth',3)
+swarmchart(ones(1, length(delay_to_collect_concat)), delay_to_collect_concat);
+hold on;
+yline(mean(delay_to_collect_concat), 'k', 'LineWidth', 2); % Black horizontal line at the mean
+
+figure;
+width = 100; % Width of the figure
+height = 500; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+swarmchart(ones(1, length(delay_to_initiation_concat)) * bar_separation_value, delay_to_initiation_concat);
+yticks([0 50 100 150 200])
+hold on;
+yline(mean(delay_to_initiation_concat), 'k', 'LineWidth', 2); % Black horizontal line at the mean
+
 yline(0);
 xtickformat('%.1f');
 ytickformat('%.1f');
-hold off
+hold off;
 
 
-variable_to_correlate = delay_to_initiation_by_mouse;
+variable_to_correlate = trial_choice_times_by_mouse;
 
 %%
 array_for_means = 1; 
