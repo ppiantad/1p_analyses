@@ -666,13 +666,13 @@ correlation_results = table();
 % Iterate over each variable
 for i = 1:length(variables)
     % Extract the variable by its name
-    % x = eval(variables{i})';  % Get the corresponding data for the current variable
-    % y = risk_table.Mean_1_to_3;  % This is the column you want to correlate with
+    x = eval(variables{i})';  % Get the corresponding data for the current variable
+    y = risk_table.Mean_1_to_3;  % This is the column you want to correlate with
 
     % for BLA-NAcSh data since there are so few cells uncomment below
-    x = eval(variables{i});
-    x = x(num_cells_mouse > 30)';
-    y = risk_table.Var11(num_cells_mouse > 30);
+    % x = eval(variables{i});
+    % x = x(num_cells_mouse > 30)';
+    % y = risk_table.Var11(num_cells_mouse > 30);
     % Compute the correlation coefficient
     [r, pval] = corrcoef(x, y);
     
@@ -835,8 +835,15 @@ diff_risky_vs_safe_prechoice_remapped = mean_prechoice_remapped_mouse_block_2_3-
 
 
 %%
-x = diff_risky_vs_safe_prechoice_remapped';
-y = risk_table.Mean_1_to_3;
+
+% all_aborts = risk_table.large_abort + risk_table.small_aborts;
+
+latency_change = risk_table.block_1_large_choice_latency - (risk_table.block_2_large_choice_latency + risk_table.block_2_small_choice_latency);
+
+% x = remapped_prechoice_ratio(risk_table.risky == 1)';
+% y = latency_change(risk_table.risky == 1);
+x = remapped_prechoice_ratio';
+y = risk_table.large_abort;
 % x = remapped_prechoice_ratio(num_cells_mouse > 30)';
 % y = risk_table.Mean_1_to_3(num_cells_mouse > 30);
 % Create a new figure with specific dimensions

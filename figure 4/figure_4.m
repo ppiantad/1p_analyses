@@ -1,16 +1,28 @@
 %% for heatmap, change "plot_num" (what neuron to plot) and array_to_plot (# corresponds to which dataset)
 
-plot_num = 178; % 81 / 31 or 58 or 70 / 2
+plot_num = 2 % 81 / 31 or 58 or 70 / 2
 
 array_to_plot = [1 8]; % depends on the structure of zall
 
-select_mouse = 'BLA_Insc_35';
+select_mouse = 'BLA_Insc_34';
 
-% for RDT D1 BLA_Insc_25:
-%prechoice neuron num 46
+% for RDT D1 BLA_Insc_24:
+%prechoice neuron num 1
 %postchoice rew num 38
 %consumption num 39
 %shock num 11
+
+% for RDT D1 BLA_Insc_27:
+%prechoice neuron num 72
+%postchoice rew num 4 or 47
+%consumption num 34
+%shock num 11
+
+% for RDT D1 BLA_Insc_34:
+%prechoice neuron num 18
+%postchoice rew num 104
+%consumption num 2
+
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
@@ -66,25 +78,25 @@ Tris = [1:numTrials]';
 %     0.13, 0.55, 0.13; % forest green
 % ];
 
-custom_colormap = [
-    1, 1, 1;         % white
-    0.9, 0.95, 0.95;
-    0.8, 0.9, 0.9;
-    0.6, 0.85, 0.85;
-    0.4, 0.8, 0.8;
-    0.2, 0.8, 0.8;
-    0.0, 0.8, 0.8;   % robin's egg blue
-];
-
 % custom_colormap = [
 %     1, 1, 1;         % white
-%     0.9, 0.9, 0.95;
-%     0.8, 0.8, 0.9;
-%     0.6, 0.6, 0.8;
-%     0.4, 0.4, 0.7;
-%     0.2, 0.2, 0.6;
-%     0.0, 0.0, 0.55;   % dark blue
+%     0.9, 0.95, 0.95;
+%     0.8, 0.9, 0.9;
+%     0.6, 0.85, 0.85;
+%     0.4, 0.8, 0.8;
+%     0.2, 0.8, 0.8;
+%     0.0, 0.8, 0.8;   % robin's egg blue
 % ];
+
+custom_colormap = [
+    1, 1, 1;         % white
+    0.9, 0.9, 0.95;
+    0.8, 0.8, 0.9;
+    0.6, 0.6, 0.8;
+    0.4, 0.4, 0.7;
+    0.2, 0.2, 0.6;
+    0.0, 0.0, 0.55;   % dark blue
+];
 
 % custom_colormap = [
 %     1, 1, 1; % white
@@ -121,11 +133,10 @@ shadedErrorBar(ts1, nanmean(zall_mouse{select_mouse_index, array_to_plot(1)}{1, 
 hold on;shadedErrorBar(ts1, nanmean(zall_mouse{select_mouse_index, array_to_plot(2)}{1, plot_num}), nanmean(neuron_sem_array{1, 1}(postchoice_reward_block_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
 
 xline(0);
-xline(median_trialStartTime, 'g')
-xline(median_time2Collect, 'r')
+
 % xlabel('Time from Large Rew Choice (s)');
 % legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
-ylim([-0.8 0.8]);
+ylim([-1 1]);
 hold off
 
 
@@ -152,6 +163,8 @@ xlim([-8 8]);
 set(gca, 'XTick', []);
 set(gca, 'YTick', [1, size(zall_mouse{select_mouse_index, array_to_plot(1)}{1, plot_num}, 1)]);
 xline(0)
+xline(median_trialStartTime, 'g')
+xline(median_time2Collect, 'r')
 scatter(time2Collect, Tris               , 'Marker', 'p')
 scatter(trialStartTime, Tris, 'Marker', 's')
 fontsize(18, 'points')
@@ -165,8 +178,8 @@ time2Collect = BehavData.collectionTime(trials_per_mouse{select_mouse_index, arr
 trialStartTime = BehavData.stTime(trials_per_mouse{select_mouse_index, array_to_plot(2)}) - BehavData.choiceTime(trials_per_mouse{select_mouse_index, array_to_plot(2)});
 median_trialStartTime = median(trialStartTime)
 median_time2Collect = median(time2Collect)
-xline(median_trialStartTime)
-xline(median_time2Collect)
+xline(median_trialStartTime, 'g')
+xline(median_time2Collect, 'r')
 [numTrials, ~] = size(time2Collect);
 Tris = [1:numTrials]';
 
