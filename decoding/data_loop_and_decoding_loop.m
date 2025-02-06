@@ -1,5 +1,5 @@
 % to use this code, use decoding_variables_to_use to load data
-
+% plus need to load relevant 10x dataset, run block_wise_changes_v1 etc
 iter = 0;
 num_iterations = 5;
 caTraceTrials_mouse_iterations = cell(1, num_iterations);

@@ -1531,9 +1531,11 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
+% only_shk_responsive_corrs = allCorrelations(kmeans_idx' == 3);
+% only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
 % not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
-not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
+% not_shk_responsive_corrs = allCorrelations(kmeans_idx' ~= 3);
+% not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
 
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients

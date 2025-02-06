@@ -58,7 +58,7 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 session_to_analyze = 'RDT_D1';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
+epoc_to_align = 'collectionTime'; % stTime choiceTime collectionTime
 period_of_interest = 'postchoice';
 
 if strcmp(epoc_to_align, 'stTime')
@@ -216,7 +216,7 @@ for ii = 1:size(fieldnames(final),1)
             end
         end
         % [BehavData,trials, varargin_identity_class] = TrialFilter_PR(BehavData, 'ALL', 1);
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'LOSS_PLUS_ONE', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');
@@ -310,6 +310,7 @@ for ii = 1:size(fieldnames(final),1)
         
         trials = cell2mat(trials);
         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(uv.ca_data_type);
+        ca_spikes = full(final.(currentanimal).(session_to_analyze).CNMFe_data.S);
         % ca = zscore(ca, 0, 2);
         if strcmp(uv.ca_data_type, 'S')
             ca = full(ca);
@@ -358,6 +359,8 @@ for ii = 1:size(fieldnames(final),1)
 
             caTraceTrials = NaN(size(eTS,1),numMeasurements); %
             unitTrace = ca(u,:); %get trace
+            caTraceTrials_spikes = NaN(size(eTS,1),numMeasurements); %
+            unitTrace_spikes = ca_spikes(u,:); %get trace
             if isempty(eTS)
                 caTraceTrials(1, 1:size(ts1, 2)) = NaN;
                 zall(1, 1:size(ts1, 2)) = NaN;
@@ -365,6 +368,10 @@ for ii = 1:size(fieldnames(final),1)
                 [zall_baselined, zall_window, zall_session, caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials, zall_luthi] = align_and_zscore(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 % [caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_only(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
                 caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                
+                [~, ~, ~, caTraceTrials_spikes, ~, ~, ~, ~] = align_and_zscore(BehavData, unitTrace_spikes, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
+                % [caTraceTrials, trial_ca, StartChoiceCollect_times, zscored_caTraceTrials] = align_only(BehavData, unitTrace, eTS, uv, time_array, zb_session, zsd_session, u, use_normalized_time);
+                caTraceTrials_spikes = caTraceTrials_spikes(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
 
                 if strcmp(uv.zscore_to, 'window') 
                     zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
@@ -415,6 +422,8 @@ for ii = 1:size(fieldnames(final),1)
                         neuron_sem(neuron_num,:) = nanstd(zall,1)/(sqrt(size(zall, 1)));
                     end
                     zall_mouse{ii, iter}(u) = {zall};
+                    caTraceTrials_spikes_mouse{ii, iter}(u) = {caTraceTrials_spikes};
+                    caTraceTrials_spikes_all(iter, neuron_num) = {caTraceTrials_spikes};
                     caTraceTrials_mouse{ii, iter}(u) = {caTraceTrials};
                     neuron_mean_mouse_unnormalized{ii, iter}(u,: ) = mean(caTraceTrials, 1);
                     neuron_sem_mouse_unnormalized{ii, iter}(u,: ) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
@@ -423,10 +432,22 @@ for ii = 1:size(fieldnames(final),1)
                     caTraceTrials_unnormalized_array(iter, neuron_num) = {caTraceTrials};
                     trials_per_mouse{ii, iter} = trials;
                     caTraceTrials = zall;
+                    
                     clear zall zb zsd zall_baselined zall_window zall_session;
 
                     trialCt = size(caTraceTrials,1);                                    %number of trials for currently analyzed event
 
+                    
+                    for g = 1:size(caTraceTrials_spikes, 1)                                         %for each resampling of the data
+                        current_trial_data = caTraceTrials_spikes(g, :);
+                        [~, lc] = findpeaks(current_trial_data(:, evtWinIdx));
+                        
+                        current_trial_peaks(g) = size(lc, 2);
+
+                    end
+                    trial_peaks_array(iter, neuron_num) = {current_trial_peaks};
+                    trial_peaks_mouse_array{ii, iter}(u) = {current_trial_peaks};
+                    clear lc pk current_trial_data current_trial_peaks
 
 
                     for g = 1:uv.resamples                                              %for each resampling of the data
@@ -588,6 +609,18 @@ neuron_sem_array(iter) = {neuron_sem};
 respClass_all_array(:,iter) = {respClass_all}';
 respClass_all_array_mouse_array(:,iter) = {respClass_all_array_mouse}';
 clear respClass_all 
+
+
+for ff = 1:size(trial_peaks_array, 2)
+    
+    current_trial_peaks_array = trial_peaks_array{iter, ff};
+    
+    current_trial_peaks_array_ind = current_trial_peaks_array >= 1;
+
+    trial_peak_sum(iter, ff) = sum(current_trial_peaks_array);
+
+    trial_peak_num(iter, ff) = sum(current_trial_peaks_array_ind);
+end
 
 
 %% plot activated neurons
