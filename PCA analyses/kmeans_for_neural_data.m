@@ -28,18 +28,31 @@ data_for_clustering = all_means;
 % here: https://www.biorxiv.org/content/10.1101/2024.06.26.600895v4
 % run data_loop on the relevant data (e.g., Pre_RDT_RM, 'OMIT_ALL', 0,
 % 'BLANK_TOUCH', 0)
-prechoice_safe_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= -4 & ts1 <= 0), 2);
-postchoice_safe_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= 0 & ts1 <= 2), 2);
+% prechoice_safe_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= -4 & ts1 <= 0), 2);
+% postchoice_safe_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= 0 & ts1 <= 2), 2);
+% % also run data_loop for collectionTime
+% consumption_safe_means = mean(zall_mean_all_array{1, 2}(:, ts1 >= 1 & ts1 <= 3), 2);
+% 
+% prechoice_risky_means = mean(zall_mean_all_array{1, 3}(:, ts1 >= -4 & ts1 <= 0), 2);
+% postchoice_risky_means = mean(zall_mean_all_array{1, 3}(:, ts1 >= 0 & ts1 <= 2), 2);
+% % also run data_loop for collectionTime
+% consumption_risky_means = mean(zall_mean_all_array{1, 4}(:, ts1 >= 1 & ts1 <= 3), 2);
+% 
+% shk_risky_means = mean(zall_mean_all_array{1, 5}(:, ts1 >= 0 & ts1 <= 2), 2);
+
+
+% or load 7x dataset
+prechoice_safe_means = mean(neuron_mean_array{1, 1}(:, ts1 >= -4 & ts1 <= 0), 2);
+postchoice_safe_means = mean(neuron_mean_array{1, 1}(:, ts1 >= 0 & ts1 <= 2), 2);
 % also run data_loop for collectionTime
-consumption_safe_means = mean(zall_mean_all_array{1, 2}(:, ts1 >= 1 & ts1 <= 3), 2);
+consumption_safe_means = mean(neuron_mean_array{1, 3}(:, ts1 >= 1 & ts1 <= 3), 2);
 
-prechoice_risky_means = mean(zall_mean_all_array{1, 3}(:, ts1 >= -4 & ts1 <= 0), 2);
-postchoice_risky_means = mean(zall_mean_all_array{1, 3}(:, ts1 >= 0 & ts1 <= 2), 2);
+prechoice_risky_means = mean(neuron_mean_array{1, 5}(:, ts1 >= -4 & ts1 <= 0), 2);
+postchoice_risky_means = mean(neuron_mean_array{1, 5}(:, ts1 >= 0 & ts1 <= 2), 2);
 % also run data_loop for collectionTime
-consumption_risky_means = mean(zall_mean_all_array{1, 4}(:, ts1 >= 1 & ts1 <= 3), 2);
+consumption_risky_means = mean(neuron_mean_array{1, 7}(:, ts1 >= 1 & ts1 <= 3), 2);
 
-shk_risky_means = mean(zall_mean_all_array{1, 5}(:, ts1 >= 0 & ts1 <= 2), 2);
-
+shk_risky_means = mean(neuron_mean_array{1, 4}(:, ts1 >= 0 & ts1 <= 2), 2);
 
 
 
@@ -48,7 +61,10 @@ all_means = [prechoice_safe_means postchoice_safe_means consumption_safe_means p
 
 data_for_clustering = all_means;
 
-data_for_display = horzcat(zall_mean_all_array{1, 1}, zall_mean_all_array{1, 3}, zall_mean_all_array{1, 5});
+
+data_for_display = horzcat(neuron_mean_array{1, 1}, neuron_mean_array{1, 5}, neuron_mean_array{1, 4});
+
+% data_for_display = horzcat(neuron_mean_array{1, 1}, neuron_mean_array{1, 3}, neuron_mean_array{1, 5});
 
 
 
@@ -60,7 +76,7 @@ data_for_display = horzcat(zall_mean_all_array{1, 1}, zall_mean_all_array{1, 3})
 
 %% from Sean to do kmeans on traces
 
-clusters_desired = 9
+clusters_desired = 13
 
 [kmeans_idx,C,sumdist3] = kmeans(data_for_clustering,clusters_desired,'Distance','correlation','Display','final', 'Replicates', 200,'Start','uniform');
 
@@ -251,13 +267,35 @@ for dd = 1:clusters_desired
     end
     
     % Plot the mean trace
-    % plot(1:480, normalized_mean_trace, 'k', 'LineWidth', 1.5);
-    plot(1:320, normalized_mean_trace, 'k', 'LineWidth', 1.5);
+    plot(1:480, normalized_mean_trace, 'k', 'LineWidth', 1.5);
+    % plot(1:320, normalized_mean_trace, 'k', 'LineWidth', 1.5);
     % Format subplot
     ylim([-1, 1]); % Keep the scale consistent
-    % xlim([1, 480]);
-    xlim([1, 320]);
+    xlim([1, 480]);
+    % xlim([1, 320]);
     title(['Cluster ' num2str(dd)]);
     set(gca, 'XTick', [], 'YTick', []); % Hide ticks for clean look
 end
 
+%%
+% Find indices of remapped neurons
+remapped_indices = find(remapped_prechoice == 1);
+
+% Extract kmeans clusters for remapped neurons
+remapped_clusters = kmeans_idx(remapped_indices);
+
+% Count occurrences of each cluster
+cluster_counts = histcounts(remapped_clusters, 1:14); % 1:14 ensures binning from 1-13
+
+% Create a bar plot
+figure;
+bar(1:13, cluster_counts, 'FaceColor', 'b'); % Blue bars
+xlabel('K-means cluster');
+ylabel('# of remapped neurons');
+title('prechoice remapped neurons per cluster');
+xticks(1:13); % Ensure x-axis has integer labels from 1 to 13
+% grid on;
+
+% Display results
+disp('Cluster counts for remapped neurons:');
+array2table(cluster_counts, 'VariableNames', strcat('Cluster_', string(1:13)))

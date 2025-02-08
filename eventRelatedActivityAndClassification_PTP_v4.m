@@ -58,7 +58,7 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 session_to_analyze = 'RDT_D1';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'collectionTime'; % stTime choiceTime collectionTime
+epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
 period_of_interest = 'postchoice';
 
 if strcmp(epoc_to_align, 'stTime')
@@ -66,13 +66,13 @@ if strcmp(epoc_to_align, 'stTime')
     uv.evtSigWin.outcome = [-1 1]; %for trial start
 elseif strcmp(epoc_to_align, 'choiceTime')
     if strcmp(period_of_interest, 'prechoice')
-        uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]
+        uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1] [-4 -0.5]
     elseif strcmp(period_of_interest, 'postchoice')
-        uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice [0 2]
+        uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice [0 2] [0 1]
     end
 elseif strcmp(epoc_to_align, 'collectionTime')
     period_of_interest = 'reward_collection';
-    uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3]
+    uv.evtSigWin.outcome = [1 3]; %for REW collection [1 3] [0 2]
 elseif strcmp(epoc_to_align, 'PressTime')
     if strcmp(period_of_interest, 'prechoice')
         uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1]
@@ -216,7 +216,7 @@ for ii = 1:size(fieldnames(final),1)
             end
         end
         % [BehavData,trials, varargin_identity_class] = TrialFilter_PR(BehavData, 'ALL', 1);
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData,  'REW', 0.3, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');
@@ -622,6 +622,42 @@ for ff = 1:size(trial_peaks_array, 2)
     trial_peak_num(iter, ff) = sum(current_trial_peaks_array_ind);
 end
 
+%%
+
+std_multiplier = 2;
+
+threshold_for_identity = 5.0118;
+threshold_for_identity_prechoice_safe = std(trial_peak_num(1, :))*std_multiplier;
+threshold_for_identity_postchoice_safe = std(trial_peak_num(2, :))*std_multiplier;
+threshold_for_identity_consum_safe = std(trial_peak_num(3, :))*std_multiplier;
+threshold_for_identity_shk = std(trial_peak_num(4, :))*std_multiplier;
+threshold_for_identity_prechoice_risky = std(trial_peak_num(5, :))*std_multiplier;
+threshold_for_identity_postchoice_risky = std(trial_peak_num(6, :))*std_multiplier;
+threshold_for_identity_consum_risky = std(trial_peak_num(7, :))*std_multiplier;
+
+
+
+prechoice_by_S_array = trial_peak_num(1, :) > threshold_for_identity & trial_peak_num(1, :) < threshold_for_identity*3;
+postchoice_by_S_array = trial_peak_num(2, :) > threshold_for_identity & trial_peak_num(2, :) < threshold_for_identity*3;
+consum_by_S_array = trial_peak_num(3, :) > threshold_for_identity & trial_peak_num(3, :) < threshold_for_identity*3;
+
+
+prechoice_risky_by_S_array = trial_peak_num(5, :) > threshold_for_identity & trial_peak_num(1, :) < threshold_for_identity*3;
+
+prechoice_safe_by_S_array = trial_peak_num(1, :) > threshold_for_identity_prechoice_safe & trial_peak_num(1, :) < threshold_for_identity_prechoice_safe*3;
+postchoice_safe_by_S_array = trial_peak_num(2, :) > threshold_for_identity_postchoice_safe & trial_peak_num(2, :) < threshold_for_identity_postchoice_safe*3;
+consum_safe_by_S_array = trial_peak_num(3, :) > threshold_for_identity_consum_safe & trial_peak_num(3, :) < threshold_for_identity_consum_safe*3;
+
+prechoice_risky_by_S_array = trial_peak_num(5, :) > threshold_for_identity_prechoice_risky & trial_peak_num(5, :) < threshold_for_identity_prechoice_risky*3;
+postchoice_risky_by_S_array = trial_peak_num(6, :) > threshold_for_identity_postchoice_risky & trial_peak_num(6, :) < threshold_for_identity_postchoice_risky*3;
+consum_risky_by_S_array = trial_peak_num(7, :) > threshold_for_identity_consum_risky & trial_peak_num(7, :) < threshold_for_identity_consum_risky*3;
+
+shk_risky_by_S_array = trial_peak_num(4, :) > threshold_for_identity_shk & trial_peak_num(4, :) < threshold_for_identity_shk*3;
+
+
+prechoice_remapped_S_array = prechoice_safe_by_S_array ~= 1 & prechoice_risky_by_S_array == 1;
+
+
 
 %% plot activated neurons
 
@@ -647,7 +683,7 @@ figure; shadedErrorBar(ts1, nanmean(neuron_mean(respClass_all_array{:,iter} == 3
 %% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
 % **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
 
-for ii = 1:size(zall_array, 2)
+for ii = 735:size(zall_array, 2)
     figure;
     % Initialize variables to store global max and min for heatmap and line graph
     globalMaxHeatmap = -inf;
@@ -686,7 +722,7 @@ for ii = 1:size(zall_array, 2)
             xline(median_time2Collect)
             [numTrials, ~] = size(behav_tbl.collectionTime(:));
             Tris = [1:numTrials]';
-            % scatter(time2Collect, Tris               , 'Marker', 'p', 'MarkerFaceColor', 'w', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 0.7)
+            scatter(time2Collect, Tris               , 'Marker', 'p', 'MarkerFaceColor', 'w', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 0.7)
             % scatter(trialStartTime, Tris, 'Marker', 's', 'MarkerFaceColor', 'k', 'MarkerEdgeAlpha', 0.2, 'MarkerFaceAlpha', 0.7)
             xline(0, 'Color', 'w')
         end     

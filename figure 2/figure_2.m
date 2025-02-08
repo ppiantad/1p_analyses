@@ -187,7 +187,7 @@ post_choice_window = [0 2];     % Post-choice period: 0 to 2 s
 consumption_window = [2 5];     % Consumption period: 1 to 3 s if using data aligned to collect, do 0 to 2 to keep things consistent. if you want to show that consum neurons peak after collect, use something like 2-5
 
 windows = {pre_choice_window, post_choice_window, consumption_window};
-plot_num = [12, 70, 10];
+plot_num = [15, 70, 10];
 
 array_to_plot = [1, 1, 1]; % depends on the structure of zall
 
@@ -227,6 +227,7 @@ for neuron_idx = 1:num_neurons
     array_to_plot_current = array_to_plot(neuron_idx);
     % Get the data for the current neuron
     neuron_data = zall_mouse{select_mouse_index, array_to_plot_current}{1, current_neuron};
+    neuron_data_s_array = caTraceTrials_spikes_mouse{select_mouse_index, array_to_plot_current}{1, current_neuron};
     % Restrict time indices based on the current window
     time_indices = ts1 >= current_window(1) & ts1 <= current_window(2);
     restricted_data = neuron_data(:, time_indices);
@@ -254,7 +255,7 @@ for neuron_idx = 1:num_neurons
         
         % Plot the selected trial
         plot(ts1, neuron_data(trial, :), 'Color', [custom_colormap(end, :), 0.5]);
-        
+        hold on; plot(ts1, neuron_data_s_array(trial, :), 'Color', [custom_colormap(end, :), 0.5]);
         % % Plot the mean as a thick black line
         % meanData = mean(neuron_data);
         % plot(ts1, meanData, 'LineWidth', 2, 'Color', 'k');
@@ -1532,8 +1533,8 @@ hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
 % only_shk_responsive_corrs = allCorrelations(kmeans_idx' == 3);
-% only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
-% not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
+only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
+not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
 % not_shk_responsive_corrs = allCorrelations(kmeans_idx' ~= 3);
 % not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
 

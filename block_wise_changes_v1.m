@@ -843,7 +843,7 @@ latency_change = risk_table.block_1_large_choice_latency - (risk_table.block_2_l
 % x = remapped_prechoice_ratio(risk_table.risky == 1)';
 % y = latency_change(risk_table.risky == 1);
 x = remapped_prechoice_ratio';
-y = risk_table.large_abort;
+y = risk_table.Mean_1_to_3;
 % x = remapped_prechoice_ratio(num_cells_mouse > 30)';
 % y = risk_table.Mean_1_to_3(num_cells_mouse > 30);
 % Create a new figure with specific dimensions
