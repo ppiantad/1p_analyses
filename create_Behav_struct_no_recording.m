@@ -7,7 +7,7 @@ ts1 = (-10:.1:10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'E:\MATLAB\raw data for WSLS etc\BLA-NAcSh ChrimsonR vs mCherry';
+metaDirectory = 'D:\MATLAB\raw data for WSLS etc\BLA-NAcSh PPO vs EGFP';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 missing_start_val_count = 0;
@@ -167,7 +167,9 @@ for zz = 1:size(metafolder_list, 1)
                         start_val = SLEAP_time_range_adjustment;
                     end
                     [BehavData, boris_Extract_tbl, start_val] = boris_to_table(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment, forced_trial_start, free_trial_start);
-
+                % added 2/10/2025
+                else 
+                    start_val = [];
                 end
                 
                 ABET_removeheader = ABETfile(2:end,:);

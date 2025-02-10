@@ -23,6 +23,33 @@ ranovaResults = ranova(rm, 'WithinModel', 'Choice*TrialBlock');
 % Display results
 disp(ranovaResults);
 
+
+%%
+% Combine data for analysis
+data = [large_choice]; % Assuming large_choice contains data for the three blocks
+num_subjects = size(data, 1); % Number of subjects (mice)
+
+% Create table for analysis
+varNames = {'Large_Block1', 'Large_Block2', 'Large_Block3'};
+tbl = array2table(data, 'VariableNames', varNames);
+
+% Define within-subject factor: TrialBlock
+TrialBlock = categorical([1, 2, 3]); % Trial Block factor
+WithinDesign = table(TrialBlock', 'VariableNames', {'TrialBlock'});
+
+% Fit repeated measures model
+rm = fitrm(tbl, 'Large_Block1-Large_Block3 ~ 1', 'WithinDesign', WithinDesign);
+
+% Run repeated measures ANOVA
+ranovaResults = ranova(rm, 'WithinModel', 'TrialBlock');
+
+% Display results
+disp(ranovaResults);
+
+% Perform post hoc pairwise comparisons
+disp('Post-hoc pairwise comparisons (Tukey-corrected):');
+mc = multcompare(rm, 'TrialBlock', 'ComparisonType', 'tukey');
+disp(mc);
 %% between subjects
 
 
