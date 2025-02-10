@@ -169,6 +169,13 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
         lose_omit_percent = sum(BehavData.lose_omit == 1)/sum(((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0) & BehavData.Block == 3 | BehavData.Block == 2);
         lose_stay_percent = sum(BehavData.lose_stay == 1)/sum(((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0) & BehavData.Block == 3 | BehavData.Block == 2);
         win_stay_percent = sum(BehavData.win_stay == 1)/sum(((BehavData.bigSmall == 1.2) & BehavData.ForceFree == 0) & BehavData.Block == 3 | BehavData.Block == 2);
+        lose_shift_ratio = sum(BehavData.lose_shift == 1)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0);
+        lose_stay_ratio = sum(BehavData.lose_stay == 1)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0);
+        lose_omit_ratio = sum(BehavData.lose_omit == 1)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0);
+        win_stay_ratio = sum(BehavData.win_stay == 1)/sum(BehavData.WL == 1 & BehavData.ForceFree == 0 & BehavData.Block == 2 | BehavData.Block == 3);
+        lose_shift_ratio_block_1 = sum(BehavData.lose_shift == 1 & BehavData.Block == 1)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0 & BehavData.Block == 1);
+        lose_shift_ratio_block_2 = sum(BehavData.lose_shift == 1 & BehavData.Block == 2)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0 & BehavData.Block == 2);
+        lose_shift_ratio_block_3 = sum(BehavData.lose_shift == 1 & BehavData.Block == 3)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0 & BehavData.Block == 3);
         BehavData.choice_latency = BehavData.choiceTime - BehavData.stTime;
         BehavData.collect_latency = BehavData.collectionTime - BehavData.choiceTime;
         BehavData.consum_duration = BehavData.collectionTime_end - BehavData.collectionTime; 
@@ -249,6 +256,13 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
             lose_omit_percent,...
             lose_stay_percent,...
             win_stay_percent,...
+            lose_shift_ratio,...
+            lose_stay_ratio,...
+            lose_omit_ratio,...
+            win_stay_ratio,...
+            lose_shift_ratio_block_1,...
+            lose_shift_ratio_block_2,...
+            lose_shift_ratio_block_3,...
             trials_completed,...
             block_1_large_choice_latency,...
             block_2_large_choice_latency,...
@@ -299,6 +313,13 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
             "lose_omit",...
             "lose_stay",...
             "win_stay",...
+            "lose_shift_ratio",...
+            "lose_stay_ratio",...
+            "lose_omit_ratio",...
+            "win_stay_ratio",...
+            "lose_shift_ratio_block_1",...
+            "lose_shift_ratio_block_2",...
+            "lose_shift_ratio_block_3",...
             "trials_completed",...
             "block_1_large_choice_latency",...
             "block_2_large_choice_latency",...
@@ -483,6 +504,23 @@ end
 
 % Add a global label for x-axis
 xlabel('Trial');
+
+
+
+for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
+    currentanimal = char(valid_animalIDs(ii));
+    if isfield(final_behavior.(currentanimal), 'PR_D1')
+        BehavData_PR = final_behavior.(currentanimal).PR_D1.uv.BehavData;
+        total_PR_presses(ii) = size(BehavData_PR ,1);
+        total_PR_rewards(ii) = sum(BehavData_PR.collectTrial == 1);
+        PR_final_ratio_completed(ii) = max(BehavData_PR.Ratio - 1);
+        PR_final_ratio_reached(ii) = max(BehavData_PR.Ratio);
+    
+    end
+
+
+
+end
 
 %%
 
@@ -1046,7 +1084,81 @@ set(gca, 'ytick', 0:25:100);
 hold off;
 
 
+%% for plotting lose_shift ratio across blocks
 
+large_choice = [risk_table.lose_shift_ratio_block_1, risk_table.lose_shift_ratio_block_2, risk_table.lose_shift_ratio_block_3];
+% small_choice = [risk_table.block_1_small_choice_latency, risk_table.block_2_small_choice_latency, risk_table.block_3_small_choice_latency];
+
+% turn NaNs (trials where the denominator, number of losses, is 0) into 0s
+large_choice(isnan(large_choice))=0;
+
+
+mean_large = nanmean(large_choice, 1);
+% mean_small = nanmean(small_choice, 1);
+sem_large = nanstd(large_choice, 0, 1) ./ sqrt(size(large_choice, 1));
+% sem_small = nanstd(small_choice, 0, 1) ./ sqrt(size(small_choice, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice, 1)
+    plot(x_points, large_choice(i, :), '-', ...
+        'Color', [0 0 1 0.6], ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+% for i = 1:size(small_choice, 1)
+%     plot(x_points, small_choice(i, :), '-', ...
+%         'Color', [1 0 0 0.6], ... % Red with 60% opacity
+%         'LineWidth', 1.2);
+% end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, 'o-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+% errorbar(x_points, mean_small, sem_small, '^-', ...
+%     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
+%     'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+% ylim([0 1.1 * max([mean_large + sem_large, ...
+%                    mean_small + sem_small])]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:1);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
 
 %% for hM4Di vs mCherry
 
@@ -2131,3 +2243,4 @@ set(gca, 'ytick', 0:25:100);
 % grid on;
 
 hold off;
+

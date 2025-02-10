@@ -9,7 +9,7 @@ final = struct();
 % preRDTField = cellreg_struct.Pre_RDT_RM_vs_RDT_D1;
 % preRDTField = cellreg_struct.RDT_D1_vs_RDT_D2;
 % preRDTField = cellreg_struct.RDT_D2_vs_RDT_D3;
-preRDTField = cellreg_struct.RDT_D1_vs_SHOCK_TEST;
+preRDTField = cellreg_struct.RDT_D1_vs_PR_D1;
 
 % Copy the data from preRDTField and its subfields into final
 final = preRDTField;

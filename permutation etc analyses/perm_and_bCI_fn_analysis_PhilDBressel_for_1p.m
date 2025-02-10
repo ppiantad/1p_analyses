@@ -30,7 +30,7 @@ consec_thresh = 3; % 1017.3Hz sample rate / 3Hz filter %340 PRD used 340 because
 % which is 10
 
 % Graphing parameters
-ylims = [-1 2];
+ylims = [-0.5 3];
 % xlims = [ts1(1) round(ts1(end))];
 xlims = x_limits;
 % sig_plot_level = linspace(4,3.2,7);

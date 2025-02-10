@@ -55,11 +55,11 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'PR_D1';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
 epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
-period_of_interest = 'postchoice';
+period_of_interest = 'prechoice';
 
 if strcmp(epoc_to_align, 'stTime')
     period_of_interest = 'trial_start';
@@ -215,8 +215,17 @@ for ii = 1:size(fieldnames(final),1)
                 end
             end
         end
-        % [BehavData,trials, varargin_identity_class] = TrialFilter_PR(BehavData, 'ALL', 1);
-        [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData,  'REW', 0.3, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+
+        if contains(session_to_analyze, 'PR')
+            [BehavData,trials, varargin_identity_class] = TrialFilter_PR(BehavData, 'ALL', 1);
+            if size(BehavData, 1) >= 100
+                BehavData(101:end,:) = [];
+            end
+        else
+            [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData,  'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        
+        end
+
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
         varargin_strings = strrep(varargin_strings, '1.2', 'Large');
@@ -683,7 +692,7 @@ figure; shadedErrorBar(ts1, nanmean(neuron_mean(respClass_all_array{:,iter} == 3
 %% Use this code to plot heatmaps for each individual cell, across trials for all levels of iter
 % **most useful for plotting matched cells within the same experiment, e.g., pan-neuronal matched Pre-RDT RM vs. RDT D1**
 
-for ii = 735:size(zall_array, 2)
+for ii = 1:size(zall_array, 2)
     figure;
     % Initialize variables to store global max and min for heatmap and line graph
     globalMaxHeatmap = -inf;
