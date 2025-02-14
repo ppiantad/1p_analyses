@@ -2257,14 +2257,20 @@ ve_diagram.ShowIntersectionAreas = true;
 %% ONLY USE CODE BELOW IF YOU WANT TO COMBINE DATA ACROSS 2 FILTERS, E.G., BLOCK 1 & BLOCKS 2/3
 
 array_for_means = 1; 
-array_for_means_second = 5; 
+array_for_means_second = []; % 5
 
 
 for q = 1:length (behav_tbl_iter{1, 1})
 
-    behav_part_1 = behav_tbl_iter{array_for_means, 1}{q, 1}
-    behav_part_2 = behav_tbl_iter{array_for_means_second, 1}{q, 1}
-    nestedCellArray_1 = vertcat(behav_part_1, behav_part_2 )
+    behav_part_1 = behav_tbl_iter{array_for_means, 1}{q, 1};
+
+    if isempty(array_for_means_second)
+        nestedCellArray_1 = behav_part_1;
+    else
+        behav_part_2 = behav_tbl_iter{array_for_means_second, 1}{q, 1};
+        nestedCellArray_1 = vertcat(behav_part_1, behav_part_2 );
+    end
+
 
 
 
@@ -2413,12 +2419,16 @@ for i = 1:length(zall_mouse)
     concatenated_columns = {};
     % Get the current nested cell array
     nestedCellArray_1 = zall_mouse{i, array_for_means};
-    nestedCellArray_2 = zall_mouse{i, array_for_means_second};
-    for qq = 1:size(nestedCellArray_1, 2)
-        concatenated_columns{qq} = vertcat(nestedCellArray_1{qq}, ...
-            nestedCellArray_2{qq});
+
+    if ~isempty(array_for_means_second)
+        nestedCellArray_2 = zall_mouse{i, array_for_means_second};
+        for qq = 1:size(nestedCellArray_1, 2)
+            concatenated_columns{qq} = vertcat(nestedCellArray_1{qq}, ...
+                nestedCellArray_2{qq});
+        end
+        nestedCellArray_1 = concatenated_columns;
+
     end
-    nestedCellArray_1 = concatenated_columns; 
     % nestedCellArray_2 = zall_mouse{i, 1};
     % Initialize the nested cell array for storing mean values
     meanNestedCellArray = cell(size(nestedCellArray_1));

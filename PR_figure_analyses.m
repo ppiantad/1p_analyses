@@ -146,3 +146,33 @@ xline(0);
 % xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
 % xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from choice (s)');
+
+%% 
+% assuming you have done: 
+% for RDT_D1: choiceTime.postchoice_0to2.SHK_1
+% for PR_D1: collectionTime.reward_collection_1to3.COLLECT_1
+
+shk_event = respClass_all_array{1,1} == 1;
+
+consumption_event = respClass_all_array{1, 2} == 1;
+
+total_modulated = [(sum(shk_event)/neuron_num)*100 (sum(consumption_event)/neuron_num)*100];
+
+shk_and_consum_both_excited = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 1;
+% this is the start of checking if neurons are MORE active than during
+% other events, i.e. if you wanted to check if REW activated neurons are
+% significantly differentially activated by SHK. preliminary poking around
+% seems to suggest that few large reward active neurons have their activity
+% increase in response to SHK
+co_activated_indices = find(shk_and_consum_both_excited(1,:) == 1);
+co_activated_indices_sum = numel(co_activated_indices);
+
+
+A = total_modulated;
+I = (co_activated_indices_sum/neuron_num)*100;
+K = [A I];
+figure; 
+[H, S] = venn(A,I,'FaceColor',{'r','y'},'FaceAlpha',{1,0.6},'EdgeColor','black');
+for i = 1:size(K, 2)
+    text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
+end

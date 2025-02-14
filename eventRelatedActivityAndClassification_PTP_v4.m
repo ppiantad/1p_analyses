@@ -58,8 +58,8 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 session_to_analyze = 'PR_D1';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
-period_of_interest = 'prechoice';
+epoc_to_align = 'collectionTime'; % stTime choiceTime collectionTime
+period_of_interest = 'postchoice';
 
 if strcmp(epoc_to_align, 'stTime')
     period_of_interest = 'trial_start';
@@ -217,12 +217,12 @@ for ii = 1:size(fieldnames(final),1)
         end
 
         if contains(session_to_analyze, 'PR')
-            [BehavData,trials, varargin_identity_class] = TrialFilter_PR(BehavData, 'ALL', 1);
+            [BehavData,trials, varargin_identity_class] = TrialFilter_PR(BehavData, 'COLLECT', 1);
             if size(BehavData, 1) >= 100
                 BehavData(101:end,:) = [];
             end
         else
-            [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData,  'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+            [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData,  'SHK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         
         end
 

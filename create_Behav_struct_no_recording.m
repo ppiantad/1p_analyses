@@ -7,7 +7,7 @@ ts1 = (-10:.1:10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'D:\MATLAB\raw data for WSLS etc\BLA-NAcSh PPO vs EGFP';
+metaDirectory = 'I:\MATLAB\raw data for WSLS etc\BLA-NAcSh PdCO vs EGFP\BLA-NAcSh PdCO vs EGFP plus controls';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 missing_start_val_count = 0;
@@ -104,7 +104,7 @@ for zz = 1:size(metafolder_list, 1)
         %     mat_strings = strsplit(char(matFiles.name),'_');
         %     date_strings = strsplit(mat_strings{4}, '-');
         csv_names = {csvFiles.name};
-        current_animal = folder_strings{5}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
+        current_animal = folder_strings{6}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
         % current_session = folder_strings{6};
         current_animal = matlab.lang.makeValidName(current_animal);
         current_session = char(folder_strings(end));

@@ -579,7 +579,7 @@ for kk = 1:length(meanZallMouse) %1:length(meanZallMouse)
     % limit to just SHOCK activated neurons
     % get this by loading the 10x variable dataset, or similar, where array
     % 4 is data from SHK == 1
-    meanNestedCellArray = meanNestedCellArray(respClass_all_array_mouse{kk, 4} == 1);
+    % meanNestedCellArray = meanNestedCellArray(respClass_all_array_mouse{kk, 4} == 1);
     
     % Extract the data for easy reference
     data = behav_data_extracted_array{1, kk};

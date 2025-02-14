@@ -34,25 +34,47 @@ negLog10P = DEG_Table.negLog10P;
 geneNames = DEG_Table.GeneName;
 
 %%
-% Define genes to annotate
-genesToLabel = ["Lmo3", "Pcdh17", "Cd4", "Pnck"];
+% genesToLabel = ["Lmo3", "Pcdh17", "Cd4", "Pnck"];
+
+genesToLabel = ["Lmo3", "Pcdh17", "Cd4", "Car1", "Cenpm", "Ddc", "Slc18a3"];
 
 % Find indices of these genes
 idx = ismember(geneNames, genesToLabel);
 
-% Plot Volcano Plot
-figure;
-scatter(log2FC, negLog10P, 50, 'b', 'filled'); % Plot all points
-hold on;
-scatter(log2FC(idx), negLog10P(idx), 50, 'r', 'filled'); % Highlight selected genes
+% Define thresholds
+log2FC_threshold = 0.5;
+negLog10P_threshold = 1;
 
-% Add annotations
-text(log2FC(idx) + 0.1, negLog10P(idx), geneNames(idx), 'FontSize', 12, 'FontWeight', 'bold', 'Color', 'k');
+% Define categories based on thresholds
+isRed = (negLog10P > negLog10P_threshold) & (log2FC > log2FC_threshold | log2FC < -log2FC_threshold); % Significant
+isGray = (log2FC >= -log2FC_threshold & log2FC <= log2FC_threshold) & (negLog10P < negLog10P_threshold); % Low FC, Not Significant
+isGreen = (log2FC > log2FC_threshold | log2FC < -log2FC_threshold) & (negLog10P < negLog10P_threshold); % High FC, Not Significant
+isBlue = ~(isRed | isGray | isGreen); % Default color for other points
+isBlack = idx; % Genes that should be labeled separately
 
-% Labels and title
+% Create Volcano Plot
+figure; hold on;
+
+% Scatter plots with different colors
+scatter(log2FC(isGray), negLog10P(isGray), 50, [0.5 0.5 0.5], 'filled'); % Grey points
+scatter(log2FC(isGreen), negLog10P(isGreen), 50, 'g', 'filled'); % Green points
+scatter(log2FC(isRed), negLog10P(isRed), 50, 'r', 'filled'); % Red points
+scatter(log2FC(isBlue), negLog10P(isBlue), 50, 'b', 'filled'); % Default blue points
+
+% Scatter plot for genes in genesToLabel (Black)
+scatter(log2FC(isBlack), negLog10P(isBlack), 80, 'k', 'filled', 'd'); % Black diamonds for visibility
+
+% Add vertical and horizontal threshold lines
+xline(log2FC_threshold, 'k--', 'LineWidth', 1.5);  % +0.5 Log2FC
+xline(-log2FC_threshold, 'k--', 'LineWidth', 1.5); % -0.5 Log2FC
+yline(negLog10P_threshold, 'k--', 'LineWidth', 1.5); % -Log10P = 1.5
+
+% Label selected genes
+text(log2FC(isBlack) + 0.1, negLog10P(isBlack), geneNames(isBlack), 'FontSize', 12, 'FontWeight', 'bold', 'Color', 'k');
+
+% Labels, Title, and Legend
 xlabel('Log_2 Fold Change');
 ylabel('-log_{10}(P-value)');
-title('Volcano Plot with Selected Gene Labels');
-grid on;
-legend({'Non-Significant', 'Highlighted Genes'}, 'Location', 'best');
+legend({'Low FC & Not Significant', 'High FC & Not Significant', 'Significant', 'Other', 'Genes of Interest'}, ...
+    'Location', 'best');
 hold off;

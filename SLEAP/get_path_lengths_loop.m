@@ -1,6 +1,10 @@
 % animalIDs = (fieldnames(final_SLEAP));
 session_to_analyze = 'Pre_RDT_RM';
 
+
+array_for_means = 1; 
+array_for_means_second = []; % 5
+
 b1_large_path_length = [];
 b2_large_path_length = [];
 b3_large_path_length = [];
@@ -54,9 +58,14 @@ for dd = 1:size(animalIDs)
         % using the 10x variable data
         
         % BehavData = behav_tbl_iter{1, 1}{dd};
-        behav_part_1 = behav_tbl_iter{1, 1}{dd, 1}
-        behav_part_2 = behav_tbl_iter{5, 1}{dd, 1}
-        BehavData = vertcat(behav_part_1, behav_part_2 )
+        behav_part_1 = behav_tbl_iter{array_for_means, 1}{dd, 1};
+        if isempty(array_for_means_second)
+            BehavData = behav_part_1;
+
+        else
+            behav_part_2 = behav_tbl_iter{array_for_means_second, 1}{dd, 1};
+            BehavData = vertcat(behav_part_1, behav_part_2);
+        end
 
         onset_trials = BehavData.stTime';
         choice_trials = BehavData.choiceTime';

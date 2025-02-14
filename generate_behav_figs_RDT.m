@@ -5,7 +5,7 @@
 
 % final_behavior = final_SLEAP; % for hM4Di data;
 
-session_to_analyze = 'RDT_OPTO_CHOICE'
+session_to_analyze = 'RDT_OPTO_SHOCKED_OUTCOMES'
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_13'};
@@ -2286,9 +2286,9 @@ hold on;
 
 % Set figure size
 width = 200; % Width of the figure
-height = 450; % Height of the figure
+height = 250; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
-
+fontsize(12, 'points')
 % Plot individual lines for "Large" data
 for i = 1:size(large_choice_mCherry, 1)
     plot(x_points, large_choice_mCherry(i, :), '-', ...
@@ -2306,11 +2306,11 @@ end
 
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
-    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, 'MarkerEdgeColor', 'none', ...
     'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, PdCO_symbol, ...
-    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
+    'LineWidth', 1.5, 'MarkerSize', 12, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, 'MarkerEdgeColor', 'none',...
     'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
 
 % Format the X-axis
@@ -2330,6 +2330,8 @@ set(gca, 'ytick', 0:25:125);
 % grid on;
 
 hold off;
+
+
 
 %% for BLA-NAcSh ChrimsonR vs mCherry
 
