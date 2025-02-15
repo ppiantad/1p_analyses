@@ -5,7 +5,7 @@
 
 % final_behavior = final_SLEAP; % for hM4Di data;
 
-session_to_analyze = 'RDT_OPTO_SHOCKED_OUTCOMES'
+session_to_analyze = 'RDT_D1'
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_13'};
@@ -2481,6 +2481,83 @@ large_choice = [risk_table.block_1_large, risk_table.block_2_large, risk_table.b
 large_choice_risky = large_choice(risk_table.risky == 1, :);
 large_choice_not_risky = large_choice(risk_table.risky == 0, :);
 small_choice = [risk_table.block_1_small, risk_table.block_2_small, risk_table.block_3_small]*100;
+
+mean_large_risky = nanmean(large_choice_risky, 1);
+mean_large_not_risky = nanmean(large_choice_not_risky, 1);
+mean_small = nanmean(small_choice, 1);
+
+sem_large_risky = nanstd(large_choice_risky, 0, 1) ./ sqrt(size(large_choice_risky, 1));
+sem_large_not_risky = nanstd(large_choice_not_risky, 0, 1) ./ sqrt(size(large_choice_not_risky, 1));
+sem_small = nanstd(small_choice, 0, 1) ./ sqrt(size(small_choice, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_risky, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_risky, 1)
+    plot(x_points, large_choice_risky(i, :), '-', ...
+        'Color', [0 0 1 0.6], ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_not_risky, 1)
+    plot(x_points, large_choice_not_risky(i, :), '-', ...
+        'Color', [1 0 0 0.6], ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large_risky, sem_large_risky, 'o-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_large_not_risky, sem_large_not_risky, '^-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 1.1 * max([mean_large_risky + sem_large_risky, ...
+                   mean_large_not_risky + sem_large_not_risky])]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:100);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%%
+
+large_choice = [risk_table.large_aborts_block_1, risk_table.large_aborts_block_2, risk_table.large_aborts_block_3];
+large_choice_risky = large_choice(risk_table.risky == 1, :);
+large_choice_not_risky = large_choice(risk_table.risky == 0, :);
+small_choice = [risk_table.block_1_small, risk_table.block_2_small, risk_table.block_3_small];
 
 mean_large_risky = nanmean(large_choice_risky, 1);
 mean_large_not_risky = nanmean(large_choice_not_risky, 1);
