@@ -182,8 +182,9 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
         lose_shift_ratio_block_3 = sum(BehavData.lose_shift == 1 & BehavData.Block == 3)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0 & BehavData.Block == 3);
         BehavData.choice_latency = BehavData.choiceTime - BehavData.stTime;
         BehavData.collect_latency = BehavData.collectionTime - BehavData.choiceTime;
-        BehavData.consum_duration = BehavData.collectionTime_end - BehavData.collectionTime; 
-        
+        if ismember('collectionTime_end', BehavData.Properties.VariableNames)
+            BehavData.consum_duration = BehavData.collectionTime_end - BehavData.collectionTime;
+        end
         block_1_choice_latency_all = mean(BehavData.choice_latency(BehavData.Block == 1 & (BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3)));
         block_2_choice_latency_all = mean(BehavData.choice_latency(BehavData.Block == 2 & (BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3)));
         block_3_choice_latency_all = mean(BehavData.choice_latency(BehavData.Block == 3 & (BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3)));
@@ -241,6 +242,16 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
             small_consum_duration_block_1 = nanmean(BehavData.consum_duration(BehavData.bigSmall == 0.3 & BehavData.Block == 1));
             small_consum_duration_block_2 = nanmean(BehavData.consum_duration(BehavData.bigSmall == 0.3 & BehavData.Block == 2));
             small_consum_duration_block_3 = nanmean(BehavData.consum_duration(BehavData.bigSmall == 0.3 & BehavData.Block == 3));
+
+
+        else
+            large_consum_duration_block_1 = NaN;
+            large_consum_duration_block_2 = NaN;
+            large_consum_duration_block_3 = NaN;
+            small_consum_duration_block_1 = NaN;
+            small_consum_duration_block_2 = NaN;
+            small_consum_duration_block_3 = NaN;
+
         end
         trials_completed = sum(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3);
         

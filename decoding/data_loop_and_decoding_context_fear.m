@@ -46,7 +46,7 @@ end
 
 experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 
-experimental_grp_to_analyze = 'No Shock';
+experimental_grp_to_analyze = 'Experimental';
 
 clear neuron_mean neuron_sem neuron_num zall_mean zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized sem_all zall_mean_all caTraceTrials_mouse caTraceTrials_current caTraceTrials_mouse_decoding
 %%
