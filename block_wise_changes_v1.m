@@ -653,6 +653,17 @@ end
 
 
 
+%%
+% USE THIS TO DELETE MISSING MOUSE FROM BLA-NAcSh. For analyses below
+for hh = 1:length(variables)
+    var_name = variables{hh}; % Get the variable name as a string
+    x = eval(var_name);       % Retrieve the variable
+    x(:,9) = [];             % Delete the 9th row
+    assignin('base', var_name, x); % Save the modified variable back to the workspace
+end
+
+
+
 %% change the "y" variable below to broadly check correlations w/ variables defined in the "variables" section
 % Define a cell array of variable names that end with "ratio"
 variables = {'conserved_ratio', 'lost_ratio', 'remapped_ratio', ...
@@ -663,16 +674,19 @@ variables = {'conserved_ratio', 'lost_ratio', 'remapped_ratio', ...
 % Initialize an empty table to store the results
 correlation_results = table();
 
+
+
+
 % Iterate over each variable
 for i = 1:length(variables)
     % Extract the variable by its name
     % x = eval(variables{i})';  % Get the corresponding data for the current variable
-    % y = risk_table.large_abort;  % This is the column you want to correlate with
+    % y = risk_table.session_length;  % This is the column you want to correlate with
 
     % for BLA-NAcSh data since there are so few cells uncomment below
     x = eval(variables{i});
     x = x(num_cells_mouse > 30)';
-    y = risk_table.Mean_1_to_3(num_cells_mouse > 30);
+    y = risk_table.session_length(num_cells_mouse > 30);
     % Compute the correlation coefficient
     [r, pval] = corrcoef(x, y);
     
@@ -845,7 +859,7 @@ latency_change = risk_table.block_1_large_choice_latency - (risk_table.block_2_l
 % x = lost_collection_ratio';
 % y = risk_table.large_abort;
 x = lost_collection_ratio(num_cells_mouse > 30)';
-y = risk_table.Mean_1_to_3(num_cells_mouse > 30);
+y = risk_table.session_length(num_cells_mouse > 30);
 % Create a new figure with specific dimensions
 figure;
 width = 250; % Width of the figure

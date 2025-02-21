@@ -14,7 +14,7 @@ ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 counts = 0;
 num_comparisons = 2; 
 
-yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
+% yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
 
 
@@ -44,7 +44,7 @@ for i = 0:(num_shocks-1)
 end
 
 
-experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 
 experimental_grp_to_analyze = 'Experimental';
 
@@ -212,7 +212,7 @@ data_for_decoding = caTraceTrials_mouse_iterations;
 % effectively decoding 1 "sample" (the means)
 
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
-relevant_period = [-4 0]
+relevant_period = [0 2]
 sub_window_idx = ts1 >= relevant_period(1) & ts1 <= relevant_period(2);
 
 % Preallocate memory for caTraceTrials_mouse_iterations_means

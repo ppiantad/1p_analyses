@@ -33,7 +33,7 @@ session_to_analyze = 'RDT_D1';
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'collectionTime';
+epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 
 neuron_num = 0;
@@ -97,7 +97,7 @@ for ii = 1:size(animalIDs,1)
         % block_2 = [block_2(1, 1) block_2(end, 2)];
         % block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
         % block_3 = [block_3(1, 1) block_3(end, 2)];
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'LOSS_PLUS_ONE', 1, 'AA', 1); %'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0; 'LOSS_PLUS_ONE', 1, 'SHK', 0, 'BLANK_TOUCH', 0; 'LOSS_PLUS_ONE', 0, 'REW', 1.2, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1); %'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0; 'LOSS_PLUS_ONE', 1, 'SHK', 0, 'BLANK_TOUCH', 0; 'LOSS_PLUS_ONE', 0, 'REW', 1.2, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         % 'OMITALL', 0, 'BLANK_TOUCH', 0
         % 'LOSS_PLUS_ONE', 1, 'SHK', 0, 'BLANK_TOUCH', 0
         % 'LOSS_PLUS_ONE', 0, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
