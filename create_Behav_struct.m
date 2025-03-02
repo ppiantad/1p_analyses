@@ -223,6 +223,8 @@ for zz = 1:size(metafolder_list, 1)
 
 
                 current_session = regexprep(current_session,{' ', '-'}, '_');
+                
+
                 [BehavData,ABETfile,Descriptives, block_end, largeRewSide, smallRewSide, forced_trial_start, free_trial_start]=ABET2TableFn_Chamber_A_v6(ABET_file,[]);
                 if exist('boris_file', 'var')
                     SLEAP_time_range_adjustment = []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; -1.23;

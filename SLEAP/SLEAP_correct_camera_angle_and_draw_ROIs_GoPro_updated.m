@@ -7,7 +7,7 @@
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'D:\risk videos\BLA hM4Di vs mCherry';
+metaDirectory = 'F:\risk videos\BLA hM4Di vs mCherry';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 p = get(0, "MonitorPositions");
@@ -63,36 +63,14 @@ for zz = 1:size(metafolder_list, 1)
         clear folderMask
 
 
-        idx = ~cellfun('isempty',strfind({files.name},'.csv')); %find the instances of .xlsx in the file list.
-        %This command converts the name field into a cell array and searches
-        %the cell array with strfind
-        csvs = files(idx); %build a mat file index
-        clear idx
-        csv_names = {csvs.name};
+
         % added these if/elseif statements to try to not have to redo all
         % the labeling if I add mice
         if isfield(final_SLEAP.(current_animal), current_session)
             if isfield(final_SLEAP.(current_animal).(current_session), 'shapeData')
                 continue
             elseif ~isfield(final_SLEAP.(current_animal).(current_session), 'shapeData')
-                for mm = 1:length(csv_names)
-                    % Check if the current name contains three distinct substrings
-                    if contains(lower(csv_names{mm}), '_gpio')
-                        disp(['GPIO File = ', csv_names{mm}])
-                        GPIO_file = strcat(folder_list{ii}, '\', csv_names{mm});
-                    end
-                    if contains(csv_names{mm}, 'ABET')
-                        disp(['ABET File = ', csv_names{mm}])
-                        ABET_file = strcat(folder_list{ii}, '\', csv_names{mm});
-                    end
 
-                    % if ~contains(csv_names{mm}, 'ABET') | ~contains(lower(csv_names{mm}), '_gpio')
-                    %     disp('BLANK folder was not analyzed due to missing files! Check contents and try again');
-                    %
-                    %     % Skip the rest of the loop for this folder
-                    %     continue;
-                    % end
-                end
 
                 folder_to_analyze = find(strcmpi(strrep(strrep(list_folder_names, ' ', ''), '-', ''), modifiedString));
                 disp(['Analyzing subfolder: ' list_folder_names{folder_to_analyze,1}]);
@@ -108,8 +86,8 @@ for zz = 1:size(metafolder_list, 1)
                 movie = files(idx); %build a mat file index
                 clear idx files
 
-                if isempty(csvs) | isempty(movie)
-                    disp('Missing behavior csvs or video file, skipping folder');
+                if isempty(movie)
+                    disp('Missing behavior video file, skipping folder');
                     continue
                 else
                     % Specify the path to your video file

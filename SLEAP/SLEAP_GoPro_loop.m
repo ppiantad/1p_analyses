@@ -9,10 +9,13 @@ ts1 = (-10:(uv.dt):10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA';
+metaDirectory = 'D:\risk videos\BLA hM4Di vs mCherry\RRD424';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
+if exist('final_SLEAP', 'var') ~= 1
+    final_SLEAP = struct;
+end
 
 % Loop through the list of subfolders
 for i = 1:length(metaDirectory_subfolders)
@@ -64,7 +67,22 @@ for zz = 1:size(metafolder_list, 1)
         folderMask = ~[list.isdir]; %find all of the folders in the directory and remove them from the list
         files = list(folderMask);  %now we have only files to work with
         clear folderMask
+        
+        if ~isfield(final_SLEAP, current_animal)
+            final_SLEAP.(current_animal) = struct;
 
+            if ~isfield(final_SLEAP.(current_animal), current_session)
+                final_SLEAP.(current_animal).(current_session) = struct;
+            else
+                continue
+            end
+        end
+
+        if ~isfield(final_SLEAP.(current_animal), current_session)
+            final_SLEAP.(current_animal).(current_session) = struct;
+        else
+            continue
+        end
 
         idx = ~cellfun('isempty',strfind({files.name},'.csv')); %find the instances of .xlsx in the file list.
         %This command converts the name field into a cell array and searches

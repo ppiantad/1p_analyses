@@ -6,7 +6,7 @@ iter = 0
 %% Edit these uservariables with what you want to look at
 uv.evtWin = [-4 2]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
 uv.BLper = [-10 -5];
-uv.dt = 0.1; %what is your frame rate
+uv.dt = 1/10; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
 session_to_analyze = 'RDT_D1';
@@ -14,7 +14,7 @@ session_to_analyze = 'RDT_D1';
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
 epoc_to_align = 'choiceTime';
-ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
+ts1 = (uv.evtWin(1):uv.dt:uv.evtWin(2)-uv.dt);
 
 % neuron_num = 0;
 use_normalized_time = 0;

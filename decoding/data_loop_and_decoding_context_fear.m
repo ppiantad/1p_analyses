@@ -18,7 +18,7 @@ num_comparisons = 2;
 
 
 
-ca_data_type = "C_raw"; % C % C_raw
+ca_data_type = "C"; % C % C_raw
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
@@ -26,7 +26,7 @@ ca_data_type = "C_raw"; % C % C_raw
 use_normalized_time = 0;
 shuffle_confirm = 1; %1 if you want shuffle, 0 if you don't
 
-session_to_analyze = 'D1_Afternoon';
+session_to_analyze = 'D2_Afternoon';
 
 shock_start_time = 4 * 60; % First shock in seconds
 shock_interval = 60; % Interval between shocks in seconds
@@ -44,9 +44,9 @@ for i = 0:(num_shocks-1)
 end
 
 
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+experimental_grps = readtable('D:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 
-experimental_grp_to_analyze = 'Experimental';
+experimental_grp_to_analyze = 'One Context';
 
 clear neuron_mean neuron_sem neuron_num zall_mean zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized sem_all zall_mean_all caTraceTrials_mouse caTraceTrials_current caTraceTrials_mouse_decoding
 %%
@@ -89,6 +89,7 @@ for num_iteration = 1:num_iterations
                     if isfield(final.(currentanimal), session_to_analyze)
                         if strcmp(final.(currentanimal).experimental_grp, experimental_grp_to_analyze) 
                         mouse_count = mouse_count + 1;
+                        mouse_ids_added(mouse_count) = {currentanimal};
                         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
 
                         num_samples = size(ca, 2);

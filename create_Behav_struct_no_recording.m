@@ -7,7 +7,7 @@ ts1 = (-10:.1:10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\raw data for WSLS etc\BLA-NAcSh PdCO vs EGFP\BLA-NAcSh PdCO vs EGFP plus controls';
+metaDirectory = 'E:\MATLAB\raw data for WSLS etc\BLA hM4Di vs mCherry';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 missing_start_val_count = 0;
@@ -104,7 +104,7 @@ for zz = 1:size(metafolder_list, 1)
         %     mat_strings = strsplit(char(matFiles.name),'_');
         %     date_strings = strsplit(mat_strings{4}, '-');
         csv_names = {csvFiles.name};
-        current_animal = folder_strings{6}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
+        current_animal = folder_strings{5}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
         % current_session = folder_strings{6};
         current_animal = matlab.lang.makeValidName(current_animal);
         current_session = char(folder_strings(end));
@@ -157,6 +157,19 @@ for zz = 1:size(metafolder_list, 1)
 
 
                 current_session = regexprep(current_session,{' ', '-'}, '_');
+                if contains(metaDirectory, 'hM4Di')
+
+
+                    if strcmp(current_session, 'RDT_D1')
+                        current_session = 'RDT_D1_CNO';
+                    elseif strcmp(current_session, 'RDT_D2')
+                        current_session = 'RDT_D2_CNO';
+                    elseif strcmp(current_session, 'RDT_D3')
+                        current_session = 'RDT_D3_SALINE';
+                    end
+                end
+
+
                 [BehavData,ABETfile,Descriptives, block_end, largeRewSide, smallRewSide, forced_trial_start, free_trial_start]=ABET2TableFn_Chamber_A_v6(ABET_file,[]);
 
 

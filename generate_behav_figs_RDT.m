@@ -5,7 +5,7 @@
 
 % final_behavior = final_SLEAP; % for hM4Di data;
 
-session_to_analyze = 'RDT_OPTO_CHOICE'
+session_to_analyze = 'RDT_D1_CNO'
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_13'};
@@ -70,11 +70,17 @@ end
 for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
     currentanimal = char(valid_animalIDs(ii));
     if isfield(final_behavior.(currentanimal), session_to_analyze)
-        if contains(session_to_analyze, 'CNO')
-            BehavData = final_behavior.(currentanimal).(session_to_analyze).BehavData;
-        else
-            BehavData = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData;
-        end
+        % if contains(session_to_analyze, 'CNO')
+        %     BehavData = final_behavior.(currentanimal).(session_to_analyze).BehavData;
+        % else
+        %     BehavData = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData;
+        % end
+
+
+
+
+        BehavData = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData;
+
         for BehavDataRow = 1:size(BehavData,1)
             if BehavData.shock(BehavDataRow) == 1
                 kk = 1;
@@ -196,15 +202,25 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
         block_1_small_choice_latency = mean(BehavData.choice_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 1));
         block_2_small_choice_latency = mean(BehavData.choice_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 2));
         block_3_small_choice_latency = mean(BehavData.choice_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 3));
+        if ismember('trial_after_shk', BehavData.Properties.VariableNames)
+            block_1_large_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 1 & BehavData.trial_after_shk == 1));
+            block_2_large_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 2 & BehavData.trial_after_shk == 1));
+            block_3_large_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 3 & BehavData.trial_after_shk == 1));
 
-        block_1_large_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 1 & BehavData.trial_after_shk == 1));
-        block_2_large_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 2 & BehavData.trial_after_shk == 1));
-        block_3_large_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 3 & BehavData.trial_after_shk == 1));
+            block_1_small_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 1 & BehavData.trial_after_shk == 1));
+            block_2_small_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 2 & BehavData.trial_after_shk == 1));
+            block_3_small_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 3 & BehavData.trial_after_shk == 1));
+        else
+            block_1_large_choice_latency_following_shk = NaN;
+            block_2_large_choice_latency_following_shk = NaN;
+            block_3_large_choice_latency_following_shk = NaN;
 
-        block_1_small_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 1 & BehavData.trial_after_shk == 1));
-        block_2_small_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 2 & BehavData.trial_after_shk == 1));
-        block_3_small_choice_latency_following_shk = mean(BehavData.choice_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 3 & BehavData.trial_after_shk == 1));
-
+            block_1_small_choice_latency_following_shk = NaN;
+            block_2_small_choice_latency_following_shk = NaN;
+            block_3_small_choice_latency_following_shk = NaN;    
+        
+        
+        end
         block_1_large_collect_latency = mean(BehavData.collect_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 1));
         block_2_large_collect_latency = mean(BehavData.collect_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 2));
         block_3_large_collect_latency = mean(BehavData.collect_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 3));
@@ -638,15 +654,15 @@ hold off;
 % set session_to_analyze = 'Pre_RDT_RM', run top of script. then should be
 % able to run code below this comment without issue
 
-mean_large_RM_D1 = table2array(mean(RM_D1_risk_table(:, 1:3), 2));
-mean_small_RM_D1 = table2array(mean(RM_D1_risk_table(:, 4:6), 2));
-sem_large_RM_D1 = table2array(std(RM_D1_risk_table(:, 1:3), 0, 2) ./ sqrt(size(RM_D1_risk_table(:, 1:3), 2)));
-sem_small_RM_D1 = table2array(std(RM_D1_risk_table(:, 4:6), 0, 2) ./ sqrt(size(RM_D1_risk_table(:, 4:6), 2)));
+mean_large_RM_D1 = table2array(mean(RM_D1_risk_table(:, 2:4), 2));
+mean_small_RM_D1 = table2array(mean(RM_D1_risk_table(:, 5:7), 2));
+sem_large_RM_D1 = table2array(std(RM_D1_risk_table(:, 2:4), 0, 2) ./ sqrt(size(RM_D1_risk_table(:, 2:4), 2)));
+sem_small_RM_D1 = table2array(std(RM_D1_risk_table(:, 5:7), 0, 2) ./ sqrt(size(RM_D1_risk_table(:, 5:7), 2)));
 
-mean_large = table2array(mean(risk_table(:, 1:3), 2));
-mean_small = table2array(mean(risk_table(:, 4:6), 2));
-sem_large = table2array(std(risk_table(:, 1:3), 0, 2) ./ sqrt(size(risk_table(:, 1:3), 2)));
-sem_small = table2array(std(risk_table(:, 4:6), 0, 2) ./ sqrt(size(risk_table(:, 4:6), 2)));
+mean_large = table2array(mean(risk_table(:, 2:4), 2));
+mean_small = table2array(mean(risk_table(:, 5:7), 2));
+sem_large = table2array(std(risk_table(:, 2:4), 0, 2) ./ sqrt(size(risk_table(:, 2:4), 2)));
+sem_small = table2array(std(risk_table(:, 5:7), 0, 2) ./ sqrt(size(risk_table(:, 5:7), 2)));
 
 % Calculate means for the bar plot
 cross_sess_large_means = [mean(mean_large_RM_D1), mean(mean_large)]*100;
@@ -667,10 +683,17 @@ x_points = 1:size(cross_sess_large_means, 2);
 figure;
 hold on;
 
+
 % Set figure size
-width = 550; % Width of the figure
+width = 200; % Width of the figure
 height = 450; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+
+% Set figure size
+% width = 550; % Width of the figure
+% height = 450; % Height of the figure
+% set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 
 % Plot individual lines for "Large" data
 for i = 1:size(cross_session_large_all, 1)
@@ -1117,6 +1140,79 @@ set(gca, 'ytick', 0:25:100);
 % grid on;
 
 hold off;
+
+%% need to run get_path_lengths
+
+large_choice = [risk_table.large_aborts_block_1, risk_table.large_aborts_block_2, risk_table.large_aborts_block_3];
+small_choice = [risk_table.small_aborts_block_1, risk_table.small_aborts_block_2, risk_table.small_aborts_block_3];
+
+mean_large = nanmean(large_choice, 1);
+mean_small = nanmean(small_choice, 1);
+sem_large = nanstd(large_choice, 0, 1) ./ sqrt(size(large_choice, 1));
+sem_small = nanstd(small_choice, 0, 1) ./ sqrt(size(small_choice, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice, 1)
+    plot(x_points, large_choice(i, :), '-', ...
+        'Color', [0 0 1 0.6], ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(small_choice, 1)
+    plot(x_points, small_choice(i, :), '-', ...
+        'Color', [1 0 0 0.6], ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, 'o-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, '^-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+% ylim([0 1.1 * max([mean_large + sem_large, ...
+%                    mean_small + sem_small])]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:100);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
 
 
 %% for plotting lose_shift ratio across blocks

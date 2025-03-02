@@ -1,5 +1,5 @@
 % animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
 
 array_for_means = 1; 

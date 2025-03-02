@@ -54,11 +54,11 @@ sum(block_2_and_3_pre_and_consumption)
 
 
 
-shk_mean = mean(neuron_mean_array{1, 1}(:, ts1 > 0 & ts1 < 2),  2);
+shk_mean = mean(neuron_mean_array{1, 4}(:, ts1 > 0 & ts1 < 2),  2);
 
 % [peak_values, time_of_peak_activity] = max(neuron_mean_array{1, 1}, [], 2);
 [~, sort_indices] = sort(shk_mean);
-neuron_mean_sorted = neuron_mean_array{1, 1}(sort_indices, :);
+neuron_mean_sorted = neuron_mean_array{1, 4}(sort_indices, :);
 
 
 % Sort the rows of activated_neuron_mean based on peak_times.
@@ -78,20 +78,34 @@ xlabel('Time (s)');
 ylabel('Neuron');
 
 %%
-custom_colormap = [
-    1, 1, 1; % white
-    1, 0.9, 0.9;
-    1, 0.8, 0.8;
-    1, 0.7, 0.7;
-    1, 0.6, 0.6;
-    1, 0.5, 0.5;
-    1, 0.4, 0.4;
-    1, 0.3, 0.3;
-    1, 0.2, 0.2;
-    1, 0.1, 0.1;
-    1, 0, 0;   % red
-];
+% custom_colormap = [
+%     1, 1, 1; % white
+%     1, 0.9, 0.9;
+%     1, 0.8, 0.8;
+%     1, 0.7, 0.7;
+%     1, 0.6, 0.6;
+%     1, 0.5, 0.5;
+%     1, 0.4, 0.4;
+%     1, 0.3, 0.3;
+%     1, 0.2, 0.2;
+%     1, 0.1, 0.1;
+%     1, 0, 0;   % red
+% ];
+% 
 
+custom_colormap = [
+    1, 1, 1;   % white
+    1, 0.95, 0.9;
+    1, 0.9, 0.8;
+    1, 0.85, 0.7;
+    1, 0.75, 0.55;
+    1, 0.65, 0.4;
+    1, 0.55, 0.3;
+    1, 0.45, 0.2;
+    1, 0.35, 0.1;
+    1, 0.25, 0.05;
+    1, 0.15, 0;  % orange
+];
 
 % Generate more intermediate colors for a smoother transition
 n = 256; % Number of colors

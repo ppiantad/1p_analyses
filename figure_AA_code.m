@@ -345,3 +345,12 @@ mean_data_array = {neuron_mean_array{1, 4}(postchoice_reward_blocks_2_and_3 == 1
 sem_data_array = {neuron_sem_array{1, 4}(postchoice_reward_blocks_2_and_3 == 1, :), neuron_sem_array{1, 4}(postchoice_reward_blocks_2_and_3 ~= 1, :)};
 
 [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3]);
+
+
+%%
+
+mean_data_array = {neuron_mean_array{1, 8}(respClass_all_array{1, 11} == 1, :), neuron_mean_array{1, 8}(prechoice_blocks_2_and_3 == 1, :)};
+sem_data_array = {neuron_sem_array{1, 8}(respClass_all_array{1, 11} == 1, :), neuron_sem_array{1, 8}(prechoice_blocks_2_and_3 == 1, :)};
+
+
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 1]);
