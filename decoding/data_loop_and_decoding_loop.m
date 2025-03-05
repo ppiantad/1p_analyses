@@ -11,7 +11,7 @@ ca_data_type = "C_raw"; % C % C_raw
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
 % these are mice that did not complete the entire session - kinda have to
 % toss them to do some comparisons during RDT
@@ -511,13 +511,13 @@ legend({'all neurons', 'pre-choice active', 'post-choice reward active', 'consum
 
 %%
 % Initialize variables to store means and standard deviations for each group
-group_means = zeros(5, 4); % 5 groups, 4 bars per group
-group_stddevs = zeros(5, 4);
+group_means = zeros(4, 2); % 5 groups, 4 bars per group
+group_stddevs = zeros(4, 2);
 
 % Calculate means and standard deviations for each group
-for i = 1:5
-    group_data = cell2mat(cross_mouse_accuracy_per_iteration(:, (i-1)*4 + 1:i*4));
-    for j = 1:4
+for i = 1:4
+    group_data = cell2mat(cross_mouse_accuracy_per_iteration(:, (i-1)*2 + 1:i*2));
+    for j = 1:2
         set_data = group_data(:, (j-1)*5 + 1:j*5);
         group_means(i, j) = mean(set_data, 'all');
         group_stddevs(i, j) = std(set_data, 0, 'all');

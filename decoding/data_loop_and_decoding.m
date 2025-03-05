@@ -88,7 +88,7 @@ for num_iteration = 1:num_iterations
                     currentanimal = char(animalIDs(ii));
                     if isfield(final.(currentanimal), session_to_analyze)
                         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                        [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2, 'TYPE', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                        [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2); %'OMITALL', 0, 'BLANK_TOUCH', 0
                         behav_tbl_temp{ii, num_comparison} = BehavData;
                         trials = cell2mat(trials);
                         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -154,7 +154,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2, 'TYPE', 1);
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData,'REW', 1.2);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -356,8 +356,8 @@ for uu = 1:size(data_for_decoding, 2)
                 yTest = y(cv.test(i), :);
                 % model = TreeBagger(numTrees, xTrain, yTrain, 'Method', 'classification');
                 % model = fitglm(xTrain, yTrain, 'Distribution', 'binomial' , 'Link', 'logit');
-                model = fitcsvm(xTrain, yTrain);
-                % model = fitcnb(xTrain, yTrain);
+                % model = fitcsvm(xTrain, yTrain);
+                model = fitcnb(xTrain, yTrain);
                 yPred = predict(model,xTest);
                 accuracy(i) = sum(yPred == yTest)/numel(yTest);
             end

@@ -5,7 +5,7 @@
 
 % final_behavior = final_SLEAP; % for hM4Di data;
 
-session_to_analyze = 'RDT_D1_CNO'
+session_to_analyze = 'RDT_OPTO_CHOICE'
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_13'};
@@ -2106,7 +2106,7 @@ figure;
 hold on;
 
 % Set figure size
-width = 200; % Width of the figure
+width = 100; % Width of the figure
 height = 250; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 fontsize(12, 'points')
@@ -2177,7 +2177,7 @@ figure;
 hold on;
 
 % Set figure size
-width = 200; % Width of the figure
+width = 100; % Width of the figure
 height = 250; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 fontsize(12, 'points')
@@ -2249,7 +2249,7 @@ figure;
 hold on;
 
 % Set figure size
-width = 200; % Width of the figure
+width = 100; % Width of the figure
 height = 250; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 fontsize(12, 'points')
@@ -2396,7 +2396,7 @@ figure;
 hold on;
 
 % Set figure size
-width = 200; % Width of the figure
+width = 100; % Width of the figure
 height = 250; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 fontsize(12, 'points')

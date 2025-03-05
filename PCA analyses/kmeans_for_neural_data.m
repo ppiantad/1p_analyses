@@ -22,61 +22,77 @@ all_means = [prechoice_means postchoice_means consumption_means];
 data_for_clustering = all_means;
 
 
+data_for_display = horzcat(zall_mean_all_array{1, 1}, zall_mean_all_array{1, 1}, zall_mean_all_array{1, 2});
 
-
-% if you want to pre-specify subwindows to do the clustering on, as is done
-% here: https://www.biorxiv.org/content/10.1101/2024.06.26.600895v4
-% run data_loop on the relevant data (e.g., Pre_RDT_RM, 'OMIT_ALL', 0,
-% 'BLANK_TOUCH', 0)
-% prechoice_safe_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= -4 & ts1 <= 0), 2);
-% postchoice_safe_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= 0 & ts1 <= 2), 2);
-% % also run data_loop for collectionTime
-% consumption_safe_means = mean(zall_mean_all_array{1, 2}(:, ts1 >= 1 & ts1 <= 3), 2);
+% % if you want to pre-specify subwindows to do the clustering on, as is done
+% % here: https://www.biorxiv.org/content/10.1101/2024.06.26.600895v4
+% % run data_loop on the relevant data (e.g., Pre_RDT_RM, 'OMIT_ALL', 0,
+% % 'BLANK_TOUCH', 0)
+% % prechoice_safe_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= -4 & ts1 <= 0), 2);
+% % postchoice_safe_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= 0 & ts1 <= 2), 2);
+% % % also run data_loop for collectionTime
+% % consumption_safe_means = mean(zall_mean_all_array{1, 2}(:, ts1 >= 1 & ts1 <= 3), 2);
+% % 
+% % prechoice_risky_means = mean(zall_mean_all_array{1, 3}(:, ts1 >= -4 & ts1 <= 0), 2);
+% % postchoice_risky_means = mean(zall_mean_all_array{1, 3}(:, ts1 >= 0 & ts1 <= 2), 2);
+% % % also run data_loop for collectionTime
+% % consumption_risky_means = mean(zall_mean_all_array{1, 4}(:, ts1 >= 1 & ts1 <= 3), 2);
+% % 
+% % shk_risky_means = mean(zall_mean_all_array{1, 5}(:, ts1 >= 0 & ts1 <= 2), 2);
 % 
-% prechoice_risky_means = mean(zall_mean_all_array{1, 3}(:, ts1 >= -4 & ts1 <= 0), 2);
-% postchoice_risky_means = mean(zall_mean_all_array{1, 3}(:, ts1 >= 0 & ts1 <= 2), 2);
-% % also run data_loop for collectionTime
-% consumption_risky_means = mean(zall_mean_all_array{1, 4}(:, ts1 >= 1 & ts1 <= 3), 2);
 % 
-% shk_risky_means = mean(zall_mean_all_array{1, 5}(:, ts1 >= 0 & ts1 <= 2), 2);
+% % or load 7x dataset
+% prechoice_safe_means = mean(neuron_mean_array{1, 1}(:, ts1 >= -4 & ts1 <= 0), 2);
+% postchoice_safe_means = mean(neuron_mean_array{1, 1}(:, ts1 >= 0 & ts1 <= 2), 2);
+% % also run data_loop for collectionTime
+% consumption_safe_means = mean(neuron_mean_array{1, 3}(:, ts1 >= 1 & ts1 <= 3), 2);
+% 
+% prechoice_risky_means = mean(neuron_mean_array{1, 5}(:, ts1 >= -4 & ts1 <= 0), 2);
+% postchoice_risky_means = mean(neuron_mean_array{1, 5}(:, ts1 >= 0 & ts1 <= 2), 2);
+% % also run data_loop for collectionTime
+% consumption_risky_means = mean(neuron_mean_array{1, 7}(:, ts1 >= 1 & ts1 <= 3), 2);
+% 
+% shk_risky_means = mean(neuron_mean_array{1, 4}(:, ts1 >= 0 & ts1 <= 2), 2);
+% 
+% 
+% 
+% 
+% all_means = [prechoice_safe_means postchoice_safe_means consumption_safe_means prechoice_risky_means postchoice_risky_means consumption_risky_means shk_risky_means];
+% 
+% data_for_clustering = all_means;
 
 
-% or load 7x dataset
-prechoice_safe_means = mean(neuron_mean_array{1, 1}(:, ts1 >= -4 & ts1 <= 0), 2);
-postchoice_safe_means = mean(neuron_mean_array{1, 1}(:, ts1 >= 0 & ts1 <= 2), 2);
-% also run data_loop for collectionTime
-consumption_safe_means = mean(neuron_mean_array{1, 3}(:, ts1 >= 1 & ts1 <= 3), 2);
-
-prechoice_risky_means = mean(neuron_mean_array{1, 5}(:, ts1 >= -4 & ts1 <= 0), 2);
-postchoice_risky_means = mean(neuron_mean_array{1, 5}(:, ts1 >= 0 & ts1 <= 2), 2);
-% also run data_loop for collectionTime
-consumption_risky_means = mean(neuron_mean_array{1, 7}(:, ts1 >= 1 & ts1 <= 3), 2);
-
-shk_risky_means = mean(neuron_mean_array{1, 4}(:, ts1 >= 0 & ts1 <= 2), 2);
-
-
-
-
-all_means = [prechoice_safe_means postchoice_safe_means consumption_safe_means prechoice_risky_means postchoice_risky_means consumption_risky_means shk_risky_means];
-
-data_for_clustering = all_means;
-
-
-data_for_display = horzcat(neuron_mean_array{1, 1}, neuron_mean_array{1, 5}, neuron_mean_array{1, 4});
+% data_for_display = horzcat(neuron_mean_array{1, 1}, neuron_mean_array{1, 5}, neuron_mean_array{1, 4});
 
 % data_for_display = horzcat(neuron_mean_array{1, 1}, neuron_mean_array{1, 3}, neuron_mean_array{1, 5});
 
 
 
-all_means = [prechoice_safe_means postchoice_safe_means consumption_safe_means prechoice_risky_means postchoice_risky_means consumption_risky_means];
+% all_means = [prechoice_safe_means postchoice_safe_means consumption_safe_means prechoice_risky_means postchoice_risky_means consumption_risky_means];
+% data_for_clustering = all_means;
+
+% data_for_display = horzcat(zall_mean_all_array{1, 1}, zall_mean_all_array{1, 3});
+
+
+
+% load 3x pre_rdt_rm dataset
+prechoice_means = mean(neuron_mean_array{1, 1}(:, ts1 >= -4 & ts1 <= 0), 2);
+postchoice_means = mean(neuron_mean_array{1, 1}(:, ts1 >= 0 & ts1 <= 2), 2);
+% also run data_loop for collectionTime
+consumption_means = mean(neuron_mean_array{1, 3}(:, ts1 >= 1 & ts1 <= 3), 2);
+
+all_means = [prechoice_means postchoice_means consumption_means];
+
 data_for_clustering = all_means;
 
-data_for_display = horzcat(zall_mean_all_array{1, 1}, zall_mean_all_array{1, 3});
+
+data_for_display = horzcat(neuron_mean_array{1, 1});
+
 
 
 %% from Sean to do kmeans on traces
 
-clusters_desired = 13
+clusters_desired = 3
 
 [kmeans_idx,C,sumdist3] = kmeans(data_for_clustering,clusters_desired,'Distance','correlation','Display','final', 'Replicates', 200,'Start','uniform');
 
@@ -86,6 +102,17 @@ clusters_desired = 13
 %     plot(ts1, data_for_clustering(kmeans_idx == ii, :));
 % 
 % end
+
+
+
+
+figure;
+for ii = 1:clusters_desired
+
+    plot(ts1, mean(neuron_mean_array{1, 1}(kmeans_idx == ii, :)));
+    hold on;
+    legend;
+end
 
 
 
@@ -126,10 +153,23 @@ for ii = 1:clusters_desired
 end
 
 
+
+% to reorganize data so it is plotted prechoice -> postchoice -> collect,
+% check the figure that is output above and change numbering below
+
+prechoice_kmeans_idx = 2
+postchoice_kmeans_idx = 1
+collection_kmeans_idx = 3
+
+kmeans_idx_new = kmeans_idx; % Create a copy to modify
+kmeans_idx_new(kmeans_idx == 1) = 2; % Change 1s to 2
+kmeans_idx_new(kmeans_idx == 2) = 1; % Change 2s to 1
+
+
 neurons_sorted_by_cluster = [];
 
 for ii = 1:clusters_desired
-    clustered_neurons = data_for_display(kmeans_idx == ii, :);
+    clustered_neurons = data_for_display(kmeans_idx_new == ii, :);
     % Sort the rows of activated_neuron_mean based on peak_times.
     % [peak_values, time_of_peak_activity] = max(clustered_neurons, [], 2);
     % [~, sort_indices] = sort(time_of_peak_activity);
@@ -267,11 +307,13 @@ for dd = 1:clusters_desired
     end
     
     % Plot the mean trace
-    plot(1:480, normalized_mean_trace, 'k', 'LineWidth', 1.5);
+    plot(1:160, normalized_mean_trace, 'k', 'LineWidth', 1.5);
+    % plot(1:480, normalized_mean_trace, 'k', 'LineWidth', 1.5);
     % plot(1:320, normalized_mean_trace, 'k', 'LineWidth', 1.5);
     % Format subplot
     ylim([-1, 1]); % Keep the scale consistent
-    xlim([1, 480]);
+    xlim([1, 160]);
+    % xlim([1, 480]);
     % xlim([1, 320]);
     title(['Cluster ' num2str(dd)]);
     set(gca, 'XTick', [], 'YTick', []); % Hide ticks for clean look

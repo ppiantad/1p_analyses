@@ -1,7 +1,7 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'RRD408';
+select_mouse = 'RRD420';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
@@ -12,13 +12,18 @@ shapeData = final_SLEAP.(select_mouse).(session_to_analyze).shapeData;
 % adjusted_start_time = dataTable.ChangeTimeInSeconds(strcmp(dataTable.FileName, 'RRD399_RDT_D1_CNO_12132023_merged_resized_grayscaled.MP4'));
 %update this becasue these data have not been corrected for the interval
 %between camera being placed in and the mouse starting behavior! 
-onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
-choice_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.choiceTime';
-offset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.collectionTime';
+% onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
+% choice_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.choiceTime';
+% offset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.collectionTime';
+
+onset_trials = final_behavior.(select_mouse).(session_to_analyze).uv.BehavData.stTime';
+choice_trials = final_behavior.(select_mouse).(session_to_analyze).uv.BehavData.choiceTime';
+offset_trials = final_behavior.(select_mouse).(session_to_analyze).uv.BehavData.collectionTime';
+
 fs_cam = 30; %set sampling rate according to camera, this is hard coded for now
 time_ranges_trials = [onset_trials; choice_trials; offset_trials];
 
-first_frame = final_SLEAP.(select_mouse).(session_to_analyze).first_frame*fs_cam;
+% first_frame = final_SLEAP.(select_mouse).(session_to_analyze).first_frame*fs_cam;
 
 SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data_raw;
 
@@ -35,7 +40,9 @@ velocity_data = zscore(SLEAP_data.vel_cm_s)';
 % SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data;
 
 
-BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
+% BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
+
+BehavData = final_behavior.(select_mouse).(session_to_analyze).uv.BehavData;
 % adjusted_start_time = BehavData.TrialPossible(1)-60;
 
 % BehavData.TrialPossible(:)=BehavData.TrialPossible(:)+adjusted_start_time(1);
@@ -50,7 +57,7 @@ BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
 % trial_starts_array = BehavData.stTime-BehavData.choiceTime;
 % trial_ends_array = BehavData.collectionTime - BehavData.choiceTime;
 
-[X_data, Y_data] = correct_XY_outliers_v1_GoPro(X_data, Y_data, first_frame);
+% [X_data, Y_data] = correct_XY_outliers_v1_GoPro(X_data, Y_data, first_frame);
 % 
 % SLEAP_data_ind = SLEAP_data.idx_frame >= first_frame;
 % SLEAP_data(:) = SLEAP_data(first_frame:end, :);

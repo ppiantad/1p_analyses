@@ -1,5 +1,5 @@
 % Define the top-level directory
-top_level_directory = 'F:\Maddy Pilot\full_pilot'; % Update this to your top-level directory
+top_level_directory = 'F:\DREADD'; % Update this to your top-level directory
 
 % Initialize a list to store matched folders
 matched_folders = {};
@@ -38,7 +38,7 @@ for p = 1:length(matched_folders)
     primary_subfolder_path = matched_folders{p};
     file_name_strings = strsplit(primary_subfolder_path, '\');
     % update this depending on folder structure
-    session_to_append = file_name_strings{5};
+    session_to_append = file_name_strings{4}; %
 
     SLEAP_folder = fullfile(primary_subfolder_path, 'SLEAP_data');
     freeze_folder = fullfile(primary_subfolder_path, 'freeze_vid');
@@ -88,7 +88,7 @@ for p = 1:length(matched_folders)
     % Check if a CSV file exists in the freeze_vid folder
     if ~isempty(freeze_csv_file)
         % Read the CSV file from freeze_vid folder
-        freeze_data = readtable(fullfile(freeze_folder, freeze_csv_file.name));
+        freeze_data = readtable(fullfile(freeze_folder, freeze_csv_file.name), 'Delimiter', ',');
 
         % Check if required columns 'frame' and 'was_freezing' are present
         if all(ismember({'frame', 'was_freezing'}, freeze_data.Properties.VariableNames))

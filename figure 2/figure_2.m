@@ -1382,8 +1382,8 @@ variable_to_correlate = trial_choice_times_by_mouse;
 meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
-timeRange = (ts1 >= -4) & (ts1 <= 0);
-% timeRange = (ts1 >= 0) & (ts1 <= 2);
+% timeRange = (ts1 >= -4) & (ts1 <= 0);
+timeRange = (ts1 >= 0) & (ts1 <= 2);
 % timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
@@ -1533,7 +1533,7 @@ hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
 % only_shk_responsive_corrs = allCorrelations(kmeans_idx' == 3);
-only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
+only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 == 1);
 % not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
 % not_shk_responsive_corrs = allCorrelations(kmeans_idx' ~= 3);
 not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
@@ -1564,7 +1564,7 @@ mean_not_shk = mean(not_shk_responsive_corrs);
 % Create a histogram for allCorrelations
 figure;
 width = 250; % Width of the figure
-height = 500; % Height of the figure (width is half of height)
+height = 250; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 histogram(not_shk_responsive_corrs , 'Normalization', 'probability', 'FaceColor', 'blue','BinWidth', 0.05,'LineStyle','none');
 hold on;

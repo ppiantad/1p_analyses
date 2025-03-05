@@ -1,5 +1,5 @@
 % Define the top-level directory
-top_level_directory = 'F:\Maddy Pilot\full_pilot'; % Update this to your top-level directory
+top_level_directory = 'F:\DREADD'; % Update this to your top-level directory
 
 SLEAP_and_freeze_combined_filepaths = dir(fullfile(top_level_directory, '**', '*SLEAP_and_freezing_combined*.csv'));
 
@@ -9,8 +9,8 @@ for k = 1:length(SLEAP_and_freeze_combined_filepaths)
     file_path = fullfile(SLEAP_and_freeze_combined_filepaths(k).folder, SLEAP_and_freeze_combined_filepaths(k).name);
     file_path_string = strsplit(file_path, '\');
 
-    current_animal = file_path_string{4}; % 
-    current_session_raw = file_path_string{5};
+    current_animal = file_path_string{3}; %  4
+    current_session_raw = file_path_string{4};
     current_session_renamed = [];
     
 
@@ -54,7 +54,7 @@ end
 
 
 %%
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
+experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice.xlsx');
 animalIDs = fieldnames(final_DLC);
 
 for dd = 1:size(experimental_grps, 1)
@@ -65,6 +65,9 @@ for dd = 1:size(experimental_grps, 1)
             final_DLC.(current_mouse).experimental_grp = current_mouse_condition;
             if any("sex" == string(experimental_grps.Properties.VariableNames))
                 final_DLC.(current_mouse).sex = experimental_grps.sex{hh};
+            end
+            if any("treatment" == string(experimental_grps.Properties.VariableNames))
+                final_DLC.(current_mouse).treatment = experimental_grps.treatment{hh};
             end
         end
 

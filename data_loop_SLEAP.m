@@ -9,7 +9,7 @@ uv.BLper = [-10 -5];
 uv.dt = 1/10; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'RDT_D1_CNO';
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
@@ -75,7 +75,7 @@ for ii = 1:size(animalIDs,1)
             end
         end
 
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
@@ -320,3 +320,48 @@ for ii = 1:size(fieldnames(final),1)
 
     end
 end
+
+
+%% for hM4Di vs mCherry
+
+% Find indices where Animals match valid_animalIDs
+valid_idx = ismember(animalIDs, hM4Di_IDs);
+
+% Filter path_length_table to only include valid animals
+valid_animalIDs = animalIDs(valid_idx, :);
+filtered_neuron_mean_unnormalized = neuron_mean_unnormalized(valid_idx, :);
+
+% Extract TreatmentCondition for the matched valid_animalIDs
+[~, loc] = ismember(valid_animalIDs, hM4Di_IDs);
+
+% Get the corresponding TreatmentCondition from risk_table
+filtered_treatment_conditions = hM4Di_treatment_groups(loc);
+
+% Find indices where TreatmentCondition is 'mCherry'
+mCherry_idx = strcmp(filtered_treatment_conditions, 'mCherry');
+hM4Di_idx = strcmp(filtered_treatment_conditions, 'hM4Di');
+
+
+filtered_neuron_mean_unnormalized_mCherry = filtered_neuron_mean_unnormalized(mCherry_idx == 1, :);
+filtered_neuron_mean_unnormalized_hM4Di = filtered_neuron_mean_unnormalized(hM4Di_idx == 1, :);
+
+
+mean_large = nanmean(filtered_neuron_mean_unnormalized_mCherry, 1);
+mean_small = nanmean(filtered_neuron_mean_unnormalized_hM4Di, 1);
+sem_large = nanstd(filtered_neuron_mean_unnormalized_mCherry, 0, 1) ./ sqrt(size(filtered_neuron_mean_unnormalized_mCherry, 1));
+sem_small = nanstd(filtered_neuron_mean_unnormalized_hM4Di, 0, 1) ./ sqrt(size(filtered_neuron_mean_unnormalized_hM4Di, 1));
+
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+% xlim([-8 8]);
+% ylim([-0.5 0.5]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.5 0 0.5]);
+shadedErrorBar(ts1, mean_large, sem_large, 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, mean_small, sem_small, 'lineProps', {'color', 'k'});
