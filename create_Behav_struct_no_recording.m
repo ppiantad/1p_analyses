@@ -150,8 +150,28 @@ for zz = 1:size(metafolder_list, 1)
 
                 BehavData=TrialFilter(BehavData,'SHK',1);
 
-
+                if exist('boris_file', 'var')
+                    SLEAP_time_range_adjustment = []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; -1.23;
+                    if contains(current_animal, '441') & contains(current_session, 'SHOCKED_OUTCOMES')
+                        SLEAP_time_range_adjustment = 7.26 % THIS MOUSE'S VIDEO STARTED LATE, SO THERE IS NO START TIME!
+                        start_val = SLEAP_time_range_adjustment;
+                    end
+                    [BehavData, start_val] = boris_to_table_shock(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment, forced_trial_start, free_trial_start);
+                
+                    % added 2/10/2025
+                else 
+                    start_val = [];
+                end
+                
+                ABET_removeheader = ABETfile(2:end,:);
+                tbl_ABET = cell2table(ABET_removeheader);
+                tbl_ABET.Properties.VariableNames = ABETfile(1,:);
+                if isempty(start_val)
+                    missing_start_val_count = missing_start_val_count + 1; 
+                    final_behavior.missing_start_val(missing_start_val_count, :) = {current_animal, current_session};
+                end
                 final_behavior.(current_animal).(current_session).uv.BehavData = BehavData;
+                final_behavior.(current_animal).(current_session).uv.session_start_adjustment = start_val;
 
             else
 

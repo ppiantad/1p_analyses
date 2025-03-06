@@ -58,24 +58,26 @@ for ii = 1:size(animalIDs,1)
     elseif isfield(final_SLEAP.(currentanimal), session_to_analyze)
         BehavData = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData;
         % for labeling shock + 1 trials, for subsequent analysis
-        for BehavDataRow = 1:size(BehavData,1)
-            if BehavData.shock(BehavDataRow) == 1
-                kk = 1;
-                while true
-                    if (BehavDataRow + kk) > size(BehavData, 1)  % Check if index exceeds the number of rows
-                        break;
-                    end
-                    if ~isnan(BehavData.bigSmall(BehavDataRow + kk)) & BehavData.ForceFree(BehavDataRow + kk) ~= 999
-                        BehavData.trial_after_shk(BehavDataRow + kk) = 1;
-                        break;
-                    else
-                        kk = kk + 1;
+        if ~strcmp(session_to_analyze, 'SHOCK_TEST')
+            for BehavDataRow = 1:size(BehavData,1)
+                if BehavData.shock(BehavDataRow) == 1
+                    kk = 1;
+                    while true
+                        if (BehavDataRow + kk) > size(BehavData, 1)  % Check if index exceeds the number of rows
+                            break;
+                        end
+                        if ~isnan(BehavData.bigSmall(BehavDataRow + kk)) & BehavData.ForceFree(BehavDataRow + kk) ~= 999
+                            BehavData.trial_after_shk(BehavDataRow + kk) = 1;
+                            break;
+                        else
+                            kk = kk + 1;
+                        end
                     end
                 end
             end
         end
 
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'SHK', 1);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
@@ -176,8 +178,8 @@ for ii = 1:size(animalIDs,1)
                 neuron_sem_unnormalized(ii,:) = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
                 zall_array{ii} = zall(:, 1:size(ts1, 2));
                 zall_mouse{ii, iter}(u) = {zall(:, 1:size(ts1, 2))};
-                unnormalized_mouse{ii, iter}(u) = {caTraceTrials(:, 1:size(ts1, 2))};
-                unnormalized_sem_mouse{ii, iter}(u) = {nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)))};
+                unnormalized_mouse{ii} = caTraceTrials(:, 1:size(ts1, 2));
+                unnormalized_sem_mouse{ii} = nanstd(caTraceTrials,1)/(sqrt(size(caTraceTrials, 1)));
                 sem_mouse{ii, iter}(u) = {nanstd(zall,1)/(sqrt(size(zall, 1)))};
                 caTraceTrials_mouse{ii, iter}(u) = {caTraceTrials(:, 1:size(ts1, 2))};
                 neuron_mean_mouse_unnormalized{ii, iter}(u,: ) = mean(caTraceTrials, 1);
@@ -322,6 +324,60 @@ for ii = 1:size(fieldnames(final),1)
 end
 
 
+%%
+%These data can be used to plot the median or mean choice
+% time on a PCA graph, for example
+
+behav_tbl_iter_single = behav_tbl_iter(1);
+
+% Initialize the concatenated table
+concatenatedTable = table();
+
+% Iterate through the 3x1 cell array
+for i = 1:numel(behav_tbl_iter_single)
+    % Assuming each cell contains a 12x1 cell array of tables
+    twelveByOneCellArray = behav_tbl_iter_single{i};
+    
+    % Initialize a temporary table to store the concatenated tables for this cell
+    tempTable = table();
+    
+    % Iterate through the 12x1 cell array
+    for j = 1:numel(twelveByOneCellArray)
+        % Assuming each cell in the 12x1 cell array contains a table
+        currentTable = twelveByOneCellArray{j};
+        
+        % Concatenate the current table to the temporary table vertically
+        tempTable = vertcat(tempTable, currentTable);
+    end
+    
+    % Concatenate the temporary table to the overall concatenated table vertically
+    concatenatedTable = vertcat(concatenatedTable, tempTable);
+end
+
+median_choice_time_block_1 = median(concatenatedTable.choiceTime(concatenatedTable.Block == 1) - concatenatedTable.stTime(concatenatedTable.Block == 1));
+median_choice_time_block_2 = median(concatenatedTable.choiceTime(concatenatedTable.Block == 2) - concatenatedTable.stTime(concatenatedTable.Block == 2));
+median_choice_time_block_3 = median(concatenatedTable.choiceTime(concatenatedTable.Block == 3) - concatenatedTable.stTime(concatenatedTable.Block == 3));
+
+median_collect_time_block_1 = median(concatenatedTable.collectionTime(concatenatedTable.Block == 1) - concatenatedTable.stTime(concatenatedTable.Block == 1));
+median_collect_time_block_2 = median(concatenatedTable.collectionTime(concatenatedTable.Block == 2) - concatenatedTable.stTime(concatenatedTable.Block == 2));
+median_collect_time_block_3 = median(concatenatedTable.collectionTime(concatenatedTable.Block == 3) - concatenatedTable.stTime(concatenatedTable.Block == 3));
+
+
+
+
+
+median_start_time_from_choice = median(concatenatedTable.stTime - concatenatedTable.choiceTime);
+median_collect_time_from_choice = median(concatenatedTable.collectionTime - concatenatedTable.choiceTime);
+
+median_start_time_from_choice_large = median(concatenatedTable.stTime(concatenatedTable.bigSmall == 1.2) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 1.2));
+median_start_time_from_choice_small = median(concatenatedTable.stTime(concatenatedTable.bigSmall == 0.3) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 0.3));
+
+median_collect_time_from_choice_large = median(concatenatedTable.collectionTime(concatenatedTable.bigSmall == 1.2) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 1.2));
+median_collect_time_from_choice_small = median(concatenatedTable.collectionTime(concatenatedTable.bigSmall == 0.3) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 0.3));
+
+
+
+
 %% for hM4Di vs mCherry
 
 % Find indices where Animals match valid_animalIDs
@@ -359,9 +415,106 @@ hold on
 width = 300; % Width of the figure
 height = 600; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xline(0);
+xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
 % xlim([-8 8]);
 % ylim([-0.5 0.5]);
 % Set X-axis ticks
 set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.5 0 0.5]);
 shadedErrorBar(ts1, mean_large, sem_large, 'lineProps', {'color', 'r'});
 hold on;shadedErrorBar(ts1, mean_small, sem_small, 'lineProps', {'color', 'k'});
+
+%% for analyzing shock test, grouping ranges of intensities together
+
+ranges = [2:7; 8:13; 14:19; 20:25]
+
+
+for hh = 1:size(unnormalized_mouse, 2)
+
+
+    velocity_data_extracted = unnormalized_mouse{1, hh}
+    if isempty(velocity_data_extracted)
+
+        mouse_velocity_in_ranges_all{hh} = nan;
+    else
+        for gg = 1:size(velocity_data_extracted, 2)
+            for mm = 1:size(ranges, 1)
+
+                mouse_velocity_in_ranges(mm, :) = mean(velocity_data_extracted(ranges(mm, :), :));
+
+            end
+
+
+        end
+
+        mouse_velocity_in_ranges_all{hh} = mouse_velocity_in_ranges;
+        clear mouse_velocity_in_ranges;
+    end
+
+end
+
+% Find indices where Animals match valid_animalIDs
+valid_idx = ismember(animalIDs, hM4Di_IDs);
+
+% Filter path_length_table to only include valid animals
+valid_animalIDs = animalIDs(valid_idx, :);
+filtered_mouse_velocity_in_ranges_all = mouse_velocity_in_ranges_all(1, valid_idx);
+
+% Initialize the output matrices
+row1 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
+row2 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
+row3 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
+row4 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
+
+% Loop through each cell and extract the rows
+for i = 1:size(valid_animalIDs, 1)
+    data = filtered_mouse_velocity_in_ranges_all{i}; % Extract the 4x60 double array
+    row1(i, :) = data(1, :);
+    row2(i, :) = data(2, :);
+    row3(i, :) = data(3, :);
+    row4(i, :) = data(4, :);
+end
+
+
+%% for PLOTTING SHOCK TEST DATA, BROKEN INTO SHOCK RANGES
+
+
+data_to_plot = row1; 
+
+
+% Extract TreatmentCondition for the matched valid_animalIDs
+[~, loc] = ismember(valid_animalIDs, hM4Di_IDs);
+
+% Get the corresponding TreatmentCondition from risk_table
+filtered_treatment_conditions = hM4Di_treatment_groups(loc);
+
+% Find indices where TreatmentCondition is 'mCherry'
+mCherry_idx = strcmp(filtered_treatment_conditions, 'mCherry');
+hM4Di_idx = strcmp(filtered_treatment_conditions, 'hM4Di');
+
+
+filtered_neuron_mean_unnormalized_mCherry = data_to_plot(mCherry_idx == 1, :);
+filtered_neuron_mean_unnormalized_hM4Di = data_to_plot(hM4Di_idx == 1, :);
+
+
+mean_large = nanmean(filtered_neuron_mean_unnormalized_mCherry, 1);
+mean_small = nanmean(filtered_neuron_mean_unnormalized_hM4Di, 1);
+sem_large = nanstd(filtered_neuron_mean_unnormalized_mCherry, 0, 1) ./ sqrt(size(filtered_neuron_mean_unnormalized_mCherry, 1));
+sem_small = nanstd(filtered_neuron_mean_unnormalized_hM4Di, 0, 1) ./ sqrt(size(filtered_neuron_mean_unnormalized_hM4Di, 1));
+
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+% xlim([-8 8]);
+% ylim([-0.5 0.5]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.5 0 0.5]);
+shadedErrorBar(ts1, mean_large, sem_large, 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, mean_small, sem_small, 'lineProps', {'color', 'k'});
+

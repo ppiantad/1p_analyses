@@ -309,7 +309,7 @@ sem_data_array = {sem_all_array{1, 1}  , sem_all_array{1, 2}};
 mean_data_array = {neuron_mean_all_unnormalized{1, 1}, neuron_mean_all_unnormalized{1, 2}};
 sem_data_array = {neuron_sem_all_unnormalized{1, 1}  , neuron_sem_all_unnormalized{1, 2}};
 
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-4 2]);
 
 
 %%

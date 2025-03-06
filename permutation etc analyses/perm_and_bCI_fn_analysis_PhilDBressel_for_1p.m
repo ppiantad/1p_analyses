@@ -55,7 +55,9 @@ max_adjustment = max(max_mean)+2*max(max_SEM);
 
 sig_plot_level = linspace(max_adjustment+2*max(max_SEM), max_adjustment-max(max_SEM), 7);
 
-sig_plot_level_v2 = linspace(max_adjustment+0.5, max_adjustment, 6);
+% sig_plot_level_v2 = linspace(max_adjustment+0.5, max_adjustment, 6);
+
+sig_plot_level_v2 = linspace(max_adjustment, max_adjustment, 6);
 
 % arg_string = string(varargin_array);
 
@@ -313,8 +315,8 @@ end
     % ylim(y_limits)
     % ylabel('z-scored dF/F', 'FontSize', 12);
     % xlabel('Time from choice (s)');
-    ylim(ylims)
-    % yticks(y_limits(1):0.2:y_limits(2))
+    % ylim(ylims)
+    % yticks(ylims(1):0.2:ylims(2))
     % xlim(xlims);
     % set(gcf, 'position', [10, 10, 900, 600]);
     % fontsize(16, "pixels")

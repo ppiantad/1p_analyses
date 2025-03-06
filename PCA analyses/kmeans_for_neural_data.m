@@ -162,9 +162,9 @@ postchoice_kmeans_idx = 1
 collection_kmeans_idx = 3
 
 kmeans_idx_new = kmeans_idx; % Create a copy to modify
-kmeans_idx_new(kmeans_idx == 1) = 2; % Change 1s to 2
+kmeans_idx_new(kmeans_idx == 1) = 3; % Change 1s to 2
 kmeans_idx_new(kmeans_idx == 2) = 1; % Change 2s to 1
-
+kmeans_idx_new(kmeans_idx == 3) = 2; % Change 2s to 1
 
 neurons_sorted_by_cluster = [];
 
@@ -293,30 +293,22 @@ caxis([-1 1]);
 for dd = 1:clusters_desired
     nexttile;
     
-    % Compute mean trace for the current cluster
+    % Compute mean trace and SEM for the current cluster
     current_cluster = neurons_by_cluster{dd};
     mean_trace = mean(current_cluster, 1);
+    sem_trace = std(current_cluster, 0, 1) / sqrt(size(current_cluster, 1));
+    sd_trace = std(current_cluster, 0, 1);
+    % Plot the mean trace with error bars
+    shadedErrorBar(ts1, mean_trace, sd_trace, 'lineProps', {'color', acton(1,:)});
     
-    % Normalize values for visibility
-    min_val = min(mean_trace);
-    max_val = max(mean_trace);
-    if max_val > min_val
-        normalized_mean_trace = 2 * (mean_trace - min_val) / (max_val - min_val) - 1;
-    else
-        normalized_mean_trace = zeros(size(mean_trace)); % Avoid divide by zero
-    end
-    
-    % Plot the mean trace
-    plot(1:160, normalized_mean_trace, 'k', 'LineWidth', 1.5);
-    % plot(1:480, normalized_mean_trace, 'k', 'LineWidth', 1.5);
-    % plot(1:320, normalized_mean_trace, 'k', 'LineWidth', 1.5);
     % Format subplot
-    ylim([-1, 1]); % Keep the scale consistent
-    xlim([1, 160]);
-    % xlim([1, 480]);
-    % xlim([1, 320]);
+    ylim([-0.75, 0.75]); % Set Y-axis limits from 1 to -1
+    xlim([min(ts1), max(ts1)]); % Adjust X-axis to match time scale
     title(['Cluster ' num2str(dd)]);
-    set(gca, 'XTick', [], 'YTick', []); % Hide ticks for clean look
+    
+    % Ensure Y-axis is visible with labels spanning from 1 to -1
+    set(gca, 'YTick', [-0.5, 0, 0.5]); 
+    % ylabel('Activity');
 end
 
 %%
