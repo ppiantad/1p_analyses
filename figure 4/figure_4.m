@@ -1112,7 +1112,7 @@ end
  mean_data_array = {neuron_mean_array{1, 1}(prechoice_block_1==1, :), neuron_mean_array{1, 8}(prechoice_block_1==1, :)};
  sem_data_array = {neuron_sem_array{1, 1}(prechoice_block_1==1, :), neuron_sem_array{1, 8}(prechoice_block_1==1, :)};
 
- [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1);
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 1]);
 
 
 
@@ -1120,13 +1120,13 @@ end
  mean_data_array = {neuron_mean_array{1, 2}(postchoice_reward_block_1==1, :), neuron_mean_array{1, 9}(postchoice_reward_block_1==1, :)};
  sem_data_array = {neuron_sem_array{1, 2}(postchoice_reward_block_1==1, :), neuron_sem_array{1, 9}(postchoice_reward_block_1==1, :)};
 
- [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 1])
 
  %%
  mean_data_array = {neuron_mean_array{1, 3}(collect_block_1==1, :), neuron_mean_array{1, 10}(collect_block_1==1, :)};
  sem_data_array = {neuron_sem_array{1, 3}(collect_block_1==1, :), neuron_sem_array{1, 10}(collect_block_1==1, :)};
 
- [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1);
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 1]);
 
 
 
@@ -1454,6 +1454,19 @@ xline(0);
 % xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
 % xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from choice (s)');
+
+
+mean_data_array = {diff_all_mean_prechoice}
+sem_data_array = {diff_all_sem_prechoice}
+[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 2], [-0.5 0.2])
+
+mean_data_array = {diff_all_mean_postchoice}
+sem_data_array = {diff_all_sem_postchoice}
+[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 3], [-0.5 0.2])
+
+mean_data_array = {diff_all_mean_collect}
+sem_data_array = {diff_all_sem_collect}
+[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [0 4], [-0.5 0.2])
 
 
 %% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav

@@ -1163,16 +1163,16 @@ elseif strcmp(session_to_analyze, 'D4')
 end
 
 if any("sex" == string(experimental_grps.Properties.VariableNames)) && ~any("treatment" == string(experimental_grps.Properties.VariableNames))
-    figure; shadedErrorBar(1:size(mean(interleave_mean_experimental_male), 2), mean(interleave_mean_experimental_male), std(interleave_mean_experimental_male));
-    hold on; shadedErrorBar(1:size(mean(interleave_mean_experimental_female), 2), mean(interleave_mean_experimental_female), std(interleave_mean_experimental_female));
+    figure; shadedErrorBar(1:size(mean(interleave_mean_experimental_male), 2), mean(interleave_mean_experimental_male), std(interleave_mean_experimental_male), 'lineProps', {'color', 'r'});
+    hold on; shadedErrorBar(1:size(mean(interleave_mean_experimental_female), 2), mean(interleave_mean_experimental_female), std(interleave_mean_experimental_female), 'lineProps', {'color', 'k'});
     hold off;
     % xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
     % xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
 
 
 elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames)))
-    figure; shadedErrorBar(1:size(mean(interleave_mean_experimental_mCherry), 2), mean(interleave_mean_experimental_mCherry), std(interleave_mean_experimental_mCherry));
-    hold on; shadedErrorBar(1:size(mean(interleave_mean_experimental_hM4Di), 2), mean(interleave_mean_experimental_hM4Di), std(interleave_mean_experimental_hM4Di));
+    figure; shadedErrorBar(1:size(mean(interleave_mean_experimental_mCherry), 2), mean(interleave_mean_experimental_mCherry), std(interleave_mean_experimental_mCherry), 'lineProps', {'color', 'r'});
+    hold on; shadedErrorBar(1:size(mean(interleave_mean_experimental_hM4Di), 2), mean(interleave_mean_experimental_hM4Di), std(interleave_mean_experimental_hM4Di), 'lineProps', {'color', 'k'});
     hold off;
     % xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
     % xticklabels([0:2:12]); % Label ticks with corresponding time in minutes

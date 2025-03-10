@@ -9,7 +9,7 @@ uv.BLper = [-10 -5];
 uv.dt = 1/10; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-session_to_analyze = 'RDT_D1_CNO';
+session_to_analyze = 'RDT_D3_SALINE';
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
@@ -77,7 +77,7 @@ for ii = 1:size(animalIDs,1)
             end
         end
 
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'SHK', 1);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 1);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
@@ -416,8 +416,8 @@ width = 300; % Width of the figure
 height = 600; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 xline(0);
-xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
-xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
 % xlim([-8 8]);
 % ylim([-0.5 0.5]);
 % Set X-axis ticks
@@ -455,7 +455,7 @@ for hh = 1:size(unnormalized_mouse, 2)
 end
 
 % Find indices where Animals match valid_animalIDs
-valid_idx = ismember(animalIDs, hM4Di_IDs);
+valid_idx = ismember(animalIDs, stGtACR_IDs);
 
 % Filter path_length_table to only include valid animals
 valid_animalIDs = animalIDs(valid_idx, :);
@@ -484,14 +484,14 @@ data_to_plot = row1;
 
 
 % Extract TreatmentCondition for the matched valid_animalIDs
-[~, loc] = ismember(valid_animalIDs, hM4Di_IDs);
+[~, loc] = ismember(valid_animalIDs, stGtACR_IDs);
 
 % Get the corresponding TreatmentCondition from risk_table
-filtered_treatment_conditions = hM4Di_treatment_groups(loc);
+filtered_treatment_conditions = stGtACR_treatment_groups(loc);
 
 % Find indices where TreatmentCondition is 'mCherry'
 mCherry_idx = strcmp(filtered_treatment_conditions, 'mCherry');
-hM4Di_idx = strcmp(filtered_treatment_conditions, 'hM4Di');
+hM4Di_idx = strcmp(filtered_treatment_conditions, 'stGtACR');
 
 
 filtered_neuron_mean_unnormalized_mCherry = data_to_plot(mCherry_idx == 1, :);
