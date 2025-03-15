@@ -1,11 +1,11 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'RRD420';
+select_mouse = 'RRD389';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-session_to_analyze = 'RDT_D1_CNO';
+session_to_analyze = 'RDT_OPTO_CHOICE';
 
 shapeData = final_SLEAP.(select_mouse).(session_to_analyze).shapeData;
 
@@ -23,7 +23,10 @@ offset_trials = final_behavior.(select_mouse).(session_to_analyze).uv.BehavData.
 fs_cam = 30; %set sampling rate according to camera, this is hard coded for now
 time_ranges_trials = [onset_trials; choice_trials; offset_trials];
 
-% first_frame = final_SLEAP.(select_mouse).(session_to_analyze).first_frame*fs_cam;
+% first_frame = final_behavior.(select_mouse).(session_to_analyze).uv.session_start_adjustment*fs_cam;
+
+
+
 
 SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data_raw;
 
@@ -32,6 +35,11 @@ SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data_raw;
 
 X_data = SLEAP_data.x_pix;
 Y_data = SLEAP_data.y_pix;
+
+% Apply Savitzky-Golay filter to each row. this mostly removes high
+% frequency changes that occur due to slight jumps in keypoint location
+X_data = sgolayfilt(X_data, 9, 33);
+Y_data = sgolayfilt(Y_data, 9, 33);
 
 % velocity_data = final_SLEAP.(select_mouse).(session_to_analyze).zscored_SLEAP_data_velocity';
 

@@ -9,11 +9,11 @@ uv.BLper = [-10 -5];
 uv.dt = 1/10; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-session_to_analyze = 'RDT_D3_SALINE';
+session_to_analyze = 'RDT_OPTO_CHOICE';
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'choiceTime';
+epoc_to_align = 'stTime';
 ts1 = (uv.evtWin(1):uv.dt:uv.evtWin(2)-uv.dt);
 
 % neuron_num = 0;
@@ -77,7 +77,7 @@ for ii = 1:size(animalIDs,1)
             end
         end
 
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 1);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
@@ -381,21 +381,21 @@ median_collect_time_from_choice_small = median(concatenatedTable.collectionTime(
 %% for hM4Di vs mCherry
 
 % Find indices where Animals match valid_animalIDs
-valid_idx = ismember(animalIDs, hM4Di_IDs);
+valid_idx = ismember(animalIDs, stGtACR_IDs);
 
 % Filter path_length_table to only include valid animals
 valid_animalIDs = animalIDs(valid_idx, :);
 filtered_neuron_mean_unnormalized = neuron_mean_unnormalized(valid_idx, :);
 
 % Extract TreatmentCondition for the matched valid_animalIDs
-[~, loc] = ismember(valid_animalIDs, hM4Di_IDs);
+[~, loc] = ismember(valid_animalIDs, stGtACR_IDs);
 
 % Get the corresponding TreatmentCondition from risk_table
-filtered_treatment_conditions = hM4Di_treatment_groups(loc);
+filtered_treatment_conditions = stGtACR_treatment_groups(loc);
 
 % Find indices where TreatmentCondition is 'mCherry'
 mCherry_idx = strcmp(filtered_treatment_conditions, 'mCherry');
-hM4Di_idx = strcmp(filtered_treatment_conditions, 'hM4Di');
+hM4Di_idx = strcmp(filtered_treatment_conditions, 'stGtACR');
 
 
 filtered_neuron_mean_unnormalized_mCherry = filtered_neuron_mean_unnormalized(mCherry_idx == 1, :);

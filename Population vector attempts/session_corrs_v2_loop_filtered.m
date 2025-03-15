@@ -386,3 +386,52 @@ xline(60)
 % ylim([-0.8 0.8]);
 % ytickformat('%.1f');
 hold off
+
+%%
+
+pre_choice_over_time_diff = mean_prechoice_over_time(:, 1) - mean_prechoice_over_time(:, 2);
+postchoice_choice_over_time_diff = mean_postchoice_over_time(:, 1) - mean_postchoice_over_time(:, 2);
+consumption_over_time_diff = mean_consumption_over_time(:, 1) - mean_consumption_over_time(:, 2);
+
+
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 400; % Width of the figure
+height = 100; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+shadedErrorBar(1:90, pre_choice_over_time_diff, sem_prechoice_over_time(:, 1), 'lineProps', {'color', 'r'});
+hold on; shadedErrorBar(1:90, postchoice_choice_over_time_diff(:, 1), sem_postchoice_over_time(:, 1), 'lineProps', {'color', 'k'});
+hold on; shadedErrorBar(1:90, consumption_over_time_diff(:, 1), sem_consumption_over_time(:, 1), 'lineProps', {'color', 'b'});
+xlim([1 90]);
+% Set X-axis ticks
+set(gca, 'XTick', [1, 30, 60, 90]);
+
+xline(30);
+xline(60)
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+% xlabel('Time from Large Rew Choice (s)');
+% legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+% ylim([-0.8 0.8]);
+% ytickformat('%.1f');
+hold off
+
+
+%%
+
+
+pre_choice_over_time_diff_mouse = mean_prechoice_over_time(:, 1) - mean_prechoice_over_time(:, 2);
+postchoice_choice_over_time_diff_mouse = mean_postchoice_over_time(:, 1) - mean_postchoice_over_time(:, 2);
+consumption_over_time_diff_mouse = mean_consumption_over_time(:, 1) - mean_consumption_over_time(:, 2);
+
+
+
+ mean_data_array = {prechoice_over_time_mean', postchoice_over_time_mean', consumption_over_time_mean'};
+ sem_data_array = {prechoice_over_time_sem', postchoice_over_time_sem', consumption_over_time_sem'};
+
+ [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, [1:90], [1 90], [-0.2 0.2]);
+
+

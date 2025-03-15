@@ -197,11 +197,13 @@ end
 combined_data = [total_shock_abort_trials_array ; total_shock_no_abort_trials_array]';
 figure();
 coordLineStyle = 'k.';
-boxplot(combined_data, 'Symbol', coordLineStyle); hold on;
+boxplot(combined_data, 'Notch', 'on', 'Symbol', coordLineStyle); hold on;
 parallelcoords(combined_data, 'Color', 0.7*[1 1 1], 'LineStyle', '-',...
   'Marker', '.', 'MarkerSize', 10);
 
 TF = isoutlier(combined_data, 'grubbs');
+
+[h p] = ttest(combined_data(:, 1), combined_data(:, 2));
 
 
 %% get Ca data

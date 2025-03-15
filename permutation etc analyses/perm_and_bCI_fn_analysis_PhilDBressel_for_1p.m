@@ -1,4 +1,4 @@
-function [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, x_limits)
+function [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, x_limits, y_limits)
 
 % data_array is expected to be a 1x# cell array. each cell should the
 % following orientation:
@@ -30,7 +30,7 @@ consec_thresh = 3; % 1017.3Hz sample rate / 3Hz filter %340 PRD used 340 because
 % which is 10
 
 % Graphing parameters
-ylims = [-0.5 1];
+ylims = y_limits;
 % xlims = [ts1(1) round(ts1(end))];
 xlims = x_limits;
 % sig_plot_level = linspace(4,3.2,7);
@@ -57,7 +57,9 @@ sig_plot_level = linspace(max_adjustment+2*max(max_SEM), max_adjustment-max(max_
 
 % sig_plot_level_v2 = linspace(max_adjustment+0.5, max_adjustment, 6);
 
-sig_plot_level_v2 = linspace(max_adjustment, max_adjustment, 6);
+% sig_plot_level_v2 = linspace(max_adjustment, max_adjustment, 6);
+
+sig_plot_level_v2 = 0;
 
 % arg_string = string(varargin_array);
 
@@ -111,13 +113,13 @@ for ii = 1:size(comparison, 2)
     comparison(ii).Cp_tCI_sig = NaN(1,comparison(ii).uv.ev_win);
     comparison(ii).sig_idx_tCI = find((comparison(ii).Cp_tCI(1,:) > bCI_tCI_CI_threshold) | (comparison(ii).Cp_tCI(2,:) < bCI_tCI_CI_threshold));
     comparison(ii).consec_tCI = consec_idx(comparison(ii).sig_idx_tCI, consec_thresh);
-    comparison(ii).Cp_tCI_sig(comparison(ii).sig_idx_tCI(comparison(ii).consec_tCI)) = sig_plot_level_v2(ii);
+    comparison(ii).Cp_tCI_sig(comparison(ii).sig_idx_tCI(comparison(ii).consec_tCI)) = sig_plot_level_v2;
 
     %bCI
     comparison(ii).Cp_bCIexp_sig = NaN(1,comparison(ii).uv.ev_win);
     comparison(ii).sig_idx_bCI = find((comparison(ii).Cp_bCIexp(1,:) > bCI_tCI_CI_threshold) | (comparison(ii).Cp_bCIexp(2,:) < bCI_tCI_CI_threshold));
     comparison(ii).consec_bCI = consec_idx(comparison(ii).sig_idx_bCI,consec_thresh);
-    comparison(ii).Cp_bCIexp_sig(comparison(ii).sig_idx_bCI(comparison(ii).consec_bCI)) = sig_plot_level_v2(ii);
+    comparison(ii).Cp_bCIexp_sig(comparison(ii).sig_idx_bCI(comparison(ii).consec_bCI)) = sig_plot_level_v2;
 
 
 
@@ -159,21 +161,21 @@ for qq = 1:size(pairwise_comps, 1)
     diff_tCI_sig_idx = ttest2(comparison(pairwise_comps(qq, 1)).mean_Cp,comparison(pairwise_comps(qq, 2)).mean_Cp);
     diff_tCI_sig_idx = find(diff_tCI_sig_idx == 1);
     diff_tCI_consec = consec_idx(diff_tCI_sig_idx,consec_thresh);
-    diff_tCI_sig(qq, diff_tCI_sig_idx(diff_tCI_consec)) = sig_plot_level_v2(qq);
+    diff_tCI_sig(qq, diff_tCI_sig_idx(diff_tCI_consec)) = sig_plot_level_v2;
     clear diff_tCI_sig_idx diff_tCI_consec
 
 
     diff_bCIexp_sig(qq, :) = NaN(1,comparison(pairwise_comps(qq, 1)).uv.ev_win);
     diff_bCIexp_sig_idx = find((diff_bCIexp{1, qq}(1,:) > 0) | (diff_bCIexp{1, qq}(2,:) < 0));
     diff_bCIexp_consec = consec_idx(diff_bCIexp_sig_idx,consec_thresh);
-    diff_bCIexp_sig(qq, diff_bCIexp_sig_idx(diff_bCIexp_consec)) = sig_plot_level_v2(qq);
+    diff_bCIexp_sig(qq, diff_bCIexp_sig_idx(diff_bCIexp_consec)) = sig_plot_level_v2;
     clear diff_bCIexp_sig_idx diff_bCIexp_consec
 
     %Permutation test
     perm_p_sig(qq,:) = NaN(1,comparison(pairwise_comps(qq, 1)).uv.ev_win);
     perm_p_sig_idx = find(perm_p(qq, :) < sig);
     perm_p_consec = consec_idx(perm_p_sig_idx,consec_thresh);
-    perm_p_sig(qq, perm_p_sig_idx(perm_p_consec)) = sig_plot_level_v2(qq);
+    perm_p_sig(qq, perm_p_sig_idx(perm_p_consec)) = sig_plot_level_v2;
     clear perm_p_sig_idx perm_p_consec
 end
 
@@ -307,17 +309,10 @@ for vv = 1:size(pairwise_comps, 1)
 
 
 end
-    z = plot([0 0],ylim,'k:');
-    z.Annotation.LegendInformation.IconDisplayStyle = 'off';
-    p = plot(xlim,[0 0],'k--');
-    p.Annotation.LegendInformation.IconDisplayStyle = 'off';
-    % y_limits = [-0.6 1.6];
-    % ylim(y_limits)
-    % ylabel('z-scored dF/F', 'FontSize', 12);
-    % xlabel('Time from choice (s)');
-    % ylim(ylims)
-    % yticks(ylims(1):0.2:ylims(2))
-    % xlim(xlims);
+
+    xlim(xlims);
+    ylim(ylims)
+    yticks(unique([yticks, ylims(2)]));
     % set(gcf, 'position', [10, 10, 900, 600]);
     % fontsize(16, "pixels")
     title('perm test')
@@ -362,11 +357,12 @@ for vv = 1:size(pairwise_comps, 1)
             % text(xlims(1),sig_plot_level_v2(vv),comparison_labels_join(vv),'Color',col_rep(vv), 'FontSize', 6);
 
     end
-    plot([0 0],ylim,'k:')
-    plot(xlim,[0 0],'k--')
+
     ylabel('z-scored dF/F', 'FontSize', 12);
     xlabel('Time from choice (s)');
     xlim(xlims);
+    ylim(ylims)
+    yticks(unique([yticks, ylims(2)]));
     set(gcf, 'position', [10, 10, 400, 800]);
     title('diff bCI')
     
@@ -427,7 +423,8 @@ for vv = 1:size(comparison, 2)
     % ylabel('z-scored dF/F', 'FontSize', 12);
     % xlabel('Time from choice (s)');
     xlim(xlims);
-    ylim([.40 sig_plot_level_v2(1)])
+    ylim(ylims)
+    yticks(unique([yticks, ylims(2)]));
 
     % Set X-axis ticks
 
@@ -479,12 +476,13 @@ for vv = 1:size(comparison, 2)
             % text(xlims(1),sig_plot_level_v2(vv), arg_string_other(vv),'Color',col_rep(vv), 'FontSize', 6);
 
     end
-    plot([0 0],ylim,'k:')
-    plot(xlim,[0 0],'k--')
+
     title('Parametric t interval CI: 95% CI does not include 0 dF/F')
     ylabel('z-scored dF/F', 'FontSize', 12);
     xlabel('Time from choice (s)');
     xlim(xlims);
+    ylim(ylims)
+    yticks(unique([yticks, ylims(2)]));
     title('tCI')
 
 end

@@ -1,6 +1,6 @@
 %% Run eventRelatedActivity first for whatever events you want to identify responsive neurons for
 clear zall_first_event zall_second_event zall_third_event sem_first_event sem_second_event sem_third_event zall_fourth_event sem_fourth_event
-select_mouse = 'BLA_Insc_35';
+select_mouse = 'BLA_Insc_32';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
@@ -18,9 +18,9 @@ consumption_activated_data = neuron_mean_mouse_unnormalized{select_mouse_index, 
 
 
 
-test_data = [pre_choice_data; post_choice_data; consumption_activated_data; shock_activated_data];
-
-zscore_data = zscore(test_data, 0 , 2);
+% test_data = [pre_choice_data; post_choice_data; consumption_activated_data; shock_activated_data];
+% 
+% zscore_data = zscore(test_data, 0 , 2);
 
 
 

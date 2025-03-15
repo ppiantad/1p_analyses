@@ -124,3 +124,14 @@ mean_no_shock_data_shks_D1 = nanmean(no_shock_data_shks_D1, 1)
 mean_no_shock_data_shks_D2 = nanmean(no_shock_data_shks_D2, 1)
 
 [h p] = ttest(mean_no_shock_data_shks_D1, mean_no_shock_data_shks_D2);
+
+%%
+
+experimental_data_shks_D1_mCherry = shock_epoch_means_mouse{1, 1}(:, strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry'));
+experimental_data_shks_D2_hM4Di = shock_epoch_means_mouse{1, 2}(:, strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'hM4Di'));
+
+
+
+mean_experimental_data_shks_D1_mCherry = nanmean(experimental_data_shks_D1_mCherry, 1)
+mean_experimental_data_shks_D2_hM4Di = nanmean(experimental_data_shks_D2_hM4Di, 1)
+[h p] = ttest2(mean_experimental_data_shks_D1_mCherry, mean_experimental_data_shks_D2_hM4Di);

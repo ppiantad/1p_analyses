@@ -7,7 +7,7 @@ ts1 = (-10:.1:10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'E:\MATLAB\raw data for WSLS etc\BLA-NAcSh ChrimsonR vs mCherry';
+metaDirectory = 'I:\MATLAB\raw data for WSLS etc\BLA stGtACR vs EGFP Behavioral Data';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 missing_start_val_count = 0;
@@ -152,8 +152,8 @@ for zz = 1:size(metafolder_list, 1)
 
                 if exist('boris_file', 'var')
                     SLEAP_time_range_adjustment = []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; -1.23;
-                    if contains(current_animal, '441') & contains(current_session, 'SHOCKED_OUTCOMES')
-                        SLEAP_time_range_adjustment = 7.26 % THIS MOUSE'S VIDEO STARTED LATE, SO THERE IS NO START TIME!
+                    if contains(current_animal, 'RRD441') & contains(current_session, 'SHOCKED_OUTCOMES')
+                        SLEAP_time_range_adjustment = -7.3470 % THIS MOUSE'S VIDEO STARTED LATE, SO THERE IS NO START TIME!
                         start_val = SLEAP_time_range_adjustment;
                     end
                     [BehavData, start_val] = boris_to_table_shock(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment, forced_trial_start, free_trial_start);
@@ -195,8 +195,8 @@ for zz = 1:size(metafolder_list, 1)
 
                 if exist('boris_file', 'var')
                     SLEAP_time_range_adjustment = []; %16.2733; %15.3983; %[]; %-16.5448; %[]; %[]16.2733; -1.23;
-                    if contains(current_animal, '441') & contains(current_session, 'SHOCKED_OUTCOMES')
-                        SLEAP_time_range_adjustment = 7.26 % THIS MOUSE'S VIDEO STARTED LATE, SO THERE IS NO START TIME!
+                    if contains(current_animal, 'RRD441') & contains(current_session, 'SHOCKED_OUTCOMES')
+                        SLEAP_time_range_adjustment = -7.3470 % THIS MOUSE'S VIDEO STARTED LATE, SO THERE IS NO START TIME!
                         start_val = SLEAP_time_range_adjustment;
                     end
                     [BehavData, boris_Extract_tbl, start_val] = boris_to_table(boris_file, BehavData, block_end, largeRewSide, smallRewSide, SLEAP_time_range_adjustment, forced_trial_start, free_trial_start);

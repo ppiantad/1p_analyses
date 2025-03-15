@@ -2,7 +2,7 @@
 fs_cam = 30; %set sampling rate according to camera, this is hard coded for now
 
 animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'RDT_D1_CNO';
+session_to_analyze = 'RDT_OPTO_CHOICE';
 
 reward_cup_time = [];
 right_screen_time = [];
@@ -23,10 +23,14 @@ for dd = 1:size(animalIDs)
         % Y_data = SLEAP_data.corrected_y_pix;
         X_data = SLEAP_data.x_pix;
         Y_data = SLEAP_data.y_pix;
-
-        onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
-        choice_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.choiceTime';
-        offset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.collectionTime';
+        % Apply Savitzky-Golay filter to each row. this mostly removes high
+        % frequency changes that occur due to slight jumps in keypoint location
+        X_data = sgolayfilt(X_data, 9, 33);
+        Y_data = sgolayfilt(Y_data, 9, 33);
+        BehavData = final_behavior.(select_mouse).(session_to_analyze).uv.BehavData;
+        onset_trials = BehavData.stTime';
+        choice_trials = BehavData.choiceTime';
+        offset_trials = BehavData.collectionTime';
 
         time_ranges_trials = [onset_trials; choice_trials; offset_trials];
 
@@ -36,7 +40,7 @@ for dd = 1:size(animalIDs)
 
         velocity_data = zscore(SLEAP_data.vel_cm_s)';
 
-        BehavData = final_SLEAP.(select_mouse).(session_to_analyze).BehavData;
+        
         % adjusted_start_time = BehavData.TrialPossible(1)-60;
         % SLEAP_data.idx_time = SLEAP_data.idx_time+adjusted_start_time;
 
@@ -172,3 +176,14 @@ for dd = 1:size(animalIDs)
     end
 end
 
+
+dwell_times_table = table;
+
+dwell_times_table.Animals = animalIDs;
+dwell_times_table.mean_left_screen_time_B1 = mean_left_screen_time_B1';
+dwell_times_table.mean_left_screen_time_B2 = mean_left_screen_time_B2';
+dwell_times_table.mean_left_screen_time_B3 = mean_left_screen_time_B3';
+
+dwell_times_table.mean_right_screen_time_B1 = mean_right_screen_time_B1';
+dwell_times_table.mean_right_screen_time_B2 = mean_right_screen_time_B2';
+dwell_times_table.mean_right_screen_time_B3 = mean_right_screen_time_B3';

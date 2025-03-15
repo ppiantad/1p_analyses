@@ -1,162 +1,3 @@
-animalIDs = fieldnames(final_DLC);
-
-session_to_analyze = 'D3';
-
-
-% experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
-
-
-%%
-clear aversive_context safe_context mean_aversive mean_safe mean_aversive_context mean_safe_context
-
-
-mouse_count = 0;
-for gg = 1:size(animalIDs, 1)
-    current_mouse = animalIDs{gg};
-    
-    if strcmp(final_DLC.(current_mouse).experimental_grp, 'Experimental')
-        mouse_count = mouse_count+1;
-        mouse_in_cond(mouse_count, :) = current_mouse;
-        mouse_data = final_DLC.(current_mouse).(session_to_analyze);
-        fields = fieldnames(mouse_data); % Get the field names
-        matchIdx = find(contains(fields, 'DLC')); % Find indices of matches
-        
-
-
-        DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).movement_data;
-        if any(strcmp('freeze', DLC_data_mouse.Properties.VariableNames))
-            freeze_data = DLC_data_mouse.freeze; 
-        elseif any(strcmp('freeze_status', DLC_data_mouse.Properties.VariableNames))
-            freeze_data = DLC_data_mouse.freeze_status;
-        elseif any(strcmp('was_freezing', DLC_data_mouse.Properties.VariableNames))
-            freeze_data = DLC_data_mouse.was_freezing;
-        end
-        % freeze_data = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw.freeze; 
-        frames_data = DLC_data_mouse.frame;
-        
-        for qq = 1:num_repeats
-            safe_context{mouse_count, qq} = freeze_data(stimulus_frames{1, 1}(qq,1)+1:stimulus_frames{1, 1}(qq,2));
-        end
-        
-        
-        for pp = 1:size(safe_context, 2)
-            % mean_safe_context(mouse_count, pp) = sum(freeze_data(stimulus_frames{1, 1}(pp,1)+1:stimulus_frames{1, 1}(pp,2)))/size(safe_context, 1);
-            % Calculate the proportion of 1s in the column
-            b = sum(safe_context{mouse_count,pp}) / size(safe_context{mouse_count,pp}, 1);
-
-            % Store the proportion in mean_aversive_context
-            mean_safe_context(mouse_count, pp) = b;
-
-            % Calculate the number of rows in the column
-            n = size(safe_context, 1);
-
-            % Calculate the standard error of the proportion
-            standard_error_safe(mouse_count, pp) = sqrt(b * (1 - b) / n);
-        end
-
-
-        for qq = 1:num_repeats
-            if qq <= 2
-                aversive_context{mouse_count, qq} = freeze_data(stimulus_frames{1, 2}(qq,1)+1:stimulus_frames{1, 2}(qq,2));
-            elseif qq > 2
-                aversive_context{mouse_count, qq} = freeze_data(stimulus_frames{1, 2}(qq,1)+1:end);
-            end
-        end
-
-
-        for pp = 1:size(aversive_context, 2)
-            % Calculate the proportion of 1s in the column
-            p = sum(aversive_context{mouse_count,pp}) / size(aversive_context{mouse_count,pp}, 1);
-
-            % Store the proportion in mean_aversive_context
-            mean_aversive_context(mouse_count, pp) = p;
-
-            % Calculate the number of rows in the column
-            n = size(mean_aversive_context, 1);
-
-            % Calculate the standard error of the proportion
-            standard_error_aversive(mouse_count, pp) = sqrt(p * (1 - p) / n);
-        end
-
-    end
-    
-
-
-
-end
-
-
-% Calculate the mean of each column
-mean_safe = mean(mean_safe_context);
-mean_aversive = mean(mean_aversive_context);
-
-mean_sem_safe = mean(standard_error_safe);
-mean_sem_aversive = mean(standard_error_aversive);
-
-% Initialize the interleaved array
-interleaved_means = zeros(1, 6);
-interleaved_sems = zeros(1,6);
-interleaved_raw = zeros(size(mean_aversive_context, 1),6);
-
-% Interleave the means
-interleaved_means(1:2:end) = mean_safe;
-interleaved_means(2:2:end) = mean_aversive;
-
-% Interleave the SEMs
-interleaved_sems(1:2:end) = mean_sem_safe;
-interleaved_sems(2:2:end) = mean_sem_aversive;
-
-interleaved_raw(1:2:end) = mean_safe_context;
-interleaved_raw(2:2:end) = mean_aversive_context;
-
-% Display the interleaved means
-disp('Interleaved Means:');
-disp(interleaved_means);
-
-% figure; plot(interleaved_means);
-
-test_interleave_mean = zeros(size(mean_safe_context, 1), 6);
-test_interleave_mean(:, [1 3 5]) = mean_safe_context;
-test_interleave_mean(:, [2 4 6]) = mean_aversive_context;
-
-test_interleave_sem = zeros(size(mean_safe_context, 1), 6);
-test_interleave_sem(:, [1 3 5]) = standard_error_safe;
-test_interleave_sem(:, [2 4 6]) = standard_error_aversive;
-
-figure; shadedErrorBar(1:size(mean(test_interleave_mean), 2), mean(test_interleave_mean), mean(test_interleave_sem));
-% hold on; plot(1:size(interleaved_means, 2), interleaved_raw)
-% hold on;shadedErrorBar(1:size(interleaved_means, 2), interleaved_means, interleaved_sems);
-hold off; 
-
-
-% Initialize a new cell array to store the concatenated results
-combined_context = cell(size(aversive_context, 1), 1);
-
-for i = 1:size(aversive_context, 1)
-    concatenated_array = [];
-    
-    for j = 1:size(aversive_context, 2)
-        % Concatenate the data from the corresponding cells of aversive_context and safe_context
-        concatenated_array = [concatenated_array; aversive_context{i, j}; safe_context{i, j}];
-    end
-    
-    % Store the concatenated array in the new cell array
-    combined_context{i} = concatenated_array;
-    max_size(i) = size(combined_context{i}, 1);
-end
-
-trimmed_combined_context = []; 
-
-for zz = 1:size(combined_context, 1)
-    trimmed_combined_context(zz, :) = combined_context{zz, 1}(1:min(max_size), 1); 
-
-
-
-end
-
-session_long_mean = mean(trimmed_combined_context); 
-
 
 
 
@@ -509,8 +350,8 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
     figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
     hold on;
 
-    h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_mCherry), experimental_sem_mCherry, 'lineProps', {'color', 'r'});
-    h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_hM4Di), experimental_sem_hM4Di, 'lineProps', {'color', 'k'});
+    h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_mCherry), experimental_sem_mCherry, 'lineProps', {'color', 'k'});
+    h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_hM4Di), experimental_sem_hM4Di, 'lineProps', {'color', 'r'});
 
     % legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
     % Adjust x-axis ticks and labels
@@ -837,7 +678,7 @@ min_samples = min_duration / sample_duration;
 
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D3';
+session_to_analyze = 'D4';
 
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
@@ -1262,8 +1103,8 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
  
     figure('Position', [100, 100, 900, 300]); % [left, bottom, width, height]
     hold on;
-    h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_mCherry), experimental_sem_mCherry, 'lineProps', {'color', 'r'});
-    h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_hM4Di), experimental_sem_hM4Di, 'lineProps', {'color', 'k'});
+    h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_mCherry), experimental_sem_mCherry, 'lineProps', {'color', 'k'});
+    h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_hM4Di), experimental_sem_hM4Di, 'lineProps', {'color', 'r'});
 
     % Calculate x-tick positions and labels
     x_tick_positions = bins_per_interval:bins_per_interval:num_bins; % [4, 8, 12, ...]
@@ -1608,6 +1449,107 @@ end
 
 % Adjustments for aesthetics
 set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'Males', 'Females'});
+ylim([0 0.9])
+hold off;
+
+
+%%
+load('PL_hM4Di_D3_freeze.mat')
+load('PL_hM4Di_D4_freeze.mat')
+% Create a figure
+
+
+mCherry_data_D3_means = [mean(experimental_data_aversive_mCherry_D3, 2) mean(experimental_data_safe_mCherry_D3, 2)];
+hM4Di_data_D3_mean = [mean(experimental_data_aversive_hM4Di_D3, 2) mean(experimental_data_safe_hM4Di_D3, 2)];
+
+mCherry_data_D4_mean = [mean(experimental_data_aversive_mCherry_D4, 2) mean(experimental_data_safe_mCherry_D4, 2)];
+hM4Di_data_D4_mean = [mean(experimental_data_aversive_hM4Di_D4, 2) mean(experimental_data_safe_hM4Di_D4, 2)];
+
+% Combine the datasets for easier handling
+all_data = {mCherry_data_D3_means, hM4Di_data_D3_mean};
+
+% Calculate means for bar heights
+means = [mean(mCherry_data_D3_means); 
+         mean(hM4Di_data_D3_mean)];
+
+% Grouped positions for the bars
+x = [1, 2; 3.5, 4.5; 6, 7]; % Adjust spacing as needed
+
+% Bar plot
+figure;
+hold on;
+
+% Loop through each group to plot bars, scatter points, and lines
+for i = 1:size(all_data, 2)
+    % Bar plot for each group
+    for col = 1:2
+        bar_x = x(i, col); % Position for the current bar
+        bar(bar_x, means(i, col), 0.4, 'FaceAlpha', 0.7); % Plot each bar
+    end
+
+    % Overlay scatter points and connect with lines for the current variable
+    data = all_data{i}; % Current variable's data
+    jittered_x = zeros(size(data)); % To store jittered x-coordinates
+    for j = 1:size(data, 1)
+        % Scatter points for the current row
+        scatter_x = x(i, :) + (rand(1, 2) - 0.5) * 0.2; % Add jitter
+        jittered_x(j, :) = scatter_x; % Store jittered x-coordinates
+        scatter(scatter_x, data(j, :), 40, 'k', 'filled');
+    end
+
+    % Connect scatter points with a line using jittered x-coordinates
+    for j = 1:size(data, 1)
+        plot(jittered_x(j, :), data(j, :), 'k-', 'LineWidth', 0.5);
+    end
+end
+
+% Adjustments for aesthetics
+set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'mCherry', 'hM4Di'});
+ylim([0 0.9])
+hold off;
+
+
+
+% Combine the datasets for easier handling
+all_data = {mCherry_data_D4_mean, hM4Di_data_D4_mean};
+
+% Calculate means for bar heights
+means = [mean(mCherry_data_D4_mean); 
+         mean(hM4Di_data_D4_mean)];
+
+% Grouped positions for the bars
+x = [1, 2; 3.5, 4.5; 6, 7]; % Adjust spacing as needed
+
+% Bar plot
+figure;
+hold on;
+
+% Loop through each group to plot bars, scatter points, and lines
+for i = 1:size(all_data, 2)
+    % Bar plot for each group
+    for col = 1:2
+        bar_x = x(i, col); % Position for the current bar
+        bar(bar_x, means(i, col), 0.4, 'FaceAlpha', 0.7); % Plot each bar
+    end
+
+    % Overlay scatter points and connect with lines for the current variable
+    data = all_data{i}; % Current variable's data
+    jittered_x = zeros(size(data)); % To store jittered x-coordinates
+    for j = 1:size(data, 1)
+        % Scatter points for the current row
+        scatter_x = x(i, :) + (rand(1, 2) - 0.5) * 0.2; % Add jitter
+        jittered_x(j, :) = scatter_x; % Store jittered x-coordinates
+        scatter(scatter_x, data(j, :), 40, 'k', 'filled');
+    end
+
+    % Connect scatter points with a line using jittered x-coordinates
+    for j = 1:size(data, 1)
+        plot(jittered_x(j, :), data(j, :), 'k-', 'LineWidth', 0.5);
+    end
+end
+
+% Adjustments for aesthetics
+set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'mCherry', 'hM4Di'});
 ylim([0 0.9])
 hold off;
 

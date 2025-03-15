@@ -82,17 +82,17 @@ n2 = consumption_and_shk_sum; N2 = consumption_and_shk_sum+consumption_not_shk_s
 
 % n2 = postchoice_and_shk_sum; N2 = postchoice_and_shk_sum+postchoice_not_shk_sum;
 
-% Pooled estimate of proportion
+% pooled estimate of proportion
 
 p0 = (n1+n2) / (N1+N2)
 
-% Expected counts under H0 (null hypothesis)
+% H0 expected(null hypothesis)
 
 n10 = N1 * p0;
 
 n20 = N2 * p0;
 
-% Chi-square test, by hand
+% chi-square test
 
 observed = [n1 N1-n1 n2 N2-n2];
 

@@ -1,5 +1,5 @@
 animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'RDT_D1_CNO';
+session_to_analyze = 'RDT_OPTO_CHOICE';
 
 b1_large_path_length = [];
 b2_large_path_length = [];
@@ -24,6 +24,12 @@ for dd = 1:size(animalIDs)
         SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data_raw;
         X_data = SLEAP_data.x_pix;
         Y_data = SLEAP_data.y_pix;
+
+
+        % Apply Savitzky-Golay filter to each row. this mostly removes high
+        % frequency changes that occur due to slight jumps in keypoint location
+        X_data = sgolayfilt(X_data, 9, 33);
+        Y_data = sgolayfilt(Y_data, 9, 33);
         % [X_data, Y_data] = correct_XY_outliers_v1(X_data, Y_data);
 
         % onset_trials = final_SLEAP.(select_mouse).(session_to_analyze).BehavData.stTime';
@@ -36,8 +42,6 @@ for dd = 1:size(animalIDs)
         % gcamp_samples = 1:1:size(Y_dF_all_session, 2);
 
         % gcamp_time = (0:length(F405_downsampled_data)-1)/fs_cam;
-
-        SLEAP_data = final_SLEAP.(select_mouse).(session_to_analyze).SLEAP_data_raw;
 
         % velocity_data = final_SLEAP.(select_mouse).(session_to_analyze).zscored_SLEAP_data_velocity';
 
@@ -189,7 +193,7 @@ large_choice_mCherry = [filtered_path_length_table.b1_large_path_length(mCherry_
 
 
 % Find indices where TreatmentCondition is 'mCherry'
-hM4Di_idx = strcmp(filtered_treatment_conditions, 'hM4Di');
+hM4Di_idx = strcmp(filtered_treatment_conditions, 'stGtACR');
 
 % Extract the relevant data
 large_choice_hM4Di = [filtered_path_length_table.b1_large_path_length(hM4Di_idx), ...
@@ -234,7 +238,7 @@ end
 % Plot individual lines for "Small" data
 for i = 1:size(large_choice_hM4Di, 1)
     plot(x_points, large_choice_hM4Di(i, :), '-', ...
-        'Color', hM4Di_color, ... % Red with 60% opacity
+        'Color', stGtACR_color, ... % Red with 60% opacity
         'LineWidth', 1.2);
 end
 
@@ -244,8 +248,8 @@ errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
     'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
 
-errorbar(x_points, mean_small, sem_small, hM4Di_symbol, ...
-    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', hM4Di_color, 'MarkerFaceColor', hM4Di_color, ...
+errorbar(x_points, mean_small, sem_small, stGtACR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', stGtACR_color, 'MarkerFaceColor', stGtACR_color, ...
     'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
 
 % Format the X-axis
@@ -292,7 +296,7 @@ large_choice_mCherry = [filtered_path_length_table.b1_small_path_length(mCherry_
 
 
 % Find indices where TreatmentCondition is 'mCherry'
-hM4Di_idx = strcmp(filtered_treatment_conditions, 'hM4Di');
+hM4Di_idx = strcmp(filtered_treatment_conditions, 'stGtACR');
 
 % Extract the relevant data
 large_choice_hM4Di = [filtered_path_length_table.b1_small_path_length(hM4Di_idx), ...
@@ -333,7 +337,7 @@ end
 % Plot individual lines for "Small" data
 for i = 1:size(large_choice_hM4Di, 1)
     plot(x_points, large_choice_hM4Di(i, :), '-', ...
-        'Color', hM4Di_color, ... % Red with 60% opacity
+        'Color', stGtACR_color, ... % Red with 60% opacity
         'LineWidth', 1.2);
 end
 
@@ -343,8 +347,8 @@ errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
     'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
 
-errorbar(x_points, mean_small, sem_small, hM4Di_symbol, ...
-    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', hM4Di_color, 'MarkerFaceColor', hM4Di_color, ...
+errorbar(x_points, mean_small, sem_small, stGtACR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', stGtACR_color, 'MarkerFaceColor', stGtACR_color, ...
     'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
 
 % Format the X-axis
