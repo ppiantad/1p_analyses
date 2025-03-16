@@ -1,8 +1,30 @@
 
+session_to_analyze = 'RDT_D1';
+
+
+if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
+    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final_SLEAP, fieldsToRemove{i})
+            final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+        end
+    end
+elseif strcmp('RDT_D2', session_to_analyze)
+
+    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_39'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final_SLEAP, fieldsToRemove{i})
+            final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+        end
+    end
+end
+
+
 fs_cam = 30; %set sampling rate according to camera, this is hard coded for now
 
-% animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'RDT_D1';
+animalIDs = (fieldnames(final_SLEAP));
 
 reward_cup_time = [];
 right_screen_time = [];
@@ -219,15 +241,19 @@ end
 large_zone_time = ([mean_large_screen_time_B1; mean_large_screen_time_B2; mean_large_screen_time_B3]*100)';
 small_zone_time = ([mean_small_screen_time_B1; mean_small_screen_time_B2; mean_small_screen_time_B3]*100)';
 rew_cup_zone_time = ([mean_reward_cup_B1; mean_reward_cup_B2; mean_reward_cup_B3]*100)';
-
+other_zone_time = ([other_zone_time_B1; other_zone_time_B2; other_zone_time_B3]*100)';
 
 mean_large_zone = nanmean(large_zone_time, 1);
 mean_small_zone = nanmean(small_zone_time, 1);
 mean_rew_cup_zone = nanmean(rew_cup_zone_time, 1);
+mean_other_zone = nanmean(other_zone_time, 1);
+
 
 sem_large = nanstd(large_zone_time, 0, 1) ./ sqrt(size(large_zone_time, 1));
 sem_small = nanstd(small_zone_time, 0, 1) ./ sqrt(size(small_zone_time, 1));
 sem_rew = nanstd(rew_cup_zone_time, 0, 1) ./ sqrt(size(rew_cup_zone_time, 1));
+sem_other = nanstd(other_zone_time, 0, 1) ./ sqrt(size(other_zone_time, 1));
+
 
 % X-axis points
 x_points = 1:3;
@@ -263,6 +289,14 @@ for i = 1:size(small_zone_time, 1)
         'LineWidth', 1.2);
 end
 
+% Plot individual lines for "Small" data
+for i = 1:size(other_zone_time, 1)
+    plot(x_points, other_zone_time(i, :), '-', ...
+        'Color', [1 0 0 0.6], ... % 
+        'LineWidth', 1.2);
+end
+
+
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large_zone, sem_large, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
@@ -275,6 +309,11 @@ errorbar(x_points, mean_small_zone, sem_small, '^-', ...
 errorbar(x_points, mean_rew_cup_zone, sem_rew, '^-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'green', 'MarkerFaceColor', 'green', ...
     'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_other_zone, sem_other, '^-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'black', 'MarkerFaceColor', 'black', ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points

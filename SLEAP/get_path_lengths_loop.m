@@ -1,6 +1,26 @@
 % animalIDs = (fieldnames(final_SLEAP));
 session_to_analyze = 'RDT_D1';
 
+if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
+    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final_SLEAP, fieldsToRemove{i})
+            final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+        end
+    end
+elseif strcmp('RDT_D2', session_to_analyze)
+
+    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_39'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final_SLEAP, fieldsToRemove{i})
+            final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+        end
+    end
+end
+
+animalIDs = (fieldnames(final_SLEAP));
 
 array_for_means = 1; 
 array_for_means_second = []; % 5
@@ -58,14 +78,14 @@ for dd = 1:size(animalIDs)
         % using the 10x variable data
         
         % BehavData = behav_tbl_iter{1, 1}{dd};
-        behav_part_1 = behav_tbl_iter{array_for_means, 1}{dd, 1};
-        if isempty(array_for_means_second)
-            BehavData = behav_part_1;
-
-        else
-            behav_part_2 = behav_tbl_iter{array_for_means_second, 1}{dd, 1};
-            BehavData = vertcat(behav_part_1, behav_part_2);
-        end
+        % behav_part_1 = behav_tbl_iter{array_for_means, 1}{dd, 1};
+        % if isempty(array_for_means_second)
+        %     BehavData = behav_part_1;
+        % 
+        % else
+        %     behav_part_2 = behav_tbl_iter{array_for_means_second, 1}{dd, 1};
+        %     BehavData = vertcat(behav_part_1, behav_part_2);
+        % end
 
         onset_trials = BehavData.stTime';
         choice_trials = BehavData.choiceTime';

@@ -90,7 +90,7 @@ disp('Between-Subject Effect (Treatment):');
 disp(tbl_between);
 
 % Optional: Perform post-hoc test if needed
-c = multcompare(stats, 'Display', 'on'); % Uncomment for post-hoc tests
+c = multcompare(stats, 'Display', 'off'); % Uncomment for post-hoc tests
 
 %% between subjects
 
