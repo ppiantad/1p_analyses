@@ -4,7 +4,7 @@
 % also you should first run block_wise_changes_v1.m to get the blocktimes
 
 
-select_mouse = 'BLA_Insc_32';
+select_mouse = 'BLA_Insc_24';
 
 % for RDT D1 BLA_Insc_25:
 %prechoice neuron num 46
@@ -20,7 +20,7 @@ first_session = 'RDT_D1';
 neuronTypes = respClass_all_array_mouse{select_mouse_index, 3};
 neuralActivity = final.(select_mouse).(first_session).CNMFe_data.C_raw;
 BehavData = final.(select_mouse).(first_session).uv.BehavData;
-
+time_array = final.(select_mouse).(first_session).time;
 
 
 %%
@@ -63,7 +63,7 @@ end
 
 % Plot the similarity over time
 figure;
-plot(time_array, similarityOverTime(1,1:trim_length));
+plot(time_array(1:(size(neuralActivity, 2) - windowSize + 1)), similarityOverTime(3, :));
 xlabel('Time');
 ylabel('Mean Similarity');
 % legend({'Type 1', 'Type 2', 'Type 3'});

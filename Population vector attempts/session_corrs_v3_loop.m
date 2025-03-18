@@ -9,7 +9,8 @@ data_to_load = {'BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_session
 load(data_to_load{1})
 
 if size(respClass_all_array, 2) == 10
-    comparison_arrays_full = [1 2 3; 8 9 10]
+    % comparison_arrays_full = [1 2 3; 8 9 10]
+    comparison_arrays_full = [1 2 3; 5 6 7]
 elseif size(respClass_all_array, 2) == 6
     comparison_arrays_full = [1 2 3; 4 5 6]
 end
@@ -51,8 +52,8 @@ for aa = 1:size(comparison_arrays_full, 1)
         % first_session = 'RDT_D1';
 
 
-        neuronTypes = respClass_all_array_mouse{select_mouse_index, 3};
-        neuralActivity = final.(select_mouse).(first_session).CNMFe_data.C_raw;
+        % neuronTypes = respClass_all_array_mouse{select_mouse_index, 3};
+        % neuralActivity = final.(select_mouse).(first_session).CNMFe_data.C_raw;
         BehavData = final.(select_mouse).(first_session).uv.BehavData;
 
 
@@ -66,9 +67,11 @@ for aa = 1:size(comparison_arrays_full, 1)
 
         end
 
-
+        % reorganize data for plotting the heatmap, with ensemble-specific
+        % neurons on top, the rest below
         PV_prechoice_all_mouse_just_prechoice = PV_prechoice_all_mouse(:, respClass_all_array_mouse{select_mouse_index, comparison_arrays(1, 1)} == 1);
         PV_prechoice_all_mouse_just_prechoice = [PV_prechoice_all_mouse_just_prechoice PV_prechoice_all_mouse(:, respClass_all_array_mouse{select_mouse_index, comparison_arrays(1, 1)} ~= 1)];
+        % data to use below, without reorg
         mean_PV_prechoice_all_mouse = mean(PV_prechoice_all_mouse)';
         % mean_PV_prechoice_all_mouse = mean_PV_prechoice_all_mouse(respClass_all_array_mouse{select_mouse_index, comparison_arrays(1, 1)} == 1, :);
         
@@ -408,6 +411,15 @@ for aa = 1:size(comparison_arrays_full, 1)
     sem_postchoice_over_time(:, aa) = mean(postchoice_over_time_sem, 2);
     sem_consumption_over_time(:, aa) = mean(consumption_over_time_sem, 2);
 
+    prechoice_over_time_mean_iter{aa} = prechoice_over_time_mean;
+    postchoice_over_time_mean_iter{aa} = postchoice_over_time_mean;
+    consumption_over_time_mean_iter{aa} = consumption_over_time_mean;
+
+    prechoice_over_time_sem_iter{aa} = prechoice_over_time_sem;
+    postchoice_over_time_sem_iter{aa} = postchoice_over_time_sem;
+    consumption_over_time_sem_iter{aa} = consumption_over_time_sem; 
+
+
 
     % % Calculate the standard deviation for each column
     % std_dev = std(prechoice_over_time_mean, 0, 2); % Use 2 for row-wise standard deviation
@@ -508,3 +520,178 @@ hold on; shadedErrorBar(1:90, mean_consumption_over_time(:, 2), sem_consumption_
 % ylim([-0.8 0.8]);
 % ytickformat('%.1f');
 hold off
+
+%%
+% Assuming prechoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double
+data1 = prechoice_over_time_mean_iter{1}; % First cell (90x10)
+data2 = prechoice_over_time_mean_iter{2}; % Second cell (90x10)
+
+% Define indices for splitting into 3 segments of 30 rows each
+segments = [1, 30; 31, 60; 61, 90];
+
+% Initialize mean matrices
+mean_values = zeros(3,2); % 3 segments x 2 cell arrays
+individual_means = cell(3,2); % To store individual column means
+
+% Loop through each segment
+for i = 1:3
+    % Extract rows for this segment
+    rows = segments(i,1):segments(i,2);
+    
+    % Compute means for each column and store
+    mean_seg1 = mean(data1(rows, :), 1); % Mean over rows for first array
+    mean_seg2 = mean(data2(rows, :), 1); % Mean over rows for second array
+    
+    % Store overall mean (for bar heights)
+    mean_values(i,1) = mean(mean_seg1); 
+    mean_values(i,2) = mean(mean_seg2);
+    
+    % Store individual column means (for scatter overlay)
+    individual_means{i,1} = mean_seg1;
+    individual_means{i,2} = mean_seg2;
+end
+
+% Plot bar graph
+figure; hold on;
+bar_handle = bar(mean_values, 'grouped');
+
+% Set bar colors
+bar_handle(1).FaceColor = 'b'; % First cell (blue)
+bar_handle(2).FaceColor = 'r'; % Second cell (red)
+
+% Get X positions for scatter overlay
+x_positions = zeros(3,2); % Store bar center positions
+for i = 1:2
+    x_positions(:,i) = bar_handle(i).XEndPoints; % Correct x positions
+end
+
+% Overlay individual data points correctly aligned
+for i = 1:3
+    scatter(x_positions(i,1) * ones(1,10), individual_means{i,1}, 'k', 'filled'); % First dataset
+    scatter(x_positions(i,2) * ones(1,10), individual_means{i,2}, 'k', 'filled'); % Second dataset
+end
+
+% Labels and legend
+xticks(mean(x_positions,2)); % Align x-ticks with bar groups
+xticklabels({'0%', '50%', '75%'});
+ylabel('Mean PV correlation');
+legend({'Safe-identified', 'Risky-identified'}, 'Location', 'SouthEast');
+ytickformat('%.1f');
+
+hold off;
+%%
+% Assuming prechoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double
+data1 = postchoice_over_time_mean_iter{1}; % First cell (90x10)
+data2 = postchoice_over_time_mean_iter{2}; % Second cell (90x10)
+
+% Define indices for splitting into 3 segments of 30 rows each
+segments = [1, 30; 31, 60; 61, 90];
+
+% Initialize mean matrices
+mean_values = zeros(3,2); % 3 segments x 2 cell arrays
+individual_means = cell(3,2); % To store individual column means
+
+% Loop through each segment
+for i = 1:3
+    % Extract rows for this segment
+    rows = segments(i,1):segments(i,2);
+    
+    % Compute means for each column and store
+    mean_seg1 = mean(data1(rows, :), 1); % Mean over rows for first array
+    mean_seg2 = mean(data2(rows, :), 1); % Mean over rows for second array
+    
+    % Store overall mean (for bar heights)
+    mean_values(i,1) = mean(mean_seg1); 
+    mean_values(i,2) = mean(mean_seg2);
+    
+    % Store individual column means (for scatter overlay)
+    individual_means{i,1} = mean_seg1;
+    individual_means{i,2} = mean_seg2;
+end
+
+% Plot bar graph
+figure; hold on;
+bar_handle = bar(mean_values, 'grouped');
+
+% Set bar colors
+bar_handle(1).FaceColor = 'b'; % First cell (blue)
+bar_handle(2).FaceColor = 'r'; % Second cell (red)
+
+% Get X positions for scatter overlay
+x_positions = zeros(3,2); % Store bar center positions
+for i = 1:2
+    x_positions(:,i) = bar_handle(i).XEndPoints; % Correct x positions
+end
+
+% Overlay individual data points correctly aligned
+for i = 1:3
+    scatter(x_positions(i,1) * ones(1,10), individual_means{i,1}, 'k', 'filled'); % First dataset
+    scatter(x_positions(i,2) * ones(1,10), individual_means{i,2}, 'k', 'filled'); % Second dataset
+end
+
+% Labels and legend
+xticks(mean(x_positions,2)); % Align x-ticks with bar groups
+xticklabels({'0%', '50%', '75%'});
+ylabel('Mean PV correlation');
+legend({'Safe-identified', 'Risky-identified'}, 'Location', 'SouthEast');
+ytickformat('%.1f');
+
+hold off;
+%%
+% Assuming prechoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double
+data1 = consumption_over_time_mean_iter{1}; % First cell (90x10)
+data2 = consumption_over_time_mean_iter{2}; % Second cell (90x10)
+
+% Define indices for splitting into 3 segments of 30 rows each
+segments = [1, 30; 31, 60; 61, 90];
+
+% Initialize mean matrices
+mean_values = zeros(3,2); % 3 segments x 2 cell arrays
+individual_means = cell(3,2); % To store individual column means
+
+% Loop through each segment
+for i = 1:3
+    % Extract rows for this segment
+    rows = segments(i,1):segments(i,2);
+    
+    % Compute means for each column and store
+    mean_seg1 = mean(data1(rows, :), 1); % Mean over rows for first array
+    mean_seg2 = mean(data2(rows, :), 1); % Mean over rows for second array
+    
+    % Store overall mean (for bar heights)
+    mean_values(i,1) = mean(mean_seg1); 
+    mean_values(i,2) = mean(mean_seg2);
+    
+    % Store individual column means (for scatter overlay)
+    individual_means{i,1} = mean_seg1;
+    individual_means{i,2} = mean_seg2;
+end
+
+% Plot bar graph
+figure; hold on;
+bar_handle = bar(mean_values, 'grouped');
+
+% Set bar colors
+bar_handle(1).FaceColor = 'b'; % First cell (blue)
+bar_handle(2).FaceColor = 'r'; % Second cell (red)
+
+% Get X positions for scatter overlay
+x_positions = zeros(3,2); % Store bar center positions
+for i = 1:2
+    x_positions(:,i) = bar_handle(i).XEndPoints; % Correct x positions
+end
+
+% Overlay individual data points correctly aligned
+for i = 1:3
+    scatter(x_positions(i,1) * ones(1,10), individual_means{i,1}, 'k', 'filled'); % First dataset
+    scatter(x_positions(i,2) * ones(1,10), individual_means{i,2}, 'k', 'filled'); % Second dataset
+end
+
+% Labels and legend
+xticks(mean(x_positions,2)); % Align x-ticks with bar groups
+xticklabels({'0%', '50%', '75%'});
+ylabel('Mean PV correlation');
+legend({'Safe-identified', 'Risky-identified'}, 'Location', 'SouthEast');
+ytickformat('%.1f');
+
+hold off;
