@@ -54,7 +54,7 @@ end
 
 
 %%
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice.xlsx');
+experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
 animalIDs = fieldnames(final_DLC);
 
 for dd = 1:size(experimental_grps, 1)
@@ -64,10 +64,10 @@ for dd = 1:size(experimental_grps, 1)
         if strcmp(current_mouse, animalIDs(hh))
             final_DLC.(current_mouse).experimental_grp = current_mouse_condition;
             if any("sex" == string(experimental_grps.Properties.VariableNames))
-                final_DLC.(current_mouse).sex = experimental_grps.sex{hh};
+                final_DLC.(current_mouse).sex = experimental_grps.sex{dd};
             end
             if any("treatment" == string(experimental_grps.Properties.VariableNames))
-                final_DLC.(current_mouse).treatment = experimental_grps.treatment{hh};
+                final_DLC.(current_mouse).treatment = experimental_grps.treatment{dd};
             end
         end
 

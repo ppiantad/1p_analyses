@@ -96,7 +96,8 @@ clusters_desired = 3
 
 [kmeans_idx,C,sumdist3] = kmeans(data_for_clustering,clusters_desired,'Distance','correlation','Display','final', 'Replicates', 200,'Start','uniform');
 
-
+figure;
+silhouette(data_for_clustering,kmeans_idx, 'Euclidean');
 % for ii = 1:clusters_desired
 %     figure;
 %     plot(ts1, data_for_clustering(kmeans_idx == ii, :));

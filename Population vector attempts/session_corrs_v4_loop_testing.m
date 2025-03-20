@@ -1,7 +1,5 @@
 % load dataset that contains data where events have been identified
-% run raster_with_representative_neurons_v2.m for the mouse for whom you
-% will analyze below
-% also you should first run block_wise_changes_v1.m to get the blocktimes
+
 clear similarityMatrix
 
 data_to_load = {'BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat', 'BLA_C_raw_no_additional_filtering_Pre_RDT_RM_only_completed_sessions_zall_window_base_workspace_10_categories.mat'};
@@ -23,37 +21,11 @@ for aa = 1:size(comparison_arrays_full, 1)
     first_session = session_to_analyze;
     
 
-    for ii = 1:size(animalIDs,1)
-        currentanimal = char(animalIDs(ii));
-        if isfield(final.(currentanimal), session_to_analyze)
-            BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-            % only use rewarded trials for this, otherwise things get wonky
-            [BehavData,trials,varargin]=TrialFilter_test(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
-            block_1 = [BehavData.stTime(BehavData.Block == 1) BehavData.collectionTime(BehavData.Block == 1)];
-            block_1_mouse(ii,:) = [block_1(1, 1) block_1(end, 2)];
-            block_2 = [BehavData.stTime(BehavData.Block == 2) BehavData.collectionTime(BehavData.Block == 2)];
-            block_2_mouse(ii,:) = [block_2(1, 1) block_2(end, 2)];
-            block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
-            block_3_mouse(ii,:) = [block_3(1, 1) block_3(end, 2)];
-
-        end
-    end
     for gg = 1:size(animalIDs, 1)
         select_mouse = animalIDs{gg};
 
-        % for RDT D1 BLA_Insc_25:
-        %prechoice neuron num 46
-        %postchoice rew num 38
-        %consumption num 39
-        %shock num 11
-
         select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-        % first_session = 'RDT_D1';
-
-
-        % neuronTypes = respClass_all_array_mouse{select_mouse_index, 3};
-        % neuralActivity = final.(select_mouse).(first_session).CNMFe_data.C_raw;
         BehavData = final.(select_mouse).(first_session).uv.BehavData;
 
 
@@ -76,31 +48,31 @@ for aa = 1:size(comparison_arrays_full, 1)
         mean_PV_prechoice_all_mouse = mean(PV_prechoice_all_mouse)';
         % mean_PV_prechoice_all_mouse = mean_PV_prechoice_all_mouse(respClass_all_array_mouse{select_mouse_index, comparison_arrays(1, 1)} == 1, :);
         
-        hold on;
-        figure; imagesc(1:size(PV_prechoice_all_mouse_just_prechoice, 1), [], PV_prechoice_all_mouse_just_prechoice')
-        colormap gray;
-        colorbar;
-        clim([0 1]);
-        hold off;
-
-        % Define the position for the first green line
-        y1_start = 1;  % Start at the first neuron
-        y1_end = sum(respClass_all_array_mouse{select_mouse_index, comparison_arrays(1, 1)} == 1);  % End at the number of neurons in the first group
-
-        % Define the position for the second line
-        y2_start = y1_end + 1;  % Start right after the first group
-        y2_end = size(PV_prechoice_all_mouse_just_prechoice, 2);  % End at the last neuron
-
-        % Draw the first vertical green line
-        hold on;
-        line([1 1], [y1_start y1_end], 'Color', 'g', 'LineWidth', 2);
-
-        % Draw the second vertical line (can be any color, e.g., black here)
-        line([1 1], [y2_start y2_end], 'Color', 'r', 'LineWidth', 2);
-        title(['From animal ',select_mouse], 'Interpreter', 'none')
-        
-
-        hold off;
+        % hold on;
+        % figure; imagesc(1:size(PV_prechoice_all_mouse_just_prechoice, 1), [], PV_prechoice_all_mouse_just_prechoice')
+        % colormap gray;
+        % colorbar;
+        % clim([0 1]);
+        % hold off;
+        % 
+        % % Define the position for the first green line
+        % y1_start = 1;  % Start at the first neuron
+        % y1_end = sum(respClass_all_array_mouse{select_mouse_index, comparison_arrays(1, 1)} == 1);  % End at the number of neurons in the first group
+        % 
+        % % Define the position for the second line
+        % y2_start = y1_end + 1;  % Start right after the first group
+        % y2_end = size(PV_prechoice_all_mouse_just_prechoice, 2);  % End at the last neuron
+        % 
+        % % Draw the first vertical green line
+        % hold on;
+        % line([1 1], [y1_start y1_end], 'Color', 'g', 'LineWidth', 2);
+        % 
+        % % Draw the second vertical line (can be any color, e.g., black here)
+        % line([1 1], [y2_start y2_end], 'Color', 'r', 'LineWidth', 2);
+        % title(['From animal ',select_mouse], 'Interpreter', 'none')
+        % 
+        % 
+        % hold off;
 
 
         ca = final.(select_mouse).(first_session).CNMFe_data.(ca_data_type);
@@ -128,11 +100,6 @@ for aa = 1:size(comparison_arrays_full, 1)
         if strcmp('shock',BehavData.Properties.VariableNames)
             xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
         end
-        % 
-        % b1_prechoice_corr = mean(prechoice_similarityOverTime(1, time_array > block_1_mouse(select_mouse_index, 1) & time_array <= block_1_mouse(select_mouse_index, 2)));
-        % b2_prechoice_corr = mean(prechoice_similarityOverTime(1, time_array > block_2_mouse(select_mouse_index, 1) & time_array <= block_2_mouse(select_mouse_index, 2)));
-        % b3_prechoice_corr = mean(prechoice_similarityOverTime(1, time_array > block_3_mouse(select_mouse_index, 1) & time_array <= block_3_mouse(select_mouse_index, 2)));
-        % 
 
         %%
 
@@ -200,14 +167,6 @@ for aa = 1:size(comparison_arrays_full, 1)
         % if strcmp('shock',BehavData.Properties.VariableNames)
         %     xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
         % end
-        % 
-        % 
-        % 
-        % b1_postchoice_corr = mean(postchoice_similarityOverTime(1, time_array > block_1_mouse(select_mouse_index, 1) & time_array <= block_1_mouse(select_mouse_index, 2)));
-        % b2_postchoice_corr = mean(postchoice_similarityOverTime(1, time_array > block_2_mouse(select_mouse_index, 1) & time_array <= block_2_mouse(select_mouse_index, 2)));
-        % b3_postchoice_corr = mean(postchoice_similarityOverTime(1, time_array > block_3_mouse(select_mouse_index, 1) & time_array <= block_3_mouse(select_mouse_index, 2)));
-        % 
-        % 
 
 
         %%
@@ -276,14 +235,6 @@ for aa = 1:size(comparison_arrays_full, 1)
         % if strcmp('shock',BehavData.Properties.VariableNames)
         %     xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
         % end
-        % 
-        % 
-        % b1_consumption_corr = mean(consumption_similarityOverTime(1, time_array > block_1_mouse(select_mouse_index, 1) & time_array <= block_1_mouse(select_mouse_index, 2)));
-        % b2_consumption_corr = mean(consumption_similarityOverTime(1, time_array > block_2_mouse(select_mouse_index, 1) & time_array <= block_2_mouse(select_mouse_index, 2)));
-        % b3_consumption_corr = mean(consumption_similarityOverTime(1, time_array > block_3_mouse(select_mouse_index, 1) & time_array <= block_3_mouse(select_mouse_index, 2)));
-
-
-
 
 
         %%

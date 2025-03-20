@@ -22,21 +22,21 @@ for aa = 1:size(comparison_arrays_full, 1)
     first_session = session_to_analyze;
 
 
-    for ii = 1:size(animalIDs,1)
-        currentanimal = char(animalIDs(ii));
-        if isfield(final.(currentanimal), session_to_analyze)
-            BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-            % only use rewarded trials for this, otherwise things get wonky
-            [BehavData,trials,varargin]=TrialFilter_test(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
-            block_1 = [BehavData.stTime(BehavData.Block == 1) BehavData.collectionTime(BehavData.Block == 1)];
-            block_1_mouse(ii,:) = [block_1(1, 1) block_1(end, 2)];
-            block_2 = [BehavData.stTime(BehavData.Block == 2) BehavData.collectionTime(BehavData.Block == 2)];
-            block_2_mouse(ii,:) = [block_2(1, 1) block_2(end, 2)];
-            block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
-            block_3_mouse(ii,:) = [block_3(1, 1) block_3(end, 2)];
-
-        end
-    end
+    % for ii = 1:size(animalIDs,1)
+    %     currentanimal = char(animalIDs(ii));
+    %     if isfield(final.(currentanimal), session_to_analyze)
+    %         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
+    %         % only use rewarded trials for this, otherwise things get wonky
+    %         [BehavData,trials,varargin]=TrialFilter_test(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+    %         block_1 = [BehavData.stTime(BehavData.Block == 1) BehavData.collectionTime(BehavData.Block == 1)];
+    %         block_1_mouse(ii,:) = [block_1(1, 1) block_1(end, 2)];
+    %         block_2 = [BehavData.stTime(BehavData.Block == 2) BehavData.collectionTime(BehavData.Block == 2)];
+    %         block_2_mouse(ii,:) = [block_2(1, 1) block_2(end, 2)];
+    %         block_3 = [BehavData.stTime(BehavData.Block == 3) BehavData.collectionTime(BehavData.Block == 3)];
+    %         block_3_mouse(ii,:) = [block_3(1, 1) block_3(end, 2)];
+    % 
+    %     end
+    % end
     for gg = 1:size(animalIDs, 1)
         if gg ~= 2 && gg ~= 3 && gg ~= 6
             select_mouse = animalIDs{gg};
@@ -51,9 +51,9 @@ for aa = 1:size(comparison_arrays_full, 1)
 
             % first_session = 'RDT_D1';
 
-
-            neuronTypes = respClass_all_array_mouse{select_mouse_index, 3};
-            neuralActivity = final.(select_mouse).(first_session).CNMFe_data.C_raw;
+            % 
+            % neuronTypes = respClass_all_array_mouse{select_mouse_index, 3};
+            % neuralActivity = final.(select_mouse).(first_session).CNMFe_data.C_raw;
             BehavData = final.(select_mouse).(first_session).uv.BehavData;
 
 
@@ -115,14 +115,14 @@ for aa = 1:size(comparison_arrays_full, 1)
                 % end
             end
             %
-            % figure; plot(time_array, prechoice_similarityOverTime(1, 1:size(time_array, 1)))
-            % xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
-            % xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
-            % xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
-            % xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
-            % if strcmp('shock',BehavData.Properties.VariableNames)
-            %     xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
-            % end
+            figure; plot(time_array, prechoice_similarityOverTime(1, 1:size(time_array, 1)))
+            xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
+            xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
+            xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
+            xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
+            if strcmp('shock',BehavData.Properties.VariableNames)
+                xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
+            end
             %
             % b1_prechoice_corr = mean(prechoice_similarityOverTime(1, time_array > block_1_mouse(select_mouse_index, 1) & time_array <= block_1_mouse(select_mouse_index, 2)));
             % b2_prechoice_corr = mean(prechoice_similarityOverTime(1, time_array > block_2_mouse(select_mouse_index, 1) & time_array <= block_2_mouse(select_mouse_index, 2)));
@@ -266,15 +266,15 @@ for aa = 1:size(comparison_arrays_full, 1)
                 consumption_similarityOverTime(t) = similarityMatrix(2);
                 % end
             end
-
-            % figure; plot(time_array, consumption_similarityOverTime(1, 1:size(time_array, 1)))
-            % xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
-            % xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
-            % xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
-            % xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
-            % if strcmp('shock',BehavData.Properties.VariableNames)
-            %     xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
-            % end
+            % 
+            figure; plot(time_array, consumption_similarityOverTime(1, 1:size(time_array, 1)))
+            xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
+            xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
+            xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
+            xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
+            if strcmp('shock',BehavData.Properties.VariableNames)
+                xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
+            end
             %
             %
             % b1_consumption_corr = mean(consumption_similarityOverTime(1, time_array > block_1_mouse(select_mouse_index, 1) & time_array <= block_1_mouse(select_mouse_index, 2)));
@@ -351,6 +351,11 @@ for aa = 1:size(comparison_arrays_full, 1)
 
 
             end
+            
+            % prechoice_similarityOverTimeTrials = zscore(prechoice_similarityOverTimeTrials, 0, 2);
+            % postchoice_similarityOverTimeTrials = zscore(postchoice_similarityOverTimeTrials, 0, 2);
+            % consumption_similarityOverTimeTrials = zscore(consumption_similarityOverTimeTrials, 0, 2);
+            
             block_1_inds = [];
             block_2_inds = [];
             block_3_inds = [];
@@ -412,6 +417,19 @@ for aa = 1:size(comparison_arrays_full, 1)
         end
     end
     %%
+    
+
+    % remove items where all values are 0, because this means the mouse has
+    % no data
+    prechoice_over_time_mean( :, ~any(prechoice_over_time_mean,1) ) = []; 
+    postchoice_over_time_mean( :, ~any(postchoice_over_time_mean,1) ) = []; 
+    consumption_over_time_mean( :, ~any(consumption_over_time_mean,1) ) = [];
+
+    prechoice_over_time_sem( :, ~any(prechoice_over_time_sem,1) ) = [];
+    postchoice_over_time_sem( :, ~any(postchoice_over_time_sem,1) ) = []; 
+    consumption_over_time_sem( :, ~any(consumption_over_time_sem,1) ) = [];
+
+    
     mean_prechoice_over_time(:, aa) = mean(prechoice_over_time_mean, 2);
     mean_postchoice_over_time(:, aa) = mean(postchoice_over_time_mean, 2);
     mean_consumption_over_time(:, aa) = mean(consumption_over_time_mean, 2);

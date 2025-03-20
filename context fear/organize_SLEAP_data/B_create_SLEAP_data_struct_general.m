@@ -1,5 +1,5 @@
 % Define the top-level directory
-top_level_directory = 'F:\Maddy Pilot\full_pilot'; % Update this to your top-level directory
+top_level_directory = 'D:\Context Data\PFC Last\Raw Data\PFC and DRN'; % Update this to your top-level directory
 
 SLEAP_and_freeze_combined_filepaths = dir(fullfile(top_level_directory, '**', '*SLEAP_and_freezing_combined*.csv'));
 
@@ -7,8 +7,8 @@ for k = 1:length(SLEAP_and_freeze_combined_filepaths)
     file_path = fullfile(SLEAP_and_freeze_combined_filepaths(k).folder, SLEAP_and_freeze_combined_filepaths(k).name);
     file_path_string = strsplit(file_path, '\');
 
-    current_animal = file_path_string{4}; % 
-    current_session_raw = file_path_string{5};
+    current_animal = file_path_string{6}; % 
+    current_session_raw = file_path_string{7};
 
     current_session = strsplit(current_session_raw, '_');
 

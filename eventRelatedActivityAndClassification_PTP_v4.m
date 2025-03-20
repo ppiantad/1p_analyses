@@ -222,7 +222,7 @@ for ii = 1:size(fieldnames(final),1)
                 BehavData(101:end,:) = [];
             end
         else
-            [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData,  'AA', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+            [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData,  'LOSS_PLUS_ONE', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         
         end
 
