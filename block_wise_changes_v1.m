@@ -93,6 +93,9 @@ sum(lost_all)
 intersect(lost_prechoice, lost_postchoice)
 true_neutral = respClass_all_array{1, comparison_arrays(1, 1)} == 3 & respClass_all_array{1, comparison_arrays(1, 2)} ~= 3 & respClass_all_array{1, comparison_arrays(1, 3)} ~= 3;
 
+true_neutral_blocks2_3 = respClass_all_array{1, comparison_arrays_full(2, 1)} ~= 3 & respClass_all_array{1, comparison_arrays_full(2, 2)} ~= 3 & respClass_all_array{1, comparison_arrays_full(2, 3)} ~= 3;
+
+true_neutral_all_blocks = respClass_all_array{1, comparison_arrays_full(1, 1)} == 3 & respClass_all_array{1, comparison_arrays_full(1, 2)} ~= 3 & respClass_all_array{1, comparison_arrays_full(1, 3)} ~= 3 & respClass_all_array{1, comparison_arrays_full(2, 1)} ~= 3 & respClass_all_array{1, comparison_arrays_full(2, 2)} ~= 3 & respClass_all_array{1, comparison_arrays_full(2, 3)} ~= 3;
 
 neurons_per_mouse = cellfun(@(x) size(x, 2), zall_mouse(:, 1));
 

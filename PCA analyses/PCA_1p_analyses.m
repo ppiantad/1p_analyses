@@ -102,6 +102,9 @@ end
 
 %%
 
+
+% [concatenatedTable_all, concatenate_all_tables] = get_median_choice_and_collect_fn(behav_tbl_iter{11, 1});
+
 [concatenatedTable_all, concatenate_all_tables] = get_median_choice_and_collect_fn(behav_tbl_iter);
 
 [full_table_all] = get_median_choice_and_collect_fn(behav_tbl_iter);
@@ -396,10 +399,11 @@ for row_idx = 1:num_rows
     zall_array_trial_concat{row_idx} = concatenated_rows;
 end
 
-%ALSO TRY SPLITTING SESSION INTO 9 PARTS (10 TRIALS EACH) AND RUN PCA 10
-%TIMES
+%   suggestions from AH
+%   ALSO TRY SPLITTING SESSION INTO 9 PARTS (10 TRIALS EACH) AND RUN PCA 10
+%   TIMES
 
-%run PCA separately on risky vs. non-risky mice
+%   run PCA separately on risky vs. non-risky mice
 
 for hh = 1:size(zall_array_trial_concat, 1)
     current_zall_array_trial_concat = zall_array_trial_concat{hh};

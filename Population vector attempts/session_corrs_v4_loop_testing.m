@@ -4,7 +4,7 @@ clear similarityMatrix
 
 data_to_load = {'BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat', 'BLA_C_raw_no_additional_filtering_Pre_RDT_RM_only_completed_sessions_zall_window_base_workspace_10_categories.mat'};
 
-load(data_to_load{1})
+load(data_to_load{2})
 
 if size(respClass_all_array, 2) == 10
     % comparison_arrays_full = [1 2 3; 8 9 10]
@@ -12,6 +12,9 @@ if size(respClass_all_array, 2) == 10
 elseif size(respClass_all_array, 2) == 6
     comparison_arrays_full = [1 2 3; 4 5 6]
 end
+
+% depending on analysis desired, may need to run upper part, then run
+% block_wise_changes_v1.m, then run below
 
 
 %%
@@ -31,9 +34,9 @@ for aa = 1:size(comparison_arrays_full, 1)
 
         %%
         PV_prechoice_all_mouse = [];
-        for ff = 1:size(zall_mouse{select_mouse_index, comparison_arrays(1, 1)}, 2)
-            for cc = 1:size(zall_mouse{select_mouse_index,comparison_arrays(1, 1)}{1, ff}, 1)
-                PV_prechoice_all_mouse(cc, ff) = mean(zall_mouse{select_mouse_index, comparison_arrays(1, 1)}{1, ff}(cc, ts1 >= -4 & ts1 <= 0));
+        for ff = 1:size(caTraceTrials_mouse{select_mouse_index, comparison_arrays(1, 1)}, 2)
+            for cc = 1:size(caTraceTrials_mouse{select_mouse_index,comparison_arrays(1, 1)}{1, ff}, 1)
+                PV_prechoice_all_mouse(cc, ff) = mean(caTraceTrials_mouse{select_mouse_index, comparison_arrays(1, 1)}{1, ff}(cc, ts1 >= -4 & ts1 <= 0));
 
             end
 
@@ -46,7 +49,18 @@ for aa = 1:size(comparison_arrays_full, 1)
         PV_prechoice_all_mouse_just_prechoice_array{aa} = PV_prechoice_all_mouse_just_prechoice;
         % data to use below, without reorg
         mean_PV_prechoice_all_mouse = mean(PV_prechoice_all_mouse)';
+        
+        % use the code below if you want to subsample the data by some
+        % factor (change the demominator after
+        % round(size(mean_PV_prechoice_all_mouse, 1)/4);)
+        % set the desired number of rows
+        % num_rows = round(size(mean_PV_prechoice_all_mouse, 1)/10);
+        % selected_rows = datasample(1:size(mean_PV_prechoice_all_mouse, 1), num_rows, 'Replace', false);
+        % mean_PV_prechoice_all_mouse  = mean_PV_prechoice_all_mouse(selected_rows, :);
+
         % mean_PV_prechoice_all_mouse = mean_PV_prechoice_all_mouse(respClass_all_array_mouse{select_mouse_index, comparison_arrays(1, 1)} == 1, :);
+        % mean_PV_prechoice_all_mouse = mean_PV_prechoice_all_mouse(true_neutral_block_1_mouse{gg, 1} ~= 1, :);
+        % mean_PV_prechoice_all_mouse = mean_PV_prechoice_all_mouse(prechoice_conserved_mouse{gg, 1} ~= 1 & prechoice_lost_mouse{gg, 1} ~= 1 & prechoice_remapped_mouse{gg, 1} ~= 1);
         
         % hold on;
         % figure; imagesc(1:size(PV_prechoice_all_mouse_just_prechoice, 1), [], PV_prechoice_all_mouse_just_prechoice')
@@ -76,8 +90,12 @@ for aa = 1:size(comparison_arrays_full, 1)
 
 
         ca = final.(select_mouse).(first_session).CNMFe_data.(ca_data_type);
-        % ca = ca(respClass_all_array_mouse{select_mouse_index, comparison_arrays(1, 1)} == 1, :);
+        
+        % filter based on variable above
+        % ca = ca(selected_rows, :);
+        % ca = ca(prechoice_conserved_mouse{gg, 1} ~= 1 & prechoice_lost_mouse{gg, 1} ~= 1 & prechoice_remapped_mouse{gg, 1} ~= 1, :);
         ca_zscored = zscore(ca, [], 2);
+        ca_zscored = ca;
         time_array = final.(select_mouse).(first_session).time;
         prechoice_similarityOverTime = [];
         for t = 1:size(ca_zscored, 2)
@@ -104,9 +122,9 @@ for aa = 1:size(comparison_arrays_full, 1)
         %%
 
         PV_postchoice_all_mouse = [];
-        for ff = 1:size(zall_mouse{select_mouse_index, comparison_arrays(1, 2)}, 2)
-            for cc = 1:size(zall_mouse{select_mouse_index, comparison_arrays(1, 2)}{1, ff}, 1)
-                PV_postchoice_all_mouse(cc, ff) = mean(zall_mouse{select_mouse_index, comparison_arrays(1, 2)}{1, ff}(cc, ts1 >= 0 & ts1 <= 2));
+        for ff = 1:size(caTraceTrials_mouse{select_mouse_index, comparison_arrays(1, 2)}, 2)
+            for cc = 1:size(caTraceTrials_mouse{select_mouse_index, comparison_arrays(1, 2)}{1, ff}, 1)
+                PV_postchoice_all_mouse(cc, ff) = mean(caTraceTrials_mouse{select_mouse_index, comparison_arrays(1, 2)}{1, ff}(cc, ts1 >= 0 & ts1 <= 2));
 
             end
 
@@ -144,7 +162,8 @@ for aa = 1:size(comparison_arrays_full, 1)
 
 
         ca = final.(select_mouse).(session_to_analyze).CNMFe_data.(ca_data_type);
-        ca_zscored = zscore(ca, [], 2);
+        % ca_zscored = zscore(ca, [], 2);
+        ca_zscored = ca;
         time_array = final.(select_mouse).(first_session).time;
         postchoice_similarityOverTime = [];
         for t = 1:size(ca_zscored, 2)
@@ -172,9 +191,9 @@ for aa = 1:size(comparison_arrays_full, 1)
         %%
 
         PV_consumption_all_mouse = [];
-        for ff = 1:size(zall_mouse{select_mouse_index, comparison_arrays(1, 3)}, 2)
-            for cc = 1:size(zall_mouse{select_mouse_index, comparison_arrays(1, 3)}{1, ff}, 1)
-                PV_consumption_all_mouse(cc, ff) = mean(zall_mouse{select_mouse_index, comparison_arrays(1, 3)}{1, ff}(cc, ts1 >= 1 & ts1 <= 3));
+        for ff = 1:size(caTraceTrials_mouse{select_mouse_index, comparison_arrays(1, 3)}, 2)
+            for cc = 1:size(caTraceTrials_mouse{select_mouse_index, comparison_arrays(1, 3)}{1, ff}, 1)
+                PV_consumption_all_mouse(cc, ff) = mean(caTraceTrials_mouse{select_mouse_index, comparison_arrays(1, 3)}{1, ff}(cc, ts1 >= 1 & ts1 <= 3));
 
             end
 
@@ -212,7 +231,8 @@ for aa = 1:size(comparison_arrays_full, 1)
 
 
         ca = final.(select_mouse).(session_to_analyze).CNMFe_data.(ca_data_type);
-        ca_zscored = zscore(ca, [], 2);
+        % ca_zscored = zscore(ca, [], 2);
+        ca_zscored = ca;
         time_array = final.(select_mouse).(first_session).time;
         consumption_similarityOverTime = [];
         for t = 1:size(ca_zscored, 2)
