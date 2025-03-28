@@ -2,9 +2,10 @@
 
 clear similarityMatrix
 
-data_to_load = {'BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat', 'BLA_C_raw_no_additional_filtering_Pre_RDT_RM_only_completed_sessions_zall_window_base_workspace_10_categories.mat'};
+data_to_load = {'BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat', 'BLA_C_raw_no_additional_filtering_Pre_RDT_RM_only_completed_sessions_zall_window_base_workspace_10_categories.mat', 'BLA_RM_D1_6_categories_03212025_including_spike_prob_array_counts.mat'};
 
 load(data_to_load{2})
+
 
 if size(respClass_all_array, 2) == 10
     % comparison_arrays_full = [1 2 3; 8 9 10]
@@ -16,6 +17,8 @@ end
 % depending on analysis desired, may need to run upper part, then run
 % block_wise_changes_v1.m, then run below
 
+% some data need the following uncommented:
+% ca_data_type = uv.ca_data_type;
 
 %%
 for aa = 1:size(comparison_arrays_full, 1)
@@ -57,7 +60,8 @@ for aa = 1:size(comparison_arrays_full, 1)
         % num_rows = round(size(mean_PV_prechoice_all_mouse, 1)/10);
         % selected_rows = datasample(1:size(mean_PV_prechoice_all_mouse, 1), num_rows, 'Replace', false);
         % mean_PV_prechoice_all_mouse  = mean_PV_prechoice_all_mouse(selected_rows, :);
-
+        
+        % mean_PV_prechoice_all_mouse = mean_PV_prechoice_all_mouse(prechoice_lost_mouse{gg, 1} == 1, :);
         % mean_PV_prechoice_all_mouse = mean_PV_prechoice_all_mouse(respClass_all_array_mouse{select_mouse_index, comparison_arrays(1, 1)} == 1, :);
         % mean_PV_prechoice_all_mouse = mean_PV_prechoice_all_mouse(true_neutral_block_1_mouse{gg, 1} ~= 1, :);
         % mean_PV_prechoice_all_mouse = mean_PV_prechoice_all_mouse(prechoice_conserved_mouse{gg, 1} ~= 1 & prechoice_lost_mouse{gg, 1} ~= 1 & prechoice_remapped_mouse{gg, 1} ~= 1);
@@ -94,8 +98,10 @@ for aa = 1:size(comparison_arrays_full, 1)
         % filter based on variable above
         % ca = ca(selected_rows, :);
         % ca = ca(prechoice_conserved_mouse{gg, 1} ~= 1 & prechoice_lost_mouse{gg, 1} ~= 1 & prechoice_remapped_mouse{gg, 1} ~= 1, :);
-        ca_zscored = zscore(ca, [], 2);
+        % ca_zscored = zscore(ca, [], 2);
         ca_zscored = ca;
+
+        % ca_zscored = ca(prechoice_lost_mouse{gg, 1} == 1, :);
         time_array = final.(select_mouse).(first_session).time;
         prechoice_similarityOverTime = [];
         for t = 1:size(ca_zscored, 2)
@@ -110,14 +116,14 @@ for aa = 1:size(comparison_arrays_full, 1)
             % end
         end
         % 
-        figure; plot(time_array, prechoice_similarityOverTime(1, 1:size(time_array, 1)))
-        xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
-        xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
-        xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
-        xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
-        if strcmp('shock',BehavData.Properties.VariableNames)
-            xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
-        end
+        % figure; plot(time_array, prechoice_similarityOverTime(1, 1:size(time_array, 1)))
+        % xline(BehavData.stTime(BehavData.bigSmall == 1.2), '--b')
+        % xline(BehavData.stTime(BehavData.bigSmall == 0.3), '--g')
+        % xline(BehavData.choiceTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--r')
+        % xline(BehavData.collectionTime(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3), '--k')
+        % if strcmp('shock',BehavData.Properties.VariableNames)
+        %     xline(BehavData.choiceTime(BehavData.shock == 1), '--y')
+        % end
 
         %%
 
@@ -380,8 +386,8 @@ for aa = 1:size(comparison_arrays_full, 1)
     mean_postchoice_over_time(:, aa) = mean(postchoice_over_time_mean, 2);
     mean_consumption_over_time(:, aa) = mean(consumption_over_time_mean, 2);
 
-
-    sem_prechoice_over_time(:, aa) = mean(prechoice_over_time_sem, 2);
+    
+    sem_prechoice_over_time(:, aa) = mean(prechoice_over_time_sem, 2); 
     sem_postchoice_over_time(:, aa) = mean(postchoice_over_time_sem, 2);
     sem_consumption_over_time(:, aa) = mean(consumption_over_time_sem, 2);
 
@@ -418,14 +424,19 @@ for aa = 1:size(comparison_arrays_full, 1)
 
 end
 
+SD_for_prechoice_over_time = prechoice_over_time_sem * sqrt(size(prechoice_over_time_sem, 2));
+SD_for_postchoice_over_time = postchoice_over_time_sem * sqrt(size(postchoice_over_time_sem, 2));
+SD_for_consumption_over_time = consumption_over_time_sem * sqrt(size(consumption_over_time_sem, 2));
+SEM_for_prechoice_over_time = std(SD_for_prechoice_over_time, 0, 2) / sqrt(size(SD_for_prechoice_over_time, 2));
+
 %%
 
 figure;
 hold on
 % Create a histogram for allCorrelations
 
-width = 400; % Width of the figure
-height = 600; % Height of the figure (width is half of height)
+width = 300; % Width of the figure
+height = 100; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 % xlim([-8 8]);
 % % Set X-axis ticks
@@ -439,6 +450,7 @@ xlim([1 90]);
 set(gca, 'XTick', [1, 30, 60, 90]);
 xline([30 60])
 ytickformat('%.2f');
+ylim([0.1 0.7])
 hold off
 
 %%
@@ -447,8 +459,8 @@ figure;
 hold on
 % Create a histogram for allCorrelations
 
-width = 200; % Width of the figure
-height = 600; % Height of the figure (width is half of height)
+width = 300; % Width of the figure
+height = 100; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 % xlim([-8 8]);
 % % Set X-axis ticks
@@ -462,6 +474,7 @@ xlim([1 90]);
 set(gca, 'XTick', [1, 30, 60, 90]);
 xline([30 60])
 ytickformat('%.2f');
+ylim([0.1 0.7])
 hold off
 %%
 
@@ -469,8 +482,8 @@ figure;
 hold on
 % Create a histogram for allCorrelations
 
-width = 200; % Width of the figure
-height = 600; % Height of the figure (width is half of height)
+width = 300; % Width of the figure
+height = 100; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 % xlim([-8 8]);
 % % Set X-axis ticks
@@ -484,6 +497,7 @@ xlim([1 90]);
 set(gca, 'XTick', [1, 30, 60, 90]);
 xline([30 60])
 ytickformat('%.2f');
+ylim([0.1 0.7])
 hold off
 
 %%
