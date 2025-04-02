@@ -91,7 +91,7 @@ current_epoc = {...
     };
 
 
-%% SUBSET OF COMPARISONS
+%% SUBSET OF COMPARISONS use for Fig. 2
 
 neuron_subgroup = {...
 
@@ -157,4 +157,49 @@ current_epoc = {...
 
     'collectionTime';
     'collectionTime';
+    };
+
+
+%% SUBSET OF COMPARISONS use for Fig. 4
+
+neuron_subgroup = {...
+    'all';
+    'all';
+    'pre-choice';
+
+    'pre-choice';
+
+    };
+
+shuffle_confirm = [...
+
+    0;
+
+    1;
+
+    0;
+
+    1;
+
+    ];
+
+ca_period_to_use = [...
+    -4 0;
+    -4 0;
+
+    -4 0;
+
+    -4 0;
+
+    ];
+current_epoc = {...
+
+    'choiceTime';
+
+    'choiceTime';
+
+    'choiceTime';
+
+    'choiceTime';
+
     };

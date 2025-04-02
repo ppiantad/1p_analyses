@@ -3,7 +3,7 @@
 iter = 0;
 num_iterations = 5;
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
-uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
+uv.evtWin = [-5 1]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 ca_data_type = "C_raw"; % C % C_raw
@@ -11,7 +11,7 @@ ca_data_type = "C_raw"; % C % C_raw
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
 % these are mice that did not complete the entire session - kinda have to
 % toss them to do some comparisons during RDT
@@ -101,7 +101,7 @@ for dd = 1:size(neuron_subgroup, 1)
                         currentanimal = char(animalIDs(ii));
                         if isfield(final.(currentanimal), session_to_analyze)
                             BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                            [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                            [BehavData,trials,varargin]=TrialFilter_test(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0
                             trials = cell2mat(trials);
                             ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
 
@@ -115,7 +115,7 @@ for dd = 1:size(neuron_subgroup, 1)
                             if strcmp(neuron_subgroup{dd}, 'all')
                                 % ca = ca;
                             elseif strcmp(neuron_subgroup{dd}, 'pre-choice')
-                                ca = ca(prechoice_block_1_mouse{ii, 1} == 1, :);
+                                ca = ca(prechoice_remapped_mouse{ii, 1} ~= 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'post-choice reward')
                                 ca = ca(postchoice_reward_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'consumption')
@@ -173,7 +173,7 @@ for dd = 1:size(neuron_subgroup, 1)
                         currentanimal = char(animalIDs(ii));
                         if isfield(final.(currentanimal), session_to_analyze)
                             BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                            [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                            [BehavData,trials,varargin]=TrialFilter_test(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 2, 'BLOCK', 3);
                             trials = cell2mat(trials);
 
                             ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -188,7 +188,7 @@ for dd = 1:size(neuron_subgroup, 1)
                             if strcmp(neuron_subgroup{dd}, 'all')
                                 % ca = ca;
                             elseif strcmp(neuron_subgroup{dd}, 'pre-choice')
-                                ca = ca(prechoice_block_1_mouse{ii, 1} == 1, :);
+                                ca = ca(prechoice_remapped_mouse{ii, 1} ~= 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'post-choice reward')
                                 ca = ca(postchoice_reward_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'consumption')
@@ -261,7 +261,7 @@ for dd = 1:size(neuron_subgroup, 1)
                         currentanimal = char(animalIDs(ii));
                         if isfield(final.(currentanimal), session_to_analyze)
                             BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                            [BehavData,trials,varargin]=TrialFilter(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
+                            [BehavData,trials,varargin]=TrialFilter_test(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 2, 'BLOCK', 3);
                             trials = cell2mat(trials);
 
                             ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -276,7 +276,7 @@ for dd = 1:size(neuron_subgroup, 1)
                             if strcmp(neuron_subgroup{dd}, 'all')
                                 % ca = ca;
                             elseif strcmp(neuron_subgroup{dd}, 'pre-choice')
-                                ca = ca(prechoice_block_1_mouse{ii, 1} == 1, :);
+                                ca = ca(prechoice_remapped_mouse{ii, 1} ~= 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'post-choice reward')
                                 ca = ca(postchoice_reward_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'consumption')
@@ -618,7 +618,7 @@ legend('Pre-choice epoch', 'Post-choice epoch', 'Consumption epoch', 'Shuffle (C
 %%
 
 % Initialize vectors to store results
-num_pairs = 4; % Since you have 8 cells, there are 4 pairs
+num_pairs = 2; % Since you have 8 cells, there are 4 pairs
 h_values = zeros(1, num_pairs);
 p_values = zeros(1, num_pairs);
 
@@ -646,6 +646,23 @@ end
 disp('Paired t-test results:');
 disp(table((1:num_pairs)', h_values', p_values', 'VariableNames', {'Pair', 'h', 'p'}));
 
+
+% for testing "real" vs "real" - check the indices to make sure it still
+% matches
+% Convert each cell to a matrix and compute mean accuracy
+data_matrix_1 = cell2mat(f1_score_per_iteration{1, 1}');
+mean_accuracy_1 = mean(data_matrix_1, 1);
+
+data_matrix_2 = cell2mat(f1_score_per_iteration{1, 3}');
+mean_accuracy_2 = mean(data_matrix_2, 1);
+
+% Perform paired-samples t-test
+[h, p] = ttest(mean_accuracy_1, mean_accuracy_2);
+
+% Store results
+h_values(i) = h;
+p_values(i) = p;
+
 %%
 % Define figure width and height (adjust as needed)
 fig_width = 300; % Width in pixels
@@ -656,7 +673,7 @@ figure('Position', [100, 100, fig_width, fig_height]);
 hold on;
 
 % Number of pairs
-num_pairs = 4; 
+num_pairs = 2; 
 mean_values = zeros(num_pairs, 2); % Store means for each pair
 sem_values = zeros(num_pairs, 2); % Store SEM for each pair
 all_data = cell(num_pairs, 2); % Store individual data for scatter

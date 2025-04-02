@@ -1243,7 +1243,7 @@ legend('Positive correlation', 'Negative correlation', 'No sig correlation');
 
 %%
 
-array_for_means = 8; 
+array_for_means = 1; 
 
 
 for q = 1:length (behav_tbl_iter{array_for_means, 1})

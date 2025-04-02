@@ -7,7 +7,7 @@ load('acton.mat')
 num_iterations = 1; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 % iter = 0;
-uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
+uv.evtWin = [-5 1]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -356,8 +356,8 @@ for uu = 1:size(data_for_decoding, 2)
                 yTest = y(cv.test(i), :);
                 % model = TreeBagger(numTrees, xTrain, yTrain, 'Method', 'classification');
                 % model = fitglm(xTrain, yTrain, 'Distribution', 'binomial' , 'Link', 'logit');
-                % model = fitcsvm(xTrain, yTrain);
-                model = fitcnb(xTrain, yTrain);
+                model = fitcsvm(xTrain, yTrain);
+                % model = fitcnb(xTrain, yTrain);
                 yPred = predict(model,xTest);
                 accuracy(i) = sum(yPred == yTest)/numel(yTest);
             end

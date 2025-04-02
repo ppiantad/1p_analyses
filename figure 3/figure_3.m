@@ -278,7 +278,11 @@ for zz = 1:size(respClass_all_array_mouse, 1)
     max_activity_exclusive_shk(zz) = max(mean(neuron_mean_mouse{zz, 4}(exclusive_shk_activated_mouse{1, zz}   == 1, :)));
 end
 
-
+% Calculate different groups as percentages
+only_shk_sum = sum(shk_event) - co_activated_indices_sum; % SHK only
+only_consumption_sum = sum(consumption_event) -co_activated_indices_sum; % Consumption only
+percent_shk_only = (only_shk_sum/neuron_num)*100
+percent_consum_only = (only_consumption_sum/neuron_num)*100
 
 %% for heatmap, change "plot_num" (what neuron to plot) and array_to_plot (# corresponds to which dataset)
 
