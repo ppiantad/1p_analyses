@@ -81,16 +81,35 @@ ranovaResults = ranova(rm);
 disp(ranovaResults);
 
 
-% Extract average values across trial blocks for between-subject analysis
-mean_data = mean(data, 2); % Average across the 3 blocks for each subject
+% Check if the interaction effect is significant
+p_interaction = ranovaResults.pValue(2); % The third row corresponds to the Treatment × TrialBlock interaction
 
-% Perform one-way ANOVA for Treatment effect
-[p, tbl_between, stats] = anova1(mean_data, tbl.Treatment, 'off'); % Suppress boxplot
-disp('Between-Subject Effect (Treatment):');
-disp(tbl_between);
-
-% Optional: Perform post-hoc test if needed
-c = multcompare(stats, 'Display', 'off'); % Uncomment for post-hoc tests
+if p_interaction < 0.05
+    disp('Significant interaction found! Performing post-hoc comparisons at each TrialBlock level...');
+    
+    % Extract data for each block
+    block1_data = data(:,1);
+    block2_data = data(:,2);
+    block3_data = data(:,3);
+    
+    % Perform independent t-tests at each block
+    [~, p_block1] = ttest2(block1_data(1:num_mice_mCherry), block1_data(num_mice_mCherry+1:end));
+    [~, p_block2] = ttest2(block2_data(1:num_mice_mCherry), block2_data(num_mice_mCherry+1:end));
+    [~, p_block3] = ttest2(block3_data(1:num_mice_mCherry), block3_data(num_mice_mCherry+1:end));
+    
+    % Apply Bonferroni correction for multiple comparisons
+    p_adjusted = min([p_block1, p_block2, p_block3] * 3, 1); % Ensures values do not exceed 1
+    
+    % Display results
+    posthoc_results = table([p_block1; p_block2; p_block3], p_adjusted', ...
+        'VariableNames', {'Raw_pValue', 'Bonferroni_pValue'}, ...
+        'RowNames', {'Block1', 'Block2', 'Block3'});
+    
+    disp('Pairwise comparisons (Treatment effect at each TrialBlock):');
+    disp(posthoc_results);
+else
+    disp('No significant interaction effect found.');
+end
 
 %% between subjects
 

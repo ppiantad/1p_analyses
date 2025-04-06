@@ -4,7 +4,7 @@ clear similarityMatrix
 
 data_to_load = {'BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat', 'BLA_C_raw_no_additional_filtering_Pre_RDT_RM_only_completed_sessions_zall_window_base_workspace_10_categories.mat', 'BLA_RM_D1_6_categories_03212025_including_spike_prob_array_counts.mat'};
 
-load(data_to_load{2})
+load(data_to_load{1})
 
 
 if size(respClass_all_array, 2) == 10
@@ -625,6 +625,65 @@ legend({'Safe-identified', 'Risky-identified'}, 'Location', 'SouthEast');
 ytickformat('%.2f');
 
 hold off;
+
+%%
+% Assuming postchoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double
+data1 = postchoice_over_time_mean_iter{1}; % First cell (90x10)
+data2 = postchoice_over_time_mean_iter{2}; % Second cell (90x10)
+
+% Define new grouping: first 30 rows, and remaining 60 rows
+segments = {1:30, 31:90};
+
+% Initialize mean matrices
+mean_values = zeros(2,2); % 2 sets x 2 datasets
+individual_means = cell(2,2); % To store individual column means
+
+% Loop through each segment group
+for i = 1:2
+    rows = segments{i};
+    
+    % Compute means for each column and store
+    mean_seg1 = mean(data1(rows, :), 1);
+    mean_seg2 = mean(data2(rows, :), 1);
+    
+    % Store overall mean (for bar heights)
+    mean_values(i,1) = mean(mean_seg1);
+    mean_values(i,2) = mean(mean_seg2);
+    
+    % Store individual column means (for scatter overlay)
+    individual_means{i,1} = mean_seg1;
+    individual_means{i,2} = mean_seg2;
+end
+
+% Plot bar graph
+figure; hold on;
+bar_handle = bar(mean_values, 'grouped');
+
+% Set bar colors
+bar_handle(1).FaceColor = 'b'; % First cell (blue)
+bar_handle(2).FaceColor = 'r'; % Second cell (red)
+
+% Get X positions for scatter overlay
+x_positions = zeros(2,2); % Store bar center positions
+for i = 1:2
+    x_positions(:,i) = bar_handle(i).XEndPoints;
+end
+
+% Overlay individual data points correctly aligned
+for i = 1:2
+    scatter(x_positions(i,1) * ones(1,10), individual_means{i,1}, 'k', 'filled'); % First dataset
+    scatter(x_positions(i,2) * ones(1,10), individual_means{i,2}, 'k', 'filled'); % Second dataset
+end
+
+% Labels and legend
+xticks(mean(x_positions,2));
+xticklabels({'0%', '50–75%'}); % Adjusted labels
+ylabel('Mean PV correlation');
+legend({'Safe-identified', 'Risky-identified'}, 'Location', 'SouthEast');
+ytickformat('%.2f');
+
+hold off;
+
 %%
 % Assuming prechoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double
 data1 = consumption_over_time_mean_iter{1}; % First cell (90x10)
