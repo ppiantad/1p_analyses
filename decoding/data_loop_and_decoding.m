@@ -7,7 +7,7 @@ load('acton.mat')
 num_iterations = 1; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 % iter = 0;
-uv.evtWin = [-5 1]; %what time do you want to look at around each event [-2 8] [-10 5]
+uv.evtWin = [-5 5]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -88,7 +88,7 @@ for num_iteration = 1:num_iterations
                     currentanimal = char(animalIDs(ii));
                     if isfield(final.(currentanimal), session_to_analyze)
                         BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                        [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3); %'OMITALL', 0, 'BLANK_TOUCH', 0
+                        [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'SHK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0
                         behav_tbl_temp{ii, num_comparison} = BehavData;
                         trials = cell2mat(trials);
                         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -154,7 +154,7 @@ for num_iteration = 1:num_iterations
                 currentanimal = char(animalIDs(ii));
                 if isfield(final.(currentanimal), session_to_analyze)
                     BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
-                    [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3);
+                    [BehavData,trials,varargin]=TrialFilter_test(BehavData, 'SHK', 1);
                     trials = cell2mat(trials);
 
                     ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
@@ -233,7 +233,7 @@ for num_iteration = 1:num_iterations
     toc
 end
 
-data_for_decoding = zall_mouse_iterations;
+data_for_decoding = caTraceTrials_mouse_iterations;
 varargin_array(iter,:) = varargin;
 %% only run this section if you DO NOT WANT TO decode across time!  
 % attempting to focus decoding on particular epoch. this section takes the mean activity in a "relevant_period" (pre-choice, etc) for each neuron to be decoded, plus its shuffle. 
@@ -245,7 +245,7 @@ varargin_array(iter,:) = varargin;
 % effectively decoding 1 "sample" (the means)
 
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
-relevant_period = [-4 0]
+relevant_period = [0 2]
 sub_window_idx = ts1 >= relevant_period(1) & ts1 <= relevant_period(2);
 
 % Preallocate memory for caTraceTrials_mouse_iterations_means

@@ -1462,7 +1462,7 @@ sem_data_array = {diff_all_sem_prechoice}
 
 mean_data_array = {diff_all_mean_postchoice}
 sem_data_array = {diff_all_sem_postchoice}
-[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 3], [-0.5 0.2])
+[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 3], [-0.7 0.2])
 
 mean_data_array = {diff_all_mean_collect}
 sem_data_array = {diff_all_sem_collect}
@@ -2761,3 +2761,163 @@ xtickangle(45); % Rotate x-axis labels for better readability
 ylabel('Percentage (%)');
 title('Percent of neurons activated by Pun for each category');
 % grid on;
+
+%% for below
+load('BLA_RDT_6_variables_only_large_use_to_show_large_alone_decrease.mat')
+% and run blockwise_changes
+
+%%
+ mean_data_array = {neuron_mean_array{1, 1}(prechoice_block_1==1, :), neuron_mean_array{1, 4}(prechoice_block_1==1, :)};
+ sem_data_array = {neuron_sem_array{1, 1}(prechoice_block_1==1, :), neuron_sem_array{1, 4}(prechoice_block_1==1, :)};
+
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 1], [-0.5 0.5]);
+
+
+
+ %%
+ mean_data_array = {neuron_mean_array{1, 2}(postchoice_reward_block_1==1, :), neuron_mean_array{1, 5}(postchoice_reward_block_1==1, :)};
+ sem_data_array = {neuron_sem_array{1, 2}(postchoice_reward_block_1==1, :), neuron_sem_array{1, 5}(postchoice_reward_block_1==1, :)};
+
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 1], [-0.5 .5])
+
+ %%
+ mean_data_array = {neuron_mean_array{1, 3}(collect_block_1==1, :), neuron_mean_array{1, 6}(collect_block_1==1, :)};
+ sem_data_array = {neuron_sem_array{1, 3}(collect_block_1==1, :), neuron_sem_array{1, 6}(collect_block_1==1, :)};
+
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 1], [-0.5 1]);
+
+
+ %% load('BLA_RDT_6_variables_only_large_use_to_show_large_alone_decrease.mat')
+ % use below to show that decreases in activity are not driven solely by
+ % more small reward trials!
+ %%
+
+diff_all_mean_prechoice = neuron_mean_array{1, 4}(prechoice_block_1 == 1, :) - neuron_mean_array{1, 1}(prechoice_block_1 == 1, :)
+diff_all_sem_prechoice = sqrt(neuron_sem_array{1, 4}(prechoice_block_1 == 1, :).^2 + neuron_sem_array{1, 1}(prechoice_block_1 == 1, :).^2)
+
+
+
+diff_all_mean_postchoice = neuron_mean_array{1, 5}(postchoice_reward_block_1 == 1, :) - neuron_mean_array{1, 2}(postchoice_reward_block_1 == 1, :)
+diff_all_sem_postchoice = sqrt(neuron_sem_array{1, 5}(postchoice_reward_block_1 == 1, :).^2 + neuron_sem_array{1, 2}(postchoice_reward_block_1 == 1, :).^2)
+
+
+diff_all_mean_collect = neuron_mean_array{1, 6}(collect_block_1 == 1, :) - neuron_mean_array{1, 3}(collect_block_1 == 1, :)
+diff_all_sem_collect = sqrt(neuron_sem_array{1, 6}(collect_block_1 == 1, :).^2 + neuron_sem_array{1, 3}(collect_block_1 == 1, :).^2)
+
+
+trimmed_diff_all_mean_prechoice = diff_all_mean_prechoice(:, ts1 > -4 & ts1 <= 0);
+trimmed_diff_all_sem_prechoice = diff_all_sem_prechoice(:, ts1 > -4 & ts1 <= 0);
+
+trimmed_diff_all_mean_postchoice = diff_all_mean_postchoice(:, ts1 > 0 & ts1 <= 4);
+trimmed_diff_all_sem_postchoice = diff_all_sem_postchoice(:, ts1 > 0 & ts1 <= 4);
+
+
+trimmed_diff_all_mean_collect = diff_all_mean_collect(:, ts1 > 0 & ts1 <= 4);
+trimmed_diff_all_sem_collect = diff_all_sem_collect(:, ts1 > 0 & ts1 <= 4);
+
+trimmed_ts1 = ts1(:, ts1 > 0 & ts1 <= 4);
+
+figure;
+width = 450; % Width of the figure
+height = 650; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+hold on;
+h(1) = shadedErrorBar(trimmed_ts1 , mean(trimmed_diff_all_mean_prechoice), mean(trimmed_diff_all_sem_prechoice), 'lineProps', {'color', 'r'});
+h(2) = shadedErrorBar(trimmed_ts1 , mean(trimmed_diff_all_mean_postchoice), mean(trimmed_diff_all_sem_postchoice), 'lineProps', {'color', 'r'});
+h(3) = shadedErrorBar(trimmed_ts1 , mean(trimmed_diff_all_mean_collect), mean(trimmed_diff_all_sem_collect), 'lineProps', {'color', 'r'});
+% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,4}(lost_all == 1, :)), nanmean(neuron_sem_array{1,4}(lost_all == 1, :)), 'lineProps', {'color', 'r'});
+% h(3) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,4}(remapped_all == 1, :)), nanmean(neuron_sem_array{1,4}(remapped_all == 1, :)), 'lineProps', {'color', 'r'});
+% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), nanmean(neuron_sem_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), 'lineProps', {'color', 'b'});
+legend([h(1).mainLine h(2).mainLine], '1st block', '2nd and 3rd block')
+xlim([0 4]);
+ylim([-0.4 0.2])
+% hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+% xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from choice (s)');
+
+
+
+
+
+
+figure;
+width = 200; % Width of the figure
+height = 650; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+hold on;
+h(1) = shadedErrorBar(ts1, mean(diff_all_mean_prechoice), mean(diff_all_sem_prechoice), 'lineProps', {'color', 'r'});
+% h(2) = shadedErrorBar(ts1, mean(diff_all_mean_postchoice), mean(diff_all_sem_postchoice), 'lineProps', {'color', 'r'});
+% h(3) = shadedErrorBar(ts1, mean(diff_all_mean_collect), mean(diff_all_sem_collect), 'lineProps', {'color', 'r'});
+% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,4}(lost_all == 1, :)), nanmean(neuron_sem_array{1,4}(lost_all == 1, :)), 'lineProps', {'color', 'r'});
+% h(3) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,4}(remapped_all == 1, :)), nanmean(neuron_sem_array{1,4}(remapped_all == 1, :)), 'lineProps', {'color', 'r'});
+% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), nanmean(neuron_sem_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), 'lineProps', {'color', 'b'});
+% legend([h(1).mainLine h(2).mainLine], '1st block', '2nd and 3rd block')
+xlim([-5 1]);
+ylim([-0.55 0.2])
+set(gca, 'YTick', [-.5 -.4 -.3 -.2 -.1 0 .1 .2]);
+ytickformat('%.1f');
+% hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+% xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from choice (s)');
+
+
+figure;
+width = 200; % Width of the figure
+height = 650; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+hold on;
+% h(1) = shadedErrorBar(ts1, mean(diff_all_mean_prechoice), mean(diff_all_sem_prechoice), 'lineProps', {'color', 'r'});
+h(2) = shadedErrorBar(ts1, mean(diff_all_mean_postchoice), mean(diff_all_sem_postchoice), 'lineProps', {'color', 'r'});
+% h(3) = shadedErrorBar(ts1, mean(diff_all_mean_collect), mean(diff_all_sem_collect), 'lineProps', {'color', 'r'});
+% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,4}(lost_all == 1, :)), nanmean(neuron_sem_array{1,4}(lost_all == 1, :)), 'lineProps', {'color', 'r'});
+% h(3) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,4}(remapped_all == 1, :)), nanmean(neuron_sem_array{1,4}(remapped_all == 1, :)), 'lineProps', {'color', 'r'});
+% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), nanmean(neuron_sem_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), 'lineProps', {'color', 'b'});
+% legend([h(1).mainLine h(2).mainLine], '1st block', '2nd and 3rd block')
+xlim([-1 3]);
+ylim([-0.55 0.2])
+set(gca, 'YTick', [-.5 -.4 -.3 -.2 -.1 0 .1 .2]);
+ytickformat('%.1f');
+% hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+% xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from choice (s)');
+
+figure;
+width = 200; % Width of the figure
+height = 650; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+hold on;
+% h(1) = shadedErrorBar(ts1, mean(diff_all_mean_prechoice), mean(diff_all_sem_prechoice), 'lineProps', {'color', 'r'});
+% h(2) = shadedErrorBar(ts1, mean(diff_all_mean_postchoice), mean(diff_all_sem_postchoice), 'lineProps', {'color', 'r'});
+h(3) = shadedErrorBar(ts1, mean(diff_all_mean_collect), mean(diff_all_sem_collect), 'lineProps', {'color', 'r'});
+% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,4}(lost_all == 1, :)), nanmean(neuron_sem_array{1,4}(lost_all == 1, :)), 'lineProps', {'color', 'r'});
+% h(3) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,4}(remapped_all == 1, :)), nanmean(neuron_sem_array{1,4}(remapped_all == 1, :)), 'lineProps', {'color', 'r'});
+% h(2) = shadedErrorBar(ts1, nanmean(neuron_mean_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), nanmean(neuron_sem_array{1,arrays_to_examine(2)}(eval(vars_to_use{1, 2}) == event_for_figures, :)), 'lineProps', {'color', 'b'});
+% legend([h(1).mainLine h(2).mainLine], '1st block', '2nd and 3rd block')
+xlim([0 4]);
+ylim([-0.55 0.2])
+set(gca, 'YTick', [-.5 -.4 -.3 -.2 -.1 0 .1 .2]);
+ytickformat('%.1f');
+% hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 3}(respClass_all_array{1,1} == 1,:)), nanmean(neuron_sem_array{1, 3}(respClass_all_array{1,1} == 1,:)), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+% xline(median_start_time_all, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_times_all, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from choice (s)');
+
+% plot differences with error & bCI for statistics
+mean_data_array = {diff_all_mean_prechoice}
+sem_data_array = {diff_all_sem_prechoice}
+[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 1], [-0.5 0.2])
+
+mean_data_array = {diff_all_mean_postchoice}
+sem_data_array = {diff_all_sem_postchoice}
+[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 3], [-0.5 0.2])
+
+mean_data_array = {diff_all_mean_collect}
+sem_data_array = {diff_all_sem_collect}
+[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [0 4], [-0.5 0.2])

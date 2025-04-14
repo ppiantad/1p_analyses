@@ -59,6 +59,9 @@ elseif exist('ChrimsonR_treatment_groups', 'var') == 1
     valid_mice = cellfun(@(sessions) any(strcmp(sessions, session_to_analyze)), valid_sessions);
     valid_animalIDs = ChrimsonR_IDs(valid_mice);
 
+elseif exist('treatment_groups', 'var') == 1
+    valid_mice = cellfun(@(sessions) any(strcmp(sessions, session_to_analyze)), valid_sessions);
+    valid_animalIDs = mouse_IDs(valid_mice);
 
 else
     valid_animalIDs = animalIDs;
@@ -488,6 +491,20 @@ elseif exist('ChrimsonR_treatment_groups', 'var') == 1
 
     % Create a new column with the corresponding treatment conditions
     risk_table_trimmed.TreatmentCondition = ChrimsonR_treatment_groups(matchIdx);
+    risk_table = risk_table_trimmed;
+
+    risk_table_sorted = sortrows(risk_table, 'TreatmentCondition');
+
+elseif exist('treatment_groups', 'var') == 1
+    valid_mice = cellfun(@(sessions) any(strcmp(sessions, session_to_analyze)), valid_sessions);
+    valid_animalIDs = mouse_IDs(valid_mice);
+    risk_table_trimmed = risk_table(ismember(risk_table.valid_animalIDs, valid_animalIDs), :);
+
+    % Add a new column with the treatment condition
+    [isMatch, matchIdx] = ismember(risk_table_trimmed.valid_animalIDs, mouse_IDs);
+
+    % Create a new column with the corresponding treatment conditions
+    risk_table_trimmed.TreatmentCondition = treatment_groups(matchIdx);
     risk_table = risk_table_trimmed;
 
     risk_table_sorted = sortrows(risk_table, 'TreatmentCondition');
@@ -3170,4 +3187,431 @@ set(gca, 'ytick', 0:25:100);
 % grid on;
 
 hold off;
+
+%%
+%% for PdCO vs ChrimsonR vs mCherry
+
+large_choice_mCherry = [risk_table.block_1_large(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_2_large(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_3_large(strcmp('mCherry', risk_table.TreatmentCondition))]*100;
+large_choice_PdCO = [risk_table.block_1_large(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.block_2_large(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.block_3_large(strcmp('PdCO', risk_table.TreatmentCondition))]*100;
+large_choice_ChrimsonR = [risk_table.block_1_large(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.block_2_large(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.block_3_large(strcmp('ChrimsonR', risk_table.TreatmentCondition))]*100;
+
+mean_mCherry = nanmean(large_choice_mCherry, 1);
+mean_PdCO = nanmean(large_choice_PdCO, 1);
+mean_ChrimsonR = nanmean(large_choice_ChrimsonR, 1);
+
+sem_mCherry = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_PdCO = nanstd(large_choice_PdCO, 0, 1) ./ sqrt(size(large_choice_PdCO, 1));
+sem_ChrimsonR = nanstd(large_choice_ChrimsonR, 0, 1) ./ sqrt(size(large_choice_ChrimsonR, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_PdCO, 1)
+    plot(x_points, large_choice_PdCO(i, :), '-', ...
+        'Color', PdCO_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_ChrimsonR, 1)
+    plot(x_points, large_choice_ChrimsonR(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_PdCO, sem_PdCO, PdCO_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_ChrimsonR, sem_ChrimsonR, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 100]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:100);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%% for PdCO vs ChrimsonR vs mCherry
+
+large_choice_mCherry = [risk_table.block_1_small(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_2_small(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_3_small(strcmp('mCherry', risk_table.TreatmentCondition))]*100;
+large_choice_PdCO = [risk_table.block_1_small(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.block_2_small(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.block_3_small(strcmp('PdCO', risk_table.TreatmentCondition))]*100;
+large_choice_ChrimsonR = [risk_table.block_1_small(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.block_2_small(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.block_3_small(strcmp('ChrimsonR', risk_table.TreatmentCondition))]*100;
+
+mean_mCherry = nanmean(large_choice_mCherry, 1);
+mean_PdCO = nanmean(large_choice_PdCO, 1);
+mean_ChrimsonR = nanmean(large_choice_ChrimsonR, 1);
+
+sem_mCherry = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_PdCO = nanstd(large_choice_PdCO, 0, 1) ./ sqrt(size(large_choice_PdCO, 1));
+sem_ChrimsonR = nanstd(large_choice_ChrimsonR, 0, 1) ./ sqrt(size(large_choice_ChrimsonR, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_PdCO, 1)
+    plot(x_points, large_choice_PdCO(i, :), '-', ...
+        'Color', PdCO_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_ChrimsonR, 1)
+    plot(x_points, large_choice_ChrimsonR(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_PdCO, sem_PdCO, PdCO_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_ChrimsonR, sem_ChrimsonR, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 100]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:100);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%% for PdCO vs ChrimsonR vs mCherry
+
+large_choice_mCherry = [risk_table.block_1_choice_latency_all(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_2_choice_latency_all(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_3_choice_latency_all(strcmp('mCherry', risk_table.TreatmentCondition))];
+large_choice_PdCO = [risk_table.block_1_choice_latency_all(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.block_2_choice_latency_all(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.block_3_choice_latency_all(strcmp('PdCO', risk_table.TreatmentCondition))];
+large_choice_ChrimsonR = [risk_table.block_1_choice_latency_all(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.block_2_choice_latency_all(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.block_3_choice_latency_all(strcmp('ChrimsonR', risk_table.TreatmentCondition))];
+
+mean_mCherry = nanmean(large_choice_mCherry, 1);
+mean_PdCO = nanmean(large_choice_PdCO, 1);
+mean_ChrimsonR = nanmean(large_choice_ChrimsonR, 1);
+
+sem_mCherry = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_PdCO = nanstd(large_choice_PdCO, 0, 1) ./ sqrt(size(large_choice_PdCO, 1));
+sem_ChrimsonR = nanstd(large_choice_ChrimsonR, 0, 1) ./ sqrt(size(large_choice_ChrimsonR, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_PdCO, 1)
+    plot(x_points, large_choice_PdCO(i, :), '-', ...
+        'Color', PdCO_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_ChrimsonR, 1)
+    plot(x_points, large_choice_ChrimsonR(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_PdCO, sem_PdCO, PdCO_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_ChrimsonR, sem_ChrimsonR, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 17]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:5:15);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%% for PdCO vs ChrimsonR vs mCherry
+
+large_choice_mCherry = [risk_table.block_1_omission_total(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_2_omission_total(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_3_omission_total(strcmp('mCherry', risk_table.TreatmentCondition))];
+large_choice_PdCO = [risk_table.block_1_omission_total(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.block_2_omission_total(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.block_3_omission_total(strcmp('PdCO', risk_table.TreatmentCondition))];
+large_choice_ChrimsonR = [risk_table.block_1_omission_total(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.block_2_omission_total(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.block_3_omission_total(strcmp('ChrimsonR', risk_table.TreatmentCondition))];
+
+mean_mCherry = nanmean(large_choice_mCherry, 1);
+mean_PdCO = nanmean(large_choice_PdCO, 1);
+mean_ChrimsonR = nanmean(large_choice_ChrimsonR, 1);
+
+sem_mCherry = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_PdCO = nanstd(large_choice_PdCO, 0, 1) ./ sqrt(size(large_choice_PdCO, 1));
+sem_ChrimsonR = nanstd(large_choice_ChrimsonR, 0, 1) ./ sqrt(size(large_choice_ChrimsonR, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_PdCO, 1)
+    plot(x_points, large_choice_PdCO(i, :), '-', ...
+        'Color', PdCO_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_ChrimsonR, 1)
+    plot(x_points, large_choice_ChrimsonR(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_PdCO, sem_PdCO, PdCO_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_ChrimsonR, sem_ChrimsonR, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 60]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:10:60);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+%% for PdCO vs ChrimsonR vs mCherry
+
+large_choice_mCherry = [risk_table.large_aborts_block_1(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.large_aborts_block_2(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.large_aborts_block_3(strcmp('mCherry', risk_table.TreatmentCondition))];
+large_choice_PdCO = [risk_table.large_aborts_block_1(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.large_aborts_block_2(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.large_aborts_block_3(strcmp('PdCO', risk_table.TreatmentCondition))];
+large_choice_ChrimsonR = [risk_table.large_aborts_block_1(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.large_aborts_block_2(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.large_aborts_block_3(strcmp('ChrimsonR', risk_table.TreatmentCondition))];
+
+mean_mCherry = nanmean(large_choice_mCherry, 1);
+mean_PdCO = nanmean(large_choice_PdCO, 1);
+mean_ChrimsonR = nanmean(large_choice_ChrimsonR, 1);
+
+sem_mCherry = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_PdCO = nanstd(large_choice_PdCO, 0, 1) ./ sqrt(size(large_choice_PdCO, 1));
+sem_ChrimsonR = nanstd(large_choice_ChrimsonR, 0, 1) ./ sqrt(size(large_choice_ChrimsonR, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_PdCO, 1)
+    plot(x_points, large_choice_PdCO(i, :), '-', ...
+        'Color', PdCO_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_ChrimsonR, 1)
+    plot(x_points, large_choice_ChrimsonR(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_PdCO, sem_PdCO, PdCO_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_ChrimsonR, sem_ChrimsonR, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 125]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:125);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+
 

@@ -1,7 +1,7 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'RRD446';
+select_mouse = 'RRD458';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 

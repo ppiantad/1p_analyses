@@ -25,7 +25,7 @@ bCI_tCI_CI_threshold = 0; % use for things that hover around 0 (dF/F for example
 
 %% ERT example
 sig = 0.001;
-consec_thresh = 3; % 1017.3Hz sample rate / 3Hz filter %340 PRD used 340 because his data WERE NOT DOWNSAMPLED (e.g., they were 1018 samples per sec) our data are 30 samples per sec or so.
+consec_thresh = 10; % 1017.3Hz sample rate / 3Hz filter %340 PRD used 340 because his data WERE NOT DOWNSAMPLED (e.g., they were 1018 samples per sec) our data are 30 samples per sec or so.
 % this means if his threshold is 1017/340 = ~3, ours should be 30/x = 3,
 % which is 10
 

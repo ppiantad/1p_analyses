@@ -567,6 +567,8 @@ hold off;
 large_choice = cell2mat(individual_means(1:3, 1))';
 small_choice = cell2mat(individual_means(1:3, 2))';
 
+
+
 %%
 % Assuming prechoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double
 data1 = postchoice_over_time_mean_iter{1}; % First cell (90x10)
@@ -628,8 +630,8 @@ hold off;
 
 %%
 % Assuming postchoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double
-data1 = postchoice_over_time_mean_iter{1}; % First cell (90x10)
-data2 = postchoice_over_time_mean_iter{2}; % Second cell (90x10)
+data1 = prechoice_over_time_mean_iter{1}; % First cell (90x10)
+data2 = prechoice_over_time_mean_iter{2}; % Second cell (90x10)
 
 % Define new grouping: first 30 rows, and remaining 60 rows
 segments = {1:30, 31:90};
@@ -683,6 +685,9 @@ legend({'Safe-identified', 'Risky-identified'}, 'Location', 'SouthEast');
 ytickformat('%.2f');
 
 hold off;
+
+
+
 
 %%
 % Assuming prechoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double

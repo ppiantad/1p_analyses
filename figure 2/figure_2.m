@@ -3299,3 +3299,91 @@ mean_data_array = {collect_array_large_mean, collect_array_small_mean};
 sem_data_array = {collect_array_large_sem, collect_array_small_sem};
 
 [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, consum_x_limits)
+
+%%
+
+load('BLA_Late_RM_use_this_for_fig1_yoked_large_small_supplement.mat')
+% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+pre_choice_small_ind = find(respClass_all_array{1,1} == 1);
+pre_choice_large_ind = find(respClass_all_array{1,2} == 1);
+
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {pre_choice_small_ind, pre_choice_large_ind};
+setLabels = ["Pre-choice small", "Pre-choice large"];
+figure;
+h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+h.ShowIntersectionCounts = true;
+h.ShowIntersectionAreas = true;
+% h.SetLabels = [];
+
+
+figure; 
+plot(ts1, mean(neuron_mean_array{1, 1}(respClass_all_array{1,1} == 1, :)))
+hold on; plot(ts1, mean(neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1, :)))
+
+mean_data_array = {neuron_mean_array{1, 1}(respClass_all_array{1,1} == 1, :), neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1, :)}
+
+sem_data_array = {neuron_sem_array{1, 1}(respClass_all_array{1,1} == 1, :), neuron_sem_array{1, 2}(respClass_all_array{1,2} == 1, :)}
+
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-6 2], [-0.8 0.8]);
+
+
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+post_choice_small_ind = find(respClass_all_array{1,3} == 1);
+prost_choice_large_ind = find(respClass_all_array{1,4} == 1);
+
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {post_choice_small_ind, prost_choice_large_ind};
+setLabels = ["Postchoice small", "Postchoice large"];
+figure;
+h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+h.ShowIntersectionCounts = true;
+h.ShowIntersectionAreas = true;
+% h.SetLabels = [];
+
+
+figure; 
+plot(ts1, mean(neuron_mean_array{1, 3}(respClass_all_array{1,3} == 1, :)))
+hold on; plot(ts1, mean(neuron_mean_array{1, 4}(respClass_all_array{1,4} == 1, :)))
+
+mean_data_array = {neuron_mean_array{1, 3}(respClass_all_array{1,3} == 1, :), neuron_mean_array{1, 4}(respClass_all_array{1,4} == 1, :)}
+
+sem_data_array = {neuron_sem_array{1, 3}(respClass_all_array{1,3} == 1, :), neuron_sem_array{1, 4}(respClass_all_array{1,4} == 1, :)}
+
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 5], [-0.8 1]);
+
+%% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+consum_small_ind = find(respClass_all_array{1,5} == 1);
+consum_large_ind = find(respClass_all_array{1,6} == 1);
+
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+setListData = {consum_small_ind, consum_large_ind};
+setLabels = ["Consum small", "Consum large"];
+figure;
+h = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+h.ShowIntersectionCounts = true;
+h.ShowIntersectionAreas = true;
+% h.SetLabels = [];
+
+
+figure; 
+plot(ts1, mean(neuron_mean_array{1, 5}(respClass_all_array{1,5} == 1, :)))
+hold on; plot(ts1, mean(neuron_mean_array{1, 6}(respClass_all_array{1,6} == 1, :)))
+
+mean_data_array = {neuron_mean_array{1, 5}(respClass_all_array{1,5} == 1, :), neuron_mean_array{1, 6}(respClass_all_array{1,6} == 1, :)}
+
+sem_data_array = {neuron_sem_array{1, 5}(respClass_all_array{1,5} == 1, :), neuron_sem_array{1, 6}(respClass_all_array{1,6} == 1, :)}
+
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 7], [-0.8 1]);

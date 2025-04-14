@@ -2,12 +2,12 @@
 
 clear similarityMatrix
 
-data_to_load = {'BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat', 'BLA_C_raw_no_additional_filtering_Pre_RDT_RM_only_completed_sessions_zall_window_base_workspace_10_categories.mat', 'BLA_RM_D1_6_categories_03212025_including_spike_prob_array_counts.mat'};
+data_to_load = {'BLA_RDT_11_variables_incl_AA_use_for_AA_PV.mat', 'BLA_C_raw_no_additional_filtering_Pre_RDT_RM_only_completed_sessions_zall_window_base_workspace_10_categories.mat', 'BLA_RM_D1_6_categories_03212025_including_spike_prob_array_counts.mat'};
 
 load(data_to_load{1})
 
 
-if size(respClass_all_array, 2) == 10
+if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11 | size(respClass_all_array, 2) == 12
     % comparison_arrays_full = [1 2 3; 8 9 10]
     comparison_arrays_full = [1 2 3; 5 6 7]
 elseif size(respClass_all_array, 2) == 6
@@ -32,10 +32,10 @@ for gg = 1:size(animalIDs, 1)
 
 
     %%
-    PV_shock_all_mouse = [];
-    for ff = 1:size(caTraceTrials_mouse{select_mouse_index, 4}, 2)
-        for cc = 1:size(caTraceTrials_mouse{select_mouse_index, 4}{1, ff}, 1)
-            PV_shock_all_mouse(cc, ff) = mean(caTraceTrials_mouse{select_mouse_index, 4}{1, ff}(cc, ts1 >= 0 & ts1 <= 5));
+    PV_AA_all_mouse = [];
+    for ff = 1:size(caTraceTrials_mouse{select_mouse_index, 11}, 2)
+        for cc = 1:size(caTraceTrials_mouse{select_mouse_index, 11}{1, ff}, 1)
+            PV_AA_all_mouse(cc, ff) = mean(caTraceTrials_mouse{select_mouse_index, 11}{1, ff}(cc, ts1 >= 0 & ts1 <= 2));
 
         end
 
@@ -43,11 +43,11 @@ for gg = 1:size(animalIDs, 1)
 
     % reorganize data for plotting the heatmap, with ensemble-specific
     % neurons on top, the rest below
-    PV_prechoice_all_mouse_just_shock = PV_shock_all_mouse(:, respClass_all_array_mouse{select_mouse_index, 4} == 1);
-    PV_prechoice_all_mouse_just_shock = [PV_prechoice_all_mouse_just_shock PV_shock_all_mouse(:, respClass_all_array_mouse{select_mouse_index, 4} ~= 1)];
+    PV_prechoice_all_mouse_just_shock = PV_AA_all_mouse(:, respClass_all_array_mouse{select_mouse_index, 11} == 1);
+    PV_prechoice_all_mouse_just_shock = [PV_prechoice_all_mouse_just_shock PV_AA_all_mouse(:, respClass_all_array_mouse{select_mouse_index, 11} ~= 1)];
     PV_prechoice_all_mouse_just_prechoice_array{gg} = PV_prechoice_all_mouse_just_shock;
     % data to use below, without reorg
-    mean_PV_shock_all_mouse = mean(PV_shock_all_mouse)';
+    mean_PV_AA_all_mouse = mean(PV_AA_all_mouse)';
 
     % use the code below if you want to subsample the data by some
     % factor (change the demominator after
@@ -71,7 +71,7 @@ for gg = 1:size(animalIDs, 1)
 
     % Define the position for the first green line
     y1_start = 1;  % Start at the first neuron
-    y1_end = sum(respClass_all_array_mouse{select_mouse_index, 4} == 1);  % End at the number of neurons in the first group
+    y1_end = sum(respClass_all_array_mouse{select_mouse_index, 11} == 1);  % End at the number of neurons in the first group
 
     % Define the position for the second line
     y2_start = y1_end + 1;  % Start right after the first group
@@ -107,7 +107,7 @@ for gg = 1:size(animalIDs, 1)
         activitySubset = ca_zscored(:, t);
         % uncomment if you want to use all neurons
         %activitySubset = neuralActivity(typeIdx, t:(t + windowSize - 1));
-        similarityMatrix = corrcoef(activitySubset, mean_PV_shock_all_mouse);
+        similarityMatrix = corrcoef(activitySubset, mean_PV_AA_all_mouse);
         shock_similarityOverTime(t) = similarityMatrix(2);
         % end
     end
