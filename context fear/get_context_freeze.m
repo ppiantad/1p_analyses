@@ -9,9 +9,9 @@
 
 % experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 
-% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice.xlsx');
+experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
 
-experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
+% experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
 
 % Define parameters
 threshold = 1; % Velocity threshold
@@ -264,7 +264,7 @@ end
 
 
 % Create a figure
-figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+figure('Position', [100, 100, 300, 450]); % [left, bottom, width, height]
 hold on;
 
 % Plot bars
@@ -281,20 +281,21 @@ errorbar(no_shk_x, no_shk_means, no_shk_sems, 'k', 'LineStyle', 'none', 'LineWid
 errorbar(shk_x, shk_means, shk_sems, 'k', 'LineStyle', 'none', 'LineWidth', 1);
 
 jitter_amount = 0.2;
-for i = 1:size(no_shk_data, 2) % Loop over groups (columns)
-    no_shk_data_temp = [];
-    shk_data_temp = [];
-
-    no_shk_data_temp = no_shk_data{1, i};
-    shk_data_temp = shk_data{1, i};
-
-    % Scatter points for no_shk_data
-    scatter(no_shk_x(i) + jitter_amount * (rand(size(no_shk_data_temp, 1), 1) - 0.5), ...
-            no_shk_data_temp, 30, group_colors{i}, 'filled');
-    % Scatter points for shk_data
-    scatter(shk_x(i) + jitter_amount * (rand(size(shk_data_temp, 1), 1) - 0.5), ...
-            shk_data_temp, 30, group_colors{i}, 'filled');
-end
+% uncomment below for individual datapoints
+% for i = 1:size(no_shk_data, 2) % Loop over groups (columns)
+%     no_shk_data_temp = [];
+%     shk_data_temp = [];
+% 
+%     no_shk_data_temp = no_shk_data{1, i};
+%     shk_data_temp = shk_data{1, i};
+% 
+%     % Scatter points for no_shk_data
+%     scatter(no_shk_x(i) + jitter_amount * (rand(size(no_shk_data_temp, 1), 1) - 0.5), ...
+%             no_shk_data_temp, 30, group_colors{i}, 'filled');
+%     % Scatter points for shk_data
+%     scatter(shk_x(i) + jitter_amount * (rand(size(shk_data_temp, 1), 1) - 0.5), ...
+%             shk_data_temp, 30, group_colors{i}, 'filled');
+% end
 
 % Customization
 xticks([mean(no_shk_x), mean(shk_x)]); % Set ticks at the center of each group
@@ -346,7 +347,7 @@ if any("sex" == string(experimental_grps.Properties.VariableNames)) && ~any("tre
     experimental_sem_female = std(experimental_data_female)/sqrt(size(experimental_data_female, 1));
     experimental_mice_female = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
 
-    figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+    figure('Position', [100, 100, 300, 450]); % [left, bottom, width, height]
     hold on;
 
     h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_male), experimental_sem_male, 'lineProps', {'color', 'r'});
@@ -371,7 +372,7 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         experimental_sem_hM4Di = std(experimental_data_hM4Di)/sqrt(size(experimental_data_hM4Di, 1));
         experimental_mice_hM4Di = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'hM4Di'), :);
 
-        figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+        figure('Position', [100, 100, 300, 450]); % [left, bottom, width, height]
         hold on;
 
         h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_mCherry), experimental_sem_mCherry, 'lineProps', {'color', 'k'});
@@ -394,7 +395,7 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         experimental_sem_hM4Di = std(experimental_data_hM4Di)/sqrt(size(experimental_data_hM4Di, 1));
         experimental_mice_hM4Di = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'chrimsonr'), :);
 
-        figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+        figure('Position', [100, 100, 300, 450]); % [left, bottom, width, height]
         hold on;
 
         h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_mCherry), experimental_sem_mCherry, 'lineProps', {'color', 'k'});
@@ -424,7 +425,7 @@ else
     no_shock_sem = std(no_shock_data)/sqrt(size(no_shock_data, 1));
     no_shock_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
 
-    figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+    figure('Position', [100, 100, 300, 450]); % [left, bottom, width, height]
     hold on;
 
     h(1) = shadedErrorBar(1:num_bins, mean(experimental_data), experimental_sem, 'lineProps', {'color', 'r'});
@@ -743,11 +744,11 @@ end
 
 % experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 % experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
-% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
+% experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
-% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice.xlsx');
+experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
 
-experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
+% experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
 
 % Define parameters
 threshold = 1; % Velocity threshold
@@ -759,7 +760,7 @@ min_samples = min_duration / sample_duration;
 
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D4';
+session_to_analyze = 'D3';
 
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
@@ -1177,7 +1178,7 @@ if any("sex" == string(experimental_grps.Properties.VariableNames)) && ~any("tre
     experimental_sem_female = std(experimental_data_female)/sqrt(size(experimental_data_female, 1));
     experimental_mice_female = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.sex, 'female'), :);
  
-    figure('Position', [100, 100, 900, 300]); % [left, bottom, width, height]
+     figure('Position', [100, 100, 900, 450]); % [left, bottom, width, height]
     hold on;
     h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_male), experimental_sem_male, 'lineProps', {'color', 'r'});
     h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_female), experimental_sem_female, 'lineProps', {'color', 'k'});
@@ -1208,7 +1209,7 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         experimental_sem_hM4Di = std(experimental_data_hM4Di)/sqrt(size(experimental_data_hM4Di, 1));
         experimental_mice_hM4Di = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'hM4Di'), :);
 
-        figure('Position', [100, 100, 900, 300]); % [left, bottom, width, height]
+         figure('Position', [100, 100, 900, 450]); % [left, bottom, width, height]
         hold on;
         h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_mCherry), experimental_sem_mCherry, 'lineProps', {'color', 'k'});
         h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_hM4Di), experimental_sem_hM4Di, 'lineProps', {'color', 'r'});
@@ -1238,7 +1239,7 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         experimental_sem_hM4Di = std(experimental_data_hM4Di)/sqrt(size(experimental_data_hM4Di, 1));
         experimental_mice_hM4Di = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'chrimsonr'), :);
 
-        figure('Position', [100, 100, 900, 300]); % [left, bottom, width, height]
+         figure('Position', [100, 100, 900, 450]); % [left, bottom, width, height]
         hold on;
         h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_mCherry), experimental_sem_mCherry, 'lineProps', {'color', 'k'});
         h(2) = shadedErrorBar(1:num_bins, mean(experimental_data_hM4Di), experimental_sem_hM4Di, 'lineProps', {'color', 'r'});
@@ -1273,7 +1274,7 @@ else
     no_shock_sem = std(no_shock_data)/sqrt(size(no_shock_data, 1));
     no_shock_mice = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'No Shock'), :);
 
-    figure('Position', [100, 100, 900, 300]); % [left, bottom, width, height]
+    figure('Position', [100, 100, 900, 450]); % [left, bottom, width, height]
     hold on;
 
     h(1) = shadedErrorBar(1:num_bins, mean(experimental_data), experimental_sem, 'lineProps', {'color', 'r'});
@@ -1385,7 +1386,7 @@ hold off;
 
 %%
 % load('pilot_D4_freeze.mat')
-% load('pilot_D3_freeze.mat')
+load('pilot_D3_freeze.mat')
 % Create a figure
 
 experimental_data_D4_means = [mean(experimental_data_aversive_D4, 2) mean(experimental_data_safe_D4, 2)];
@@ -1409,7 +1410,8 @@ means = [mean(experimental_data_D3_means);
 x = [1, 2; 3.5, 4.5; 6, 7]; % Adjust spacing as needed
 
 % Bar plot
-figure;
+
+figure('Position', [100, 100, 400, 450]); % [left, bottom, width, height]
 hold on;
 
 % Loop through each group to plot bars, scatter points, and lines
@@ -1455,7 +1457,7 @@ means = [mean(experimental_data_D4_means);
 x = [1, 2; 3.5, 4.5; 6, 7]; % Adjust spacing as needed
 
 % Bar plot
-figure;
+figure('Position', [100, 100, 400, 450]); % [left, bottom, width, height]
 hold on;
 
 % Loop through each group to plot bars, scatter points, and lines
@@ -1555,7 +1557,7 @@ means = [mean(experimental_data_D4_means_male);
 x = [1, 2; 3.5, 4.5; 6, 7]; % Adjust spacing as needed
 
 % Bar plot
-figure;
+figure('Position', [100, 100, 400, 450]); % [left, bottom, width, height]
 hold on;
 
 % Loop through each group to plot bars, scatter points, and lines
@@ -1589,29 +1591,26 @@ hold off;
 
 
 %%
-load('PL_hM4Di_D3_freeze.mat')
-load('PL_hM4Di_D4_freeze.mat')
+% load('PL_hM4Di_D3_freeze.mat')
+% load('PL_hM4Di_D4_freeze.mat')
 % Create a figure
 
 
-mCherry_data_D3_means = [mean(experimental_data_aversive_mCherry_D3, 2) mean(experimental_data_safe_mCherry_D3, 2)];
-hM4Di_data_D3_mean = [mean(experimental_data_aversive_hM4Di_D3, 2) mean(experimental_data_safe_hM4Di_D3, 2)];
-
-mCherry_data_D4_mean = [mean(experimental_data_aversive_mCherry_D4, 2) mean(experimental_data_safe_mCherry_D4, 2)];
-hM4Di_data_D4_mean = [mean(experimental_data_aversive_hM4Di_D4, 2) mean(experimental_data_safe_hM4Di_D4, 2)];
+mCherry_data_means = [mean(experimental_data_aversive_mCherry, 2) mean(experimental_data_safe_mCherry, 2)];
+hM4Di_data_mean = [mean(experimental_data_aversive_hM4Di, 2) mean(experimental_data_safe_hM4Di, 2)];
 
 % Combine the datasets for easier handling
-all_data = {mCherry_data_D3_means, hM4Di_data_D3_mean};
+all_data = {mCherry_data_means, hM4Di_data_mean};
 
 % Calculate means for bar heights
-means = [mean(mCherry_data_D3_means); 
-         mean(hM4Di_data_D3_mean)];
+means = [mean(mCherry_data_means); 
+         mean(hM4Di_data_mean)];
 
 % Grouped positions for the bars
 x = [1, 2; 3.5, 4.5; 6, 7]; % Adjust spacing as needed
 
 % Bar plot
-figure;
+figure('Position', [100, 100, 400, 450]); % [left, bottom, width, height]
 hold on;
 
 % Loop through each group to plot bars, scatter points, and lines
@@ -1640,51 +1639,6 @@ end
 
 % Adjustments for aesthetics
 set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'mCherry', 'hM4Di'});
-ylim([0 0.9])
-hold off;
-
-
-
-% Combine the datasets for easier handling
-all_data = {mCherry_data_D4_mean, hM4Di_data_D4_mean};
-
-% Calculate means for bar heights
-means = [mean(mCherry_data_D4_mean); 
-         mean(hM4Di_data_D4_mean)];
-
-% Grouped positions for the bars
-x = [1, 2; 3.5, 4.5; 6, 7]; % Adjust spacing as needed
-
-% Bar plot
-figure;
-hold on;
-
-% Loop through each group to plot bars, scatter points, and lines
-for i = 1:size(all_data, 2)
-    % Bar plot for each group
-    for col = 1:2
-        bar_x = x(i, col); % Position for the current bar
-        bar(bar_x, means(i, col), 0.4, 'FaceAlpha', 0.7); % Plot each bar
-    end
-
-    % Overlay scatter points and connect with lines for the current variable
-    data = all_data{i}; % Current variable's data
-    jittered_x = zeros(size(data)); % To store jittered x-coordinates
-    for j = 1:size(data, 1)
-        % Scatter points for the current row
-        scatter_x = x(i, :) + (rand(1, 2) - 0.5) * 0.2; % Add jitter
-        jittered_x(j, :) = scatter_x; % Store jittered x-coordinates
-        scatter(scatter_x, data(j, :), 40, 'k', 'filled');
-    end
-
-    % Connect scatter points with a line using jittered x-coordinates
-    for j = 1:size(data, 1)
-        plot(jittered_x(j, :), data(j, :), 'k-', 'LineWidth', 0.5);
-    end
-end
-
-% Adjustments for aesthetics
-set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'mCherry', 'hM4Di'});
-ylim([0 0.9])
+ylim([0 0.8])
 hold off;
 

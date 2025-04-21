@@ -255,13 +255,13 @@ end
 % end
 
 figure; hold on
-width = 200; % Width of the figure
+width = 300; % Width of the figure
 height = 600; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 xlim(xlims);
 % Set X-axis ticks
 set(gca);
-ytickformat('%.1f');
+ytickformat('%.2f');
 
 for vv = 1:size(pairwise_comps, 1)
 

@@ -415,12 +415,12 @@ figure;
 hold on
 % Create a histogram for allCorrelations
 
-width = 600; % Width of the figure
+width = 350; % Width of the figure
 height = 300; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 xlim([-8 8]);
 % Set X-axis ticks
-set(gca, 'XTick', [-8, 0, 8]);
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.6, 0, 0.6]);
 shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(prechoice_block_1==1, :)), nanmean(neuron_sem_array{1, 1}(prechoice_block_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
 hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(postchoice_reward_block_1==1, :)), nanmean(neuron_sem_array{1, 1}(postchoice_reward_block_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
 hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(collect_block_1==1, :)), nanmean(neuron_sem_array{1, 1}(collect_block_1==1, :)), 'lineProps', {'color', batlowW(iter,:)});
@@ -429,7 +429,8 @@ xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
 xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
 xlabel('Time from Large Rew Choice (s)');
 legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
-ylim([-0.8 0.8]);
+ylim([-0.6 0.6]);
+
 hold off
 
 %%
@@ -533,9 +534,10 @@ sem_consumption = [std(action_auc_consumption(:))/sqrt(numel(action_auc_consumpt
 
 % Plot the bar graph
 figure;
-width = 600; % Width of the figure
-height = 300; % Height of the figure (width is half of height)
+width = 350; % Width of the figure
+height = 200; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+set(gca, 'YTick', [-10, 0, 10]);
 bar_groups = 1:3; % Number of groups
 bar_width = 0.3; % Width of each bar (adjust as needed)
 hold on;

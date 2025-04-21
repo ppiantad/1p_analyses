@@ -192,7 +192,7 @@ for dd = 1:size(animalIDs)
 
     end
 end
-
+%%
 mean_left_screen_time_all_blocks = mean([mean_left_screen_time_B1; mean_left_screen_time_B2; mean_left_screen_time_B3]);
 mean_right_screen_time_all_blocks = mean([mean_right_screen_time_B1; mean_right_screen_time_B2; mean_right_screen_time_B3]);
 mean_reward_cup_all_blocks = mean([mean_reward_cup_B1; mean_reward_cup_B2; mean_reward_cup_B3]);
@@ -264,7 +264,7 @@ figure;
 hold on;
 
 % Set figure size
-width = 200; % Width of the figure
+width = 600; % Width of the figure
 height = 450; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 
@@ -292,7 +292,7 @@ end
 % Plot individual lines for "Small" data
 for i = 1:size(other_zone_time, 1)
     plot(x_points, other_zone_time(i, :), '-', ...
-        'Color', [1 0 0 0.6], ... % 
+        'Color', 'black', ... % 
         'LineWidth', 1.2);
 end
 
@@ -306,11 +306,11 @@ errorbar(x_points, mean_small_zone, sem_small, '^-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
     'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
 
-errorbar(x_points, mean_rew_cup_zone, sem_rew, '^-', ...
+errorbar(x_points, mean_rew_cup_zone, sem_rew, 'square-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'green', 'MarkerFaceColor', 'green', ...
     'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
 
-errorbar(x_points, mean_other_zone, sem_other, '^-', ...
+errorbar(x_points, mean_other_zone, sem_other, 'diamond-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'black', 'MarkerFaceColor', 'black', ...
     'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
 

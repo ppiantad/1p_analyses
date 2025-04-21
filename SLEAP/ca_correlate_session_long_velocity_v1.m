@@ -46,7 +46,7 @@ neuron_num = 0;
 for ii = 1:size(fieldnames(final),1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze) && isfield(final_SLEAP.(currentanimal), session_to_analyze)
-        BehavData = final.(currentanimal).(session_to_analyze).uv.BehavData;
+        BehavData = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData;
         % block_1 = [BehavData.stTime(BehavData.Block == 1) BehavData.collectionTime(BehavData.Block == 1)]; 
         % block_1 = [block_1(1, 1) block_1(end, 2)];
         % block_2 = [BehavData.stTime(BehavData.Block == 2) BehavData.collectionTime(BehavData.Block == 2)]; 

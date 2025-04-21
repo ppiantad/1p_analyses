@@ -5,7 +5,7 @@
 
 % final_behavior = final_SLEAP; % for hM4Di data;
 
-session_to_analyze = 'RDT_OPTO_CHOICE'
+session_to_analyze = 'RDT_D1'
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_13'};
@@ -187,6 +187,11 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
         lose_stay_ratio = sum(BehavData.lose_stay == 1)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0);
         lose_omit_ratio = sum(BehavData.lose_omit == 1)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0);
         win_stay_ratio = sum(BehavData.win_stay == 1)/sum(BehavData.WL == 1 & BehavData.ForceFree == 0 & BehavData.Block == 2 | BehavData.Block == 3);
+
+        win_stay_ratio_block_1 = sum(BehavData.win_stay == 1 & BehavData.Block == 1)/sum(BehavData.WL == 1 & BehavData.ForceFree == 0 & BehavData.Block == 1);
+        win_stay_ratio_block_2 = sum(BehavData.win_stay == 1 & BehavData.Block == 2)/sum(BehavData.WL == 1 & BehavData.ForceFree == 0 & BehavData.Block == 2);
+        win_stay_ratio_block_3 = sum(BehavData.win_stay == 1 & BehavData.Block == 3)/sum(BehavData.WL == 1 & BehavData.ForceFree == 0 & BehavData.Block == 3);
+        
         lose_shift_ratio_block_1 = sum(BehavData.lose_shift == 1 & BehavData.Block == 1)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0 & BehavData.Block == 1);
         lose_shift_ratio_block_2 = sum(BehavData.lose_shift == 1 & BehavData.Block == 2)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0 & BehavData.Block == 2);
         lose_shift_ratio_block_3 = sum(BehavData.lose_shift == 1 & BehavData.Block == 3)/sum(BehavData.WL == 3 & BehavData.ForceFree == 0 & BehavData.Block == 3);
@@ -304,6 +309,9 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
             lose_stay_ratio,...
             lose_omit_ratio,...
             win_stay_ratio,...
+            win_stay_ratio_block_1,...
+            win_stay_ratio_block_2,...
+            win_stay_ratio_block_3,...
             lose_shift_ratio_block_1,...
             lose_shift_ratio_block_2,...
             lose_shift_ratio_block_3,...
@@ -368,6 +376,9 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
             "lose_stay_ratio",...
             "lose_omit_ratio",...
             "win_stay_ratio",...
+            "win_stay_ratio_block_1",...
+            "win_stay_ratio_block_2",...
+            "win_stay_ratio_block_3",...
             "lose_shift_ratio_block_1",...
             "lose_shift_ratio_block_2",...
             "lose_shift_ratio_block_3",...
@@ -731,11 +742,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, cross_sess_large_means, cross_sess_large_sems, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 18, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, cross_sess_small_means, cross_sess_small_sems, '^-', ...
     'LineWidth', 1.5, 'MarkerSize', 18, 'Color', 'red', 'MarkerFaceColor', 'red', ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -846,11 +857,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, '^-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -918,11 +929,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, '^-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -990,11 +1001,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, '^-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1062,11 +1073,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, '^-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1134,11 +1145,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, '^-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1206,11 +1217,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, '^-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1236,16 +1247,16 @@ hold off;
 %% for plotting lose_shift ratio across blocks
 
 large_choice = [risk_table.lose_shift_ratio_block_1, risk_table.lose_shift_ratio_block_2, risk_table.lose_shift_ratio_block_3];
-% small_choice = [risk_table.block_1_small_choice_latency, risk_table.block_2_small_choice_latency, risk_table.block_3_small_choice_latency];
+small_choice = [risk_table.win_stay_ratio_block_1, risk_table.win_stay_ratio_block_2, risk_table.win_stay_ratio_block_3];
 
 % turn NaNs (trials where the denominator, number of losses, is 0) into 0s
 large_choice(isnan(large_choice))=0;
-
+small_choice(isnan(small_choice))=0;
 
 mean_large = nanmean(large_choice, 1);
-% mean_small = nanmean(small_choice, 1);
+mean_small = nanmean(small_choice, 1);
 sem_large = nanstd(large_choice, 0, 1) ./ sqrt(size(large_choice, 1));
-% sem_small = nanstd(small_choice, 0, 1) ./ sqrt(size(small_choice, 1));
+sem_small = nanstd(small_choice, 0, 1) ./ sqrt(size(small_choice, 1));
 
 
 
@@ -1274,21 +1285,21 @@ for i = 1:size(large_choice, 1)
 end
 
 % Plot individual lines for "Small" data
-% for i = 1:size(small_choice, 1)
-%     plot(x_points, small_choice(i, :), '-', ...
-%         'Color', [1 0 0 0.6], ... % Red with 60% opacity
-%         'LineWidth', 1.2);
-% end
+for i = 1:size(small_choice, 1)
+    plot(x_points, small_choice(i, :), '-', ...
+        'Color', [1 0 0 0.6], ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
 
 
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
-% errorbar(x_points, mean_small, sem_small, '^-', ...
-%     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
-%     'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+errorbar(x_points, mean_small, sem_small, '^-', ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1357,7 +1368,7 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % errorbar(x_points, mean_small, sem_small, '^-', ...
 %     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
@@ -1428,11 +1439,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, hM4Di_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', hM4Di_color, 'MarkerFaceColor', hM4Di_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1501,11 +1512,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, hM4Di_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', hM4Di_color, 'MarkerFaceColor', hM4Di_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1572,11 +1583,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, hM4Di_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', hM4Di_color, 'MarkerFaceColor', hM4Di_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
 xticklabels({'0', '50', '75'}); % Provide labels for each x_point
@@ -1621,7 +1632,7 @@ hold on;
 
 % Set figure size
 width = 200; % Width of the figure
-height = 450; % Height of the figure
+height = 250; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 
 % Plot individual lines for "Large" data
@@ -1642,11 +1653,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, hM4Di_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', hM4Di_color, 'MarkerFaceColor', hM4Di_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1713,11 +1724,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, hM4Di_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', hM4Di_color, 'MarkerFaceColor', hM4Di_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1785,11 +1796,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, stGtACR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', stGtACR_color, 'MarkerFaceColor', stGtACR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1856,11 +1867,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, stGtACR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', stGtACR_color, 'MarkerFaceColor', stGtACR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1927,11 +1938,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, stGtACR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', stGtACR_color, 'MarkerFaceColor', stGtACR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -1998,11 +2009,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, stGtACR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', stGtACR_color, 'MarkerFaceColor', stGtACR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2048,7 +2059,7 @@ hold on;
 
 % Set figure size
 width = 200; % Width of the figure
-height = 450; % Height of the figure
+height = 250; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 
 % Plot individual lines for "Large" data
@@ -2069,11 +2080,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, stGtACR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', stGtACR_color, 'MarkerFaceColor', stGtACR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2145,11 +2156,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, stGtACR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', stGtACR_color, 'MarkerFaceColor', stGtACR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2217,11 +2228,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, 'MarkerEdgeColor', 'none', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, PdCO_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 12, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, 'MarkerEdgeColor', 'none',...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2288,11 +2299,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, 'MarkerEdgeColor', 'none', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, PdCO_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 12, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, 'MarkerEdgeColor', 'none',...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2360,11 +2371,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, 'MarkerEdgeColor', 'none', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, PdCO_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 12, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, 'MarkerEdgeColor', 'none',...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2432,11 +2443,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, 'MarkerEdgeColor', 'none', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, PdCO_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 12, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, 'MarkerEdgeColor', 'none',...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2507,11 +2518,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, 'MarkerEdgeColor', 'none', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, PdCO_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 12, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, 'MarkerEdgeColor', 'none',...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2580,11 +2591,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2652,11 +2663,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2724,11 +2735,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2795,11 +2806,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2866,11 +2877,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -2938,11 +2949,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -3010,11 +3021,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -3086,11 +3097,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large_risky, sem_large_risky, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_large_not_risky, sem_large_not_risky, '^-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -3163,11 +3174,11 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_large_risky, sem_large_risky, 'o-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'blue', 'MarkerFaceColor', 'blue', ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_large_not_risky, sem_large_not_risky, '^-', ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', 'red', 'MarkerFaceColor', 'red', ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -3246,15 +3257,15 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_PdCO, sem_PdCO, PdCO_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_ChrimsonR, sem_ChrimsonR, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -3331,15 +3342,15 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_PdCO, sem_PdCO, PdCO_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_ChrimsonR, sem_ChrimsonR, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -3416,15 +3427,15 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_PdCO, sem_PdCO, PdCO_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_ChrimsonR, sem_ChrimsonR, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -3501,15 +3512,15 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_PdCO, sem_PdCO, PdCO_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_ChrimsonR, sem_ChrimsonR, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points
@@ -3585,15 +3596,15 @@ end
 % Plot with error bars for "Large" and "Small"
 errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
-    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_PdCO, sem_PdCO, PdCO_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 errorbar(x_points, mean_ChrimsonR, sem_ChrimsonR, ChrimsonR_symbol, ...
     'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
-    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
 
 % Format the X-axis
 xticks(x_points); % Set x-ticks at valid x_points

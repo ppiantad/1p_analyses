@@ -330,7 +330,7 @@ mean_data_array = {neuron_mean_array{1, 11}(respClass_all_array{1, 4} == 1, :), 
 sem_data_array = {neuron_sem_array{1, 11}(respClass_all_array{1, 4} == 1, :), neuron_sem_array{1, 11}(respClass_all_array{1, 4} == 3, :)};
 
 
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.5 0.5]);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2]);
 
 %%
 
