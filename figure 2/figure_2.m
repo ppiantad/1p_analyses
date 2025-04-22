@@ -1,4 +1,4 @@
-load('BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat')
+% load('BLA_C_raw_no_additional_filtering_RDT_D1_only_completed_sessions_zall_window_base_workspace_10_categories.mat')
 %% for heatmap, change "plot_num" (what neuron to plot) and array_to_plot (# corresponds to which dataset)
 
 plot_num = 10
@@ -1314,6 +1314,9 @@ mean_03 = mean(trial_choice_times_concat(trial_types_concat == 0.3));
 plot([0.8, 1.2], [mean_12, mean_12], 'b-', 'LineWidth', 2); % Blue line for trial_types_concat == 1.2
 plot([0.8, 1.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); % Red line for trial_types_concat == 0.3
 
+
+[h_choice_times p_choice_times] = ttest2(trial_choice_times_concat(trial_types_concat == 1.2), trial_choice_times_concat(trial_types_concat == 0.3))
+
 hold off;
 title('Trial Choice Times');
 xlabel('Trial');
@@ -1339,6 +1342,8 @@ mean_12 = mean(rew_collect_times_concat(trial_types_concat == 1.2));
 mean_03 = mean(rew_collect_times_concat(trial_types_concat == 0.3));
 plot([bar_separation_value - 0.2, bar_separation_value + 0.2], [mean_12, mean_12], 'b-', 'LineWidth', 2); % Blue line for trial_types_concat == 1.2
 plot([bar_separation_value - 0.2, bar_separation_value + 0.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); % Red line for trial_types_concat == 0.3
+
+[h_rew_times p_rew_times] = ttest2(rew_collect_times_concat(trial_types_concat == 1.2), rew_collect_times_concat(trial_types_concat == 0.3))
 
 hold off;
 title('Reward Collection Times');
@@ -1384,8 +1389,8 @@ variable_to_correlate = trial_choice_times_by_mouse;
 meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
-timeRange = (ts1 >= -4) & (ts1 <= 0);
-% timeRange = (ts1 >= 0) & (ts1 <= 2);
+% timeRange = (ts1 >= -4) & (ts1 <= 0);
+timeRange = (ts1 >= 0) & (ts1 <= 2);
 % timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
@@ -1536,6 +1541,7 @@ hold off;
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
 % only_shk_responsive_corrs = allCorrelations(kmeans_idx' == 3);
 only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
+only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 == 1);
 % not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
 % not_shk_responsive_corrs = allCorrelations(kmeans_idx' ~= 3);
 not_shk_responsive_corrs = allCorrelations(true_neutral ==1);

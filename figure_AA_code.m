@@ -3,7 +3,7 @@
 % eventRelatedActivityAndClassification_PTP_v4.m with AA, 1 as filters
 
 
-
+load('BLA_RDT_11_variables_incl_AA_use_for_AA_PV.mat')
 
 
 %% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav

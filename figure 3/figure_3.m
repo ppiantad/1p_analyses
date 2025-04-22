@@ -571,10 +571,10 @@ nonresp_to_shk = nonresp_all == 1 & respClass_all_array{1,4} == 1;
 sum(nonresp_to_shk)
 
 %% run eventRelated w/ SHK, 1 and LOSS_PLUS_ONE 1, then run code below
-for q = 1:length (behav_tbl_iter{1, 1})
-    nestedCellArray_1 = behav_tbl_iter{1, 1}{q};
+for q = 1:length (behav_tbl_iter{4, 1})
+    nestedCellArray_1 = behav_tbl_iter{4, 1}{q};
     if ~isempty(nestedCellArray_1)
-        nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
+        nestedCellArray_2 = behav_tbl_iter{4, 1}{q};
         if size(nestedCellArray_1, 1) > size(nestedCellArray_2, 1)
             delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime(1:end-1,:);
         else
@@ -639,7 +639,7 @@ hold off;
 variable_to_correlate = delay_to_collect_post_shk_by_mouse;
 
 %%
-array_for_means = 1; 
+array_for_means = 4; 
 
 % Initialize the new cell array to store the mean values
 meanZallMouse = cell(size(zall_mouse, 2), 1);
@@ -783,8 +783,8 @@ hold off;
 
 %%
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
-only_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}  ==1);
-not_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 1}  ==3);
+only_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 4}  ==1);
+not_shk_responsive_corrs = allCorrelations(respClass_all_array{1, 4}  ==3);
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
 figure;
