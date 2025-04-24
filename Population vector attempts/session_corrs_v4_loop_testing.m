@@ -686,7 +686,7 @@ ytickformat('%.2f');
 
 hold off;
 
-
+[h_prechoice_pv_mean p_pv_mean] = ttest(individual_means{1, 1}, individual_means{1, 2})
 
 
 %%

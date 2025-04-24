@@ -176,7 +176,7 @@ disp(ranovaResults);
 disp('Post-hoc pairwise comparisons (Tukey-corrected):');
 mc = multcompare(rm, 'TrialBlock', 'ComparisonType', 'tukey');
 disp(mc);
-%% between subjects
+%% between subjects for 2 treatment groups
 
 
 % Create wide-format data for analysis
@@ -235,6 +235,175 @@ if p_interaction < 0.05
     disp(posthoc_results);
 else
     disp('No significant interaction effect found.');
+end
+
+% Calculate mean response for each subject across all blocks
+mCherry_means = mean(data(1:num_mice_mCherry,:), 2);  % Average across blocks
+hM4Di_means = mean(data(num_mice_mCherry+1:end,:), 2);  % Average across blocks
+
+% Perform independent samples t-test
+[h, p, ci, stats] = ttest2(mCherry_means, hM4Di_means);
+
+% Display t-test results
+fprintf('Treatment effect (t-test): t(%d) = %.3f, p = %.4f\n', ...
+    stats.df, stats.tstat, p);
+
+if p < 0.05
+    fprintf('Treatment effect is significant (p = %.4f)\n', p);
+    fprintf('mCherry group mean: %.3f\n', mean(mCherry_means));
+    fprintf('hM4Di group mean: %.3f\n', mean(hM4Di_means));
+    fprintf('Difference: %.3f\n', mean(mCherry_means) - mean(hM4Di_means));
+else
+    fprintf('Treatment effect is not significant (p = %.4f)\n', p);
+end
+
+
+
+%% between subjects for 3 treatment groups
+% Create wide-format data for analysis
+num_mice_mCherry = size(large_choice_mCherry, 1);
+num_mice_PdCO = size(large_choice_PdCO, 1);
+num_mice_ChrimsonR = size(large_choice_ChrimsonR, 1);
+
+% Combine data from all three groups into a wide-format table
+data = [large_choice_mCherry; large_choice_PdCO; large_choice_ChrimsonR];
+Treatment = [repmat({'mCherry'}, num_mice_mCherry, 1); 
+             repmat({'PdCO'}, num_mice_PdCO, 1); 
+             repmat({'ChrimsonR'}, num_mice_ChrimsonR, 1)];
+Subject = (1:size(data, 1))';
+
+% Convert to table
+tbl = array2table(data, 'VariableNames', {'Block1', 'Block2', 'Block3'});
+tbl.Treatment = categorical(Treatment);
+tbl.Subject = Subject;
+
+% Define within-subject factors
+TrialBlock = categorical([1, 2, 3]');
+WithinDesign = table(TrialBlock, 'VariableNames', {'TrialBlock'});
+
+% Fit repeated measures model with Treatment as a between-subject factor
+rm = fitrm(tbl, 'Block1-Block3 ~ Treatment', 'WithinDesign', WithinDesign);
+
+% Run repeated measures ANOVA
+ranovaResults = ranova(rm);
+
+% Get between-subjects effects table using the correct method
+betweenSubjectsTable = anova(rm);
+
+% Display results
+disp('Mixed ANOVA Results:');
+disp(ranovaResults);
+disp('Between-Subjects Effects:');
+disp(betweenSubjectsTable);
+
+% Correctly access the main effect of Treatment from between-subjects table
+p_treatment = betweenSubjectsTable.pValue(1); % First row of between-subjects table is Treatment effect
+fprintf('Main effect of Treatment: p = %.4f\n', p_treatment);
+
+% Conduct post-hoc tests for Treatment if main effect is significant
+if p_treatment < 0.05
+    disp('Significant main effect of Treatment found! Performing post-hoc comparisons...');
+    
+    % Calculate mean response for each subject across all blocks, grouped by treatment
+    mCherry_means = mean(data(1:num_mice_mCherry,:), 2);
+    PdCO_means = mean(data(num_mice_mCherry+1:num_mice_mCherry+num_mice_PdCO,:), 2);
+    ChrimsonR_means = mean(data(num_mice_mCherry+num_mice_PdCO+1:end,:), 2);
+    
+    % Perform pairwise comparisons with Bonferroni correction
+    [~, p_mCherry_vs_PdCO] = ttest2(mCherry_means, PdCO_means);
+    [~, p_mCherry_vs_ChrimsonR] = ttest2(mCherry_means, ChrimsonR_means);
+    [~, p_PdCO_vs_ChrimsonR] = ttest2(PdCO_means, ChrimsonR_means);
+    
+    % Apply Bonferroni correction (multiply by number of comparisons)
+    p_adjusted_mCherry_vs_PdCO = min(p_mCherry_vs_PdCO * 3, 1);
+    p_adjusted_mCherry_vs_ChrimsonR = min(p_mCherry_vs_ChrimsonR * 3, 1);
+    p_adjusted_PdCO_vs_ChrimsonR = min(p_PdCO_vs_ChrimsonR * 3, 1);
+    
+    % Display pairwise comparison results
+    fprintf('mCherry vs PdCO: p = %.4f (adjusted p = %.4f)\n', p_mCherry_vs_PdCO, p_adjusted_mCherry_vs_PdCO);
+    fprintf('mCherry vs ChrimsonR: p = %.4f (adjusted p = %.4f)\n', p_mCherry_vs_ChrimsonR, p_adjusted_mCherry_vs_ChrimsonR);
+    fprintf('PdCO vs ChrimsonR: p = %.4f (adjusted p = %.4f)\n', p_PdCO_vs_ChrimsonR, p_adjusted_PdCO_vs_ChrimsonR);
+    
+    % Show means for each group
+    fprintf('Group means:\n');
+    fprintf('mCherry mean: %.3f\n', mean(mCherry_means));
+    fprintf('PdCO mean: %.3f\n', mean(PdCO_means));
+    fprintf('ChrimsonR mean: %.3f\n', mean(ChrimsonR_means));
+else
+    disp('No significant main effect of Treatment found.');
+end
+
+% Check if the interaction effect is significant
+p_interaction = ranovaResults.pValue(2); % Treatment × TrialBlock interaction
+if p_interaction < 0.05
+    disp('Significant interaction found! Performing post-hoc comparisons at each TrialBlock level...');
+    
+    % For each block, compare the three treatment groups using one-way ANOVA
+    for block = 1:3
+        block_data = data(:,block);
+        
+        % Create a table for ANOVA
+        block_tbl = table(block_data, categorical(Treatment), 'VariableNames', {'Response', 'Treatment'});
+        
+        % Run one-way ANOVA for this block
+        [p, tbl_anova, stats] = anova1(block_data, Treatment, 'off');
+        
+        fprintf('\nBlock %d: One-way ANOVA p = %.4f\n', block, p);
+        
+        % If ANOVA is significant, run multiple comparisons
+        if p < 0.05
+            % Extract data for each treatment group in this block
+            mCherry_block = block_data(1:num_mice_mCherry);
+            PdCO_block = block_data(num_mice_mCherry+1:num_mice_mCherry+num_mice_PdCO);
+            ChrimsonR_block = block_data(num_mice_mCherry+num_mice_PdCO+1:end);
+            
+            % Perform pairwise t-tests with Bonferroni correction
+            [~, p_mCherry_PdCO] = ttest2(mCherry_block, PdCO_block);
+            [~, p_mCherry_ChrimsonR] = ttest2(mCherry_block, ChrimsonR_block);
+            [~, p_PdCO_ChrimsonR] = ttest2(PdCO_block, ChrimsonR_block);
+            
+            % Apply Bonferroni correction
+            p_adjusted = [p_mCherry_PdCO, p_mCherry_ChrimsonR, p_PdCO_ChrimsonR] * 3;
+            p_adjusted = min(p_adjusted, 1); % Ensure values do not exceed 1
+            
+            % Display results
+            pairwise_results = table([p_mCherry_PdCO; p_mCherry_ChrimsonR; p_PdCO_ChrimsonR], ...
+                                     [p_adjusted(1); p_adjusted(2); p_adjusted(3)], ...
+                                     'VariableNames', {'Raw_pValue', 'Bonferroni_pValue'}, ...
+                                     'RowNames', {'mCherry vs PdCO', 'mCherry vs ChrimsonR', 'PdCO vs ChrimsonR'});
+            fprintf('Pairwise comparisons for Block %d:\n', block);
+            disp(pairwise_results);
+            
+            % Show means for each group in this block
+            fprintf('Block %d means: mCherry = %.3f, PdCO = %.3f, ChrimsonR = %.3f\n', ...
+                block, mean(mCherry_block), mean(PdCO_block), mean(ChrimsonR_block));
+        else
+            fprintf('No significant differences between treatments in Block %d\n', block);
+        end
+    end
+else
+    disp('No significant interaction effect found.');
+end
+
+% Additional analysis: Test for main effect of Block using repeated measures
+p_block = ranovaResults.pValue(1); % Main effect of TrialBlock
+if p_block < 0.05
+    disp('Significant main effect of TrialBlock found!');
+    
+    % Perform Mauchly's test for sphericity
+    mauchlyTest = rm.mauchly;
+    fprintf('Mauchly''s Test of Sphericity: p = %.4f\n', mauchlyTest.pValue);
+    
+    % Perform post-hoc pairwise comparisons between blocks
+    blockComparisons = multcompare(rm, 'TrialBlock');
+    disp('Pairwise comparisons between Trial Blocks:');
+    disp(blockComparisons);
+    
+    % Calculate means for each block
+    block_means = [mean(data(:,1)), mean(data(:,2)), mean(data(:,3))];
+    fprintf('Block means: Block1 = %.3f, Block2 = %.3f, Block3 = %.3f\n', block_means(1), block_means(2), block_means(3));
+else
+    disp('No significant main effect of TrialBlock found.');
 end
 
 %% between subjects
