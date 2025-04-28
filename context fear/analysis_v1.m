@@ -14,7 +14,7 @@ iter = 0
 % load('BLA-NAcShell_Risk_2024_01_04.mat')
 
 %% Edit these uservariables with what you want to look at
-uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
+uv.evtWin = [-4 4]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
@@ -101,6 +101,7 @@ animalIDs = (fieldnames(final));
 
 for ii = 1:size(animalIDs,1)
     currentanimal = char(animalIDs(ii));
+    
     if isfield(final.(currentanimal), session_to_analyze)
         % if exist('full_filter_string', 'var')
         %     if yoke_data == 1
@@ -137,6 +138,7 @@ for ii = 1:size(animalIDs,1)
         % 
         %     end
         % end
+        current_animal_treatment{ii} = final.(currentanimal).experimental_grp;
         ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
         % comment out below if you don't want to zscore traces prior to the
         % rest of the analysis
@@ -247,3 +249,189 @@ zall_mean_all_array(iter) = {zall_mean_all};
 neuron_mean_all_unnormalized(iter) = {neuron_mean_unnormalized};
 sem_all_array(iter) = {sem_all};
 
+%% set up inputs to PCA
+mean_data_experimental_mice = [];
+mean_data_one_context_mice = [];
+mean_data_no_shock_mice = [];
+
+sem_data_experimental_mice = []; 
+sem_data_one_context_mice = [];
+sem_data_no_shock_mice = [];
+
+for ii = 1:length(animalIDs)
+    currentanimal = char(animalIDs(ii));
+    currentTreatment = current_animal_treatment{ii}
+    if strcmp(currentTreatment, 'Experimental')
+        mean_data_experimental_mice = [mean_data_experimental_mice; neuron_mean_mouse{ii, 1}  ];
+        sem_data_experimental_mice = [sem_data_experimental_mice; neuron_sem_mouse{ii, 1}];
+    elseif strcmp(currentTreatment, 'One Context')
+        mean_data_one_context_mice = [mean_data_one_context_mice; neuron_mean_mouse{ii, 1}  ];
+        sem_data_one_context_mice = [sem_data_one_context_mice; neuron_sem_mouse{ii, 1}];
+    elseif strcmp(currentTreatment, 'No Shock')
+
+        mean_data_no_shock_mice = [mean_data_no_shock_mice; neuron_mean_mouse{ii, 1}  ];
+        sem_data_no_shock_mice = [sem_data_no_shock_mice; neuron_sem_mouse{ii, 1}];
+    end
+end
+
+
+
+
+mean_data_array = {mean_data_experimental_mice, mean_data_one_context_mice, mean_data_no_shock_mice};
+sem_data_array = {sem_data_experimental_mice, sem_data_one_context_mice, sem_data_no_shock_mice};
+
+
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 4], [-0.6 0.6]);
+
+
+
+
+figure; plot(ts1, mean(normalize(mean_data_one_context_mice, 2)))
+hold on; plot(ts1, mean(normalize(mean_data_experimental_mice, 2)))
+hold on; plot(ts1, mean(normalize(mean_data_no_shock_mice, 2)))
+
+data_for_pca = {mean_data_one_context_mice, mean_data_experimental_mice, mean_data_no_shock_mice};
+
+
+
+clear idx temp
+for i = 1:length(data_for_pca)
+
+    temp(i) = (size(data_for_pca{1, i},1));
+end
+
+[minSize,minIdx] = min(temp);
+
+for i = 1:length(data_for_pca)
+    if i ~= minIdx
+        idx_for_subsample = randperm(temp(i),minSize);
+        idx_for_subsample = sort(idx_for_subsample);
+        zdataTemp{i} = data_for_pca{1, i}(idx_for_subsample,:);
+    else
+        zdataTemp{i} = data_for_pca{1, i};
+
+    end
+end
+
+%% try this if you want to zscore to a particular baseline before PCA
+% Initialize the output cell array with the same dimensions as input
+% data_for_ca_normalized = cell(size(data_for_pca));
+% 
+% % Define baseline period
+% baseline_period = [-4 -1];
+% 
+% % For each cell in the array
+% for i = 1:length(data_for_pca)
+%     % Extract data from current cell
+%     current_data = data_for_pca{i};
+% 
+%     % Find indices corresponding to baseline period
+%     baseline_indices = ts1 >= baseline_period(1) & ts1 <= baseline_period(2);
+% 
+%     % Calculate mean and std of baseline period
+%     baseline_mean = mean(current_data(:, baseline_indices), 2);
+%     baseline_std = std(current_data(:, baseline_indices), 0, 2);
+% 
+%     % Z-score the entire data using baseline statistics
+%     % Formula: z = (data - baseline_mean) / baseline_std
+%     normalized_data = bsxfun(@minus, current_data, baseline_mean);
+%     normalized_data = bsxfun(@rdivide, normalized_data, baseline_std);
+% 
+%     % Store normalized data in output cell array
+%     data_for_pca_normalized{i} = normalized_data;
+% end
+
+%%
+%%
+
+
+
+shk_mean = mean(mean_data_experimental_mice(:, ts1 > 0 & ts1 < 2),  2);
+
+% [peak_values, time_of_peak_activity] = max(neuron_mean_array{1, 1}, [], 2);
+[~, sort_indices] = sort(shk_mean);
+neuron_mean_sorted = mean_data_experimental_mice(sort_indices, :);
+
+
+% Sort the rows of activated_neuron_mean based on peak_times.
+% [~, sort_indices] = sort(time_of_peak_activity);
+% activated_neuron_mean_sorted = activated_rows(sort_indices, :);
+
+% Now, activated_neuron_mean_sorted contains the rows of neuron_mean filtered by respClass_all == 1
+% and sorted by the time of peak activity.
+
+figure;
+% Generate the heatmap
+imagesc(ts1, 1, neuron_mean_sorted);
+
+% Add a colorbar and axis labels
+colorbar;
+xlabel('Time (s)');
+ylabel('Neuron');
+
+%%
+custom_colormap = [
+    1, 1, 1; % white
+    1, 0.9, 0.9;
+    1, 0.8, 0.8;
+    1, 0.7, 0.7;
+    1, 0.6, 0.6;
+    1, 0.5, 0.5;
+    1, 0.4, 0.4;
+    1, 0.3, 0.3;
+    1, 0.2, 0.2;
+    1, 0.1, 0.1;
+    1, 0, 0;   % red
+];
+% 
+
+% custom_colormap = [
+%     1, 1, 1;   % white
+%     1, 0.95, 0.9;
+%     1, 0.9, 0.8;
+%     1, 0.85, 0.7;
+%     1, 0.75, 0.55;
+%     1, 0.65, 0.4;
+%     1, 0.55, 0.3;
+%     1, 0.45, 0.2;
+%     1, 0.35, 0.1;
+%     1, 0.25, 0.05;
+%     1, 0.15, 0;  % orange
+% ];
+
+% Generate more intermediate colors for a smoother transition
+n = 256; % Number of colors
+custom_colormap = interp1(linspace(0, 1, size(custom_colormap, 1)), custom_colormap, linspace(0, 1, n));
+
+% Create a figure with a narrow width and taller height
+figure('Position', [100, 100, 350, 600]); % [left, bottom, width, height]
+hold on
+% Create a tiled layout with 2 rows and 1 column
+% tiledlayout(2, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
+
+% First tile (heatmap)
+% ax1 = nexttile;
+% hold on;
+
+% Plot the heatmap
+imagesc(ts1, 1, neuron_mean_sorted);
+
+% Apply the custom colormap
+colormap(custom_colormap);
+
+% Restrict the color axis range to [-1, 1]
+clim([-1 1]);
+
+% Add a separate axes for the colorbar to associate it only with the upper tile
+c = colorbar('eastoutside');
+set(c, 'YTick', clim); % 
+ylim([1, size(neuron_mean_sorted, 1)]);
+xlim([-4 4]);
+% Set X-axis ticks
+set(gca, 'XTick', [-4, 0, 4]);
+set(gca, 'YTick', [1, size(neuron_mean_sorted, 1)]);
+xline(0)
+% scatter(time2Collect, Tris               , 'Marker', 'p')
+% scatter(trialStartTime, Tris, 'Marker', 's')
+fontsize(18, 'points')
+hold off;

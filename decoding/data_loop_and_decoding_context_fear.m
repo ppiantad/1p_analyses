@@ -4,10 +4,10 @@ load('batlowW.mat'); %using Scientific Colour-Maps 6.0 (http://www.fabiocrameri.
 load('acton.mat')
 
 %%
-num_iterations = 10; 
+num_iterations = 5; 
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 % iter = 0;
-uv.evtWin = [-4 4]; %what time do yuv.evtWin = [-2 4]; %what time do y
+uv.evtWin = [-2 4]; %what time do yuv.evtWin = [-2 4]; %what time do y
 uv.BLper = [-4 -2];
 uv.dt = 0.1; %what is your frame rate
 ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
@@ -44,7 +44,7 @@ for i = 0:(num_shocks-1)
 end
 
 
-experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 
 experimental_grp_to_analyze = 'No Shock';
 

@@ -19,7 +19,7 @@ uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-ca_data_type = "C"; % C % C_raw %S
+ca_data_type = "S"; % C % C_raw %S
 % CNMFe_data.C_raw: CNMFe traces
 % CNMFe_data.C: denoised CNMFe traces
 % CNMFe_data.S: inferred spikes
@@ -27,7 +27,7 @@ ca_data_type = "C"; % C % C_raw %S
 % (10) for spike rate
 
 
-session_to_analyze = 'D3';
+session_to_analyze = 'D4';
 
 % Parameters
 session_duration = 12 * 60; % seconds
@@ -138,6 +138,10 @@ end
 %% FILTER TO GET UN-SHUFFLED DATA
 iter = iter+1;
 neuron_num = 0;
+neuron_num_experimental = 0;
+neuron_num_one_context = 0;
+neuron_num_no_shock = 0;
+
 animalIDs = (fieldnames(final));
 
 
@@ -151,6 +155,7 @@ for ii = 1:size(animalIDs,1)
     
     % Check if animal has the session we want to analyze
     if isfield(final.(currentanimal), session_to_analyze)
+        current_animal_treatment{ii} = final.(currentanimal).experimental_grp;
         disp(['Processing animal: ' currentanimal]);
         
         % Get calcium data
@@ -172,15 +177,30 @@ for ii = 1:size(animalIDs,1)
         calcium_events.(currentanimal).stimulus_type_2 = zeros(num_neurons, size(stimulus_frames{2}, 1));
         calcium_events.(currentanimal).p_values = zeros(num_neurons, 1);
         calcium_events.(currentanimal).responsive_neurons = zeros(num_neurons, 1); % 0=not responsive, 1=stim1, 2=stim2
+        calcium_events.(currentanimal).treatment_condition = current_animal_treatment{ii};
         
         % Process each neuron
         for neuron_idx = 1:num_neurons
+            neuron_num = neuron_num + 1;
+            if strcmp(current_animal_treatment{ii}, 'Experimental')
+                neuron_num_experimental = neuron_num_experimental + 1;
+            elseif strcmp(current_animal_treatment{ii}, 'One Context')
+                neuron_num_one_context = neuron_num_one_context + 1;
+
+            elseif strcmp(current_animal_treatment{ii}, 'No Shock')
+                neuron_num_no_shock = neuron_num_no_shock + 1;
+
+            end
+
             neuron_trace = ca(neuron_idx, :);
             
             % Find peaks in the trace (calcium events)
-            [peaks, peak_locs] = findpeaks(neuron_trace, 'MinPeakHeight', mean(neuron_trace) + 1*std(neuron_trace), ...
-                                          'MinPeakDistance', 3);
-            
+            % [peaks, peak_locs] = findpeaks(neuron_trace, 'MinPeakHeight', mean(neuron_trace) + 1*std(neuron_trace), ...
+            %                               'MinPeakDistance', 3);
+
+
+            [peaks, peak_locs] = findpeaks(neuron_trace);
+
             % Count events in each stimulus period
             % First stimulus type (safe)
             for stim_idx = 1:size(stimulus_frames{1}, 1)
@@ -213,6 +233,9 @@ for ii = 1:size(animalIDs,1)
             
             norm_stim1_events = calcium_events.(currentanimal).stimulus_type_1(neuron_idx, :) ./ stim1_duration';
             norm_stim2_events = calcium_events.(currentanimal).stimulus_type_2(neuron_idx, :) ./ stim2_duration';
+
+            % norm_stim1_events = calcium_events.(currentanimal).stimulus_type_1(neuron_idx, :);
+            % norm_stim2_events = calcium_events.(currentanimal).stimulus_type_2(neuron_idx, :);
             
             % Perform statistical test to compare responses between stimulus types
             % Using paired t-test (if same number of trials) or unpaired t-test (if different number)
@@ -275,17 +298,31 @@ for ii = 1:length(animalIDs)
 end
 
 % Apply multiple comparisons correction (False Discovery Rate)
-[fdr_p, fdr_mask] = mafdr(all_p_values, 'BHFDR', true);
+% [fdr_p, fdr_mask] = mafdr(all_p_values, 'BHFDR', false);
+% all_responsive_fdr = zeros(size(all_responsive));
+% for i = 1:length(fdr_mask)
+%     if fdr_mask(i)
+%         if all_mean_stim1(i) > all_mean_stim2(i)
+%             all_responsive_fdr(i) = 1;
+%         else
+%             all_responsive_fdr(i) = 2;
+%         end
+%     end
+% end
+
+% Apply multiple comparisons correction (False Discovery Rate)
+[fdr_p, fdr_mask] = mafdr(all_p_values, 'BHFDR', false);
 all_responsive_fdr = zeros(size(all_responsive));
 for i = 1:length(fdr_mask)
-    if fdr_mask(i)
-        if all_mean_stim1(i) > all_mean_stim2(i)
-            all_responsive_fdr(i) = 1;
-        else
-            all_responsive_fdr(i) = 2;
-        end
+    fdr_mask(i);
+    if all_mean_stim1(i) > all_mean_stim2(i)
+        all_responsive_fdr(i) = 1;
+    else
+        all_responsive_fdr(i) = 2;
     end
 end
+
+
 
 % Group summary statistics
 group_summary = struct();
@@ -348,3 +385,350 @@ title('Stimulus Preference by Neuron');
 
 % Save the results
 save('calcium_events_analysis.mat', 'calcium_events', 'group_summary');
+
+
+experimental_mice_num = 0;
+one_context_mice_num = 0;
+no_shock_mice_num = 0;
+
+for ii = 1:length(animalIDs)
+    currentanimal = char(animalIDs(ii));
+    currentTreatment = calcium_events.(currentanimal).treatment_condition;
+    if strcmp(currentTreatment, 'Experimental')
+        experimental_mice_num = experimental_mice_num + 1
+        percent_responsive_experimental_mice(experimental_mice_num) = calcium_events.(currentanimal).percent_responsive;
+        percent_increase_first_third_fifth_experimental_mice(experimental_mice_num) = calcium_events.(currentanimal).percent_stim1_responsive;
+        percent_increase_second_fourth_sixth_experimental_mice(experimental_mice_num) = calcium_events.(currentanimal).percent_stim2_responsive;
+    elseif strcmp(currentTreatment, 'One Context')
+        one_context_mice_num = one_context_mice_num + 1;
+        percent_responsive_one_context_mice(one_context_mice_num) = calcium_events.(currentanimal).percent_responsive;
+        percent_increase_first_third_fifth_context_mice(one_context_mice_num) = calcium_events.(currentanimal).percent_stim1_responsive;
+        percent_increase_second_fourth_sixth_context_mice(one_context_mice_num) = calcium_events.(currentanimal).percent_stim2_responsive;
+    elseif strcmp(currentTreatment, 'No Shock')
+        no_shock_mice_num = no_shock_mice_num + 1;
+        percent_responsive_no_shock_mice(no_shock_mice_num) = calcium_events.(currentanimal).percent_responsive;
+        percent_increase_first_third_fifth_no_shock_mice(no_shock_mice_num) = calcium_events.(currentanimal).percent_stim1_responsive;
+        percent_increase_second_fourth_sixth_no_shock_mice(no_shock_mice_num) = calcium_events.(currentanimal).percent_stim2_responsive;
+    end
+end
+
+% Calculate means
+means = [mean(percent_responsive_experimental_mice), ...
+         mean(percent_responsive_one_context_mice), ...
+         mean(percent_responsive_no_shock_mice)];
+
+% Calculate SEM (Standard Error of the Mean)
+sem = [std(percent_responsive_experimental_mice)/sqrt(length(percent_responsive_experimental_mice)), ...
+       std(percent_responsive_one_context_mice)/sqrt(length(percent_responsive_one_context_mice)), ...
+       std(percent_responsive_no_shock_mice)/sqrt(length(percent_responsive_no_shock_mice))];
+
+% Create a figure
+figure('Position', [100, 100, 600, 500]);
+
+% Create bar plot
+b = bar(means, 'FaceColor', 'flat');
+b.CData(1,:) = [0.3, 0.6, 0.8]; % Color for experimental
+b.CData(2,:) = [0.8, 0.4, 0.3]; % Color for one context
+b.CData(3,:) = [0.4, 0.7, 0.4]; % Color for no shock
+
+hold on;
+
+% Add error bars
+errorbar(1:3, means, sem, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+
+% Add individual data points
+% Need to calculate x-positions for the scatter points (with some jitter)
+x1 = repmat(1, size(percent_responsive_experimental_mice)) + (rand(size(percent_responsive_experimental_mice))-0.5)*0.2;
+x2 = repmat(2, size(percent_responsive_one_context_mice)) + (rand(size(percent_responsive_one_context_mice))-0.5)*0.2;
+x3 = repmat(3, size(percent_responsive_no_shock_mice)) + (rand(size(percent_responsive_no_shock_mice))-0.5)*0.2;
+
+% Plot scatter points
+scatter(x1, percent_responsive_experimental_mice, 50, 'k', 'filled', 'MarkerFaceAlpha', 0.7);
+scatter(x2, percent_responsive_one_context_mice, 50, 'k', 'filled', 'MarkerFaceAlpha', 0.7);
+scatter(x3, percent_responsive_no_shock_mice, 50, 'k', 'filled', 'MarkerFaceAlpha', 0.7);
+
+% Set axis labels and title
+% xlabel('Condition', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Percent responsive (%)', 'FontSize', 14, 'FontWeight', 'bold');
+% title('Percent Responsive Mice by Condition', 'FontSize', 16, 'FontWeight', 'bold');
+
+% Set x-tick labels
+xticks(1:3);
+xticklabels({'Experimental', 'One Context', 'No Shock'});
+xtickangle(45);
+
+% Improve appearance
+set(gca, 'FontSize', 12, 'LineWidth', 1.5, 'Box', 'off');
+ylim([0, max(means) + max(sem) + 0.1]);
+
+% Add a legend (if needed)
+legend('Experimental', 'One Context', 'No Shock', 'Location', 'NorthEast');
+
+% Adjust spacing
+% grid on;
+% grid minor;
+hold off;
+
+
+%%
+% After completing the analysis above, create a combined visualization of neuron activity
+figure('Name', 'Significant and Highly Active Neurons', 'Position', [100, 100, 1400, 900]);
+
+% Create time vector for x-axis (in seconds)
+time_vector = (0:(total_time_points-1)) / sampling_rate;
+
+% Initialize arrays to store neuron information with their p-values and mean activity
+stim1_neurons_data = struct('animal', {}, 'neuron_idx', {}, 'p_value', {}, 'mean_activity', {}, 'trace', {});
+stim2_neurons_data = struct('animal', {}, 'neuron_idx', {}, 'p_value', {}, 'mean_activity', {}, 'trace', {});
+
+% Define significance and activity thresholds
+p_value_threshold = 0.05;
+stim1_activity_threshold = 0.10;  % For safe-active neurons
+stim2_activity_threshold = 0.10;  % For different-active neurons
+
+for ii = 1:size(animalIDs,1)
+    currentanimal = char(animalIDs(ii));
+    
+    % Check if animal has the session we want to analyze
+    if isfield(final.(currentanimal), session_to_analyze)
+        % Get calcium data
+        ca = final.(currentanimal).(session_to_analyze).CNMFe_data.(ca_data_type);
+        if strcmp(ca_data_type, 'S')
+            ca = full(ca);
+        end
+        
+        % Get responsive neurons, p-values, and mean activity during stimuli
+        responsive_neurons = calcium_events.(currentanimal).responsive_neurons;
+        neuron_p_values = calcium_events.(currentanimal).p_values;
+        mean_events_stim1 = calcium_events.(currentanimal).mean_events_stim1;  % Assuming this exists
+        mean_events_stim2 = calcium_events.(currentanimal).mean_events_stim2;  % Assuming this exists
+        
+        % Extract stim1 preferring neurons (safe-active)
+        stim1_neurons = find(responsive_neurons == 1);
+        for n_idx = 1:length(stim1_neurons)
+            neuron_idx = stim1_neurons(n_idx);
+            
+            % Check if this neuron meets both criteria
+            if neuron_p_values(neuron_idx) < p_value_threshold && mean_events_stim1(neuron_idx) > stim1_activity_threshold
+                % Ensure trace is the right length by trimming if necessary
+                trace = ca(neuron_idx, 1:min(size(ca, 2), length(time_vector)));
+                
+                % Normalize trace to [0,1]
+                normalized_trace = (trace - min(trace)) / (max(trace) - min(trace));
+                
+                % Store neuron data
+                new_data = struct('animal', currentanimal, ...
+                                 'neuron_idx', neuron_idx, ...
+                                 'p_value', neuron_p_values(neuron_idx), ...
+                                 'mean_activity', mean_events_stim1(neuron_idx), ...
+                                 'trace', normalized_trace);
+                stim1_neurons_data = [stim1_neurons_data; new_data];
+            end
+        end
+        
+        % Extract stim2 preferring neurons (different-active)
+        stim2_neurons = find(responsive_neurons == 2);
+        for n_idx = 1:length(stim2_neurons)
+            neuron_idx = stim2_neurons(n_idx);
+            
+            % Check if this neuron meets both criteria
+            if neuron_p_values(neuron_idx) < p_value_threshold && mean_events_stim2(neuron_idx) > stim2_activity_threshold
+                % Ensure trace is the right length by trimming if necessary
+                trace = ca(neuron_idx, 1:min(size(ca, 2), length(time_vector)));
+                
+                % Normalize trace to [0,1]
+                normalized_trace = (trace - min(trace)) / (max(trace) - min(trace));
+                
+                % Store neuron data
+                new_data = struct('animal', currentanimal, ...
+                                 'neuron_idx', neuron_idx, ...
+                                 'p_value', neuron_p_values(neuron_idx), ...
+                                 'mean_activity', mean_events_stim2(neuron_idx), ...
+                                 'trace', normalized_trace);
+                stim2_neurons_data = [stim2_neurons_data; new_data];
+            end
+        end
+    end
+end
+
+% Sort neurons by p-value (ascending order)
+if ~isempty(stim1_neurons_data)
+    [~, idx] = sort([stim1_neurons_data.p_value]);
+    stim1_neurons_data = stim1_neurons_data(idx);
+end
+
+if ~isempty(stim2_neurons_data)
+    [~, idx] = sort([stim2_neurons_data.p_value]);
+    stim2_neurons_data = stim2_neurons_data(idx);
+end
+
+% Take only top 5 neurons (or all if fewer than 5)
+top_n = 5;
+stim1_top_neurons = min(top_n, length(stim1_neurons_data));
+stim2_top_neurons = min(top_n, length(stim2_neurons_data));
+
+% Prepare data for plotting top safe-preferring neurons
+stim1_traces = [];
+stim1_neuron_ids = {};
+
+for i = 1:stim1_top_neurons
+    stim1_traces = [stim1_traces; stim1_neurons_data(i).trace];
+    stim1_neuron_ids = [stim1_neuron_ids; {sprintf('%s-N%d (p=%.3f, act=%.2f)', ...
+                        stim1_neurons_data(i).animal, ...
+                        stim1_neurons_data(i).neuron_idx, ...
+                        stim1_neurons_data(i).p_value, ...
+                        stim1_neurons_data(i).mean_activity)}];
+end
+
+% Prepare data for plotting top different-preferring neurons
+stim2_traces = [];
+stim2_neuron_ids = {};
+
+for i = 1:stim2_top_neurons
+    stim2_traces = [stim2_traces; stim2_neurons_data(i).trace];
+    stim2_neuron_ids = [stim2_neuron_ids; {sprintf('%s-N%d (p=%.3f, act=%.2f)', ...
+                        stim2_neurons_data(i).animal, ...
+                        stim2_neurons_data(i).neuron_idx, ...
+                        stim2_neurons_data(i).p_value, ...
+                        stim2_neurons_data(i).mean_activity)}];
+end
+
+% Trim time vector if needed to match trace length
+if ~isempty(stim1_traces)
+    time_vector = time_vector(1:size(stim1_traces, 2));
+elseif ~isempty(stim2_traces)
+    time_vector = time_vector(1:size(stim2_traces, 2));
+end
+
+% Plot both types of neurons on the same figure
+figure(1);
+hold on;
+
+% Define spacing and layout parameters
+spacing = 1.2;           % Spacing between traces
+central_gap = 2;         % Gap between the two groups of neurons
+total_neurons = stim1_top_neurons + stim2_top_neurons;
+
+% Plot safe-preferring neurons (blue, bottom)
+for i = 1:stim1_top_neurons
+    plot(time_vector, stim1_traces(i,:) + (i-1)*spacing, 'b', 'LineWidth', 1.5);
+end
+
+% Plot different-preferring neurons (red, top)
+for i = 1:stim2_top_neurons
+    % Position them after safe-preferring neurons plus a gap
+    plot(time_vector, stim2_traces(i,:) + (i-1)*spacing + stim1_top_neurons*spacing + central_gap, 'r', 'LineWidth', 1.5);
+end
+
+% Add shading for stimulus periods across entire plot height
+y_max = (total_neurons-1) * spacing + central_gap + 1; 
+
+% Shade stimulus type 1 periods (light blue)
+for stim_idx = 1:size(stimulus_frames{1}, 1)
+    frame_start = stimulus_frames{1}(stim_idx, 1);
+    frame_end = stimulus_frames{1}(stim_idx, 2);
+    x_start = frame_start / sampling_rate;
+    x_end = frame_end / sampling_rate;
+    
+    % Make sure the stimulus periods are within our plot range
+    if x_start <= time_vector(end) && x_end >= time_vector(1)
+        % Adjust to be within range
+        x_start = max(x_start, time_vector(1));
+        x_end = min(x_end, time_vector(end));
+        
+        % Create shaded region
+        rectangle('Position', [x_start, 0, x_end-x_start, y_max], ...
+                 'FaceColor', [0.8, 0.9, 1, 0.2], 'EdgeColor', 'none');
+    end
+end
+
+% Shade stimulus type 2 periods (light red)
+for stim_idx = 1:size(stimulus_frames{2}, 1)
+    frame_start = stimulus_frames{2}(stim_idx, 1);
+    frame_end = stimulus_frames{2}(stim_idx, 2);
+    x_start = frame_start / sampling_rate;
+    x_end = frame_end / sampling_rate;
+    
+    % Make sure the stimulus periods are within our plot range
+    if x_start <= time_vector(end) && x_end >= time_vector(1)
+        % Adjust to be within range
+        x_start = max(x_start, time_vector(1));
+        x_end = min(x_end, time_vector(end));
+        
+        % Create shaded region
+        rectangle('Position', [x_start, 0, x_end-x_start, y_max], ...
+                 'FaceColor', [1, 0.8, 0.8, 0.2], 'EdgeColor', 'none');
+    end
+end
+
+% Create combined y-tick positions and labels
+ytick_positions = [];
+ytick_labels = {};
+
+% Add y-ticks for safe-preferring neurons
+for i = 1:stim1_top_neurons
+    ytick_positions = [ytick_positions, (i-1)*spacing];
+    ytick_labels = [ytick_labels, stim1_neuron_ids(i)];
+end
+
+% Add y-ticks for different-preferring neurons
+for i = 1:stim2_top_neurons
+    ytick_positions = [ytick_positions, (i-1)*spacing + stim1_top_neurons*spacing + central_gap];
+    ytick_labels = [ytick_labels, stim2_neuron_ids(i)];
+end
+
+% Set y-tick labels
+yticks(ytick_positions);
+yticklabels(ytick_labels);
+
+% Add a horizontal line to separate the two groups
+if stim1_top_neurons > 0 && stim2_top_neurons > 0
+    separator_y = stim1_top_neurons * spacing + central_gap/2;
+    line([time_vector(1), time_vector(end)], [separator_y, separator_y], 'Color', 'k', 'LineStyle', '--');
+end
+
+% Create custom legend
+h_safe = plot(NaN, NaN, 'b', 'LineWidth', 1.5);
+h_diff = plot(NaN, NaN, 'r', 'LineWidth', 1.5);
+h_stim1 = rectangle('Position', [0, 0, 0, 0], 'FaceColor', [0.8, 0.9, 1, 0.2], 'EdgeColor', 'none');
+h_stim2 = rectangle('Position', [0, 0, 0, 0], 'FaceColor', [1, 0.8, 0.8, 0.2], 'EdgeColor', 'none');
+
+% Create legend
+legend([h_safe, h_diff, h_stim1, h_stim2], ...
+       {'Safe-Preferring Neurons', 'Different-Preferring Neurons', 'Safe Stimulus', 'Different Stimulus'}, ...
+       'Location', 'northoutside', 'Orientation', 'horizontal');
+
+% Add labels and title
+xlabel('Time (seconds)');
+title(['Top Neurons with p < ' num2str(p_value_threshold) ...
+       ' and Activity > ' num2str(stim1_activity_threshold) ...
+       ' (' num2str(stim1_top_neurons) ' Safe, ' num2str(stim2_top_neurons) ' Different)']);
+
+% Add group labels to clarify the two sections
+if stim1_top_neurons > 0
+    text(time_vector(1) - 0.05*range(time_vector), (stim1_top_neurons-1)*spacing/2, 'Safe-Preferring', ...
+         'Color', 'b', 'FontWeight', 'bold', 'HorizontalAlignment', 'right', 'Rotation', 90);
+end
+
+if stim2_top_neurons > 0
+    text(time_vector(1) - 0.05*range(time_vector), (stim1_top_neurons)*spacing + central_gap + (stim2_top_neurons-1)*spacing/2, 'Different-Preferring', ...
+         'Color', 'r', 'FontWeight', 'bold', 'HorizontalAlignment', 'right', 'Rotation', 90);
+end
+
+% Set y-limits with a bit of padding
+ylim([-0.5, y_max + 0.5]);
+
+hold off;
+
+% Display information about the selection criteria
+fprintf(['Neuron selection criteria:\n' ...
+         '- Safe-preferring: p < %.3f and mean_events_stim1 > %.3f\n' ...
+         '- Different-preferring: p < %.3f and mean_events_stim2 > %.3f\n' ...
+         '- Found %d safe-preferring and %d different-preferring neurons meeting criteria\n'], ...
+         p_value_threshold, stim1_activity_threshold, ...
+         p_value_threshold, stim2_activity_threshold, ...
+         length(stim1_neurons_data), length(stim2_neurons_data));
+
+% Save figure
+% savefig(1, 'significant_active_neurons.fig');
+% saveas(1, 'significant_active_neurons.png');

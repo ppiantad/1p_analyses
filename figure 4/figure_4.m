@@ -1199,7 +1199,7 @@ remapped_prechoice_sum = sum(remapped_prechoice)
 
 mean_data_array = {neuron_mean_array{1, 1}(conserved_prechoice  ==1, :), neuron_mean_array{1, 8}(conserved_prechoice  ==1, :), neuron_mean_array{1, 8}(lost_prechoice  ==1, :)}
 sem_data_array = {neuron_sem_array{1, 1}(conserved_prechoice  ==1, :), neuron_sem_array{1, 8}(conserved_prechoice  ==1, :), neuron_sem_array{1, 8}(lost_prechoice  ==1, :)}
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1)
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 5], [-0.5 0.7])
 
 
 %%
