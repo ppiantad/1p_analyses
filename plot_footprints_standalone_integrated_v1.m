@@ -7,12 +7,12 @@
 
 
 % String to compare
-targetAnimal = 'BLA_Insc_35';
+targetAnimal = 'B57677';
 
 % Perform element-wise comparison
 animal_index_to_plot = find(strcmp(animalIDs, targetAnimal));
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'D1_Afternoon';
 
 Coor = final.(targetAnimal).(session_to_analyze).CNMFe_data.Coor;  
 
@@ -144,7 +144,8 @@ for i = 1:numel(Coor)
         plot_color = "black";
     end
 
-
+    % plot_color = "red";
+    
     % Plot the circle
     fill(x, y, plot_color);
 

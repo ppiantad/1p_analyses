@@ -1389,8 +1389,8 @@ variable_to_correlate = trial_choice_times_by_mouse;
 meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
-% timeRange = (ts1 >= -4) & (ts1 <= 0);
-timeRange = (ts1 >= 0) & (ts1 <= 2);
+timeRange = (ts1 >= -4) & (ts1 <= 0);
+% timeRange = (ts1 >= 0) & (ts1 <= 2);
 % timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
@@ -1541,10 +1541,11 @@ hold off;
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
 % only_shk_responsive_corrs = allCorrelations(kmeans_idx' == 3);
 only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
-only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 == 1);
-% not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
+% only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 == 1);
+% only_shk_responsive_corrs = allCorrelations(collect_block_1 == 1);
+not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
 % not_shk_responsive_corrs = allCorrelations(kmeans_idx' ~= 3);
-not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
+% not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
 
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
@@ -2609,11 +2610,37 @@ plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
 
-only_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 == 1 & postchoice_reward_block_1 ~=1);
-not_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
 
-only_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 == 1 & postchoice_reward_block_1 ~=1);
-not_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
+
+
+% only_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 == 1 & postchoice_reward_block_1 ~=1);
+% not_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
+% 
+% only_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 == 1 & postchoice_reward_block_1 ~=1);
+% not_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
+
+
+% 
+% only_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ==1);
+% not_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
+% 
+% only_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ==1);
+% not_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
+
+
+only_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 == 1);
+not_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(true_neutral == 1);
+
+only_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 == 1);
+not_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(true_neutral == 1);
+
+% only_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(postchoice_reward_block_1 == 1);
+% not_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(postchoice_reward_block_1 ~= 1);
+% 
+% only_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(postchoice_reward_block_1 == 1);
+% not_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(postchoice_reward_block_1 ~= 1);
+
+
 
 % Create histograms for SHK responsive correlations for both types
 figure;
@@ -2775,6 +2802,49 @@ ytickformat('%.1f');
 hold off;
 
 
+bar_separation_value = 3;
+
+figure;
+width = 200; % Width of the figure
+height = 200; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+swarmchart(ones(1, length(only_shk_responsive_corrs_Type1_2)), only_shk_responsive_corrs_Type1_2)
+hold on
+swarmchart(ones(1, length(not_shk_responsive_corrs_Type1_2))*bar_separation_value, not_shk_responsive_corrs_Type1_2)
+
+% yline(mean(only_shk_responsive_corrs), ones(length(only_shk_responsive_corrs)))
+plot([0.5; 1.5], [mean(only_shk_responsive_corrs_Type1_2); mean(only_shk_responsive_corrs_Type1_2)], 'LineWidth',3)
+plot([bar_separation_value-.5; bar_separation_value+.5], [mean(not_shk_responsive_corrs_Type1_2); mean(not_shk_responsive_corrs_Type1_2)], 'LineWidth',3)
+yline(0);
+xtickformat('%.1f');
+ytickformat('%.1f');
+hold off
+
+
+% Create a histogram for allCorrelations
+figure;
+width = 250; % Width of the figure
+height = 250; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+histogram(not_shk_responsive_corrs_Type1_2 , 'Normalization', 'probability', 'FaceColor', 'blue','BinWidth', 0.05,'LineStyle','none');
+hold on;
+
+% Create a histogram for only_shk_responsive_corrs on the same figure
+histogram(only_shk_responsive_corrs_Type1_2, 'Normalization', 'probability', 'FaceColor', 'red', 'BinWidth', 0.05, 'LineStyle','none');
+% xline(mean_only_shk, 'r')
+% xline(mean_not_shk, 'g')
+% Add labels and title
+xlabel('Correlation Coefficient');
+ylabel('Probability');
+% title('Histograms of Correlation Coefficients');
+% legend('All Correlations', 'Only SHK Responsive Correlations');
+
+% Optionally, you can add a vertical line at 0 for reference
+yLimits = ylim;
+plot([0 0], yLimits, 'k', 'LineWidth', 2);
+xtickformat('%.2f');
+ytickformat('%.2f');
+hold off;
 
 %% plot scatters for individual neurons & behav variables
 

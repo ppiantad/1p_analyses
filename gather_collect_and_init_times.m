@@ -77,7 +77,7 @@ for ii = 1:size(animalIDs, 1)
 
 
         [BehavData,trials,varargin]=TrialFilter_test(BehavData,'OMITALL', 0, 'BLANK_TOUCH', 0);
-
+        
         trial_after_shock_mouse{ii} = BehavData.trial_after_shk;
         block_data_for_mouse{ii} = BehavData.Block;
 
@@ -163,7 +163,7 @@ baseline_CI = prctile(boot_baseline, [alpha/2 * 100, (1 - alpha/2) * 100]);
 mean_across_rows = mean(initiation_times_concat, 1);
 
 % Identify time points where the mean is outside the baseline CI
-sig_diff_timepoints = (mean_across_rows > baseline_CI(2)) | (mean_across_rows < baseline_CI(1));
+sig_diff_timepoints = (mean_across_rows > mean(baseline_CI(2, :))) | (mean_across_rows < mean(baseline_CI(1, :)));
 
 % Plot results
 figure;
@@ -229,7 +229,7 @@ baseline_CI = prctile(boot_baseline, [alpha/2 * 100, (1 - alpha/2) * 100]);
 mean_across_rows = mean(collect_times_concat, 1);
 
 % Identify time points where the mean is outside the baseline CI
-sig_diff_timepoints = (mean_across_rows > baseline_CI(2)) | (mean_across_rows < baseline_CI(1));
+sig_diff_timepoints = (mean_across_rows > mean(baseline_CI(2, :))) | (mean_across_rows < mean(baseline_CI(1, :)));
 
 % Plot results
 figure;
@@ -332,7 +332,7 @@ baseline_CI = prctile(boot_baseline, [alpha/2 * 100, (1 - alpha/2) * 100]);
 mean_across_rows = mean(initiation_times_concat, 1);
 
 % Identify time points where the mean is outside the baseline CI
-sig_diff_timepoints = (mean_across_rows > baseline_CI(2)) | (mean_across_rows < baseline_CI(1));
+sig_diff_timepoints = (mean_across_rows > mean(baseline_CI(2, :))) | (mean_across_rows < mean(baseline_CI(1, :)));
 
 % Plot results
 figure;

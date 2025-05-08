@@ -176,3 +176,76 @@ figure;
 for i = 1:size(K, 2)
     text(S.ZoneCentroid(i,1), S.ZoneCentroid(i,2),  [num2str(K(1,i))])
 end
+
+
+%%
+shk_consistent = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 1;
+sum(shk_consistent)
+shk_first_only = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} ~= 1;
+sum(shk_first_only)
+shk_second_only = respClass_all_array{1,1} ~= 1 & respClass_all_array{1,2} == 1;
+sum(shk_second_only)
+
+% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
+% this outputs a ever so slightly wonky diagram. a few nodes that do not
+% actually overlap minimally overlap (but intersections are 0), and 1 node
+% that has 1 overlap does not overlap at all. 
+% shk_consistent_ind = find(respClass_all_array{1,1} == 1);
+% pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
+shk_first_only_ind = find(respClass_all_array{1,1} == 1);
+shk_second_only_ind = find(respClass_all_array{1,2} == 1);
+% consum_inhibited_ind = find(all_consum_inhibited == 1);
+% setListData = {shk_first_only_ind, shk_second_only_ind};
+setListData = {shk_first_only_ind, shk_second_only_ind};
+setLabels = ["Shock Test", "RDT D1"];
+figure;
+ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
+
+ve_diagram.ShowIntersectionCounts = true;
+ve_diagram.ShowIntersectionAreas = true;
+% h.SetLabels = [];
+
+%%
+
+shk_and_consum_both_excited = respClass_all_array{1,1} == 1 & respClass_all_array{1,2} == 1;
+% this is the start of checking if neurons are MORE active than during
+% other events, i.e. if you wanted to check if REW activated neurons are
+% significantly differentially activated by SHK. preliminary poking around
+% seems to suggest that few large reward active neurons have their activity
+% increase in response to SHK
+co_activated_indices = find(shk_and_consum_both_excited(1,:) == 1);
+co_activated_indices_sum = numel(co_activated_indices);
+
+% Calculate different groups as percentages
+only_shk = (sum(respClass_all_array{1,1} == 1)/neuron_num)*100 - (co_activated_indices_sum/neuron_num)*100; % SHK only
+only_consumption = (sum(respClass_all_array{1,2} == 1)/neuron_num)*100 - (co_activated_indices_sum/neuron_num)*100; % Consumption only
+both = (co_activated_indices_sum/neuron_num)*100; % Overlap between SHK and Consumption
+not_modulated = 100 - (only_shk + only_consumption + both); % Unmodulated neurons
+
+% Data for the stacked bar (bottom to top: Not modulated, Consumption only, Both, SHK only)
+data_for_bar_plot = [not_modulated, only_consumption, both, only_shk];
+
+% Create the stacked bar plot
+figure;
+bar(1, data_for_bar_plot, 'stacked'); % Single bar at x = 1
+colormap([0.7 0.7 0.7; 0 0 1; 0.8 0.8 0; 1 0 0]); % Grey (Unmodulated), Blue (Consumption), Yellow (Both), Red (SHK)
+
+% Formatting
+xticks(1); % Single bar on x-axis
+xticklabels({'Neuron Modulation'});
+ylabel('Percentage of Neurons (%)');
+title('Neuron Modulation by Events');
+ylim([0 100]); % Ensure the bar always reaches 100%
+legend({'Not Modulated', 'Consumption Only', 'Both', 'SHK Only'}, 'Location', 'eastoutside');
+
+% Adding percentage labels
+y_offset = 0; % Start at the base of the bar
+for i = 1:length(data_for_bar_plot)
+    if data_for_bar_plot(i) > 0  % Only add labels for non-zero sections
+        text(1, y_offset + data_for_bar_plot(i)/2, sprintf('%.1f%%', data_for_bar_plot(i)), ...
+            'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', ...
+            'Color', 'white', 'FontWeight', 'bold');
+        y_offset = y_offset + data_for_bar_plot(i); % Move up for next section
+    end
+end
+

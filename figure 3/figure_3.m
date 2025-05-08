@@ -636,7 +636,7 @@ ytickformat('%.1f');
 hold off;
 
 
-variable_to_correlate = delay_to_collect_post_shk_by_mouse;
+variable_to_correlate = delay_to_initiation_by_mouse;
 
 %%
 array_for_means = 4; 
@@ -810,7 +810,7 @@ mean_not_shk = mean(not_shk_responsive_corrs);
 % Create a histogram for allCorrelations
 figure;
 width = 250; % Width of the figure
-height = 500; % Height of the figure (width is half of height)
+height = 250; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 histogram(not_shk_responsive_corrs , 'Normalization', 'probability', 'FaceColor', 'blue','BinWidth', 0.05,'LineStyle','none');
 hold on;
@@ -876,7 +876,7 @@ bar_separation_value = 3;
 
 figure;
 width = 250; % Width of the figure
-height = 500; % Height of the figure (width is half of height)
+height = 250; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 swarmchart(ones(1, length(only_shk_responsive_corrs)), only_shk_responsive_corrs)
 hold on

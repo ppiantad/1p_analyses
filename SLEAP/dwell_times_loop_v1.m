@@ -264,7 +264,7 @@ figure;
 hold on;
 
 % Set figure size
-width = 600; % Width of the figure
+width = 200; % Width of the figure
 height = 450; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 

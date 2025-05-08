@@ -12,13 +12,13 @@ sum(shk_second_only)
 % this outputs a ever so slightly wonky diagram. a few nodes that do not
 % actually overlap minimally overlap (but intersections are 0), and 1 node
 % that has 1 overlap does not overlap at all. 
-shk_consistent_ind = find(respClass_all_array{1,1} == 1);
+% shk_consistent_ind = find(respClass_all_array{1,1} == 1);
 % pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
 shk_first_only_ind = find(respClass_all_array{1,1} == 1);
 shk_second_only_ind = find(respClass_all_array{1,2} == 1);
 % consum_inhibited_ind = find(all_consum_inhibited == 1);
 % setListData = {shk_first_only_ind, shk_second_only_ind};
-setListData = {shk_second_only_ind, shk_first_only_ind};
+setListData = {shk_first_only_ind, shk_second_only_ind};
 setLabels = ["Shock Test", "RDT D1"];
 figure;
 ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);

@@ -27,7 +27,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 
-session_to_analyze = 'D1_Afternoon';
+session_to_analyze = 'D3';
 
 % Parameters
 session_duration = 12 * 60; % seconds
@@ -64,6 +64,48 @@ for i = 0:(num_shocks-1)
     shk_on(i+1) = shock_start_time + i * shock_interval; % Shock start time in seconds
     shk_off(i+1) = shk_on(i+1) + shock_duration; % Shock end time in seconds
 end
+
+
+
+
+% Parameters
+stimulus_duration = 2 * 60; % 2 minutes in seconds
+num_repeats = 3;
+total_stimuli = 2;
+
+% Initialize variables
+stimulus_times = cell(total_stimuli, 1);
+current_time = 0;
+
+session_length_in_min = 12;
+
+% Loop through each stimulus alternately and calculate start and end times
+for j = 1:num_repeats
+    for i = 1:total_stimuli
+        start_time = current_time;
+        end_time = start_time + stimulus_duration;
+        
+        if isempty(stimulus_times{i})
+            stimulus_times{i} = [start_time, end_time];
+        else
+            stimulus_times{i} = [stimulus_times{i}; start_time, end_time];
+        end
+        
+        current_time = end_time;
+    end
+end
+
+
+% Multiply every value in stimulus_times by the FPS
+for i = 1:total_stimuli
+    stimulus_frames{i} = stimulus_times{i} * sampling_rate;
+end
+
+stimulus_change_times = ([stimulus_frames{1,1}(:, 1); stimulus_frames{1,2}(:, 1)]/sampling_rate)';
+aversive_context_on_times = ([stimulus_frames{1,2}(:, 1)]/sampling_rate)';
+
+
+
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
@@ -154,7 +196,24 @@ for ii = 1:size(animalIDs,1)
 
 
         time_array = (0:(num_samples-1)) / sampling_frequency;
-        eTS = shk_on'; %get time stamps
+
+
+
+                % get freeze on times by running get_context_freeze for the
+        % relevant session
+        % freeze_on_times = final_DLC.(currentanimal).(session_to_analyze).freeze_times_mouse(1, :);
+        % 
+        % eTS = freeze_on_times';
+
+        % freeze_on_times = final_DLC.(currentanimal).(session_to_analyze).move_times_mouse(1, :);
+
+        eTS = freeze_on_times';
+        eTS = eTS(eTS > 10);
+
+        % eTS = aversive_context_on_times'; %get time stamps
+        % eTS = shk_on'; %get time stamps
+
+
         zb_session = [];
         zsd_session = [];
         zb_session = mean(ca,2);
@@ -426,9 +485,9 @@ clim([-1 1]);
 c = colorbar('eastoutside');
 set(c, 'YTick', clim); % 
 ylim([1, size(neuron_mean_sorted, 1)]);
-xlim([-4 4]);
+xlim([-2 4]);
 % Set X-axis ticks
-set(gca, 'XTick', [-4, 0, 4]);
+set(gca, 'XTick', [-2, 0, 4]);
 set(gca, 'YTick', [1, size(neuron_mean_sorted, 1)]);
 xline(0)
 % scatter(time2Collect, Tris               , 'Marker', 'p')

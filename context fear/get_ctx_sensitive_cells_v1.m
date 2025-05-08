@@ -27,7 +27,7 @@ ca_data_type = "S"; % C % C_raw %S
 % (10) for spike rate
 
 
-session_to_analyze = 'D4';
+session_to_analyze = 'D3';
 
 % Parameters
 session_duration = 12 * 60; % seconds
@@ -423,7 +423,7 @@ sem = [std(percent_responsive_experimental_mice)/sqrt(length(percent_responsive_
        std(percent_responsive_no_shock_mice)/sqrt(length(percent_responsive_no_shock_mice))];
 
 % Create a figure
-figure('Position', [100, 100, 600, 500]);
+figure('Position', [100, 100, 200, 500]);
 
 % Create bar plot
 b = bar(means, 'FaceColor', 'flat');
@@ -443,26 +443,26 @@ x2 = repmat(2, size(percent_responsive_one_context_mice)) + (rand(size(percent_r
 x3 = repmat(3, size(percent_responsive_no_shock_mice)) + (rand(size(percent_responsive_no_shock_mice))-0.5)*0.2;
 
 % Plot scatter points
-scatter(x1, percent_responsive_experimental_mice, 50, 'k', 'filled', 'MarkerFaceAlpha', 0.7);
-scatter(x2, percent_responsive_one_context_mice, 50, 'k', 'filled', 'MarkerFaceAlpha', 0.7);
-scatter(x3, percent_responsive_no_shock_mice, 50, 'k', 'filled', 'MarkerFaceAlpha', 0.7);
+scatter(x1, percent_responsive_experimental_mice, 50, 'k');
+scatter(x2, percent_responsive_one_context_mice, 50, 'k');
+scatter(x3, percent_responsive_no_shock_mice, 50, 'k');
 
 % Set axis labels and title
 % xlabel('Condition', 'FontSize', 14, 'FontWeight', 'bold');
-ylabel('Percent responsive (%)', 'FontSize', 14, 'FontWeight', 'bold');
+% ylabel('Percent responsive (%)', 'FontSize', 14, 'FontWeight', 'bold');
 % title('Percent Responsive Mice by Condition', 'FontSize', 16, 'FontWeight', 'bold');
 
 % Set x-tick labels
 xticks(1:3);
-xticklabels({'Experimental', 'One Context', 'No Shock'});
-xtickangle(45);
+% xticklabels({'Experimental', 'One Context', 'No Shock'});
+% xtickangle(45);
 
 % Improve appearance
-set(gca, 'FontSize', 12, 'LineWidth', 1.5, 'Box', 'off');
-ylim([0, max(means) + max(sem) + 0.1]);
+set(gca, 'FontSize', 12, 'LineWidth', 1, 'Box', 'off');
+ylim([0, 15]);
 
 % Add a legend (if needed)
-legend('Experimental', 'One Context', 'No Shock', 'Location', 'NorthEast');
+% legend('Experimental', 'One Context', 'No Shock', 'Location', 'NorthEast');
 
 % Adjust spacing
 % grid on;
@@ -472,19 +472,19 @@ hold off;
 
 %%
 % After completing the analysis above, create a combined visualization of neuron activity
-figure('Name', 'Significant and Highly Active Neurons', 'Position', [100, 100, 1400, 900]);
+figure('Name', 'Neurons with Highest Differential Activity', 'Position', [100, 100, 1400, 900]);
 
 % Create time vector for x-axis (in seconds)
 time_vector = (0:(total_time_points-1)) / sampling_rate;
 
-% Initialize arrays to store neuron information with their p-values and mean activity
-stim1_neurons_data = struct('animal', {}, 'neuron_idx', {}, 'p_value', {}, 'mean_activity', {}, 'trace', {});
-stim2_neurons_data = struct('animal', {}, 'neuron_idx', {}, 'p_value', {}, 'mean_activity', {}, 'trace', {});
+% Initialize arrays to store neuron information with their activity measures
+stim1_neurons_data = struct('animal', {}, 'neuron_idx', {}, 'p_value', {}, ...
+                          'mean_stim1', {}, 'mean_stim2', {}, 'diff', {}, 'trace', {});
+stim2_neurons_data = struct('animal', {}, 'neuron_idx', {}, 'p_value', {}, ...
+                          'mean_stim1', {}, 'mean_stim2', {}, 'diff', {}, 'trace', {});
 
-% Define significance and activity thresholds
+% Define significance threshold
 p_value_threshold = 0.05;
-stim1_activity_threshold = 0.10;  % For safe-active neurons
-stim2_activity_threshold = 0.10;  % For different-active neurons
 
 for ii = 1:size(animalIDs,1)
     currentanimal = char(animalIDs(ii));
@@ -497,19 +497,22 @@ for ii = 1:size(animalIDs,1)
             ca = full(ca);
         end
         
-        % Get responsive neurons, p-values, and mean activity during stimuli
+        % Get responsive neurons and activity measures
         responsive_neurons = calcium_events.(currentanimal).responsive_neurons;
         neuron_p_values = calcium_events.(currentanimal).p_values;
-        mean_events_stim1 = calcium_events.(currentanimal).mean_events_stim1;  % Assuming this exists
-        mean_events_stim2 = calcium_events.(currentanimal).mean_events_stim2;  % Assuming this exists
+        mean_events_stim1 = calcium_events.(currentanimal).mean_events_stim1;
+        mean_events_stim2 = calcium_events.(currentanimal).mean_events_stim2;
         
         % Extract stim1 preferring neurons (safe-active)
         stim1_neurons = find(responsive_neurons == 1);
         for n_idx = 1:length(stim1_neurons)
             neuron_idx = stim1_neurons(n_idx);
             
-            % Check if this neuron meets both criteria
-            if neuron_p_values(neuron_idx) < p_value_threshold && mean_events_stim1(neuron_idx) > stim1_activity_threshold
+            % Check if this neuron meets the p-value threshold
+            if neuron_p_values(neuron_idx) < p_value_threshold
+                % Calculate the activity difference
+                activity_diff = mean_events_stim1(neuron_idx) - mean_events_stim2(neuron_idx);
+                
                 % Ensure trace is the right length by trimming if necessary
                 trace = ca(neuron_idx, 1:min(size(ca, 2), length(time_vector)));
                 
@@ -520,7 +523,9 @@ for ii = 1:size(animalIDs,1)
                 new_data = struct('animal', currentanimal, ...
                                  'neuron_idx', neuron_idx, ...
                                  'p_value', neuron_p_values(neuron_idx), ...
-                                 'mean_activity', mean_events_stim1(neuron_idx), ...
+                                 'mean_stim1', mean_events_stim1(neuron_idx), ...
+                                 'mean_stim2', mean_events_stim2(neuron_idx), ...
+                                 'diff', activity_diff, ...
                                  'trace', normalized_trace);
                 stim1_neurons_data = [stim1_neurons_data; new_data];
             end
@@ -531,8 +536,11 @@ for ii = 1:size(animalIDs,1)
         for n_idx = 1:length(stim2_neurons)
             neuron_idx = stim2_neurons(n_idx);
             
-            % Check if this neuron meets both criteria
-            if neuron_p_values(neuron_idx) < p_value_threshold && mean_events_stim2(neuron_idx) > stim2_activity_threshold
+            % Check if this neuron meets the p-value threshold
+            if neuron_p_values(neuron_idx) < p_value_threshold
+                % Calculate the activity difference (negative for different-preferring)
+                activity_diff = mean_events_stim2(neuron_idx) - mean_events_stim1(neuron_idx);
+                
                 % Ensure trace is the right length by trimming if necessary
                 trace = ca(neuron_idx, 1:min(size(ca, 2), length(time_vector)));
                 
@@ -543,7 +551,9 @@ for ii = 1:size(animalIDs,1)
                 new_data = struct('animal', currentanimal, ...
                                  'neuron_idx', neuron_idx, ...
                                  'p_value', neuron_p_values(neuron_idx), ...
-                                 'mean_activity', mean_events_stim2(neuron_idx), ...
+                                 'mean_stim1', mean_events_stim1(neuron_idx), ...
+                                 'mean_stim2', mean_events_stim2(neuron_idx), ...
+                                 'diff', activity_diff, ...
                                  'trace', normalized_trace);
                 stim2_neurons_data = [stim2_neurons_data; new_data];
             end
@@ -551,14 +561,14 @@ for ii = 1:size(animalIDs,1)
     end
 end
 
-% Sort neurons by p-value (ascending order)
+% Sort neurons by absolute activity difference (descending order)
 if ~isempty(stim1_neurons_data)
-    [~, idx] = sort([stim1_neurons_data.p_value]);
+    [~, idx] = sort([stim1_neurons_data.diff], 'descend');
     stim1_neurons_data = stim1_neurons_data(idx);
 end
 
 if ~isempty(stim2_neurons_data)
-    [~, idx] = sort([stim2_neurons_data.p_value]);
+    [~, idx] = sort([stim2_neurons_data.diff], 'descend');
     stim2_neurons_data = stim2_neurons_data(idx);
 end
 
@@ -573,11 +583,12 @@ stim1_neuron_ids = {};
 
 for i = 1:stim1_top_neurons
     stim1_traces = [stim1_traces; stim1_neurons_data(i).trace];
-    stim1_neuron_ids = [stim1_neuron_ids; {sprintf('%s-N%d (p=%.3f, act=%.2f)', ...
+    stim1_neuron_ids = [stim1_neuron_ids; {sprintf('%s-N%d (diff=%.2f, S1=%.2f, S2=%.2f)', ...
                         stim1_neurons_data(i).animal, ...
                         stim1_neurons_data(i).neuron_idx, ...
-                        stim1_neurons_data(i).p_value, ...
-                        stim1_neurons_data(i).mean_activity)}];
+                        stim1_neurons_data(i).diff, ...
+                        stim1_neurons_data(i).mean_stim1, ...
+                        stim1_neurons_data(i).mean_stim2)}];
 end
 
 % Prepare data for plotting top different-preferring neurons
@@ -586,11 +597,12 @@ stim2_neuron_ids = {};
 
 for i = 1:stim2_top_neurons
     stim2_traces = [stim2_traces; stim2_neurons_data(i).trace];
-    stim2_neuron_ids = [stim2_neuron_ids; {sprintf('%s-N%d (p=%.3f, act=%.2f)', ...
+    stim2_neuron_ids = [stim2_neuron_ids; {sprintf('%s-N%d (diff=%.2f, S1=%.2f, S2=%.2f)', ...
                         stim2_neurons_data(i).animal, ...
                         stim2_neurons_data(i).neuron_idx, ...
-                        stim2_neurons_data(i).p_value, ...
-                        stim2_neurons_data(i).mean_activity)}];
+                        stim2_neurons_data(i).diff, ...
+                        stim2_neurons_data(i).mean_stim1, ...
+                        stim2_neurons_data(i).mean_stim2)}];
 end
 
 % Trim time vector if needed to match trace length
@@ -700,8 +712,7 @@ legend([h_safe, h_diff, h_stim1, h_stim2], ...
 
 % Add labels and title
 xlabel('Time (seconds)');
-title(['Top Neurons with p < ' num2str(p_value_threshold) ...
-       ' and Activity > ' num2str(stim1_activity_threshold) ...
+title(['Neurons with Highest Differential Activity (p < ' num2str(p_value_threshold) ')' ...
        ' (' num2str(stim1_top_neurons) ' Safe, ' num2str(stim2_top_neurons) ' Different)']);
 
 % Add group labels to clarify the two sections
@@ -720,15 +731,37 @@ ylim([-0.5, y_max + 0.5]);
 
 hold off;
 
-% Display information about the selection criteria
+% Display information about the selection criteria and results
 fprintf(['Neuron selection criteria:\n' ...
-         '- Safe-preferring: p < %.3f and mean_events_stim1 > %.3f\n' ...
-         '- Different-preferring: p < %.3f and mean_events_stim2 > %.3f\n' ...
+         '- Safe-preferring: p < %.3f and sorted by (mean_stim1 - mean_stim2)\n' ...
+         '- Different-preferring: p < %.3f and sorted by (mean_stim2 - mean_stim1)\n' ...
          '- Found %d safe-preferring and %d different-preferring neurons meeting criteria\n'], ...
-         p_value_threshold, stim1_activity_threshold, ...
-         p_value_threshold, stim2_activity_threshold, ...
+         p_value_threshold, p_value_threshold, ...
          length(stim1_neurons_data), length(stim2_neurons_data));
 
+% Display top neurons with their differential activity
+fprintf('\nTop Safe-Preferring Neurons:\n');
+for i = 1:stim1_top_neurons
+    fprintf('%s-N%d: diff=%.2f (S1=%.2f, S2=%.2f, p=%.4f)\n', ...
+            stim1_neurons_data(i).animal, ...
+            stim1_neurons_data(i).neuron_idx, ...
+            stim1_neurons_data(i).diff, ...
+            stim1_neurons_data(i).mean_stim1, ...
+            stim1_neurons_data(i).mean_stim2, ...
+            stim1_neurons_data(i).p_value);
+end
+
+fprintf('\nTop Different-Preferring Neurons:\n');
+for i = 1:stim2_top_neurons
+    fprintf('%s-N%d: diff=%.2f (S1=%.2f, S2=%.2f, p=%.4f)\n', ...
+            stim2_neurons_data(i).animal, ...
+            stim2_neurons_data(i).neuron_idx, ...
+            stim2_neurons_data(i).diff, ...
+            stim2_neurons_data(i).mean_stim1, ...
+            stim2_neurons_data(i).mean_stim2, ...
+            stim2_neurons_data(i).p_value);
+end
+
 % Save figure
-% savefig(1, 'significant_active_neurons.fig');
-% saveas(1, 'significant_active_neurons.png');
+% savefig(1, 'highest_differential_neurons.fig');
+% saveas(1, 'highest_differential_neurons.png');

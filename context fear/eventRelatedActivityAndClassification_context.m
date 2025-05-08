@@ -19,7 +19,7 @@ load('acton.mat')
 uv.evtWin = [-4 4]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
-uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice [0 2] [0 1]
+uv.evtSigWin.outcome = [-2 0]; %for SHK or immediate post-choice [0 2] [0 1]
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
 ca_data_type = "C_raw"; % C % C_raw %S
@@ -30,7 +30,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 
-session_to_analyze = 'D1_Afternoon';
+session_to_analyze = 'D4';
 
 % Parameters
 session_duration = 12 * 60; % seconds
@@ -67,6 +67,45 @@ for i = 0:(num_shocks-1)
     shk_on(i+1) = shock_start_time + i * shock_interval; % Shock start time in seconds
     shk_off(i+1) = shk_on(i+1) + shock_duration; % Shock end time in seconds
 end
+
+% Parameters
+stimulus_duration = 2 * 60; % 2 minutes in seconds
+num_repeats = 3;
+total_stimuli = 2;
+
+% Initialize variables
+stimulus_times = cell(total_stimuli, 1);
+current_time = 0;
+
+session_length_in_min = 12;
+
+% Loop through each stimulus alternately and calculate start and end times
+for j = 1:num_repeats
+    for i = 1:total_stimuli
+        start_time = current_time;
+        end_time = start_time + stimulus_duration;
+        
+        if isempty(stimulus_times{i})
+            stimulus_times{i} = [start_time, end_time];
+        else
+            stimulus_times{i} = [stimulus_times{i}; start_time, end_time];
+        end
+        
+        current_time = end_time;
+    end
+end
+
+
+% Multiply every value in stimulus_times by the FPS
+for i = 1:total_stimuli
+    stimulus_frames{i} = stimulus_times{i} * sampling_rate;
+end
+
+stimulus_change_times = ([stimulus_frames{1,1}(:, 1); stimulus_frames{1,2}(:, 1)]/sampling_rate)';
+aversive_context_on_times = ([stimulus_frames{1,2}(:, 1)]/sampling_rate)';
+safe_context_on_times = ([stimulus_frames{1,1}(:, 1)]/sampling_rate)';
+
+
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
@@ -191,7 +230,17 @@ for ii = 1:size(fieldnames(final),1)
         sampling_frequency = (final.(currentanimal).(session_to_analyze).uv.sampling_rate);
 
         time_array = (0:(num_samples-1)) / sampling_frequency;
-        eTS = shk_on'; %get time stamps
+
+
+        % get freeze on times by running get_context_freeze for the
+        % relevant session
+        freeze_on_times = final_DLC.(currentanimal).(session_to_analyze).freeze_times_mouse(1, :);
+
+        eTS = freeze_on_times';
+        % 
+        % eTS = shk_on'; %get time stamps
+        % 
+        % eTS = aversive_context_on_times'; %get time stamps
         for e = 1:size(eTS,1)                                                      %for each event
             evtWinIdx = ts1 >= uv.evtSigWin.outcome(1,1) &...          %calculate logical index for each event period
                 ts1 <= uv.evtSigWin.outcome(1,2);
@@ -224,6 +273,13 @@ for ii = 1:size(fieldnames(final),1)
                 for t = 1:size(eTS,1)
                     % set each trial's temporal boundaries
 
+                    center_time = eTS(t);
+                    window_start_time = center_time + uv.evtWin(1,1);
+                    % Find the closest index in time_array to your window start
+                    [~, start_idx] = min(abs(time_array - window_start_time));
+                    % Get exactly numMeasurements points
+                    end_idx = start_idx + numMeasurements - 1;
+                    window_indices = start_idx:end_idx;
 
                     timeWin = [eTS(t)+uv.evtWin(1,1):uv.dt:eTS(t)+uv.evtWin(1,2)];  %calculate time window around each event
                     BL_win = [eTS(t)+uv.BLper(1,1):uv.dt:eTS(t)+uv.BLper(1,2)];
@@ -236,8 +292,8 @@ for ii = 1:size(fieldnames(final),1)
                         idx = time_array >= min(timeWin) & time_array < max(timeWin);      %logical index of time window around each behavioral event time  %idx = caTime > min(timeWin) & caTime < max(timeWin);
                         bl_idx = time_array > min(BL_win) & time_array < max(BL_win);
                         %caTraceTrials(t,1:sum(idx)) = unitTrace(idx);               %store the evoked calcium trace around each event   (see below, comment out if dont want normalized to whole trace)
-                        caTraceTrials(t,:) = unitTrace(idx);
-                        zscored_caTraceTrials(t, :) = unitTrace_zscored(idx);
+                        caTraceTrials(t,:) = unitTrace(window_indices);
+                        zscored_caTraceTrials(t, :) = unitTrace_zscored(window_indices);
                         zb(t,:) = nanmean(unitTrace(bl_idx)); %baseline mean
                         zb_window(t,:) = nanmean(caTraceTrials(t,:));
                         zsd(t,:) = nanstd(unitTrace(bl_idx)); %baseline std
@@ -530,10 +586,80 @@ percent_active_no_shock = (total_active_no_shock/num_cells_no_shock)*100
 percent_inhibited_no_shock = (total_inhibited_no_shock/num_cells_no_shock)*100
 percent_not_active_no_shock = 100-[percent_active_no_shock + percent_inhibited_no_shock] 
 
-figure; pie([percent_active_experimental percent_inhibited_experimental percent_not_active_experimental])
-figure; pie([percent_active_one_context percent_inhibited_one_context percent_not_active_one_context])
-figure; pie([percent_active_no_shock percent_inhibited_no_shock percent_not_active_no_shock])
+explode = [1 1 1];
+
+figure; pie([percent_active_experimental percent_inhibited_experimental percent_not_active_experimental], explode)
+figure; pie([percent_active_one_context percent_inhibited_one_context percent_not_active_one_context], explode)
+figure; pie([percent_active_no_shock percent_inhibited_no_shock percent_not_active_no_shock], explode)
 
 
 
 
+%%
+mean_data_experimental_mice = [];
+mean_data_one_context_mice = [];
+mean_data_no_shock_mice = [];
+
+respClass_experimental_mice = [];
+respClass_one_context_mice = [];
+respClass_no_shock_mice = [];
+
+sem_data_experimental_mice = []; 
+sem_data_one_context_mice = [];
+sem_data_no_shock_mice = [];
+
+for ii = 1:length(animalIDs)
+    currentanimal = char(animalIDs(ii));
+    currentTreatment = current_animal_treatment{ii}
+    if strcmp(currentTreatment, 'Experimental')
+        mean_data_experimental_mice = [mean_data_experimental_mice; neuron_mean_mouse{ii, 1}  ];
+        sem_data_experimental_mice = [sem_data_experimental_mice; neuron_sem_mouse{ii, 1}];
+        respClass_experimental_mice = [respClass_experimental_mice, respClass_all_array_mouse{ii, 1}]
+
+    elseif strcmp(currentTreatment, 'One Context')
+        mean_data_one_context_mice = [mean_data_one_context_mice; neuron_mean_mouse{ii, 1}  ];
+        sem_data_one_context_mice = [sem_data_one_context_mice; neuron_sem_mouse{ii, 1}];
+        respClass_one_context_mice = [respClass_one_context_mice, respClass_all_array_mouse{ii, 1}]
+
+    elseif strcmp(currentTreatment, 'No Shock')
+
+        mean_data_no_shock_mice = [mean_data_no_shock_mice; neuron_mean_mouse{ii, 1}  ];
+        sem_data_no_shock_mice = [sem_data_no_shock_mice; neuron_sem_mouse{ii, 1}];
+        respClass_no_shock_mice = [respClass_no_shock_mice, respClass_all_array_mouse{ii, 1}]
+    end
+end
+
+figure; plot(ts1, mean(mean_data_experimental_mice(respClass_experimental_mice == 1, :)))
+hold on; plot(ts1, mean(mean_data_one_context_mice(respClass_one_context_mice == 1, :)))
+hold on; plot(ts1, mean(mean_data_no_shock_mice(respClass_no_shock_mice == 1, :)))
+
+
+figure('Position', [100, 100, 700, 450]); % [left, bottom, width, height]
+hold on;
+
+h(1) = shadedErrorBar(ts1, mean(mean_data_experimental_mice(respClass_experimental_mice == 1, :)), mean(sem_data_experimental_mice(respClass_experimental_mice == 1, :)), 'lineProps', {'color', 'r'});
+h(2) = shadedErrorBar(ts1, mean(mean_data_one_context_mice(respClass_one_context_mice == 1, :)), mean(sem_data_one_context_mice(respClass_one_context_mice == 1, :)), 'lineProps', {'color', 'r'});
+
+% legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
+% Adjust x-axis ticks and labels
+% Adjust x-axis ticks and labels
+% xlim([1 num_bins]); % Set x-axis limits to match the data range
+% xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
+% xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
+
+ylim([-0.5 0.5]); % Set y-axis limits
+
+figure('Position', [100, 100, 700, 450]); % [left, bottom, width, height]
+hold on;
+
+h(1) = shadedErrorBar(ts1, mean(mean_data_experimental_mice(respClass_experimental_mice == 2, :)), mean(sem_data_experimental_mice(respClass_experimental_mice == 2, :)), 'lineProps', {'color', 'r'});
+h(2) = shadedErrorBar(ts1, mean(mean_data_one_context_mice(respClass_one_context_mice == 2, :)), mean(sem_data_one_context_mice(respClass_one_context_mice == 2, :)), 'lineProps', {'color', 'r'});
+
+% legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
+% Adjust x-axis ticks and labels
+% Adjust x-axis ticks and labels
+% xlim([1 num_bins]); % Set x-axis limits to match the data range
+% xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
+% xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
+
+ylim([-0.5 0.5]); % Set y-axis limits
