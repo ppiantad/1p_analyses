@@ -833,12 +833,12 @@ ytickformat('%.2f');
 hold off;
 
 % Perform a Kolmogorov-Smirnov test to compare the two distributions
-[h, p] = kstest2(not_shk_responsive_corrs , only_shk_responsive_corrs);
+[h, p, k] = kstest2(not_shk_responsive_corrs , only_shk_responsive_corrs)
 
-% Display the results of the statistical test
-fprintf('Kolmogorov-Smirnov test result:\n');
-fprintf('h = %d (0 means the null hypothesis cannot be rejected, 1 means it can be rejected)\n', h);
-fprintf('p-value = %.4f\n', p);
+% % Display the results of the statistical test
+% fprintf('Kolmogorov-Smirnov test result:\n');
+% fprintf('h = %d (0 means the null hypothesis cannot be rejected, 1 means it can be rejected)\n', h);
+% fprintf('p-value = %.4f\n', p);
 
 [h,p,ci,stats] = ttest2(not_shk_responsive_corrs , only_shk_responsive_corrs)
 %%
@@ -978,3 +978,30 @@ xlabel('Mean Sub-window Activity Session 1');
 ylabel('Choice Times Mouse');
 title('Scatter Plot with Regression Line and R^2 Value');
 hold off;
+
+
+%% are consumption neurons inhibited by Shk? are Shk neurons inhibited during consumption?
+
+
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-8 8]);
+ylim([-0.5 1.2]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.5 0 0.5 1]);
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(collect_block_1==1, :)), nanmean(neuron_sem_array{1, 4}(collect_block_1==1, :)), 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 10}(respClass_all_array{1, 4}==1, :)), nanmean(neuron_sem_array{1, 10}(respClass_all_array{1, 4}==1, :)), 'lineProps', {'color', 'k'});
+
+xline(0);
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+
+hold off

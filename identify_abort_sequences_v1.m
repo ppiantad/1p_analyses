@@ -203,7 +203,7 @@ parallelcoords(combined_data, 'Color', 0.7*[1 1 1], 'LineStyle', '-',...
 
 TF = isoutlier(combined_data, 'grubbs');
 
-[h p] = ttest(combined_data(:, 1), combined_data(:, 2))
+[h,p,ci,stats] = ttest(combined_data(:, 1), combined_data(:, 2))
 
 
 %% get Ca data

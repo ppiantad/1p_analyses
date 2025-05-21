@@ -8,8 +8,8 @@ load(data_to_load{1})
 
 
 if size(respClass_all_array, 2) == 10
-    % comparison_arrays_full = [1 2 3; 8 9 10]
-    comparison_arrays_full = [1 2 3; 5 6 7]
+    comparison_arrays_full = [1 2 3; 8 9 10]
+    % comparison_arrays_full = [1 2 3; 5 6 7]
 elseif size(respClass_all_array, 2) == 6
     comparison_arrays_full = [1 2 3; 4 5 6]
 end
@@ -628,65 +628,7 @@ ytickformat('%.2f');
 
 hold off;
 
-%%
-% Assuming postchoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double
-data1 = prechoice_over_time_mean_iter{1}; % First cell (90x10)
-data2 = prechoice_over_time_mean_iter{2}; % Second cell (90x10)
 
-% Define new grouping: first 30 rows, and remaining 60 rows
-segments = {1:30, 31:90};
-
-% Initialize mean matrices
-mean_values = zeros(2,2); % 2 sets x 2 datasets
-individual_means = cell(2,2); % To store individual column means
-
-% Loop through each segment group
-for i = 1:2
-    rows = segments{i};
-    
-    % Compute means for each column and store
-    mean_seg1 = mean(data1(rows, :), 1);
-    mean_seg2 = mean(data2(rows, :), 1);
-    
-    % Store overall mean (for bar heights)
-    mean_values(i,1) = mean(mean_seg1);
-    mean_values(i,2) = mean(mean_seg2);
-    
-    % Store individual column means (for scatter overlay)
-    individual_means{i,1} = mean_seg1;
-    individual_means{i,2} = mean_seg2;
-end
-
-% Plot bar graph
-figure; hold on;
-bar_handle = bar(mean_values, 'grouped');
-
-% Set bar colors
-bar_handle(1).FaceColor = 'b'; % First cell (blue)
-bar_handle(2).FaceColor = 'r'; % Second cell (red)
-
-% Get X positions for scatter overlay
-x_positions = zeros(2,2); % Store bar center positions
-for i = 1:2
-    x_positions(:,i) = bar_handle(i).XEndPoints;
-end
-
-% Overlay individual data points correctly aligned
-for i = 1:2
-    scatter(x_positions(i,1) * ones(1,10), individual_means{i,1}, 'k', 'filled'); % First dataset
-    scatter(x_positions(i,2) * ones(1,10), individual_means{i,2}, 'k', 'filled'); % Second dataset
-end
-
-% Labels and legend
-xticks(mean(x_positions,2));
-xticklabels({'0%', '50–75%'}); % Adjusted labels
-ylabel('Mean PV correlation');
-legend({'Safe-identified', 'Risky-identified'}, 'Location', 'SouthEast');
-ytickformat('%.2f');
-
-hold off;
-
-[h_prechoice_pv_mean p_pv_mean] = ttest(individual_means{1, 1}, individual_means{1, 2})
 
 
 %%
@@ -747,3 +689,431 @@ legend({'Safe-identified', 'Risky-identified'}, 'Location', 'SouthEast');
 ytickformat('%.2f');
 
 hold off;
+
+%%
+% Assuming postchoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double
+data1 = prechoice_over_time_mean_iter{1}; % First cell (90x10)
+data2 = prechoice_over_time_mean_iter{2}; % Second cell (90x10)
+
+% Define new grouping: first 30 rows, and remaining 60 rows
+segments = {1:30, 31:90};
+
+% Initialize mean matrices
+mean_values = zeros(2,2); % 2 sets x 2 datasets
+individual_means = cell(2,2); % To store individual column means
+
+% Loop through each segment group
+for i = 1:2
+    rows = segments{i};
+    
+    % Compute means for each column and store
+    mean_seg1 = mean(data1(rows, :), 1);
+    mean_seg2 = mean(data2(rows, :), 1);
+    
+    % Store overall mean (for bar heights)
+    mean_values(i,1) = mean(mean_seg1);
+    mean_values(i,2) = mean(mean_seg2);
+    
+    % Store individual column means (for scatter overlay)
+    individual_means{i,1} = mean_seg1;
+    individual_means{i,2} = mean_seg2;
+end
+
+% Plot bar graph
+figure; hold on;
+width = 200; % Width of the figure
+height = 400; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+bar_handle = bar(mean_values, 'grouped');
+
+% Set bar colors
+bar_handle(1).FaceColor = 'b'; % First cell (blue)
+bar_handle(2).FaceColor = 'r'; % Second cell (red)
+
+% Get X positions for scatter overlay
+x_positions = zeros(2,2); % Store bar center positions
+for i = 1:2
+    x_positions(:,i) = bar_handle(i).XEndPoints;
+end
+
+% Overlay individual data points correctly aligned
+for i = 1:2
+    scatter(x_positions(i,1) * ones(1,10), individual_means{i,1}, 'k', 'filled'); % First dataset
+    scatter(x_positions(i,2) * ones(1,10), individual_means{i,2}, 'k', 'filled'); % Second dataset
+end
+
+% Labels and legend
+xticks(mean(x_positions,2));
+xticklabels({'0%', '50–75%'}); % Adjusted labels
+ylabel('Mean PV correlation');
+legend({'Safe-identified', 'Risky-identified'}, 'Location', 'SouthEast');
+ytickformat('%.2f');
+
+hold off;
+
+[h_prechoice_pv_mean, p_pv_mean, ~, stats_prechoice_pv] = ttest(individual_means{1, 1}, individual_means{1, 2})
+
+% 2×2 Repeated Measures ANOVA for behavioral task data 
+% Factors: Identification (Safe-identified, Risky-identified) × Block (Safe, Risky)
+% Using cell array input structure: individual_means (2×2 cell array)
+% - Row 1: Safe block, Row 2: Risky block
+% - Column 1: Safe-identified, Column 2: Risky-identified
+
+% Step 1: Extract data from the cell array
+safe_block_safe_id = individual_means{1,1};    % Safe block, Safe-identified
+safe_block_risky_id = individual_means{1,2};   % Safe block, Risky-identified
+risky_block_safe_id = individual_means{2,1};   % Risky block, Safe-identified
+risky_block_risky_id = individual_means{2,2};  % Risky block, Risky-identified
+
+% Verify dimensions to ensure all cells have the same number of subjects
+num_subjects = length(safe_block_safe_id);
+if length(safe_block_risky_id) ~= num_subjects || ...
+   length(risky_block_safe_id) ~= num_subjects || ...
+   length(risky_block_risky_id) ~= num_subjects
+    error('All cells must contain the same number of subjects');
+end
+
+% Step 2: Prepare data in the format required for repeated measures ANOVA
+% Create a table with subject IDs and the 4 condition measurements
+subject_id = (1:num_subjects)';
+data_wide = table(subject_id, ...
+                 safe_block_safe_id', risky_block_safe_id', ...
+                 safe_block_risky_id', risky_block_risky_id', ...
+                 'VariableNames', {'Subject', 'Safe_SafeID', 'Risky_SafeID', 'Safe_RiskyID', 'Risky_RiskyID'});
+
+% Create the within-subjects design table
+% This defines the structure of our repeated measures design
+withinDesign = table(categorical({'Safe'; 'Risky'; 'Safe'; 'Risky'}), ...
+                    categorical({'SafeID'; 'SafeID'; 'RiskyID'; 'RiskyID'}), ...
+                    'VariableNames', {'Block', 'Identification'});
+
+% Step 3: Conduct the 2×2 repeated measures ANOVA
+% Define the repeated measures model - all measures with the same between-subjects model (~ 1)
+rm = fitrm(data_wide, 'Safe_SafeID,Risky_SafeID,Safe_RiskyID,Risky_RiskyID ~ 1', 'WithinDesign', withinDesign);
+
+% Run the repeated measures ANOVA
+ranova_table = ranova(rm, 'WithinModel', 'Block*Identification');
+
+% Display results
+disp('Repeated Measures ANOVA Results:');
+disp(ranova_table);
+
+% Display ANOVA results
+fprintf('Identification effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranova_table{5,2}, ranova_table{6,2}, ranova_table{5,4}, ranova_table{5,5});
+% Display ANOVA results
+fprintf('Block (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranova_table{3,2}, ranova_table{4,2}, ranova_table{3,4}, ranova_table{3,5});
+
+fprintf('Interaction (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranova_table{7,2}, ranova_table{8,2}, ranova_table{7,4}, ranova_table{7,5});
+
+
+% Step 6: Simple effects analysis (if needed)
+% If there's a significant interaction, you may want to perform simple effects tests
+disp('Simple Effects Analysis:');
+
+% Effect of Block for Safe-identified stimuli
+[~, p_safe_id, ~, stats_safe_id] = ttest(safe_block_safe_id, risky_block_safe_id);
+disp('Effect of Block for Safe-identified stimuli:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_safe_id.tstat), ...
+      ', p = ', num2str(p_safe_id)]);
+
+% Effect of Block for Risky-identified stimuli
+[~, p_risky_id, ~, stats_risky_id] = ttest(safe_block_risky_id, risky_block_risky_id);
+disp('Effect of Block for Risky-identified stimuli:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_risky_id.tstat), ...
+      ', p = ', num2str(p_risky_id)]);
+
+% Effect of Identification in Safe Block
+[~, p_safe_block, ~, stats_safe_block] = ttest(safe_block_safe_id, safe_block_risky_id);
+disp('Effect of Identification in Safe Block:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_safe_block.tstat), ...
+      ', p = ', num2str(p_safe_block)]);
+
+% Effect of Identification in Risky Block
+[~, p_risky_block, ~, stats_risky_block] = ttest(risky_block_safe_id, risky_block_risky_id);
+disp('Effect of Identification in Risky Block:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_risky_block.tstat), ...
+      ', p = ', num2str(p_risky_block)]);
+%%
+% Assuming postchoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double
+data1 = postchoice_over_time_mean_iter{1}; % First cell (90x10)
+data2 = postchoice_over_time_mean_iter{2}; % Second cell (90x10)
+
+% Define new grouping: first 30 rows, and remaining 60 rows
+segments = {1:30, 31:90};
+
+% Initialize mean matrices
+mean_values = zeros(2,2); % 2 sets x 2 datasets
+individual_means = cell(2,2); % To store individual column means
+
+% Loop through each segment group
+for i = 1:2
+    rows = segments{i};
+    
+    % Compute means for each column and store
+    mean_seg1 = mean(data1(rows, :), 1);
+    mean_seg2 = mean(data2(rows, :), 1);
+    
+    % Store overall mean (for bar heights)
+    mean_values(i,1) = mean(mean_seg1);
+    mean_values(i,2) = mean(mean_seg2);
+    
+    % Store individual column means (for scatter overlay)
+    individual_means{i,1} = mean_seg1;
+    individual_means{i,2} = mean_seg2;
+end
+
+% Plot bar graph
+figure; hold on;
+width = 200; % Width of the figure
+height = 400; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+bar_handle = bar(mean_values, 'grouped');
+
+% Set bar colors
+bar_handle(1).FaceColor = 'b'; % First cell (blue)
+bar_handle(2).FaceColor = 'r'; % Second cell (red)
+
+% Get X positions for scatter overlay
+x_positions = zeros(2,2); % Store bar center positions
+for i = 1:2
+    x_positions(:,i) = bar_handle(i).XEndPoints;
+end
+
+% Overlay individual data points correctly aligned
+for i = 1:2
+    scatter(x_positions(i,1) * ones(1,10), individual_means{i,1}, 'k', 'filled'); % First dataset
+    scatter(x_positions(i,2) * ones(1,10), individual_means{i,2}, 'k', 'filled'); % Second dataset
+end
+
+% Labels and legend
+xticks(mean(x_positions,2));
+xticklabels({'0%', '50–75%'}); % Adjusted labels
+ylabel('Mean PV correlation');
+legend({'Safe-identified', 'Risky-identified'}, 'Location', 'SouthEast');
+ytickformat('%.2f');
+
+hold off;
+
+[h_prechoice_pv_mean p_pv_mean] = ttest(individual_means{1, 1}, individual_means{1, 2})
+
+% Step 1: Extract data from the cell array
+safe_block_safe_id = individual_means{1,1};    % Safe block, Safe-identified
+safe_block_risky_id = individual_means{1,2};   % Safe block, Risky-identified
+risky_block_safe_id = individual_means{2,1};   % Risky block, Safe-identified
+risky_block_risky_id = individual_means{2,2};  % Risky block, Risky-identified
+
+% Verify dimensions to ensure all cells have the same number of subjects
+num_subjects = length(safe_block_safe_id);
+if length(safe_block_risky_id) ~= num_subjects || ...
+   length(risky_block_safe_id) ~= num_subjects || ...
+   length(risky_block_risky_id) ~= num_subjects
+    error('All cells must contain the same number of subjects');
+end
+
+% Step 2: Prepare data in the format required for repeated measures ANOVA
+% Create a table with subject IDs and the 4 condition measurements
+subject_id = (1:num_subjects)';
+data_wide = table(subject_id, ...
+                 safe_block_safe_id', risky_block_safe_id', ...
+                 safe_block_risky_id', risky_block_risky_id', ...
+                 'VariableNames', {'Subject', 'Safe_SafeID', 'Risky_SafeID', 'Safe_RiskyID', 'Risky_RiskyID'});
+
+% Create the within-subjects design table
+% This defines the structure of our repeated measures design
+withinDesign = table(categorical({'Safe'; 'Risky'; 'Safe'; 'Risky'}), ...
+                    categorical({'SafeID'; 'SafeID'; 'RiskyID'; 'RiskyID'}), ...
+                    'VariableNames', {'Block', 'Identification'});
+
+% Step 3: Conduct the 2×2 repeated measures ANOVA
+% Define the repeated measures model - all measures with the same between-subjects model (~ 1)
+rm = fitrm(data_wide, 'Safe_SafeID,Risky_SafeID,Safe_RiskyID,Risky_RiskyID ~ 1', 'WithinDesign', withinDesign);
+
+% Run the repeated measures ANOVA
+ranova_table = ranova(rm, 'WithinModel', 'Block*Identification');
+
+% Display results
+disp('Repeated Measures ANOVA Results:');
+disp(ranova_table);
+
+% Display ANOVA results
+fprintf('Identification effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranova_table{5,2}, ranova_table{6,2}, ranova_table{5,4}, ranova_table{5,5});
+% Display ANOVA results
+fprintf('Block (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranova_table{3,2}, ranova_table{4,2}, ranova_table{3,4}, ranova_table{3,5});
+
+fprintf('Interaction (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranova_table{7,2}, ranova_table{8,2}, ranova_table{7,4}, ranova_table{7,5});
+
+
+% Step 6: Simple effects analysis (if needed)
+% If there's a significant interaction, you may want to perform simple effects tests
+disp('Simple Effects Analysis:');
+
+% Effect of Block for Safe-identified stimuli
+[~, p_safe_id, ~, stats_safe_id] = ttest(safe_block_safe_id, risky_block_safe_id);
+disp('Effect of Block for Safe-identified stimuli:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_safe_id.tstat), ...
+      ', p = ', num2str(p_safe_id)]);
+
+% Effect of Block for Risky-identified stimuli
+[~, p_risky_id, ~, stats_risky_id] = ttest(safe_block_risky_id, risky_block_risky_id);
+disp('Effect of Block for Risky-identified stimuli:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_risky_id.tstat), ...
+      ', p = ', num2str(p_risky_id)]);
+
+% Effect of Identification in Safe Block
+[~, p_safe_block, ~, stats_safe_block] = ttest(safe_block_safe_id, safe_block_risky_id);
+disp('Effect of Identification in Safe Block:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_safe_block.tstat), ...
+      ', p = ', num2str(p_safe_block)]);
+
+% Effect of Identification in Risky Block
+[~, p_risky_block, ~, stats_risky_block] = ttest(risky_block_safe_id, risky_block_risky_id);
+disp('Effect of Identification in Risky Block:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_risky_block.tstat), ...
+      ', p = ', num2str(p_risky_block)]);
+
+%%
+% Assuming postchoice_over_time_mean_iter is a 1x2 cell array, each containing a 90x10 double
+data1 = consumption_over_time_mean_iter{1}; % First cell (90x10)
+data2 = consumption_over_time_mean_iter{2}; % Second cell (90x10)
+
+% Define new grouping: first 30 rows, and remaining 60 rows
+segments = {1:30, 31:90};
+
+% Initialize mean matrices
+mean_values = zeros(2,2); % 2 sets x 2 datasets
+individual_means = cell(2,2); % To store individual column means
+
+% Loop through each segment group
+for i = 1:2
+    rows = segments{i};
+    
+    % Compute means for each column and store
+    mean_seg1 = mean(data1(rows, :), 1);
+    mean_seg2 = mean(data2(rows, :), 1);
+    
+    % Store overall mean (for bar heights)
+    mean_values(i,1) = mean(mean_seg1);
+    mean_values(i,2) = mean(mean_seg2);
+    
+    % Store individual column means (for scatter overlay)
+    individual_means{i,1} = mean_seg1;
+    individual_means{i,2} = mean_seg2;
+end
+
+% Plot bar graph
+figure; hold on;
+width = 200; % Width of the figure
+height = 400; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+bar_handle = bar(mean_values, 'grouped');
+
+% Set bar colors
+bar_handle(1).FaceColor = 'b'; % First cell (blue)
+bar_handle(2).FaceColor = 'r'; % Second cell (red)
+
+% Get X positions for scatter overlay
+x_positions = zeros(2,2); % Store bar center positions
+for i = 1:2
+    x_positions(:,i) = bar_handle(i).XEndPoints;
+end
+
+% Overlay individual data points correctly aligned
+for i = 1:2
+    scatter(x_positions(i,1) * ones(1,10), individual_means{i,1}, 'k', 'filled'); % First dataset
+    scatter(x_positions(i,2) * ones(1,10), individual_means{i,2}, 'k', 'filled'); % Second dataset
+end
+
+% Labels and legend
+xticks(mean(x_positions,2));
+xticklabels({'0%', '50–75%'}); % Adjusted labels
+ylabel('Mean PV correlation');
+legend({'Safe-identified', 'Risky-identified'}, 'Location', 'SouthEast');
+ytickformat('%.2f');
+
+hold off;
+
+[h_prechoice_pv_mean p_pv_mean] = ttest(individual_means{1, 1}, individual_means{1, 2})
+
+% Step 1: Extract data from the cell array
+safe_block_safe_id = individual_means{1,1};    % Safe block, Safe-identified
+safe_block_risky_id = individual_means{1,2};   % Safe block, Risky-identified
+risky_block_safe_id = individual_means{2,1};   % Risky block, Safe-identified
+risky_block_risky_id = individual_means{2,2};  % Risky block, Risky-identified
+
+% Verify dimensions to ensure all cells have the same number of subjects
+num_subjects = length(safe_block_safe_id);
+if length(safe_block_risky_id) ~= num_subjects || ...
+   length(risky_block_safe_id) ~= num_subjects || ...
+   length(risky_block_risky_id) ~= num_subjects
+    error('All cells must contain the same number of subjects');
+end
+
+% Step 2: Prepare data in the format required for repeated measures ANOVA
+% Create a table with subject IDs and the 4 condition measurements
+subject_id = (1:num_subjects)';
+data_wide = table(subject_id, ...
+                 safe_block_safe_id', risky_block_safe_id', ...
+                 safe_block_risky_id', risky_block_risky_id', ...
+                 'VariableNames', {'Subject', 'Safe_SafeID', 'Risky_SafeID', 'Safe_RiskyID', 'Risky_RiskyID'});
+
+% Create the within-subjects design table
+% This defines the structure of our repeated measures design
+withinDesign = table(categorical({'Safe'; 'Risky'; 'Safe'; 'Risky'}), ...
+                    categorical({'SafeID'; 'SafeID'; 'RiskyID'; 'RiskyID'}), ...
+                    'VariableNames', {'Block', 'Identification'});
+
+% Step 3: Conduct the 2×2 repeated measures ANOVA
+% Define the repeated measures model - all measures with the same between-subjects model (~ 1)
+rm = fitrm(data_wide, 'Safe_SafeID,Risky_SafeID,Safe_RiskyID,Risky_RiskyID ~ 1', 'WithinDesign', withinDesign);
+
+% Run the repeated measures ANOVA
+ranova_table = ranova(rm, 'WithinModel', 'Block*Identification');
+
+% Display results
+disp('Repeated Measures ANOVA Results:');
+disp(ranova_table);
+
+% Display ANOVA results
+fprintf('Identification effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranova_table{5,2}, ranova_table{6,2}, ranova_table{5,4}, ranova_table{5,5});
+% Display ANOVA results
+fprintf('Block (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranova_table{3,2}, ranova_table{4,2}, ranova_table{3,4}, ranova_table{3,5});
+
+fprintf('Interaction (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranova_table{7,2}, ranova_table{8,2}, ranova_table{7,4}, ranova_table{7,5});
+
+
+% Step 6: Simple effects analysis (if needed)
+% If there's a significant interaction, you may want to perform simple effects tests
+disp('Simple Effects Analysis:');
+
+% Effect of Block for Safe-identified stimuli
+[~, p_safe_id, ~, stats_safe_id] = ttest(safe_block_safe_id, risky_block_safe_id);
+disp('Effect of Block for Safe-identified stimuli:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_safe_id.tstat), ...
+      ', p = ', num2str(p_safe_id)]);
+
+% Effect of Block for Risky-identified stimuli
+[~, p_risky_id, ~, stats_risky_id] = ttest(safe_block_risky_id, risky_block_risky_id);
+disp('Effect of Block for Risky-identified stimuli:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_risky_id.tstat), ...
+      ', p = ', num2str(p_risky_id)]);
+
+% Effect of Identification in Safe Block
+[~, p_safe_block, ~, stats_safe_block] = ttest(safe_block_safe_id, safe_block_risky_id);
+disp('Effect of Identification in Safe Block:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_safe_block.tstat), ...
+      ', p = ', num2str(p_safe_block)]);
+
+% Effect of Identification in Risky Block
+[~, p_risky_block, ~, stats_risky_block] = ttest(risky_block_safe_id, risky_block_risky_id);
+disp('Effect of Identification in Risky Block:');
+disp(['t(', num2str(num_subjects-1), ') = ', num2str(stats_risky_block.tstat), ...
+      ', p = ', num2str(p_risky_block)]);

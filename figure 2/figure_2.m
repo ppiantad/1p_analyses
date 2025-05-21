@@ -1245,7 +1245,7 @@ legend('Positive correlation', 'Negative correlation', 'No sig correlation');
 
 %%
 
-array_for_means = 1; 
+array_for_means = 8; 
 
 
 for q = 1:length (behav_tbl_iter{array_for_means, 1})
@@ -1315,7 +1315,7 @@ plot([0.8, 1.2], [mean_12, mean_12], 'b-', 'LineWidth', 2); % Blue line for tria
 plot([0.8, 1.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); % Red line for trial_types_concat == 0.3
 
 
-[h_choice_times p_choice_times] = ttest2(trial_choice_times_concat(trial_types_concat == 1.2), trial_choice_times_concat(trial_types_concat == 0.3))
+[h_choice_times p_choice_times, ~, stats_choice_times] = ttest2(trial_choice_times_concat(trial_types_concat == 1.2), trial_choice_times_concat(trial_types_concat == 0.3))
 
 hold off;
 title('Trial Choice Times');
@@ -1343,7 +1343,7 @@ mean_03 = mean(rew_collect_times_concat(trial_types_concat == 0.3));
 plot([bar_separation_value - 0.2, bar_separation_value + 0.2], [mean_12, mean_12], 'b-', 'LineWidth', 2); % Blue line for trial_types_concat == 1.2
 plot([bar_separation_value - 0.2, bar_separation_value + 0.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); % Red line for trial_types_concat == 0.3
 
-[h_rew_times p_rew_times] = ttest2(rew_collect_times_concat(trial_types_concat == 1.2), rew_collect_times_concat(trial_types_concat == 0.3))
+[h_rew_times p_rew_times, ~, stats_rew_times] = ttest2(rew_collect_times_concat(trial_types_concat == 1.2), rew_collect_times_concat(trial_types_concat == 0.3))
 
 hold off;
 title('Reward Collection Times');
@@ -1540,12 +1540,13 @@ hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
 % only_shk_responsive_corrs = allCorrelations(kmeans_idx' == 3);
-only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
+% only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
 % only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 == 1);
 % only_shk_responsive_corrs = allCorrelations(collect_block_1 == 1);
-not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
+only_shk_responsive_corrs = allCorrelations(prechoice_blocks_2_and_3 == 1);
+% not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
 % not_shk_responsive_corrs = allCorrelations(kmeans_idx' ~= 3);
-% not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
+not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
 
 % Now, allCorrelations contains all the correlation coefficients
 % Create a histogram of the correlation coefficients
@@ -1596,7 +1597,7 @@ ytickformat('%.2f');
 hold off;
 
 % Perform a Kolmogorov-Smirnov test to compare the two distributions
-[h, p] = kstest2(not_shk_responsive_corrs , only_shk_responsive_corrs);
+[h, p, k] = kstest2(not_shk_responsive_corrs , only_shk_responsive_corrs)
 
 % Display the results of the statistical test
 fprintf('Kolmogorov-Smirnov test result:\n');

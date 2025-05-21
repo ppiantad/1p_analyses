@@ -1276,7 +1276,7 @@ remapped_postchoice_reward_sum = sum(remapped_postchoice_reward)
 
 mean_data_array = { neuron_mean_array{1, 6}(conserved_postchoice_reward  ==1, :), neuron_mean_array{1, 9}(lost_postchoice_reward  ==1, :), neuron_mean_array{1, 9}(remapped_postchoice_reward  ==1, :)}
 sem_data_array = {neuron_sem_array{1, 6}(conserved_postchoice_reward  ==1, :), neuron_sem_array{1, 9}(lost_postchoice_reward  ==1, :), neuron_sem_array{1, 9}(remapped_postchoice_reward  ==1, :)}
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 5], [-0.5 0.7])
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 5], [-0.5 0.8])
 
 
 %%
@@ -1295,7 +1295,7 @@ remapped_collection_sum = sum(remapped_collection)
 
 mean_data_array = {neuron_mean_array{1, 10}(conserved_collection  ==1, :), neuron_mean_array{1, 10}(lost_collection  ==1, :), neuron_mean_array{1, 10}(remapped_collection  ==1, :)}
 sem_data_array = {neuron_sem_array{1, 10}(conserved_collection  ==1, :), neuron_sem_array{1, 10}(lost_collection  ==1, :), neuron_sem_array{1, 10}(remapped_collection  ==1, :)}
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 5], [-0.5 0.7])
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 5], [-0.5 0.8])
 
 
 %%
@@ -1814,7 +1814,70 @@ p = 1 - chi2cdf(chi2stat,1)
 
 
 
+%% create correlation matrix heatmap with exclusively active cells
+test = [];
+test = [neuron_mean_array{1, 1}(prechoice_blocks_2_and_3 == 1, :)];
+% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1, :)];
+test = [test; neuron_mean_array{1, 2}(postchoice_reward_blocks_2_and_3 == 1, :)];
+test = [test; neuron_mean_array{1, 3}(collect_blocks_2_and_3 == 1,:)];
+% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1,3}~=1, :)];
 
+pre_choice_index = [1:sum(prechoice_block_1)];
+post_choice_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(postchoice_reward_block_1)];
+consumption_index = [post_choice_index(end)+1:post_choice_index(end)+sum(collect_block_1)];
+neutral_index = [consumption_index(end)+1:consumption_index(end)+sum(respClass_all_array{1, 2}~=1 & respClass_all_array{1, 1}~=1 & respClass_all_array{1,3}~=1)];
+
+
+data = test;
+
+alpha = 0.0001;
+
+% Initialize matrices to store correlation coefficients and p-values
+correlation_matrix = zeros(size(data, 1));
+p_value_matrix = zeros(size(data, 1));
+
+% Calculate correlation coefficients and p-values between rows
+for i = 1:size(data, 1)
+    for j = 1:size(data, 1)
+        [corr_coeff, p_value] = corrcoef(data(i, :)', data(j, :)');
+        correlation_matrix(i, j) = corr_coeff(1, 2); % Store correlation coefficient
+        p_value_matrix(i, j) = p_value(1, 2); % Store p-value
+    end
+end
+
+% Plot the correlation matrix
+figure;
+imagesc(correlation_matrix);
+
+axis square; % Make the plot square for better visualization
+% title('Correlation Matrix');
+% xlabel('Neuron Number');
+% ylabel('Neuron Number');
+ylim([1  size(test, 1)])
+% Show row and column indices on the plot
+xticks([1  size(test, 1)]);
+yticks([1  size(test, 1)]);
+
+% If you want to customize the color map, you can use colormap function
+% For example, using a blue-white-red colormap:
+colormap(gray);
+
+% If you want to limit the color scale to the range [0, 1]
+caxis([-1 1]); % Assuming correlations range from -1 to 1
+% Add a separate axes for the colorbar to associate it only with the upper tile
+c = colorbar('eastoutside');
+set(c, 'YTick', clim); % 
+% % Display p-values as text on the plot
+% for i = 1:size(data, 1)
+%     for j = 1:size(data, 1)
+%         text(j, i, sprintf('p = %.4f', p_value_matrix(i, j)), ...
+%             'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
+%     end
+% end
+
+xline(pre_choice_index(end), '--g')
+xline(post_choice_index(end), '--c')
+xline(consumption_index(end), '--b')
 
 
 
@@ -1899,6 +1962,9 @@ set(c, 'YTick', clim); %
 %     end
 % end
 
+xline(pre_choice_index(end), '--g')
+xline(post_choice_index(end), '--c')
+xline(consumption_index(end), '--b')
 %%
 action_p_value_matrix = p_value_matrix(pre_choice_index, pre_choice_index);
 action_correl_matrix = correlation_matrix(pre_choice_index, pre_choice_index);
@@ -1990,6 +2056,9 @@ xlim([0.5, 1.5]); % since we only have one set of data, we set the limits to cen
 %         uu = uu+1;
 %     end
 % end
+xline(pre_choice_index(end), '--g')
+xline(post_choice_index(end), '--c')
+xline(consumption_index(end), '--b')
 
 %%
 post_choice_p_value_matrix = p_value_matrix(post_choice_index, post_choice_index);
@@ -2439,6 +2508,7 @@ barh(x, [action_data; post_choice_data; consumption_data; action_post_choice_dat
 % xticklabels({'aa', 'cc', 'ac'});
 % ylabel('% Neuron Pairs');
 % title('Title');
+
 
 % Add legend
 legend('Positive correlation', 'Negative correlation', 'No sig correlation');
@@ -2921,3 +2991,587 @@ sem_data_array = {diff_all_sem_postchoice}
 mean_data_array = {diff_all_mean_collect}
 sem_data_array = {diff_all_sem_collect}
 [comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [0 4], [-0.5 0.2])
+
+%% below for supplement 4 correlate pre-choice blocks 2/3 with choice
+%% ONLY USE CODE BELOW IF YOU WANT TO COMBINE DATA ACROSS 2 FILTERS, E.G., BLOCK 1 & BLOCKS 2/3
+
+array_for_means = 8; 
+array_for_means_second = []; % 5
+
+
+for q = 1:length (behav_tbl_iter{1, 1})
+
+    behav_part_1 = behav_tbl_iter{array_for_means, 1}{q, 1};
+
+    if isempty(array_for_means_second)
+        nestedCellArray_1 = behav_part_1;
+    else
+        behav_part_2 = behav_tbl_iter{array_for_means_second, 1}{q, 1};
+        nestedCellArray_1 = vertcat(behav_part_1, behav_part_2 );
+    end
+
+
+
+
+    if ~isempty(nestedCellArray_1)
+        % nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
+        % if size(nestedCellArray_1, 1) > size(nestedCellArray_2, 1)
+        %     delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime(1:end-1,:);
+        % else
+        %     delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
+        % end
+        %
+
+        for zz = 1:size(nestedCellArray_1, 1)
+            valid_start_times = nestedCellArray_1.stTime(2:end);
+            valid_choice_times = nestedCellArray_1.choiceTime(1:end-1);
+            delay_to_initiation = valid_start_times - valid_choice_times;
+            trial_types = nestedCellArray_1.bigSmall;
+        end
+
+        trial_choice_times = nestedCellArray_1.choiceTime - nestedCellArray_1.stTime;
+        % delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
+        delay_to_collect_post_shk = nestedCellArray_1.collectionTime - nestedCellArray_1.choiceTime;
+        trial_choice_times_by_mouse{q} = trial_choice_times;
+        delay_to_initiation_by_mouse{q} = delay_to_initiation;
+        delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
+        trial_types_by_mouse{q} = trial_types;
+        clear trial_choice_times delay_to_initiation delay_to_collect_post_shk trial_types
+    end
+
+
+end
+
+trial_types_concat = cat(1, trial_types_by_mouse{:});
+trial_choice_times_concat = cat(1, trial_choice_times_by_mouse{:});
+trial_choice_times_concat = trial_choice_times_concat(trial_types_concat == 1.2);
+trial_types_concat = trial_types_concat(trial_types_concat == 1.2);
+path_length_concat = path_length_concat(trial_types_concat == 1.2);
+rew_collect_times_concat = cat(1, delay_to_collect_post_shk_by_mouse{:});
+
+bar_separation_value = 3;
+
+figure;
+
+% Adjust figure dimensions for subplots
+width = 400; % Adjusted width for 3 subplots
+height = 500; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Subplot 1: trial_choice_times_concat
+subplot(1, 3, 1); % First subplot
+hold on;
+% Define colors based on trial_types_concat
+colors = repmat([0.5, 0.5, 0.5], length(trial_choice_times_concat), 1); % Default to gray
+colors(trial_types_concat == 1.2, :) = repmat([0, 0, 1], sum(trial_types_concat == 1.2), 1); % Blue for trial_types_concat == 1.2
+colors(trial_types_concat == 0.3, :) = repmat([1, 0, 0], sum(trial_types_concat == 0.3), 1); % Red for trial_types_concat == 0.3
+
+% Create the swarmchart with colors
+s = swarmchart(ones(1, length(trial_choice_times_concat)), trial_choice_times_concat, 36, colors, 'filled');
+s.MarkerEdgeColor = 'k'; % Black stroke for all circles
+
+% Calculate and plot means for each group
+mean_12 = mean(trial_choice_times_concat(trial_types_concat == 1.2));
+mean_03 = mean(trial_choice_times_concat(trial_types_concat == 0.3));
+plot([0.8, 1.2], [mean_12, mean_12], 'b-', 'LineWidth', 2); % Blue line for trial_types_concat == 1.2
+plot([0.8, 1.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); % Red line for trial_types_concat == 0.3
+
+hold off;
+title('Trial Choice Times');
+xlabel('Trial');
+ylabel('Time');
+yline(0); % Add yline if needed
+xtickformat('%.1f');
+ytickformat('%.1f');
+
+% Subplot 2: rew_collect_times_concat
+subplot(1, 3, 2); % Second subplot
+hold on;
+% Define colors based on trial_types_concat
+colors = repmat([0.5, 0.5, 0.5], length(rew_collect_times_concat), 1); % Default to gray
+colors(trial_types_concat == 1.2, :) = repmat([0, 0, 1], sum(trial_types_concat == 1.2), 1); % Blue for trial_types_concat == 1.2
+colors(trial_types_concat == 0.3, :) = repmat([1, 0, 0], sum(trial_types_concat == 0.3), 1); % Red for trial_types_concat == 0.3
+
+% Create the swarmchart with colors
+s = swarmchart(ones(1, length(rew_collect_times_concat)) * bar_separation_value, rew_collect_times_concat, 36, colors, 'filled');
+s.MarkerEdgeColor = 'k'; % Black stroke for all circles
+
+% Calculate and plot means for each group
+mean_12 = mean(rew_collect_times_concat(trial_types_concat == 1.2));
+mean_03 = mean(rew_collect_times_concat(trial_types_concat == 0.3));
+plot([bar_separation_value - 0.2, bar_separation_value + 0.2], [mean_12, mean_12], 'b-', 'LineWidth', 2); % Blue line for trial_types_concat == 1.2
+plot([bar_separation_value - 0.2, bar_separation_value + 0.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); % Red line for trial_types_concat == 0.3
+
+hold off;
+title('Reward Collection Times');
+xlabel('Reward Collection');
+ylabel('Time');
+yline(0);
+xtickformat('%.1f');
+ytickformat('%.1f');
+
+% Subplot 3: path_length_concat
+subplot(1, 3, 3); % Third subplot
+hold on;
+% Define colors based on trial_types_concat
+colors = repmat([0.5, 0.5, 0.5], length(path_length_concat), 1); % Default to gray
+colors(trial_types_concat == 1.2, :) = repmat([0, 0, 1], sum(trial_types_concat == 1.2), 1); % Blue for trial_types_concat == 1.2
+colors(trial_types_concat == 0.3, :) = repmat([1, 0, 0], sum(trial_types_concat == 0.3), 1); % Red for trial_types_concat == 0.3
+
+% Create the swarmchart with colors
+s = swarmchart(ones(1, length(path_length_concat)) * bar_separation_value * 1.5, path_length_concat, 36, colors, 'filled');
+s.MarkerEdgeColor = 'k'; % Black stroke for all circles
+
+% Calculate and plot means for each group
+mean_12 = mean(path_length_concat(trial_types_concat == 1.2));
+mean_03 = mean(path_length_concat(trial_types_concat == 0.3));
+plot([bar_separation_value * 1.5 - 0.2, bar_separation_value * 1.5 + 0.2], [mean_12, mean_12], 'b-', 'LineWidth', 2); % Blue line for trial_types_concat == 1.2
+plot([bar_separation_value * 1.5 - 0.2, bar_separation_value * 1.5 + 0.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); % Red line for trial_types_concat == 0.3
+
+hold off;
+title('Path Length');
+xlabel('Path Length');
+ylabel('Length (a.u.)');
+yline(0);
+xtickformat('%.1f');
+ytickformat('%.1f');
+
+variable_to_correlate = trial_choice_times_by_mouse;
+
+
+%%
+
+
+% Initialize the new cell array to store the mean values
+meanZallMouse = cell(size(zall_mouse, 2), 1);
+
+% Define the time range for 0 to 2 seconds
+timeRange = (ts1 >= -4) & (ts1 <= 0);
+% timeRange = (ts1 >= 0) & (ts1 <= 2);
+% timeRange = (ts1 >= 1) & (ts1 <= 3);
+
+
+% Iterate through each cell in the zall_mouse array
+for i = 1:length(zall_mouse)
+    nestedCellArray_1 = {};
+    nestedCellArray_2 = {}
+    concatenated_columns = {};
+    % Get the current nested cell array
+    nestedCellArray_1 = zall_mouse{i, array_for_means};
+
+    if ~isempty(array_for_means_second)
+        nestedCellArray_2 = zall_mouse{i, array_for_means_second};
+        for qq = 1:size(nestedCellArray_1, 2)
+            concatenated_columns{qq} = vertcat(nestedCellArray_1{qq}, ...
+                nestedCellArray_2{qq});
+        end
+        nestedCellArray_1 = concatenated_columns;
+
+    end
+    % nestedCellArray_2 = zall_mouse{i, 1};
+    % Initialize the nested cell array for storing mean values
+    meanNestedCellArray = cell(size(nestedCellArray_1));
+    
+    % Iterate through each cell in the nested cell array
+    for j = 1:length(nestedCellArray_1)
+        % Get the current double array
+        currentArray = nestedCellArray_1{j};
+
+
+        % uncomment below if you want to mean center
+        % currentArray_mean = mean(currentArray, 2);
+        % currentArray = currentArray-currentArray_mean;
+        % Compute the mean activity for each row in the time range 0 to 2 seconds
+        meanValues = mean(currentArray(:, timeRange), 2);
+        
+        % meanValues = max(currentArray(:, timeRange), [], 2);
+        % meanValues = currentArray(:, timeRange);
+
+        % Store the mean values in the corresponding cell of the nested cell array
+        meanNestedCellArray{j} = meanValues;
+    end
+    
+    % Store the nested cell array of mean values in the corresponding cell of the main cell array
+    meanZallMouse{i} = meanNestedCellArray;
+    concatenated_columns_array{i} = concatenated_columns;
+    clear meanNestedCellArray
+end
+
+% Now, meanZallMouse contains the mean activity for each row in the time period 0 to 2 seconds
+% Each cell in meanZallMouse contains a nested cell array with the
+
+
+
+
+
+
+
+% Initialize the new cell arrays to store the correlation results
+correlationResults_Type1_2 = cell(size(meanZallMouse)); % For trial_types_by_mouse == 1.2
+correlationResults_Type0_3 = cell(size(meanZallMouse)); % For trial_types_by_mouse == 0.3
+
+% Iterate through each level of meanZallMouse
+for i = 1:length(meanZallMouse)
+    % Get the current nested cell array of mean values
+    meanNestedCellArray = meanZallMouse{i};
+    % Initialize the nested cell arrays for storing correlation results
+    correlationNestedArray_Type1_2 = zeros(size(meanNestedCellArray));
+    correlationNestedArray_Type0_3 = zeros(size(meanNestedCellArray));
+
+    
+    % Determine the corresponding index in variable_to_correlate
+    trialIndex = mod(i-1, length(variable_to_correlate)) + 1;
+    
+    % Get the corresponding trial choice times and trial types
+    trialChoiceTimes = variable_to_correlate{trialIndex}';
+    trialTypes = trial_types_by_mouse{trialIndex};
+    
+    % Iterate through each cell in the nested cell array
+    for j = 1:length(meanNestedCellArray)
+        % Get the current mean values array
+        meanValues = meanNestedCellArray{j}';
+
+        % Check for matching lengths and extract subsets based on trial types
+        if length(trialChoiceTimes) == length(meanValues)
+            % Subset for trial_types_by_mouse == 1.2
+            indices_Type1_2 = trialTypes == 1.2;
+
+            if sum(indices_Type1_2) > 1
+                correlationNestedArray_Type1_2(j) = corr(meanValues(indices_Type1_2)', trialChoiceTimes(indices_Type1_2)');
+            else
+                correlationNestedArray_Type1_2(j) = NaN; % Handle insufficient data
+            end
+            
+            % Subset for trial_types_by_mouse == 0.3
+            indices_Type0_3 = trialTypes == 0.3;
+            if sum(indices_Type0_3) > 1
+                correlationNestedArray_Type0_3(j) = corr(meanValues(indices_Type0_3)', trialChoiceTimes(indices_Type0_3)');
+            else
+                correlationNestedArray_Type0_3(j) = NaN; % Handle insufficient data
+            end
+        elseif length(trialChoiceTimes) < length(meanValues)
+            % Adjust length mismatch scenario for trial_types_by_mouse == 1.2
+            indices_Type1_2 = trialTypes == 1.2;
+            if sum(indices_Type1_2) > 1
+                correlationNestedArray_Type1_2(j) = corr(meanValues(1:end-1 & indices_Type1_2), trialChoiceTimes(indices_Type1_2));
+            else
+                correlationNestedArray_Type1_2(j) = NaN;
+            end
+            
+            % Adjust length mismatch scenario for trial_types_by_mouse == 0.3
+            indices_Type0_3 = trialTypes == 0.3;
+            if sum(indices_Type0_3) > 1
+                correlationNestedArray_Type0_3(j) = corr(meanValues(1:end-1 & indices_Type0_3), trialChoiceTimes(indices_Type0_3));
+            else
+                correlationNestedArray_Type0_3(j) = NaN;
+            end
+        else
+            % If lengths do not match, handle the mismatch by setting correlation to NaN
+            correlationNestedArray_Type1_2(j) = NaN;
+            correlationNestedArray_Type0_3(j) = NaN;
+        end
+    end
+
+    % Store the nested cell arrays of correlation coefficients in the main cell arrays
+    correlationResults_Type1_2{i} = correlationNestedArray_Type1_2;
+    correlationResults_Type0_3{i} = correlationNestedArray_Type0_3;
+end
+
+% The results are stored in correlationResults_Type1_2 and correlationResults_Type0_3
+
+% Now, correlationResults contains the correlation coefficients for each nested structure in meanZallMouse
+
+
+% Assuming correlationResults_Type1_2 and correlationResults_Type0_3 are defined and contain the correlation coefficients
+
+% Initialize empty arrays to collect all correlation coefficients
+allCorrelations_Type1_2 = [];
+allCorrelations_Type0_3 = [];
+
+% Iterate through each level of correlationResults_Type1_2 and correlationResults_Type0_3
+for i = 1:length(correlationResults_Type1_2)
+    % Get the current nested arrays of correlation coefficients
+    correlationNestedArray_Type1_2 = correlationResults_Type1_2{i};
+    correlationNestedArray_Type0_3 = correlationResults_Type0_3{i};
+    
+    % Iterate through each cell in the nested arrays
+    for j = 1:length(correlationNestedArray_Type1_2)
+        % Get the current correlation coefficients
+        correlationCoeff_Type1_2 = correlationNestedArray_Type1_2(j);
+        correlationCoeff_Type0_3 = correlationNestedArray_Type0_3(j);
+        
+        % Check if the coefficients are not NaN and append to respective arrays
+        if ~isnan(correlationCoeff_Type1_2)
+            allCorrelations_Type1_2 = [allCorrelations_Type1_2; correlationCoeff_Type1_2];
+        end
+        if ~isnan(correlationCoeff_Type0_3)
+            allCorrelations_Type0_3 = [allCorrelations_Type0_3; correlationCoeff_Type0_3];
+        end
+    end
+end
+
+% Now, allCorrelations_Type1_2 and allCorrelations_Type0_3 contain all the correlation coefficients for the respective types
+
+% Create histograms of the correlation coefficients for both types
+figure;
+subplot(2, 1, 1);
+histogram(allCorrelations_Type1_2);
+xlabel('Correlation Coefficient (Type 1.2)');
+ylabel('Frequency');
+title('Histogram of Correlation Coefficients (Type 1.2)');
+
+subplot(2, 1, 2);
+histogram(allCorrelations_Type0_3);
+xlabel('Correlation Coefficient (Type 0.3)');
+ylabel('Frequency');
+title('Histogram of Correlation Coefficients (Type 0.3)');
+
+% Optionally, you can add a vertical line at 0 for reference in both histograms
+subplot(2, 1, 1);
+hold on;
+yLimits = ylim;
+plot([0 0], yLimits, 'r--', 'LineWidth', 2);
+hold off;
+
+subplot(2, 1, 2);
+hold on;
+yLimits = ylim;
+plot([0 0], yLimits, 'r--', 'LineWidth', 2);
+hold off;
+
+
+
+
+
+% only_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 == 1 & postchoice_reward_block_1 ~=1);
+% not_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
+% 
+% only_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 == 1 & postchoice_reward_block_1 ~=1);
+% not_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
+
+
+% 
+% only_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ==1);
+% not_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
+% 
+% only_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ==1);
+% not_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(prechoice_block_1 ~= 1 & postchoice_reward_block_1 ~=1);
+
+
+only_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(collect_blocks_2_and_3 == 1);
+not_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(true_neutral == 1);
+
+only_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(collect_blocks_2_and_3 == 1);
+not_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(true_neutral == 1);
+
+% only_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(postchoice_reward_block_1 == 1);
+% not_shk_responsive_corrs_Type1_2 = allCorrelations_Type1_2(postchoice_reward_block_1 ~= 1);
+% 
+% only_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(postchoice_reward_block_1 == 1);
+% not_shk_responsive_corrs_Type0_3 = allCorrelations_Type0_3(postchoice_reward_block_1 ~= 1);
+
+
+
+% Create histograms for SHK responsive correlations for both types
+figure;
+subplot(2, 2, 1);
+histogram(only_shk_responsive_corrs_Type1_2);
+xlabel('Correlation Coefficient (Type 1.2)');
+ylabel('Frequency');
+title('Histogram of SHK Responsive Correlations (Type 1.2)');
+
+subplot(2, 2, 2);
+histogram(not_shk_responsive_corrs_Type1_2);
+xlabel('Correlation Coefficient (Type 1.2)');
+ylabel('Frequency');
+title('Histogram of Non-SHK Responsive Correlations (Type 1.2)');
+
+subplot(2, 2, 3);
+histogram(only_shk_responsive_corrs_Type0_3);
+xlabel('Correlation Coefficient (Type 0.3)');
+ylabel('Frequency');
+title('Histogram of SHK Responsive Correlations (Type 0.3)');
+
+subplot(2, 2, 4);
+histogram(not_shk_responsive_corrs_Type0_3);
+xlabel('Correlation Coefficient (Type 0.3)');
+ylabel('Frequency');
+title('Histogram of Non-SHK Responsive Correlations (Type 0.3)');
+
+% Optionally, you can add vertical lines at 0 for reference in all histograms
+for i = 1:4
+    subplot(2, 2, i);
+    hold on;
+    yLimits = ylim;
+    plot([0 0], yLimits, 'r--', 'LineWidth', 2);
+    hold off;
+end
+
+
+
+% Assuming the following variables are defined:
+% allCorrelations_Type1_2, allCorrelations_Type0_3: arrays containing correlation coefficients for Types 1.2 and 0.3
+% only_shk_responsive_corrs_Type1_2, only_shk_responsive_corrs_Type0_3: arrays containing SHK responsive correlation coefficients for Types 1.2 and 0.3
+% not_shk_responsive_corrs_Type1_2, not_shk_responsive_corrs_Type0_3: arrays containing non-SHK responsive correlation coefficients for Types 1.2 and 0.3
+
+% Calculate means for Type 1.2
+mean_only_shk_Type1_2 = mean(only_shk_responsive_corrs_Type1_2);
+mean_not_shk_Type1_2 = mean(not_shk_responsive_corrs_Type1_2);
+
+% Calculate means for Type 0.3
+mean_only_shk_Type0_3 = mean(only_shk_responsive_corrs_Type0_3);
+mean_not_shk_Type0_3 = mean(not_shk_responsive_corrs_Type0_3);
+
+% Create histograms for both types
+figure;
+width = 250; % Width of the figure
+height = 1000; % Height of the figure (double the width)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Subplot for Type 1.2
+subplot(2, 1, 1);
+histogram(not_shk_responsive_corrs_Type1_2, 'Normalization', 'probability', 'FaceColor', 'blue', 'BinWidth', 0.05, 'LineStyle', 'none');
+hold on;
+histogram(only_shk_responsive_corrs_Type1_2, 'Normalization', 'probability', 'FaceColor', 'red', 'BinWidth', 0.05, 'LineStyle', 'none');
+xline(mean_only_shk_Type1_2, 'r');
+xline(mean_not_shk_Type1_2, 'g');
+xlabel('Correlation Coefficient (Type 1.2)');
+ylabel('Probability');
+title('Histograms of Correlation Coefficients (Type 1.2)');
+hold off;
+
+% Subplot for Type 0.3
+subplot(2, 1, 2);
+histogram(not_shk_responsive_corrs_Type0_3, 'Normalization', 'probability', 'FaceColor', 'blue', 'BinWidth', 0.05, 'LineStyle', 'none');
+hold on;
+histogram(only_shk_responsive_corrs_Type0_3, 'Normalization', 'probability', 'FaceColor', 'red', 'BinWidth', 0.05, 'LineStyle', 'none');
+xline(mean_only_shk_Type0_3, 'r');
+xline(mean_not_shk_Type0_3, 'g');
+xlabel('Correlation Coefficient (Type 0.3)');
+ylabel('Probability');
+title('Histograms of Correlation Coefficients (Type 0.3)');
+hold off;
+
+% Optionally, add vertical lines at 0 for reference
+for i = 1:2
+    subplot(2, 1, i);
+    hold on;
+    yLimits = ylim;
+    plot([0 0], yLimits, 'k', 'LineWidth', 2);
+    xtickformat('%.2f');
+    ytickformat('%.2f');
+    hold off;
+end
+
+% Perform Kolmogorov-Smirnov tests for both types
+[h_Type1_2, p_Type1_2] = kstest2(not_shk_responsive_corrs_Type1_2, only_shk_responsive_corrs_Type1_2);
+[h_Type0_3, p_Type0_3] = kstest2(not_shk_responsive_corrs_Type0_3, only_shk_responsive_corrs_Type0_3);
+
+% Display the results of the statistical tests for Type 1.2
+fprintf('Kolmogorov-Smirnov test result for Type 1.2:\n');
+fprintf('h = %d (0 means the null hypothesis cannot be rejected, 1 means it can be rejected)\n', h_Type1_2);
+fprintf('p-value = %.4f\n', p_Type1_2);
+
+% Display the results of the statistical tests for Type 0.3
+fprintf('Kolmogorov-Smirnov test result for Type 0.3:\n');
+fprintf('h = %d (0 means the null hypothesis cannot be rejected, 1 means it can be rejected)\n', h_Type0_3);
+fprintf('p-value = %.4f\n', p_Type0_3);
+
+% Perform t-tests for both types
+[h_ttest_Type1_2, p_ttest_Type1_2, ci_Type1_2, stats_Type1_2] = ttest2(not_shk_responsive_corrs_Type1_2, only_shk_responsive_corrs_Type1_2);
+[h_ttest_Type0_3, p_ttest_Type0_3, ci_Type0_3, stats_Type0_3] = ttest2(not_shk_responsive_corrs_Type0_3, only_shk_responsive_corrs_Type0_3);
+
+% Display t-test results for Type 1.2
+fprintf('T-test result for Type 1.2:\n');
+fprintf('h = %d\n', h_ttest_Type1_2);
+fprintf('p-value = %.4f\n', p_ttest_Type1_2);
+
+% Display t-test results for Type 0.3
+fprintf('T-test result for Type 0.3:\n');
+fprintf('h = %d\n', h_ttest_Type0_3);
+fprintf('p-value = %.4f\n', p_ttest_Type0_3);
+
+
+
+
+
+
+
+
+bar_separation_value = 3;
+
+figure;
+width = 250; % Width of the figure
+height = 500; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Swarm chart for Type 1.2 correlations
+swarmchart(ones(1, length(only_shk_responsive_corrs_Type1_2)), only_shk_responsive_corrs_Type1_2, 'o', 'MarkerFaceColor', 'red');
+hold on;
+swarmchart(ones(1, length(not_shk_responsive_corrs_Type1_2)) * bar_separation_value, not_shk_responsive_corrs_Type1_2, 'o', 'MarkerFaceColor', 'blue');
+
+% Plot mean lines for Type 1.2 correlations
+plot([0.5; 1.5], [mean(only_shk_responsive_corrs_Type1_2); mean(only_shk_responsive_corrs_Type1_2)], 'LineWidth', 3, 'Color', 'red');
+plot([bar_separation_value - 0.5; bar_separation_value + 0.5], [mean(not_shk_responsive_corrs_Type1_2); mean(not_shk_responsive_corrs_Type1_2)], 'LineWidth', 3, 'Color', 'blue');
+
+% Swarm chart for Type 0.3 correlations
+bar_separation_value_0_3 = bar_separation_value + 3;
+swarmchart(ones(1, length(only_shk_responsive_corrs_Type0_3)) + 2 * bar_separation_value, only_shk_responsive_corrs_Type0_3, 'o', 'MarkerFaceColor', 'magenta');
+swarmchart(ones(1, length(not_shk_responsive_corrs_Type0_3)) + 3 * bar_separation_value, not_shk_responsive_corrs_Type0_3, 'o', 'MarkerFaceColor', 'cyan');
+
+% Plot mean lines for Type 0.3 correlations
+plot([bar_separation_value_0_3 - 0.5; bar_separation_value_0_3 + 0.5], [mean(only_shk_responsive_corrs_Type0_3); mean(only_shk_responsive_corrs_Type0_3)], 'LineWidth', 3, 'Color', 'magenta');
+plot([bar_separation_value_0_3 + 2.5; bar_separation_value_0_3 + 3.5], [mean(not_shk_responsive_corrs_Type0_3); mean(not_shk_responsive_corrs_Type0_3)], 'LineWidth', 3, 'Color', 'cyan');
+
+% General plot settings
+yline(0, 'k--');
+xticks([1, bar_separation_value, bar_separation_value + 2, bar_separation_value_0_3, bar_separation_value_0_3 + 3]);
+xticklabels({'Type 1.2 SHK Resp.', 'Type 1.2 Not SHK Resp.', 'Type 0.3 SHK Resp.', 'Type 0.3 Not SHK Resp.'});
+xtickformat('%.1f');
+ytickformat('%.1f');
+hold off;
+
+
+bar_separation_value = 3;
+
+figure;
+width = 200; % Width of the figure
+height = 200; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+swarmchart(ones(1, length(only_shk_responsive_corrs_Type1_2)), only_shk_responsive_corrs_Type1_2)
+hold on
+swarmchart(ones(1, length(not_shk_responsive_corrs_Type1_2))*bar_separation_value, not_shk_responsive_corrs_Type1_2)
+
+% yline(mean(only_shk_responsive_corrs), ones(length(only_shk_responsive_corrs)))
+plot([0.5; 1.5], [mean(only_shk_responsive_corrs_Type1_2); mean(only_shk_responsive_corrs_Type1_2)], 'LineWidth',3)
+plot([bar_separation_value-.5; bar_separation_value+.5], [mean(not_shk_responsive_corrs_Type1_2); mean(not_shk_responsive_corrs_Type1_2)], 'LineWidth',3)
+yline(0);
+xtickformat('%.1f');
+ytickformat('%.1f');
+hold off
+
+
+% Create a histogram for allCorrelations
+figure;
+width = 250; % Width of the figure
+height = 250; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+histogram(not_shk_responsive_corrs_Type1_2 , 'Normalization', 'probability', 'FaceColor', 'blue','BinWidth', 0.05,'LineStyle','none');
+hold on;
+
+% Create a histogram for only_shk_responsive_corrs on the same figure
+histogram(only_shk_responsive_corrs_Type1_2, 'Normalization', 'probability', 'FaceColor', 'red', 'BinWidth', 0.05, 'LineStyle','none');
+% xline(mean_only_shk, 'r')
+% xline(mean_not_shk, 'g')
+% Add labels and title
+xlabel('Correlation Coefficient');
+ylabel('Probability');
+% title('Histograms of Correlation Coefficients');
+% legend('All Correlations', 'Only SHK Responsive Correlations');
+
+% Optionally, you can add a vertical line at 0 for reference
+yLimits = ylim;
+plot([0 0], yLimits, 'k', 'LineWidth', 2);
+xtickformat('%.2f');
+ytickformat('%.2f');
+hold off;

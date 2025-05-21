@@ -253,6 +253,171 @@ end
 %     xlim(xlims);
 % 
 % end
+% 
+% figure; hold on
+% width = 300; % Width of the figure
+% height = 600; % Height of the figure (width is half of height)
+% set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+% xlim(xlims);
+% % Set X-axis ticks
+% set(gca);
+% ytickformat('%.2f');
+% 
+% for vv = 1:size(pairwise_comps, 1)
+% 
+%     if size(comparison,2) == 2
+%         for qq = 1:size(comparison,2)
+% 
+%             comp_mean(qq,:) = comparison(qq).mean_Cp;
+%             comp_sem(qq,:) = comparison(qq).sem_Cp;
+%             % z = shadedErrorBar(timeline, comp_mean(qq,:), comp_sem(qq,:), 'lineProps', {'color', col_rep(qq)});
+%             z = shadedErrorBar(timeline, comp_mean(qq,:), comp_sem(qq,:), 'lineProps', {'color', col_rep(qq)});
+%             % set(z.edge,'LineStyle','none')
+%             % z.mainLine.LineWidth = 3;            
+%             % legend(cmb_strings, 'AutoUpdate','off', 'Location', 'westoutside')
+% %             plot(timeline,comp_mean(qq,:),'Color',col_rep(qq))
+% 
+% %             errorplot3(comp_mean(qq,:)-comp_sem(qq,:),comp_mean(qq,:)+comp_sem(qq,:),[-8 8],col_rep(qq),.15)
+% 
+%             f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'linestyle','-');
+%             % f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.');
+%             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
+%             % text(xlims(1),sig_plot_level_v2(vv), comparison_labels_join(vv),'Color',col_rep(vv+1),'FontSize', 6);
+% 
+% 
+% 
+%         end
+% %     elseif size(comparison,2) > 2
+% %             comp_mean(vv,:) = comparison(vv).mean_Cp;
+% %             comp_sem(vv,:) = comparison(vv).sem_Cp;
+% %             z = shadedErrorBar(timeline, comp_mean(vv,:), comp_sem(vv,:), 'lineProps', {'color', col_rep(qq+1)});
+% %             % set(z.edge,'LineStyle','none')
+% %             % z.mainLine.LineWidth = 3;
+% % 
+% %             % legend(cmb_strings, 'AutoUpdate','off', 'Location', 'westoutside')
+% % %             legend(arg_string_other, 'AutoUpdate','off')
+% % %             plot(timeline,comp_mean(vv,:),'Color',col_rep(vv))
+% % %             errorplot3(comp_mean(vv,:)-comp_sem(vv,:),comp_mean(vv,:)+comp_sem(vv,:),[-8 8],col_rep(vv),.15)
+% % 
+% %             f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'linestyle','-');
+% %             % f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.');
+% %             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
+% % 
+% %             % text(xlims(1),sig_plot_level_v2(vv),comparison_labels_join(vv),'Color',col_rep(vv+1), 'FontSize', 6);
+% % 
+% %     end
+% %
+%     elseif size(comparison,2) > 2
+%         for qq = 1:size(comparison,2)
+% 
+%             comp_mean(qq,:) = comparison(qq).mean_Cp;
+%             comp_sem(qq,:) = comparison(qq).sem_Cp;
+%             % z = shadedErrorBar(timeline, comp_mean(qq,:), comp_sem(qq,:), 'lineProps', {'color', col_rep(qq)});
+%             z = shadedErrorBar(timeline, comp_mean(qq,:), comp_sem(qq,:), 'lineProps', {'color', col_rep(qq)});
+%             % set(z.edge,'LineStyle','none')
+%             % z.mainLine.LineWidth = 3;
+%             % legend(cmb_strings, 'AutoUpdate','off', 'Location', 'westoutside')
+%             %             plot(timeline,comp_mean(qq,:),'Color',col_rep(qq))
+% 
+%             %             errorplot3(comp_mean(qq,:)-comp_sem(qq,:),comp_mean(qq,:)+comp_sem(qq,:),[-8 8],col_rep(qq),.15)
+% 
+%             % f = plot(timeline,perm_p_sig(qq,:),'Color',col_rep(qq),'linestyle','-');
+%             % f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.');
+%             % f.Annotation.LegendInformation.IconDisplayStyle = 'off';
+%             % text(xlims(1),sig_plot_level_v2(vv), comparison_labels_join(vv),'Color',col_rep(vv+1),'FontSize', 6);
+%             f = plot(timeline,perm_p_sig(qq,:),'Color',col_rep(qq),'linestyle','-');
+%             % f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.');
+%             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
+% 
+% 
+%         end
+% 
+%     end
+% 
+% 
+% end
+% 
+%     xlim(xlims);
+%     ylim(ylims)
+%     yticks(unique([yticks, ylims(2)]));
+%     % set(gcf, 'position', [10, 10, 900, 600]);
+%     % fontsize(16, "pixels")
+%     title('perm test')
+%     % set(gcf, 'resize', 'off' );
+% 
+% 
+% 
+    %% Plot permutation test data
+
+% create a label for each comparison to be made
+% if size(arg_string_other, 1) > 2
+%     if contains(arg_string_other, 'block', 'IgnoreCase', true)
+%         for zz = 1:size(arg_string_block, 1)
+%             for hh = 1:size(pairwise_comps, 2)
+%                 comparison_labels(zz, hh) = arg_string_block(contains(arg_string_block, string(pairwise_comps(zz, hh))));
+%             end
+%         end
+%     elseif ~contains(arg_string_other, 'block', 'IgnoreCase', true)
+%         for zz = 1:size(arg_string_other, 1)
+%             for hh = 1:size(pairwise_comps, 2)-1
+%                 comparison_labels(hh, zz) = arg_string_other(zz);
+%             end
+%         end
+%     end
+% elseif size(arg_string_other,1) <= 2
+%     for zz = 1:size(arg_string_other, 1)
+%         for hh = 1:size(pairwise_comps, 2)-1
+%             comparison_labels(hh, zz) = arg_string_other(zz);
+%         end
+%     end
+% 
+% end
+% % combine the comparisons made above to directly display what is being
+% % % compared
+% comparison_labels_join = join(comparison_labels, ' vs ');
+% 
+% num_trials_sum_string = string(num_trials_sum)';
+% 
+% num_sessions_sum_strong = string(num_sessions_sum)';
+% cmb_strings = append(arg_string_other, ' ','num events=', num_trials_sum_string, ' ', 'num sessions=', num_sessions_sum_strong);
+% 
+
+% figure; hold on
+% for vv = 1:size(pairwise_comps, 1)
+% 
+%     if size(comparison,2) == 2
+%         for qq = 1:size(comparison,2)
+% 
+%             comp_mean(qq,:) = comparison(qq).mean_Cp;
+%             comp_sem(qq,:) = comparison(qq).sem_Cp;
+% 
+%             plot(timeline,comp_mean(qq,:),'Color',col_rep(qq))
+%             
+%             errorplot3(comp_mean(qq,:)-comp_sem(qq,:),comp_mean(qq,:)+comp_sem(qq,:),[-8 8],col_rep(qq),.15)
+% 
+%             plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.')
+%             text(xlims(1),sig_plot_level_v2(vv), comparison_labels_join(vv),'Color',col_rep(vv+1),'FontSize', 6);
+%             lgd = legend(comparison_labels)
+%             
+%             
+%         end
+%     elseif size(comparison,2) > 2
+%             comp_mean(vv,:) = comparison(vv).mean_Cp;
+%             comp_sem(vv,:) = comparison(vv).sem_Cp;
+% 
+%             plot(timeline,comp_mean(vv,:),'Color',col_rep(vv))
+%             errorplot3(comp_mean(vv,:)-comp_sem(vv,:),comp_mean(vv,:)+comp_sem(vv,:),[-8 8],col_rep(vv),.15)
+% 
+%             plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.')
+%             text(xlims(1),sig_plot_level_v2(vv),comparison_labels_join(vv),'Color',col_rep(vv+1), 'FontSize', 6);
+%             
+%     end
+%     plot([0 0],ylim,'k:')
+%     plot(xlim,[0 0],'k--')
+%     
+%     xlim(xlims);
+% 
+% end
 
 figure; hold on
 width = 300; % Width of the figure
@@ -266,12 +431,12 @@ ytickformat('%.2f');
 for vv = 1:size(pairwise_comps, 1)
 
     if size(comparison,2) == 2
-        for qq = 1:size(comparison,2)
 
-            comp_mean(qq,:) = comparison(qq).mean_Cp;
-            comp_sem(qq,:) = comparison(qq).sem_Cp;
+
+            comp_mean(vv,:) = comparison(vv).mean_Cp;
+            comp_sem(vv,:) = comparison(vv).sem_Cp;
             % z = shadedErrorBar(timeline, comp_mean(qq,:), comp_sem(qq,:), 'lineProps', {'color', col_rep(qq)});
-            z = shadedErrorBar(timeline, comp_mean(qq,:), comp_sem(qq,:), 'lineProps', {'color', col_rep(qq)});
+            z = shadedErrorBar(timeline, comp_mean(vv,:), comp_sem(qq,:), 'lineProps', {'color', col_rep(vv)});
             % set(z.edge,'LineStyle','none')
             % z.mainLine.LineWidth = 3;            
             % legend(cmb_strings, 'AutoUpdate','off', 'Location', 'westoutside')
@@ -284,27 +449,52 @@ for vv = 1:size(pairwise_comps, 1)
             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
             % text(xlims(1),sig_plot_level_v2(vv), comparison_labels_join(vv),'Color',col_rep(vv+1),'FontSize', 6);
             
-            
-            
-        end
+
+%     elseif size(comparison,2) > 2
+%             comp_mean(vv,:) = comparison(vv).mean_Cp;
+%             comp_sem(vv,:) = comparison(vv).sem_Cp;
+%             z = shadedErrorBar(timeline, comp_mean(vv,:), comp_sem(vv,:), 'lineProps', {'color', col_rep(qq+1)});
+%             % set(z.edge,'LineStyle','none')
+%             % z.mainLine.LineWidth = 3;
+% 
+%             % legend(cmb_strings, 'AutoUpdate','off', 'Location', 'westoutside')
+% %             legend(arg_string_other, 'AutoUpdate','off')
+% %             plot(timeline,comp_mean(vv,:),'Color',col_rep(vv))
+% %             errorplot3(comp_mean(vv,:)-comp_sem(vv,:),comp_mean(vv,:)+comp_sem(vv,:),[-8 8],col_rep(vv),.15)
+% 
+%             f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'linestyle','-');
+%             % f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.');
+%             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
+% 
+%             % text(xlims(1),sig_plot_level_v2(vv),comparison_labels_join(vv),'Color',col_rep(vv+1), 'FontSize', 6);
+% 
+%     end
+%
     elseif size(comparison,2) > 2
+
+
             comp_mean(vv,:) = comparison(vv).mean_Cp;
             comp_sem(vv,:) = comparison(vv).sem_Cp;
-            z = shadedErrorBar(timeline, comp_mean(vv,:), comp_sem(vv,:), 'lineProps', {'color', col_rep(qq)});
+            % z = shadedErrorBar(timeline, comp_mean(qq,:), comp_sem(qq,:), 'lineProps', {'color', col_rep(qq)});
+            z = shadedErrorBar(timeline, comp_mean(vv,:), comp_sem(vv,:), 'lineProps', {'color', col_rep(vv)});
             % set(z.edge,'LineStyle','none')
             % z.mainLine.LineWidth = 3;
-            
             % legend(cmb_strings, 'AutoUpdate','off', 'Location', 'westoutside')
-%             legend(arg_string_other, 'AutoUpdate','off')
-%             plot(timeline,comp_mean(vv,:),'Color',col_rep(vv))
-%             errorplot3(comp_mean(vv,:)-comp_sem(vv,:),comp_mean(vv,:)+comp_sem(vv,:),[-8 8],col_rep(vv),.15)
+            %             plot(timeline,comp_mean(qq,:),'Color',col_rep(qq))
 
-            f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'linestyle','-');
+            %             errorplot3(comp_mean(qq,:)-comp_sem(qq,:),comp_mean(qq,:)+comp_sem(qq,:),[-8 8],col_rep(qq),.15)
+
+            % f = plot(timeline,perm_p_sig(qq,:),'Color',col_rep(qq),'linestyle','-');
+            % f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.');
+            % f.Annotation.LegendInformation.IconDisplayStyle = 'off';
+            % text(xlims(1),sig_plot_level_v2(vv), comparison_labels_join(vv),'Color',col_rep(vv+1),'FontSize', 6);
+            f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv),'linestyle','-');
             % f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.');
             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
-            
-            % text(xlims(1),sig_plot_level_v2(vv),comparison_labels_join(vv),'Color',col_rep(vv+1), 'FontSize', 6);
-            
+
+
+
+
     end
 
 
@@ -317,7 +507,6 @@ end
     % fontsize(16, "pixels")
     title('perm test')
     % set(gcf, 'resize', 'off' );
-
 %% Plot diff bCI
 
 

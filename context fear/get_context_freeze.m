@@ -5,11 +5,11 @@
 
 % experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
-experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 
 % experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 
-% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
+experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
 
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
 
@@ -778,11 +778,11 @@ for i = 1:total_stimuli
 end
 
 
-experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 % experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 % experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
-% experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
+experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
 
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
 

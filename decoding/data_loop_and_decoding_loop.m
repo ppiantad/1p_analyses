@@ -635,16 +635,18 @@ for i = 1:num_pairs
     mean_accuracy_2 = mean(data_matrix_2, 1);
     
     % Perform paired-samples t-test
-    [h, p] = ttest(mean_accuracy_1, mean_accuracy_2);
+    [h,p,ci,stats] = ttest(mean_accuracy_1, mean_accuracy_2);
     
     % Store results
     h_values(i) = h;
     p_values(i) = p;
+    df_values(i) = stats.df;
+    t_values(i) = stats.tstat;
 end
 
 % Display results
 disp('Paired t-test results:');
-disp(table((1:num_pairs)', h_values', p_values', 'VariableNames', {'Pair', 'h', 'p'}));
+disp(table((1:num_pairs)', h_values', df_values', t_values', p_values', 'VariableNames', {'Pair', 'h', 'df', 't-value', 'p'}));
 
 %%
 % Define figure width and height (adjust as needed)

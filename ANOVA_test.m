@@ -1,5 +1,5 @@
 
-
+clc
 % Combine data for analysis
 data = [large_choice, small_choice]; % Combine large and small choices
 % data = [large_path_length, small_path_length]; % Combine large and small choices
@@ -22,8 +22,21 @@ rm = fitrm(tbl, 'Large_Block1-Small_Block3 ~ 1', 'WithinDesign', WithinDesign);
 % Run repeated measures ANOVA
 ranovaResults = ranova(rm, 'WithinModel', 'Choice*TrialBlock');
 
+
+mauchlyTest = mauchly(rm)
 % Display results
 disp(ranovaResults);
+
+% Display ANOVA results
+fprintf('Reward Size (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranovaResults{3,2}, ranovaResults{4,2}, ranovaResults{3,4}, ranovaResults{3,5});
+
+% Display ANOVA results
+fprintf('Trial Block effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranovaResults{5,2}, ranovaResults{6,2}, ranovaResults{5,4}, ranovaResults{5,5});
+% Display ANOVA results
+fprintf('Interaction effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranovaResults{7,2}, ranovaResults{8,2}, ranovaResults{7,4}, ranovaResults{7,5});
 
 % Check if interaction is significant (using p < 0.05 threshold)
 pValueInteraction = ranovaResults{7, 5}; % p-value for Choice*TrialBlock interaction
@@ -56,7 +69,7 @@ if pValueInteraction < 0.05
     largeModel = fitrm(tbl, 'Large_Block1-Large_Block3 ~ 1');
     largeRanova = ranova(largeModel);
     fprintf('Large Choice - Effect of Trial Block: F(%.1f,%.1f) = %.3f, p = %.4f\n', ...
-        largeRanova{1,2}, largeRanova{1,3}, largeRanova{1,4}, largeRanova{1,5});
+        largeRanova{1,2}, largeRanova{2,2}, largeRanova{1,4}, largeRanova{1,5});
     
     % If significant, run post-hoc pairwise comparisons with Bonferroni correction
     if largeRanova{1,5} < 0.05
@@ -65,7 +78,7 @@ if pValueInteraction < 0.05
         largeComparisons = multcompare(largeModel, 'Time', 'ComparisonType', 'bonferroni');
         % Display results
         for i = 1:size(largeComparisons, 1)
-            fprintf('  Block %d vs Block %d: Mean Diff = %.3f, CI = [%.3f, %.3f], p = %.4f\n', ...
+            fprintf('  Large Rew Block %d vs Block %d: Mean Diff = %.3f, CI = [%.3f, %.3f], p = %.4f\n', ...
                 largeComparisons.Time_1(i), largeComparisons.Time_2(i), ...
                 largeComparisons.Difference(i), largeComparisons.Lower(i), ...
                 largeComparisons.Upper(i), largeComparisons.pValue(i));
@@ -77,7 +90,7 @@ if pValueInteraction < 0.05
     smallModel = fitrm(tbl, 'Small_Block1-Small_Block3 ~ 1');
     smallRanova = ranova(smallModel);
     fprintf('Small Choice - Effect of Trial Block: F(%.1f,%.1f) = %.3f, p = %.4f\n', ...
-        smallRanova{1,2}, smallRanova{1,3}, smallRanova{1,4}, smallRanova{1,5});
+        smallRanova{1,2}, smallRanova{2,2}, smallRanova{1,4}, smallRanova{1,5});
     
     % If significant, run post-hoc pairwise comparisons with Bonferroni correction
     if smallRanova{1,5} < 0.05
@@ -86,35 +99,35 @@ if pValueInteraction < 0.05
         smallComparisons = multcompare(smallModel, 'Time', 'ComparisonType', 'bonferroni');
         % Display results
         for i = 1:size(smallComparisons, 1)
-            fprintf('  Block %d vs Block %d: Mean Diff = %.3f, CI = [%.3f, %.3f], p = %.4f\n', ...
+            fprintf('  Small Rew Block %d vs Block %d: Mean Diff = %.3f, CI = [%.3f, %.3f], p = %.4f\n', ...
                 smallComparisons.Time_1(i), smallComparisons.Time_2(i), ...
                 smallComparisons.Difference(i), smallComparisons.Lower(i), ...
                 smallComparisons.Upper(i), smallComparisons.pValue(i));
         end
     end
     
-    % Visualize the interaction
-    fprintf('\n--- Visualizing the Interaction ---\n');
-    
-    % Calculate means and standard errors
-    largeMeans = mean(data(:,1:3));
-    smallMeans = mean(data(:,4:6));
-    largeSE = std(data(:,1:3)) / sqrt(num_subjects);
-    smallSE = std(data(:,4:6)) / sqrt(num_subjects);
-    
-    figure;
-    errorbar([1, 2, 3], largeMeans, largeSE, '-o', 'LineWidth', 2, 'MarkerSize', 8, 'MarkerFaceColor', 'auto');
-    hold on;
-    errorbar([1, 2, 3], smallMeans, smallSE, '-s', 'LineWidth', 2, 'MarkerSize', 8, 'MarkerFaceColor', 'auto');
-    
-    xlabel('Trial Block');
-    ylabel('Response');
-    legend('Large Choice', 'Small Choice', 'Location', 'best');
-    title('Interaction between Choice Type and Trial Block');
-    xticks([1, 2, 3]);
-    xticklabels({'Block 1', 'Block 2', 'Block 3'});
-    grid on;
-    box on;
+    % % Visualize the interaction
+    % fprintf('\n--- Visualizing the Interaction ---\n');
+    % 
+    % % Calculate means and standard errors
+    % largeMeans = mean(data(:,1:3));
+    % smallMeans = mean(data(:,4:6));
+    % largeSE = std(data(:,1:3)) / sqrt(num_subjects);
+    % smallSE = std(data(:,4:6)) / sqrt(num_subjects);
+    % 
+    % figure;
+    % errorbar([1, 2, 3], largeMeans, largeSE, '-o', 'LineWidth', 2, 'MarkerSize', 8, 'MarkerFaceColor', 'auto');
+    % hold on;
+    % errorbar([1, 2, 3], smallMeans, smallSE, '-s', 'LineWidth', 2, 'MarkerSize', 8, 'MarkerFaceColor', 'auto');
+    % 
+    % xlabel('Trial Block');
+    % ylabel('Response');
+    % legend('Large Choice', 'Small Choice', 'Location', 'best');
+    % title('Interaction between Choice Type and Trial Block');
+    % xticks([1, 2, 3]);
+    % xticklabels({'Block 1', 'Block 2', 'Block 3'});
+    % grid on;
+    % box on;
     
 else
     disp('Interaction not significant. Post-hoc tests for interaction not needed.');
@@ -177,84 +190,96 @@ disp('Post-hoc pairwise comparisons (Tukey-corrected):');
 mc = multcompare(rm, 'TrialBlock', 'ComparisonType', 'tukey');
 disp(mc);
 %% between subjects for 2 treatment groups
-
-
+clc
 % Create wide-format data for analysis
 num_mice_mCherry = size(large_choice_mCherry, 1);
 num_mice_hM4Di = size(large_choice_hM4Di, 1);
-
 % Combine data from both groups into a wide-format table
 data = [large_choice_mCherry; large_choice_hM4Di];
 Treatment = [repmat({'mCherry'}, num_mice_mCherry, 1); repmat({'hM4Di'}, num_mice_hM4Di, 1)];
 Subject = (1:size(data, 1))';
-
 % Convert to table
 tbl = array2table(data, 'VariableNames', {'Block1', 'Block2', 'Block3'});
 tbl.Treatment = categorical(Treatment);
 tbl.Subject = Subject;
-
 % Define within-subject factors
 TrialBlock = categorical([1, 2, 3]');
 WithinDesign = table(TrialBlock, 'VariableNames', {'TrialBlock'});
-
 % Fit repeated measures model with Treatment as a between-subject factor
 rm = fitrm(tbl, 'Block1-Block3 ~ Treatment', 'WithinDesign', WithinDesign);
-
 % Run repeated measures ANOVA
 ranovaResults = ranova(rm);
-
 % Display results
 disp(ranovaResults);
 
-
+% Display ANOVA results
+fprintf('Trial Block effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranovaResults{1,2}, ranovaResults{3,2}, ranovaResults{1,4}, ranovaResults{1,5});
+% Display ANOVA results
+fprintf('Interaction effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranovaResults{2,2}, ranovaResults{3,2}, ranovaResults{2,4}, ranovaResults{2,5});
 % Check if the interaction effect is significant
 p_interaction = ranovaResults.pValue(2); % The third row corresponds to the Treatment × TrialBlock interaction
-
 if p_interaction < 0.05
     disp('Significant interaction found! Performing post-hoc comparisons at each TrialBlock level...');
-    
     % Extract data for each block
     block1_data = data(:,1);
     block2_data = data(:,2);
     block3_data = data(:,3);
-    
     % Perform independent t-tests at each block
-    [~, p_block1] = ttest2(block1_data(1:num_mice_mCherry), block1_data(num_mice_mCherry+1:end));
-    [~, p_block2] = ttest2(block2_data(1:num_mice_mCherry), block2_data(num_mice_mCherry+1:end));
-    [~, p_block3] = ttest2(block3_data(1:num_mice_mCherry), block3_data(num_mice_mCherry+1:end));
-    
+    [~, p_block1, ~, stats_block1] = ttest2(block1_data(1:num_mice_mCherry), block1_data(num_mice_mCherry+1:end));
+    [~, p_block2, ~, stats_block2] = ttest2(block2_data(1:num_mice_mCherry), block2_data(num_mice_mCherry+1:end));
+    [~, p_block3, ~, stats_block3] = ttest2(block3_data(1:num_mice_mCherry), block3_data(num_mice_mCherry+1:end));
     % Apply Bonferroni correction for multiple comparisons
     p_adjusted = min([p_block1, p_block2, p_block3] * 3, 1); % Ensures values do not exceed 1
+    % Create table with t-values, df, p-values, and adjusted p-values
+    t_values = [stats_block1.tstat; stats_block2.tstat; stats_block3.tstat];
+    df_values = [stats_block1.df; stats_block2.df; stats_block3.df];
+    p_values = [p_block1; p_block2; p_block3];
     
-    % Display results
-    posthoc_results = table([p_block1; p_block2; p_block3], p_adjusted', ...
-        'VariableNames', {'Raw_pValue', 'Bonferroni_pValue'}, ...
+    posthoc_results = table(t_values, df_values, p_values, p_adjusted', ...
+        'VariableNames', {'t_value', 'df', 'Raw_pValue', 'Bonferroni_pValue'}, ...
         'RowNames', {'Block1', 'Block2', 'Block3'});
-    
     disp('Pairwise comparisons (Treatment effect at each TrialBlock):');
     disp(posthoc_results);
+    
+    % Also print formatted results
+    for i = 1:3
+        block_name = sprintf('Block%d', i);
+        fprintf('%s: t(%.0f) = %.3f, p = %.4f (adjusted p = %e\n', ...
+            block_name, posthoc_results.df(i), posthoc_results.t_value(i), ...
+            posthoc_results.Raw_pValue(i), posthoc_results.Bonferroni_pValue(i));
+    end
 else
     disp('No significant interaction effect found.');
 end
 
 % Calculate mean response for each subject across all blocks
-mCherry_means = mean(data(1:num_mice_mCherry,:), 2);  % Average across blocks
-hM4Di_means = mean(data(num_mice_mCherry+1:end,:), 2);  % Average across blocks
+mCherry_means = mean(data(1:num_mice_mCherry,:), 2); % Average across blocks
+hM4Di_means = mean(data(num_mice_mCherry+1:end,:), 2); % Average across blocks
 
-% Perform independent samples t-test
-[h, p, ci, stats] = ttest2(mCherry_means, hM4Di_means);
+% Create variables for ANOVA
+group_means = [mCherry_means; hM4Di_means];
+group_labels = [repmat({'mCherry'}, length(mCherry_means), 1); repmat({'hM4Di'}, length(hM4Di_means), 1)];
 
-% Display t-test results
-fprintf('Treatment effect (t-test): t(%d) = %.3f, p = %.4f\n', ...
-    stats.df, stats.tstat, p);
+% Perform one-way ANOVA
+[p, tbl_anova, stats] = anova1(group_means, group_labels, 'off');
+
+% Display ANOVA results
+fprintf('Treatment effect (one-way ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    tbl_anova{2,3}, tbl_anova{3,3}, tbl_anova{2,5}, p);
 
 if p < 0.05
-    fprintf('Treatment effect is significant (p = %.4f)\n', p);
+    fprintf('Treatment effect is significant (p = %e)\n', p);
     fprintf('mCherry group mean: %.3f\n', mean(mCherry_means));
     fprintf('hM4Di group mean: %.3f\n', mean(hM4Di_means));
     fprintf('Difference: %.3f\n', mean(mCherry_means) - mean(hM4Di_means));
+    
+    % If you want to add multiple comparison test
+    [c,m,h,gnames] = multcompare(stats, 'Display', 'off');
+    fprintf('Multiple comparison p-value: %e\n', c(1,6));
 else
-    fprintf('Treatment effect is not significant (p = %.4f)\n', p);
+    fprintf('Treatment effect is not significant (p = %e)\n', p);
 end
 
 

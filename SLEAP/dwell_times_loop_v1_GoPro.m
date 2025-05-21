@@ -2,9 +2,10 @@
 fs_cam = 30; %set sampling rate according to camera, this is hard coded for now
 
 animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'RDT_OPTO_CHOICE';
+session_to_analyze = 'RDT_D1_CNO';
+IDs_from_list = hM4Di_IDs;
 % IDs_from_list = stGtACR_IDs;
-IDs_from_list = PdCO_IDs;
+% IDs_from_list = PdCO_IDs;
 
 reward_cup_time = [];
 right_screen_time = [];
@@ -219,9 +220,10 @@ dwell_times_table.other_zone_time_B3 = other_zone_time_B3';
 
 dwell_times_table_reorg = dwell_times_table(loc, :);
 
+dwell_times_table_reorg.treatment = hM4Di_treatment_groups;
+% dwell_times_table_reorg.treatment = stGtACR_treatment_groups;
+% dwell_times_table_reorg.treatment = PdCO_treatment_groups;
 
-
-dwell_times_table_reorg.treatment = PdCO_treatment_groups;
 
 % remove any mice where all values are 0 - this means these mice had no
 % session. should be double checked to make sure 0s aren't from a bug or
