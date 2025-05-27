@@ -1,4 +1,4 @@
-function [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, x_limits, y_limits)
+function [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, x_limits, y_limits, input_threshold) 
 
 % data_array is expected to be a 1x# cell array. each cell should the
 % following orientation:
@@ -25,7 +25,7 @@ bCI_tCI_CI_threshold = 0; % use for things that hover around 0 (dF/F for example
 
 %% ERT example
 sig = 0.001;
-consec_thresh = 10; % 1017.3Hz sample rate / 3Hz filter %340 PRD used 340 because his data WERE NOT DOWNSAMPLED (e.g., they were 1018 samples per sec) our data are 30 samples per sec or so.
+consec_thresh = input_threshold; %formerly hardcoded to 10 (for 30 Hz data) or 3 (for 10 Hz data) % 1017.3Hz sample rate / 3Hz filter %340 PRD used 340 because his data WERE NOT DOWNSAMPLED (e.g., they were 1018 samples per sec) our data are 30 samples per sec or so.
 % this means if his threshold is 1017/340 = ~3, ours should be 30/x = 3,
 % which is 10
 
@@ -428,7 +428,7 @@ xlim(xlims);
 set(gca);
 ytickformat('%.2f');
 
-for vv = 1:size(pairwise_comps, 1)
+for vv = 1:size(pairwise_comps, 2)
 
     if size(comparison,2) == 2
 
@@ -436,7 +436,7 @@ for vv = 1:size(pairwise_comps, 1)
             comp_mean(vv,:) = comparison(vv).mean_Cp;
             comp_sem(vv,:) = comparison(vv).sem_Cp;
             % z = shadedErrorBar(timeline, comp_mean(qq,:), comp_sem(qq,:), 'lineProps', {'color', col_rep(qq)});
-            z = shadedErrorBar(timeline, comp_mean(vv,:), comp_sem(qq,:), 'lineProps', {'color', col_rep(vv)});
+            z = shadedErrorBar(timeline, comp_mean(vv,:), comp_sem(vv,:), 'lineProps', {'color', col_rep(vv)});
             % set(z.edge,'LineStyle','none')
             % z.mainLine.LineWidth = 3;            
             % legend(cmb_strings, 'AutoUpdate','off', 'Location', 'westoutside')
@@ -444,7 +444,7 @@ for vv = 1:size(pairwise_comps, 1)
             
 %             errorplot3(comp_mean(qq,:)-comp_sem(qq,:),comp_mean(qq,:)+comp_sem(qq,:),[-8 8],col_rep(qq),.15)
 
-            f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'linestyle','-');
+            f = plot(timeline,perm_p_sig,'Color',col_rep(vv),'linestyle','-');
             % f = plot(timeline,perm_p_sig(vv,:),'Color',col_rep(vv+1),'Marker','.');
             f.Annotation.LegendInformation.IconDisplayStyle = 'off';
             % text(xlims(1),sig_plot_level_v2(vv), comparison_labels_join(vv),'Color',col_rep(vv+1),'FontSize', 6);
@@ -503,6 +503,7 @@ end
     xlim(xlims);
     ylim(ylims)
     yticks(unique([yticks, ylims(2)]));
+    %yticks(ylims/2);
     % set(gcf, 'position', [10, 10, 900, 600]);
     % fontsize(16, "pixels")
     title('perm test')

@@ -649,7 +649,10 @@ for ff = 1:numConditions
     e13 = scatter(PCA_traj{ff}(1, closest_index_collect(ff)), PCA_traj{ff}(2, closest_index_collect(ff)), d_marker_size, [0, 0, 0]/255, '^', 'filled', 'HandleVisibility', 'off');
 %     e13 = scatter(d1(1, d_marker_loc(3)), d1(2, d_marker_loc(3)), d_marker_size, [0, 0, 0]/255, 'square', 'filled', 'HandleVisibility', 'off');
     legend
-
+    xlim([-60 40]);
+    ylim([-40 60])
+    yticks([-40:20:60]);
+    xticks([-60:20:40]);
 end
 
 

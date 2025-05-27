@@ -1199,7 +1199,7 @@ remapped_prechoice_sum = sum(remapped_prechoice)
 
 mean_data_array = {neuron_mean_array{1, 1}(conserved_prechoice  ==1, :), neuron_mean_array{1, 8}(conserved_prechoice  ==1, :), neuron_mean_array{1, 8}(lost_prechoice  ==1, :)}
 sem_data_array = {neuron_sem_array{1, 1}(conserved_prechoice  ==1, :), neuron_sem_array{1, 8}(conserved_prechoice  ==1, :), neuron_sem_array{1, 8}(lost_prechoice  ==1, :)}
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 5], [-0.5 0.7])
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 5], [-0.5 0.7], 3)
 
 
 %%
@@ -1218,7 +1218,7 @@ remapped_postchoice_reward_sum = sum(remapped_postchoice_reward)
 
 mean_data_array = {neuron_mean_array{1, 2}(conserved_postchoice_reward  ==1, :), neuron_mean_array{1, 9}(conserved_postchoice_reward  ==1, :), neuron_mean_array{1, 9}(lost_postchoice_reward  ==1, :)}
 sem_data_array = {neuron_sem_array{1, 2}(conserved_postchoice_reward  ==1, :), neuron_sem_array{1, 9}(conserved_postchoice_reward  ==1, :), neuron_sem_array{1, 9}(lost_postchoice_reward  ==1, :)}
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 5], [-0.5 0.8])
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 5], [-0.5 0.8], 3)
 
 %%
 % arrays_to_examine = [comparison_arrays(1, 3) comparison_arrays(2, 3)];
@@ -1236,7 +1236,7 @@ remapped_collection_sum = sum(remapped_collection)
 
 mean_data_array = {neuron_mean_array{1, 3}(conserved_collection  ==1, :), neuron_mean_array{1, 10}(conserved_collection  ==1, :), neuron_mean_array{1, 10}(lost_collection  ==1, :), neuron_mean_array{1, 10}(remapped_collection  ==1, :)}
 sem_data_array = {neuron_sem_array{1, 3}(conserved_collection  ==1, :), neuron_sem_array{1, 10}(conserved_collection  ==1, :), neuron_sem_array{1, 10}(lost_collection  ==1, :), neuron_sem_array{1, 10}(remapped_collection  ==1, :)}
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 5], [-0.5 0.8])
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 5], [-0.5 0.8], 3)
 
 
 
@@ -1458,15 +1458,15 @@ xlabel('Time from choice (s)');
 % plot differences with error & bCI for statistics
 mean_data_array = {diff_all_mean_prechoice}
 sem_data_array = {diff_all_sem_prechoice}
-[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 1], [-0.5 0.2])
+[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 1], [-0.6 0.2])
 
 mean_data_array = {diff_all_mean_postchoice}
 sem_data_array = {diff_all_sem_postchoice}
-[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 3], [-0.7 0.2])
+[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 3], [-0.8 0.2])
 
 mean_data_array = {diff_all_mean_collect}
 sem_data_array = {diff_all_sem_collect}
-[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [0 4], [-0.5 0.2])
+[comparison] = bCI_and_tCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [0 4], [-0.6 0.2])
 
 
 %% requires https://www.mathworks.com/matlabcentral/fileexchange/98974-venn-euler-diagram?s_tid=FX_rc3_behav
@@ -1792,7 +1792,7 @@ p = 1 - chi2cdf(chi2stat,1)
  mean_data_array = {neuron_mean_array{1, 1}(remapped_prechoice==1, :), neuron_mean_array{1, 8}(remapped_prechoice==1, :)};
  sem_data_array = {neuron_sem_array{1, 1}(remapped_prechoice==1, :), neuron_sem_array{1, 8}(remapped_prechoice==1, :)};
 
- [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 1], [-0.1 0.7]);
+ [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 1], [-0.2 0.6], 3);
 
 
 
@@ -2840,7 +2840,7 @@ load('BLA_RDT_6_variables_only_large_use_to_show_large_alone_decrease.mat')
  mean_data_array = {neuron_mean_array{1, 1}(prechoice_block_1==1, :), neuron_mean_array{1, 4}(prechoice_block_1==1, :)};
  sem_data_array = {neuron_sem_array{1, 1}(prechoice_block_1==1, :), neuron_sem_array{1, 4}(prechoice_block_1==1, :)};
 
- [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 1], [-0.5 0.5]);
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 1], [-0.5 0.5], 3);
 
 
 

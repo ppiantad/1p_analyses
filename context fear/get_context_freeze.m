@@ -782,7 +782,7 @@ end
 % experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 % experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
-experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
+experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
 
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
 
@@ -796,7 +796,7 @@ min_samples = min_duration / sample_duration;
 
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D3';
+session_to_analyze = 'D4';
 
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)

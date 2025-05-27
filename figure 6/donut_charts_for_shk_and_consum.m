@@ -42,6 +42,8 @@ p_combined = (x1 + x2) / (n1 + n2);
 % Z-statistic
 z = (p1 - p2) / sqrt(p_combined * (1 - p_combined) * (1/n1 + 1/n2));
 
+z_val = abs(z)
+
 % Two-tailed p-value
 p_value = 2 * (1 - normcdf(abs(z)));
 
@@ -97,6 +99,8 @@ p_combined = (x1 + x2) / (n1 + n2);
 
 % Z-statistic
 z = (p1 - p2) / sqrt(p_combined * (1 - p_combined) * (1/n1 + 1/n2));
+
+z_val = abs(z)
 
 % Two-tailed p-value
 p_value = 2 * (1 - normcdf(abs(z)));
@@ -199,6 +203,8 @@ p_combined = (x1 + x2) / (n1 + n2);
 % Z-statistic
 z = (p1 - p2) / sqrt(p_combined * (1 - p_combined) * (1/n1 + 1/n2));
 
+z_val = abs(z)
+
 % Two-tailed p-value
 p_value = 2 * (1 - normcdf(abs(z)));
 
@@ -253,6 +259,8 @@ p_combined = (x1 + x2) / (n1 + n2);
 
 % Z-statistic
 z = (p1 - p2) / sqrt(p_combined * (1 - p_combined) * (1/n1 + 1/n2));
+
+z_val = abs(z)
 
 % Two-tailed p-value
 p_value = 2 * (1 - normcdf(abs(z)));
@@ -309,6 +317,8 @@ p_combined = (x1 + x2) / (n1 + n2);
 
 % Z-statistic
 z = (p1 - p2) / sqrt(p_combined * (1 - p_combined) * (1/n1 + 1/n2));
+
+z_val = abs(z)
 
 % Two-tailed p-value
 p_value = 2 * (1 - normcdf(abs(z)));

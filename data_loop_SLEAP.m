@@ -4,12 +4,12 @@ iter = 0
 
 
 %% Edit these uservariables with what you want to look at
-uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
+uv.evtWin = [-4 2]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
 uv.BLper = [-10 -5];
 uv.dt = 1/10; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
 
-session_to_analyze = 'RDT_OPTO_CHOICE';
+session_to_analyze = 'RDT_D1';
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
@@ -77,7 +77,7 @@ for ii = 1:size(animalIDs,1)
             end
         end
 
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'SHK', 1);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
@@ -444,7 +444,7 @@ median_collect_time_from_choice_hM4Di = median(concatenatedTable_hM4Di.collectio
  mean_data_array = {filtered_neuron_mean_unnormalized_mCherry, filtered_neuron_mean_unnormalized_hM4Di};
  sem_data_array = {filtered_neuron_sem_unnormalized_mCherry, filtered_neuron_sem_unnormalized_hM4Di};
 
- [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-6 6], [0 5]);
+ [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-6 6], [0 5], 3);
 
 
 
@@ -536,7 +536,7 @@ median_collect_time_from_choice_hM4Di = median(concatenatedTable_hM4Di.collectio
  mean_data_array = {filtered_neuron_mean_unnormalized_mCherry, filtered_neuron_mean_unnormalized_hM4Di};
  sem_data_array = {filtered_neuron_sem_unnormalized_mCherry, filtered_neuron_sem_unnormalized_hM4Di};
 
- [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-6 6], [0 5]);
+ [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-6 6], [0 5], 3);
 
 
 
@@ -563,21 +563,24 @@ plot(ts1, perm_p_sig+1)
 
 %% for analyzing shock test, grouping ranges of intensities together
 
-ranges = [2:7; 8:13; 14:19; 20:25]
+% ranges = [2:7; 8:13; 14:19; 20:25]
 
+ranges = [2:13; 14:25]
 
 for hh = 1:size(unnormalized_mouse, 2)
 
 
-    velocity_data_extracted = unnormalized_mouse{1, hh}
+    velocity_data_extracted = unnormalized_mouse{1, hh};
     if isempty(velocity_data_extracted)
 
         mouse_velocity_in_ranges_all{hh} = nan;
+        mouse_sem_in_ranges{hh} = nan;
     else
         for gg = 1:size(velocity_data_extracted, 2)
             for mm = 1:size(ranges, 1)
 
                 mouse_velocity_in_ranges(mm, :) = mean(velocity_data_extracted(ranges(mm, :), :));
+                mouse_sem_in_ranges(mm, :) = std(velocity_data_extracted(ranges(mm, :), :)/sqrt(size(velocity_data_extracted(ranges(mm, :), :), 1)));
 
             end
 
@@ -585,7 +588,8 @@ for hh = 1:size(unnormalized_mouse, 2)
         end
 
         mouse_velocity_in_ranges_all{hh} = mouse_velocity_in_ranges;
-        clear mouse_velocity_in_ranges;
+        mouse_sem_in_ranges_all{hh} = mouse_sem_in_ranges;
+        clear mouse_velocity_in_ranges mouse_sem_in_ranges;
     end
 
 end
@@ -597,6 +601,7 @@ valid_idx = ismember(animalIDs, stGtACR_IDs);
 % Filter path_length_table to only include valid animals
 valid_animalIDs = animalIDs(valid_idx, :);
 filtered_mouse_velocity_in_ranges_all = mouse_velocity_in_ranges_all(1, valid_idx);
+filtered_mouse_sem_in_ranges_all = mouse_sem_in_ranges_all(1, valid_idx);
 
 % Initialize the output matrices
 row1 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
@@ -604,13 +609,27 @@ row2 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
 row3 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
 row4 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
 
+
+sem_data_row1 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
+sem_data_row2 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
+sem_data_row3 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
+sem_data_row4 = zeros(size(valid_animalIDs, 1), size(ts1, 2));
+
 % Loop through each cell and extract the rows
 for i = 1:size(valid_animalIDs, 1)
     data = filtered_mouse_velocity_in_ranges_all{i}; % Extract the 4x60 double array
     row1(i, :) = data(1, :);
     row2(i, :) = data(2, :);
-    row3(i, :) = data(3, :);
-    row4(i, :) = data(4, :);
+    % row3(i, :) = data(3, :);
+    % row4(i, :) = data(4, :);
+    sem_data = filtered_mouse_sem_in_ranges_all{i}; % Extract the 4x60 double array
+    sem_data_row1(i, :) = sem_data(1, :);
+    sem_data_row2(i, :) = sem_data(2, :);
+    % sem_data_row3(i, :) = sem_data(3, :);
+    % sem_data_row4(i, :) = sem_data(4, :);
+
+
+
 end
 
 
@@ -618,7 +637,7 @@ end
 
 
 data_to_plot = row1; 
-
+sem_to_plot = sem_data_row1;
 
 % Extract TreatmentCondition for the matched valid_animalIDs
 [~, loc] = ismember(valid_animalIDs, hM4Di_IDs);
@@ -634,6 +653,8 @@ hM4Di_idx = strcmp(filtered_treatment_conditions, 'hM4Di');
 filtered_neuron_mean_unnormalized_mCherry = data_to_plot(mCherry_idx == 1, :);
 filtered_neuron_mean_unnormalized_hM4Di = data_to_plot(hM4Di_idx == 1, :);
 
+filtered_neuron_sem_unnormalized_mCherry = sem_to_plot(mCherry_idx == 1, :);
+filtered_neuron_sem_unnormalized_hM4Di = sem_to_plot(hM4Di_idx == 1, :);
 
 mean_large = nanmean(filtered_neuron_mean_unnormalized_mCherry, 1);
 mean_small = nanmean(filtered_neuron_mean_unnormalized_hM4Di, 1);
@@ -656,10 +677,18 @@ set(gca, 'XTick', [-2, 0, 2, 4, 6], 'YTick', [0 5 10]);
 shadedErrorBar(ts1, mean_large, sem_large, 'lineProps', {'color', 'r'});
 hold on;shadedErrorBar(ts1, mean_small, sem_small, 'lineProps', {'color', 'k'});
 
+mean_data_array = {filtered_neuron_mean_unnormalized_mCherry, filtered_neuron_mean_unnormalized_hM4Di};
+sem_data_array = {filtered_neuron_sem_unnormalized_mCherry, filtered_neuron_sem_unnormalized_hM4Di};
+
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-6 6], [0 10], 3);
+
+
+
 %% for PLOTTING SHOCK TEST DATA, BROKEN INTO SHOCK RANGES
 
 
-data_to_plot = row4; 
+data_to_plot = row2; 
+sem_to_plot = sem_data_row2;
 
 
 % Extract TreatmentCondition for the matched valid_animalIDs
@@ -676,6 +705,8 @@ hM4Di_idx = strcmp(filtered_treatment_conditions, 'stGtACR');
 filtered_neuron_mean_unnormalized_mCherry = data_to_plot(mCherry_idx == 1, :);
 filtered_neuron_mean_unnormalized_hM4Di = data_to_plot(hM4Di_idx == 1, :);
 
+filtered_neuron_sem_unnormalized_mCherry = sem_to_plot(mCherry_idx == 1, :);
+filtered_neuron_sem_unnormalized_hM4Di = sem_to_plot(hM4Di_idx == 1, :);
 
 mean_large = nanmean(filtered_neuron_mean_unnormalized_mCherry, 1);
 mean_small = nanmean(filtered_neuron_mean_unnormalized_hM4Di, 1);
@@ -698,3 +729,7 @@ set(gca, 'XTick', [-2, 0, 2, 4, 6], 'YTick', [0 5 10]);
 shadedErrorBar(ts1, mean_large, sem_large, 'lineProps', {'color', 'r'});
 hold on;shadedErrorBar(ts1, mean_small, sem_small, 'lineProps', {'color', 'k'});
 
+mean_data_array = {filtered_neuron_mean_unnormalized_mCherry, filtered_neuron_mean_unnormalized_hM4Di};
+sem_data_array = {filtered_neuron_sem_unnormalized_mCherry, filtered_neuron_sem_unnormalized_hM4Di};
+
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-6 6], [0 10], 3);

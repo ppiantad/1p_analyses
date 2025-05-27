@@ -773,19 +773,18 @@ hold off;
 
 % Step 1: Prepare data in the format required for repeated measures ANOVA
 num_subjects = size(cross_session_large_all, 1);
-
 % Create a table with subject IDs and the 4 condition measurements
 subject_id = (1:num_subjects)';
 data_wide = table(subject_id, ...
-                 cross_session_large_all(:,1), cross_session_large_all(:,2), ...
-                 cross_session_small_all(:,1), cross_session_small_all(:,2), ...
-                 'VariableNames', {'Subject', 'Day1_Large', 'Day2_Large', 'Day1_Small', 'Day2_Small'});
-                 
+    cross_session_large_all(:,1), cross_session_large_all(:,2), ...
+    cross_session_small_all(:,1), cross_session_small_all(:,2), ...
+    'VariableNames', {'Subject', 'Day1_Large', 'Day2_Large', 'Day1_Small', 'Day2_Small'});
+
 % Create the within-subjects design table
 % This defines the structure of our repeated measures design
 withinDesign = table(categorical({'Day1'; 'Day2'; 'Day1'; 'Day2'}), ...
-                    categorical({'Large'; 'Large'; 'Small'; 'Small'}), ...
-                    'VariableNames', {'Day', 'RewardSize'});
+    categorical({'Large'; 'Large'; 'Small'; 'Small'}), ...
+    'VariableNames', {'Day', 'RewardSize'});
 
 % Step 2: Conduct the 2×2 repeated measures ANOVA
 % Define the repeated measures model - all measures with the same between-subjects model (~ 1)
@@ -799,56 +798,218 @@ disp('Repeated Measures ANOVA Results:');
 disp(ranova_table);
 
 % Display ANOVA results
-fprintf('Reward Size effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+fprintf('Reward Size effect (RM ANOVA): F(%d,%d) = %.3f, p = %.3e\n', ...
     ranova_table{5,2}, ranova_table{6,2}, ranova_table{5,4}, ranova_table{5,5});
 % Display ANOVA results
-fprintf('Day effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+fprintf('Day effect (RM ANOVA): F(%d,%d) = %.3f, p = %.3e\n', ...
     ranova_table{3,2}, ranova_table{4,2}, ranova_table{3,4}, ranova_table{3,5});
-
-fprintf('Interaction (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+fprintf('Interaction (RM ANOVA): F(%d,%d) = %.3f, p = %.3e\n', ...
     ranova_table{7,2}, ranova_table{8,2}, ranova_table{7,4}, ranova_table{7,5});
 
 % Check if the interaction effect is significant
-p_interaction = ranova_table{7,5}; % The third row corresponds to the Treatment × TrialBlock interaction
+p_interaction = ranova_table{7,5}; % The interaction p-value
 if p_interaction < 0.05
-    disp('Significant interaction found! Performing post-hoc comparisons at each Earyl/Late level...');
-    % Extract data for each block
-    early_data = data_wide(:,[2, 4]);
-    late_data = data_wide(:,[3, 5]);
-
-    % Perform independent t-tests at each block
-    [~, p_early_data, ~, stats_early_data] = ttest(mean_large_RM_D1, mean_small_RM_D1);
-    [~, p_late_data, ~, stats_late_data] = ttest(mean_large, mean_small);
-
-    % Apply Bonferroni correction for multiple comparisons
-    p_adjusted = min([p_early_data, p_late_data] * 2, 1); % Ensures values do not exceed 1
-    % Create table with t-values, df, p-values, and adjusted p-values
-    t_values = [stats_early_data.tstat; stats_late_data.tstat];
-    df_values = [stats_early_data.df; stats_late_data.df];
-    p_values = [p_early_data; p_late_data];
+    disp('Significant interaction found! Performing Tukey''s multiple comparisons...');
+    fprintf('\n========== POST-HOC TESTS ==========\n');
     
-    posthoc_results = table(t_values, df_values, p_values, p_adjusted', ...
-        'VariableNames', {'t_value', 'df', 'Raw_pValue', 'Bonferroni_pValue'}, ...
-        'RowNames', {'Early', 'Late'});
-    disp('Pairwise comparisons (Early vs Late by Rew Size):');
-    disp(posthoc_results);
+    % Reshape data for Tukey's multiple comparisons
+    % Create long-format data for all Day-RewardSize combinations
+    all_values = [];
+    all_groups = {};
     
-    % Also print formatted results
-    for i = 1:2
-        if i == 1
-            block_name = 'Early';
-        elseif i == 2
-            block_name = 'Late';
-        end
+    % Day1 Large
+    all_values = [all_values; data_wide.Day1_Large];
+    all_groups = [all_groups; repmat({'Day1_Large'}, num_subjects, 1)];
+    
+    % Day2 Large
+    all_values = [all_values; data_wide.Day2_Large];
+    all_groups = [all_groups; repmat({'Day2_Large'}, num_subjects, 1)];
+    
+    % Day1 Small
+    all_values = [all_values; data_wide.Day1_Small];
+    all_groups = [all_groups; repmat({'Day1_Small'}, num_subjects, 1)];
+    
+    % Day2 Small
+    all_values = [all_values; data_wide.Day2_Small];
+    all_groups = [all_groups; repmat({'Day2_Small'}, num_subjects, 1)];
+    
+    % Use anova1 to get stats structure for multcompare
+    [~, ~, stats_tukey] = anova1(all_values, all_groups, 'off');
+    
+    % Perform Tukey's multiple comparisons
+    [c, m, h, gnames] = multcompare(stats_tukey, 'CType', 'tukey-kramer', 'Display', 'off');
+    
+    % Display Tukey's results in a readable format
+    fprintf('\nTukey''s HSD Multiple Comparisons Results:\n');
+    fprintf('%-12s %-12s %10s %10s %10s %10s\n', 'Group 1', 'Group 2', 'Diff', 'Lower CI', 'Upper CI', 'p-value');
+    fprintf('%-12s %-12s %10s %10s %10s %10s\n', repmat('-', 1, 12), repmat('-', 1, 12), repmat('-', 1, 10), repmat('-', 1, 10), repmat('-', 1, 10), repmat('-', 1, 10));
+    
+    for i = 1:size(c, 1)
+        group1_idx = c(i, 1);
+        group2_idx = c(i, 2);
+        group1_name = gnames{group1_idx};
+        group2_name = gnames{group2_idx};
+        diff = c(i, 4);
+        lower_ci = c(i, 3);
+        upper_ci = c(i, 5);
+        p_val = c(i, 6);
         
-        fprintf('%s: t(%.0f) = %.3f, p = %.4f (adjusted p = %e\n', ...
-            block_name, posthoc_results.df(i), posthoc_results.t_value(i), ...
-            posthoc_results.Raw_pValue(i), posthoc_results.Bonferroni_pValue(i));
+        fprintf('%-12s %-12s %10.3f %10.3f %10.3f %10.3e', ...
+            group1_name, group2_name, diff, lower_ci, upper_ci, p_val);
+        
+        if p_val < 0.05
+            fprintf(' *');
+        end
+        fprintf('\n');
     end
+    
+    fprintf('\n* indicates significant difference (p < 0.05)\n');
+    
+    % Display group means for reference
+    fprintf('\nGroup Means:\n');
+    for i = 1:length(gnames)
+        fprintf('%-12s: %.3f ± %.3f (SEM)\n', gnames{i}, m(i, 1), m(i, 2));
+    end
+    
+    % Highlight specific comparisons of interest
+    fprintf('\n--- Key Comparisons ---\n');
+    fprintf('Reward Size comparisons within each day:\n');
+    
+    % Day 1: Large vs Small
+    for i = 1:size(c, 1)
+        group1_name = gnames{c(i, 1)};
+        group2_name = gnames{c(i, 2)};
+        
+        if (strcmp(group1_name, 'Day1_Large') && strcmp(group2_name, 'Day1_Small')) || ...
+           (strcmp(group1_name, 'Day1_Small') && strcmp(group2_name, 'Day1_Large'))
+            diff = c(i, 4);
+            lower_ci = c(i, 3);
+            upper_ci = c(i, 5);
+            p_val = c(i, 6);
+            
+            fprintf('Day 1 (Large vs Small): Diff = %.3f, 95%% CI [%.3f, %.3f], p = %.3e', ...
+                abs(diff), lower_ci, upper_ci, p_val);
+            
+            if p_val < 0.05
+                fprintf(' *');
+            end
+            fprintf('\n');
+            break;
+        end
+    end
+    
+    % Day 2: Large vs Small
+    for i = 1:size(c, 1)
+        group1_name = gnames{c(i, 1)};
+        group2_name = gnames{c(i, 2)};
+        
+        if (strcmp(group1_name, 'Day2_Large') && strcmp(group2_name, 'Day2_Small')) || ...
+           (strcmp(group1_name, 'Day2_Small') && strcmp(group2_name, 'Day2_Large'))
+            diff = c(i, 4);
+            lower_ci = c(i, 3);
+            upper_ci = c(i, 5);
+            p_val = c(i, 6);
+            
+            fprintf('Day 2 (Large vs Small): Diff = %.3f, 95%% CI [%.3f, %.3f], p = %.3e', ...
+                abs(diff), lower_ci, upper_ci, p_val);
+            
+            if p_val < 0.05
+                fprintf(' *');
+            end
+            fprintf('\n');
+            break;
+        end
+    end
+    
+    fprintf('\nDay comparisons within each reward size:\n');
+    
+    % Large: Day 1 vs Day 2
+    for i = 1:size(c, 1)
+        group1_name = gnames{c(i, 1)};
+        group2_name = gnames{c(i, 2)};
+        
+        if (strcmp(group1_name, 'Day1_Large') && strcmp(group2_name, 'Day2_Large')) || ...
+           (strcmp(group1_name, 'Day2_Large') && strcmp(group2_name, 'Day1_Large'))
+            diff = c(i, 4);
+            lower_ci = c(i, 3);
+            upper_ci = c(i, 5);
+            p_val = c(i, 6);
+            
+            fprintf('Large Reward (Day 1 vs Day 2): Diff = %.3f, 95%% CI [%.3f, %.3f], p = %.3e', ...
+                abs(diff), lower_ci, upper_ci, p_val);
+            
+            if p_val < 0.05
+                fprintf(' *');
+            end
+            fprintf('\n');
+            break;
+        end
+    end
+    
+    % Small: Day 1 vs Day 2
+    for i = 1:size(c, 1)
+        group1_name = gnames{c(i, 1)};
+        group2_name = gnames{c(i, 2)};
+        
+        if (strcmp(group1_name, 'Day1_Small') && strcmp(group2_name, 'Day2_Small')) || ...
+           (strcmp(group1_name, 'Day2_Small') && strcmp(group2_name, 'Day1_Small'))
+            diff = c(i, 4);
+            lower_ci = c(i, 3);
+            upper_ci = c(i, 5);
+            p_val = c(i, 6);
+            
+            fprintf('Small Reward (Day 1 vs Day 2): Diff = %.3f, 95%% CI [%.3f, %.3f], p = %.3e', ...
+                abs(diff), lower_ci, upper_ci, p_val);
+            
+            if p_val < 0.05
+                fprintf(' *');
+            end
+            fprintf('\n');
+            break;
+        end
+    end
+    
 else
     disp('No significant interaction effect found.');
+    
+    % Check main effects if interaction is not significant
+    p_reward_size = ranova_table{5,5}; % p-value for RewardSize main effect
+    p_day = ranova_table{3,5};  % p-value for Day main effect
+    
+    % Check main effect of Reward Size
+    if p_reward_size < 0.05
+        fprintf('\n--- Main effect of Reward Size is significant (p = %.3e) ---\n', p_reward_size);
+        % Compare overall means (Large vs Small)
+        large_mean = mean([data_wide.Day1_Large; data_wide.Day2_Large]);
+        small_mean = mean([data_wide.Day1_Small; data_wide.Day2_Small]);
+        fprintf('Large Reward mean: %.3f\n', large_mean);
+        fprintf('Small Reward mean: %.3f\n', small_mean);
+        fprintf('Difference: %.3f\n', large_mean - small_mean);
+    end
+    
+    % Check main effect of Day
+    if p_day < 0.05
+        fprintf('\n--- Main effect of Day is significant (p = %.3e) ---\n', p_day);
+        % Compare overall means (Day 1 vs Day 2)
+        day1_mean = mean([data_wide.Day1_Large; data_wide.Day1_Small]);
+        day2_mean = mean([data_wide.Day2_Large; data_wide.Day2_Small]);
+        fprintf('Day 1 mean: %.3f\n', day1_mean);
+        fprintf('Day 2 mean: %.3f\n', day2_mean);
+        fprintf('Difference: %.3f\n', day1_mean - day2_mean);
+        
+        % Run pairwise comparisons for Day using multcompare
+        dayComp = multcompare(rm, 'Day', 'ComparisonType', 'tukey-kramer');
+        
+        % Display results
+        fprintf('Post-hoc comparisons for Day (across both reward sizes):\n');
+        for i = 1:size(dayComp, 1)
+            fprintf('Day %s vs Day %s: Mean Diff = %.3f, CI = [%.3f, %.3f], p = %.3e\n', ...
+                dayComp.Day_1{i}, dayComp.Day_2{i}, ...
+                dayComp.Difference(i), dayComp.Lower(i), ...
+                dayComp.Upper(i), dayComp.pValue(i));
+        end
+    end
 end
-
 %%
 mean_latency_large = mean([risk_table.block_1_large_choice_latency, risk_table.block_2_large_choice_latency, risk_table.block_3_large_choice_latency], 2)
 mean_latency_small = mean([risk_table.block_1_small_choice_latency, risk_table.block_2_small_choice_latency, risk_table.block_3_small_choice_latency], 2)
