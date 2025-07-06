@@ -265,7 +265,7 @@ aa_small = aa_small(~any(isnan(aa_small), 2), :);
 
 
 %%
-% run data_loop after loading 10x dataset
+% run data_loop after loading 11x dataset
 % [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1);
 % [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 2);
 
@@ -287,7 +287,8 @@ AA_small_data_sems(AA_small_no_trials, :) = [];
 mean_data_array = {AA_large_data, AA_small_data};
 sem_data_array = {AA_large_data_sems, AA_small_data_sems};
 
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 4], [-0.5 0.5]);
+% [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 4], [-0.5 0.5], 3);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 4], [-0.2 0.4], 3);
 
 %%
 % run data_loop_SLEAP
@@ -321,16 +322,16 @@ sem_data_array = {neuron_sem_all_unnormalized{1, 1}  , neuron_sem_all_unnormaliz
 mean_data_array = {neuron_mean_array{1, 4}(respClass_all_array{1, 11} == 1, :), neuron_mean_array{1, 4}(respClass_all_array{1, 11} == 3, :)};
 sem_data_array = {neuron_sem_array{1, 4}(respClass_all_array{1, 11} == 1, :), neuron_sem_array{1, 4}(respClass_all_array{1, 11} == 3, :)};
 
-
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.5 1]);
+% [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.5 1], 3);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.25 0.60], 3);
 
 %%
 
 mean_data_array = {neuron_mean_array{1, 11}(respClass_all_array{1, 4} == 1, :), neuron_mean_array{1, 11}(respClass_all_array{1, 4} == 3, :)};
 sem_data_array = {neuron_sem_array{1, 11}(respClass_all_array{1, 4} == 1, :), neuron_sem_array{1, 11}(respClass_all_array{1, 4} == 3, :)};
 
-
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2]);
+% [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2], 3);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.1 0.10], 3);
 
 %%
 

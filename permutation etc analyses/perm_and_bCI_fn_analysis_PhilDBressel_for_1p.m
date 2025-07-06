@@ -45,7 +45,10 @@ for ii = 1:size(ZallMean_for_perm_test, 2)
 %     comparison(ii).mean_Cp = mean(comparison(ii).data,1, 'omitnan'); %
     comparison(ii).mean_Cp = mean(comparison(ii).data,1); %
 %     comparison(ii).sem_Cp = nansem(comparison(ii).data); %
-    comparison(ii).sem_Cp = mean(comparison(ii).sem_data, 1); %
+    %PTP: I think this is the more correct way to do SEM
+    % comparison(ii).sem_Cp = mean(comparison(ii).sem_data, 1); %
+    %PTP: Sean suggests using the SEM calculation below
+    comparison(ii).sem_Cp = std(comparison(ii).data,1)/sqrt(size(comparison(ii).data,1)); %
     adjust_labels(ii) = max(comparison(ii).mean_Cp)+2*max(comparison(ii).sem_Cp);
     max_mean(ii) = max(comparison(ii).mean_Cp);
     max_SEM(ii) = max(comparison(ii).sem_Cp);
@@ -502,6 +505,7 @@ end
 
     xlim(xlims);
     ylim(ylims)
+    % yticks(unique([-0.10 -0.05 0 0.05 0.10]));
     yticks(unique([yticks, ylims(2)]));
     %yticks(ylims/2);
     % set(gcf, 'position', [10, 10, 900, 600]);

@@ -434,6 +434,32 @@ ylim([-0.6 0.6]);
 hold off
 
 %%
+
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 350; % Width of the figure
+height = 300; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-8 8]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.6, 0, 0.6]);
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(prechoice_block_1==1, :)), std(neuron_mean_array{1, 1}(prechoice_block_1==1, :)/sqrt(size(neuron_mean_array{1, 1}(prechoice_block_1==1, :), 1))), 'lineProps', {'color', batlowW(iter,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(postchoice_reward_block_1==1, :)), std(neuron_mean_array{1, 1}(postchoice_reward_block_1==1, :)/sqrt(size(neuron_mean_array{1, 1}(postchoice_reward_block_1==1, :), 1))), 'lineProps', {'color', batlowW(iter,:)});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(collect_block_1==1, :)), std(neuron_mean_array{1, 1}(collect_block_1==1, :)/sqrt(size(neuron_mean_array{1, 1}(collect_block_1==1, :), 1))), 'lineProps', {'color', batlowW(iter,:)});
+xline(0);
+xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+ylim([-0.6 0.6]);
+
+hold off
+
+
+%%
 % Get AUCs for the relevant periods for the 3 defined events
 % Define time windows
 pre_choice_window = [-4 0];     % Pre-choice period: -4 to 0 s
@@ -1245,7 +1271,7 @@ legend('Positive correlation', 'Negative correlation', 'No sig correlation');
 
 %%
 
-array_for_means = 8; 
+array_for_means = 1; 
 
 
 for q = 1:length (behav_tbl_iter{array_for_means, 1})
@@ -1540,10 +1566,10 @@ hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
 % only_shk_responsive_corrs = allCorrelations(kmeans_idx' == 3);
-% only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
+only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
 % only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 == 1);
 % only_shk_responsive_corrs = allCorrelations(collect_block_1 == 1);
-only_shk_responsive_corrs = allCorrelations(prechoice_blocks_2_and_3 == 1);
+% only_shk_responsive_corrs = allCorrelations(prechoice_blocks_2_and_3 == 1);
 % not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
 % not_shk_responsive_corrs = allCorrelations(kmeans_idx' ~= 3);
 not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
@@ -1590,7 +1616,7 @@ ylabel('Probability');
 % legend('All Correlations', 'Only SHK Responsive Correlations');
 
 % Optionally, you can add a vertical line at 0 for reference
-yLimits = ylim;
+yLimits = [0 0.15];
 plot([0 0], yLimits, 'k', 'LineWidth', 2);
 xtickformat('%.2f');
 ytickformat('%.2f');
@@ -1629,7 +1655,7 @@ bar_separation_value = 3;
 
 figure;
 width = 250; % Width of the figure
-height = 500; % Height of the figure (width is half of height)
+height = 250; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 swarmchart(ones(1, length(only_shk_responsive_corrs)), only_shk_responsive_corrs)
 hold on
@@ -1837,24 +1863,28 @@ select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
 
 
-% prechoice representative: 
-find(correlationResults{5, 1} < -0.3)
-start_time = -4;% sub-window start time
-end_time = 0; % sub-window end time
-
-sub_window_idx = ts1 >= start_time & ts1 <= end_time;
-sub_window_activity_session_1 = zall_mouse{5, 1}{1, 63}(:, sub_window_idx);
-choice_times_mouse = trial_choice_times_by_mouse{1, 5};
-trial_types = trial_types_by_mouse{1, 5};
-
-% postchoice representative:
+% % prechoice representative: 
 % find(correlationResults{5, 1} < -0.3)
-% start_time = 0;% sub-window start time
-% end_time = 2; % sub-window end time
+% start_time = -4;% sub-window start time
+% end_time = 0; % sub-window end time
+% 
 % sub_window_idx = ts1 >= start_time & ts1 <= end_time;
-% sub_window_activity_session_1 = zall_mouse{5, 1}{1, 104}(:, sub_window_idx);
+% sub_window_activity_session_1 = zall_mouse{5, 1}{1, 63}(:, sub_window_idx);
+% r_val_for_representative = correlationResults{5, 1}(1, 63)
+% p_val_for_representative = correlationResults_sig{5, 1}(1, 63)
 % choice_times_mouse = trial_choice_times_by_mouse{1, 5};
 % trial_types = trial_types_by_mouse{1, 5};
+
+% postchoice representative:
+find(correlationResults{5, 1} < -0.3)
+start_time = 0;% sub-window start time
+end_time = 2; % sub-window end time
+sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+sub_window_activity_session_1 = zall_mouse{5, 1}{1, 104}(:, sub_window_idx);
+r_val_for_representative = correlationResults{5, 1}(1, 104)
+p_val_for_representative = correlationResults_sig{5, 1}(1, 104)
+choice_times_mouse = trial_choice_times_by_mouse{1, 5};
+trial_types = trial_types_by_mouse{1, 5};
 
 %consumption representative:
 % find(correlationResults{5, 1} > 0.3)
@@ -1889,7 +1919,7 @@ mean_sub_window_activity_session_1 = mean(sub_window_activity_session_1, 2);
 
 x = mean_sub_window_activity_session_1;
 y = choice_times_mouse;
-
+size(y)
 
 % x = mean_sub_window_activity_session_1(trial_types == 1.2);
 % y = choice_times_mouse(trial_types == 1.2);

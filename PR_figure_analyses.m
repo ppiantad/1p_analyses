@@ -19,7 +19,9 @@ scatter(ones(size(PR_final_ratio_reached)), PR_final_ratio_reached, 40, 'k', 'fi
 
 hold off;
 xlim([0.5 1.5]);
+ylim([0 16])
 xticks([]);
+yticks([0 5 10 15])
 ylabel('Final PR ratio attained');
 
 % Second subplot - Total Presses
@@ -33,7 +35,9 @@ scatter(ones(size(total_PR_presses)), total_PR_presses, 40, 'k', 'filled', 'jitt
 
 hold off;
 xlim([0.5 1.5]);
+ylim([0 320])
 xticks([]);
+yticks([0 100 200 300])
 ylabel('Total presses');
 
 % Adjust layout
@@ -249,3 +253,202 @@ for i = 1:length(data_for_bar_plot)
     end
 end
 
+
+
+%% 06/27/2025 data pulled from RRD Photometry and Opto Progressive Ratio v2 - need to get raw data from PCs in FLAC
+
+mean_PR_presses_control_laser_on = [419 417 275 461 186 346 548]
+mean_PR_presses_control_laser_off = [302 503 213 229 519]
+
+mean_PR_presses_ChrimsonR_laser_on = [120 231 269 184 217 378]
+mean_PR_presses_ChrimsonR_laser_off = [511 462 363 379 503 294]
+
+mean_PR_ratio_control_laser_on = [53 53 41 57 33 49 61]
+mean_PR_ratio_control_laser_off = [45 61 37 37 61]
+
+mean_PR_ratio_ChrimsonR_laser_on = [25 37 41 33 37 49]
+mean_PR_ratio_ChrimsonR_laser_off = [61 57 49 53 61 45]
+
+
+
+
+% Compute means and SEMs for each group
+% PR Presses
+mean_presses = [mean(mean_PR_presses_control_laser_on), mean(mean_PR_presses_control_laser_off), ...
+                mean(mean_PR_presses_ChrimsonR_laser_on), mean(mean_PR_presses_ChrimsonR_laser_off)];
+sem_presses = [std(mean_PR_presses_control_laser_on)/sqrt(length(mean_PR_presses_control_laser_on)), ...
+               std(mean_PR_presses_control_laser_off)/sqrt(length(mean_PR_presses_control_laser_off)), ...
+               std(mean_PR_presses_ChrimsonR_laser_on)/sqrt(length(mean_PR_presses_ChrimsonR_laser_on)), ...
+               std(mean_PR_presses_ChrimsonR_laser_off)/sqrt(length(mean_PR_presses_ChrimsonR_laser_off))];
+
+% PR Ratios
+mean_ratios = [mean(mean_PR_ratio_control_laser_on), mean(mean_PR_ratio_control_laser_off), ...
+               mean(mean_PR_ratio_ChrimsonR_laser_on), mean(mean_PR_ratio_ChrimsonR_laser_off)];
+sem_ratios = [std(mean_PR_ratio_control_laser_on)/sqrt(length(mean_PR_ratio_control_laser_on)), ...
+              std(mean_PR_ratio_control_laser_off)/sqrt(length(mean_PR_ratio_control_laser_off)), ...
+              std(mean_PR_ratio_ChrimsonR_laser_on)/sqrt(length(mean_PR_ratio_ChrimsonR_laser_on)), ...
+              std(mean_PR_ratio_ChrimsonR_laser_off)/sqrt(length(mean_PR_ratio_ChrimsonR_laser_off))];
+
+% Define colors for each group
+colors = [0.6, 0.8, 1.0;    % Light blue for Control Laser On
+          0.2, 0.4, 0.8;    % Dark blue for Control Laser Off
+          1.0, 0.7, 0.7;    % Light red for ChrimsonR Laser On
+          0.8, 0.2, 0.2];   % Dark red for ChrimsonR Laser Off
+
+% Create figure
+figure;
+
+% First subplot - Final PR Ratio Attained
+subplot(1,2,1);
+b1 = bar(1:4, mean_ratios, 0.6, 'FaceColor', 'flat');
+% Set colors for each bar
+for i = 1:4
+    b1.CData(i,:) = colors(i,:);
+end
+hold on;
+
+% Add error bars
+errorbar(1:4, mean_ratios, sem_ratios, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+
+% Add individual data points with jitter
+all_ratio_data = {mean_PR_ratio_control_laser_on, mean_PR_ratio_control_laser_off, ...
+                  mean_PR_ratio_ChrimsonR_laser_on, mean_PR_ratio_ChrimsonR_laser_off};
+for i = 1:4
+    x_pos = i + 0.1 * (rand(size(all_ratio_data{i})) - 0.5); % Add jitter
+    scatter(x_pos, all_ratio_data{i}, 40, 'k', 'filled');
+end
+
+hold off;
+xlim([0.5 4.5]);
+ylim([0 70]);
+xticks(1:4);
+xticklabels({'Control\nLaser On', 'Control\nLaser Off', 'ChrimsonR\nLaser On', 'ChrimsonR\nLaser Off'});
+yticks([0 20 40 60]);
+ylabel('Final PR ratio attained');
+
+% Second subplot - Total Presses
+subplot(1,2,2);
+b2 = bar(1:4, mean_presses, 0.6, 'FaceColor', 'flat');
+% Set colors for each bar
+for i = 1:4
+    b2.CData(i,:) = colors(i,:);
+end
+hold on;
+
+% Add error bars
+errorbar(1:4, mean_presses, sem_presses, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+
+% Add individual data points with jitter
+all_presses_data = {mean_PR_presses_control_laser_on, mean_PR_presses_control_laser_off, ...
+                    mean_PR_presses_ChrimsonR_laser_on, mean_PR_presses_ChrimsonR_laser_off};
+for i = 1:4
+    x_pos = i + 0.1 * (rand(size(all_presses_data{i})) - 0.5); % Add jitter
+    scatter(x_pos, all_presses_data{i}, 40, 'k', 'filled');
+end
+
+hold off;
+xlim([0.5 4.5]);
+ylim([0 600]);
+xticks(1:4);
+xticklabels({'Control\nLaser On', 'Control\nLaser Off', 'ChrimsonR\nLaser On', 'ChrimsonR\nLaser Off'});
+yticks([0 200 400 600]);
+ylabel('Total presses');
+
+% Adjust layout
+set(gcf, 'Position', [100, 100, 500, 350]); % Increased width for 4 bars
+
+
+
+%% ANOVA Analysis
+
+% Combine all PR ratio data
+ratios = [mean_PR_ratio_control_laser_on, ...
+          mean_PR_ratio_control_laser_off, ...
+          mean_PR_ratio_ChrimsonR_laser_on, ...
+          mean_PR_ratio_ChrimsonR_laser_off]';
+
+% Define group labels
+group_treatment = [repmat({'Control'}, length(mean_PR_ratio_control_laser_on), 1); 
+                   repmat({'Control'}, length(mean_PR_ratio_control_laser_off), 1); 
+                   repmat({'ChrimsonR'}, length(mean_PR_ratio_ChrimsonR_laser_on), 1); 
+                   repmat({'ChrimsonR'}, length(mean_PR_ratio_ChrimsonR_laser_off), 1)];
+
+group_laser = [repmat({'On'}, length(mean_PR_ratio_control_laser_on), 1); 
+               repmat({'Off'}, length(mean_PR_ratio_control_laser_off), 1); 
+               repmat({'On'}, length(mean_PR_ratio_ChrimsonR_laser_on), 1); 
+               repmat({'Off'}, length(mean_PR_ratio_ChrimsonR_laser_off), 1)];
+
+% Create a table
+T_ratio = table(ratios, group_treatment, group_laser, ...
+    'VariableNames', {'PR_Ratio', 'Treatment', 'Laser'});
+
+% Run 2-way ANOVA
+[p_ratio, tbl_ratio, stats_ratio] = anovan(T_ratio.PR_Ratio, ...
+    {T_ratio.Treatment, T_ratio.Laser}, ...
+    'model', 'interaction', ...
+    'varnames', {'Treatment', 'Laser'});
+
+% Posthoc if interaction is significant
+if p_ratio(3) < 0.05
+    fprintf('\nSignificant interaction detected (p = %.4f), running Tukey posthoc:\n', p_ratio(3));
+    figure;
+    c_ratio = multcompare(stats_ratio, 'Dimension', [1 2]);
+end
+
+% Run multcompare with group indices [1 2] (Treatment × Laser)
+[c_ratio, m_ratio, h_ratio, gnames_ratio] = multcompare(stats_ratio, 'Dimension', [1 2]);
+
+% Display comparisons in readable format
+fprintf('\nPosthoc comparisons for PR Ratio:\n');
+for i = 1:size(c_ratio,1)
+    group1 = gnames_ratio{c_ratio(i,1)};
+    group2 = gnames_ratio{c_ratio(i,2)};
+    pval   = c_ratio(i,6);  % p-value is in column 6
+    fprintf('  %s vs %s: p = %.4f\n', group1, group2, pval);
+end
+
+%%
+% Combine total presses data
+presses = [mean_PR_presses_control_laser_on, ...
+           mean_PR_presses_control_laser_off, ...
+           mean_PR_presses_ChrimsonR_laser_on, ...
+           mean_PR_presses_ChrimsonR_laser_off]';
+
+% Define same group labels
+group_treatment = [repmat({'Control'}, length(mean_PR_presses_control_laser_on), 1); 
+                   repmat({'Control'}, length(mean_PR_presses_control_laser_off), 1); 
+                   repmat({'ChrimsonR'}, length(mean_PR_presses_ChrimsonR_laser_on), 1); 
+                   repmat({'ChrimsonR'}, length(mean_PR_presses_ChrimsonR_laser_off), 1)];
+
+group_laser = [repmat({'On'}, length(mean_PR_presses_control_laser_on), 1); 
+               repmat({'Off'}, length(mean_PR_presses_control_laser_off), 1); 
+               repmat({'On'}, length(mean_PR_presses_ChrimsonR_laser_on), 1); 
+               repmat({'Off'}, length(mean_PR_presses_ChrimsonR_laser_off), 1)];
+
+% Create table
+T_presses = table(presses, group_treatment, group_laser, ...
+    'VariableNames', {'Presses', 'Treatment', 'Laser'});
+
+% Run 2-way ANOVA
+[p_press, tbl_press, stats_press] = anovan(T_presses.Presses, ...
+    {T_presses.Treatment, T_presses.Laser}, ...
+    'model', 'interaction', ...
+    'varnames', {'Treatment', 'Laser'});
+
+% Posthoc if interaction is significant
+if p_press(3) < 0.05
+    fprintf('\nSignificant interaction detected (p = %.4f), running Tukey posthoc:\n', p_press(3));
+    figure;
+    c_press = multcompare(stats_press, 'Dimension', [1 2]);
+end
+
+
+[c_press, m_press, h_press, gnames_press] = multcompare(stats_press, 'Dimension', [1 2]);
+
+fprintf('\nPosthoc comparisons for Total Presses:\n');
+for i = 1:size(c_press,1)
+    group1 = gnames_press{c_press(i,1)};
+    group2 = gnames_press{c_press(i,2)};
+    pval   = c_press(i,6);
+    fprintf('  %s vs %s: p = %.4f\n', group1, group2, pval);
+end

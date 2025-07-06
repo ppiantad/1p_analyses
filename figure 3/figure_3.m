@@ -189,6 +189,9 @@ shk_activated_sum = sum(shk_activated);
 figure; plot(ts1, nanmean(neuron_mean_array{1, 4}(shk_activated,:))); hold on; plot(ts1,  nanmean(neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:)));
 
 
+figure; shadedErrorBar
+
+
 total_modulated = [(sum(post_choice_rew_event)/neuron_num)*100 (sum(shk_event)/neuron_num)*100];
 
 A = total_modulated;
@@ -473,7 +476,9 @@ xlim([-8 8]);
 ylim([-0.5 1.2]);
 % Set X-axis ticks
 set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.5 0 0.5 1]);
-shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :)), nanmean(neuron_sem_array{1, 4}(respClass_all_array{1, 4}==1, :)), 'lineProps', {'color', 'r'});
+% shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :)), nanmean(neuron_sem_array{1, 4}(respClass_all_array{1, 4}==1, :)), 'lineProps', {'color', 'r'});
+% shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :)), std(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :))/sqrt(size(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :), 1)), 'lineProps', {'color', 'r'});
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :)), std(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :)), 'lineProps', {'color', 'r'});
 % hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
 
 xline(0);
@@ -636,7 +641,7 @@ ytickformat('%.1f');
 hold off;
 
 
-variable_to_correlate = delay_to_initiation_by_mouse;
+variable_to_correlate = delay_to_collect_post_shk_by_mouse;
 
 %%
 array_for_means = 4; 
@@ -700,7 +705,7 @@ end
 
 % Initialize the new cell array to store the correlation results
 correlationResults = cell(size(meanZallMouse));
-
+correlationResults_sig = cell(size(meanZallMouse));
 
 
 % Iterate through each level of meanZallMouse
@@ -710,6 +715,7 @@ for i = 1:length(meanZallMouse)
     
     % Initialize the nested cell array for storing correlation results
     correlationNestedArray = zeros(size(meanNestedCellArray));
+    corr_sig_NestedArray = zeros(size(meanNestedCellArray));
     
     % Determine the corresponding index in trial_choice_times_by_mouse
     % Adjust this logic based on how the indices are mapped
@@ -726,20 +732,22 @@ for i = 1:length(meanZallMouse)
         % Check if trialChoiceTimes has the same length as meanValues
         if length(trialChoiceTimes) == length(meanValues)
             % Compute the correlation
-            correlationCoeff = corr(meanValues, trialChoiceTimes(:));
+            [correlationCoeff, corr_sig_vals] = corr(meanValues, trialChoiceTimes(:));
         elseif length(trialChoiceTimes) < length(meanValues)
-            correlationCoeff = corr(meanValues(1:end-1), trialChoiceTimes(:));
+            [correlationCoeff, corr_sig_vals] = corr(meanValues(1:end-1), trialChoiceTimes(:));
         else
             % If lengths do not match, handle the mismatch (e.g., set correlation to NaN)
-            correlationCoeff = NaN;
+            [correlationCoeff, corr_sig_vals] = NaN;
         end
         
         % Store the correlation coefficient in the nested cell array
         correlationNestedArray(j) = correlationCoeff;
+        corr_sig_NestedArray(j) = corr_sig_vals;
     end
     clear meanValues
     % Store the nested cell array of correlation coefficients in the main cell array
     correlationResults{i} = correlationNestedArray;
+    correlationResults_sig{i} = corr_sig_NestedArray;
 end
 
 %%
@@ -910,7 +918,9 @@ find(correlationResults{5, 1} > 0.5)
 start_time = 0;% sub-window start time
 end_time = 5; % sub-window end time
 sub_window_idx = ts1 >= start_time & ts1 <= end_time;
-sub_window_activity_session_1 = zall_mouse{5, 1}{1, 80}(:, sub_window_idx);
+sub_window_activity_session_1 = zall_mouse{5, 4}{1, 104}(:, sub_window_idx);
+r_val_for_representative = correlationResults{5, 1}(1, 104)
+p_val_for_representative = correlationResults_sig{5, 1}(1, 104)
 choice_times_mouse = variable_to_correlate{1, 5};
 % trial_types = trial_types_by_mouse{1, 5};
 trial_types = trial_types_second_var_by_mouse{1, 5};

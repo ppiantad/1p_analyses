@@ -1,8 +1,8 @@
 % animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
-    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39'};
+    fieldsToRemove = {'BLA_Insc_13', 'BLA_Insc_18', 'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39'};
 
     for i = 1:length(fieldsToRemove)
         if isfield(final_SLEAP, fieldsToRemove{i})
@@ -190,12 +190,21 @@ for dd = 1:size(animalIDs)
 
         large_path_length_all_blocks(dd) = mean(path_length_array(1, BehavData.bigSmall == 1.2));
         small_path_length_all_blocks(dd) = mean(path_length_array(1, BehavData.bigSmall == 0.3));
+
+        b1_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 1 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
+        b2_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 2 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
+        b3_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 3 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
+        path_length_array_mouse{dd} = path_length_array';
+
+    elseif ~isfield(final_SLEAP.(select_mouse), session_to_analyze)
+        b1_path_length_mouse{dd} = nan;
+        b2_path_length_mouse{dd} = nan;
+        b3_path_length_mouse{dd} = nan;
+        path_length_array_mouse{dd} = nan';
+
     end
 
-    b1_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 1 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
-    b2_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 2 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
-    b3_path_length_mouse{dd} = path_length_array(1, BehavData.Block == 3 &  BehavData.omissionALL == 0 &  BehavData.Blank_Touch == 0);
-    path_length_array_mouse{dd} = path_length_array'; 
+
 end
 
 path_length_concat = cat(1, path_length_array_mouse{:});

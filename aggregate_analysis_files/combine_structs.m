@@ -14,8 +14,8 @@
 
 %%
 % Load both .mat files
-data1 = load('BLA-NAcShell_PdCO_behavior_data_04072025.mat');  % final_behavior
-data2 = load('BLA-NAcSh_behavior_only_01082025.mat');          % final_behavior
+data1 = load('BLA_panneuronal_behavior_12302024.mat');  % final_behavior
+data2 = load('females_behavior.mat');          % final_behavior
 
 % Extract structs
 fb1 = data1.final_behavior;
@@ -35,12 +35,12 @@ end
 
 
 %Save the merged struct
-save('BLA_NAcSh_ChrimsonR_and_PdCO_final_behavior.mat', 'final_behavior');
+save('females_with_inscopix_males_behavior.mat', 'final_behavior');
 
 %% for SLEAP data
 % Load both .mat files
-data1 = load('BLA-NAcS_PdCO_SLEAP_04072025_updated.mat');  % final_SLEAP
-data2 = load('BLA-NAcSh_behavior_only_01082025.mat');          % final_SLEAP
+data1 = load('females_SLEAP.mat');  % final_SLEAP
+data2 = load('BLA_panneuronal_SLEAP_data_2024_11_04_plus_XY_correction.mat');          % final_SLEAP
 
 % Extract structs
 fb1 = data1.final_SLEAP;
@@ -60,5 +60,5 @@ end
 
 
 %Save the merged struct
-save('BLA_NAcSh_ChrimsonR_and_PdCO_final_SLEAP.mat', 'final_SLEAP');
+save('females_with_inscopix_males_SLEAP.mat', 'final_SLEAP');
 

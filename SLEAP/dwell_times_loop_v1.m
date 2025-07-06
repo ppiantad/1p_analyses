@@ -1,5 +1,5 @@
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'Pre_RDT_RM';
 
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
@@ -333,3 +333,234 @@ set(gca, 'ytick', 0:25:100);
 % grid on;
 
 hold off;
+
+%%
+%%  FOR GENERAL analyses of 1p: Tukey's for multiple comparisons
+clc
+% Combine data for analysis - now with four zone types
+data = [large_zone_time, small_zone_time, rew_cup_zone_time, other_zone_time]; % 10x12 matrix (4 zones × 3 blocks each)
+
+num_subjects = size(data, 1); % Number of subjects (mice)
+
+% Create table for analysis
+varNames = {'Large_Block1', 'Large_Block2', 'Large_Block3', ...
+            'Small_Block1', 'Small_Block2', 'Small_Block3', ...
+            'RewardCup_Block1', 'RewardCup_Block2', 'RewardCup_Block3', ...
+            'Other_Block1', 'Other_Block2', 'Other_Block3'};
+tbl = array2table(data, 'VariableNames', varNames);
+
+% Define within-subject factors
+Zone = categorical({'Large', 'Large', 'Large', 'Small', 'Small', 'Small', ...
+                   'RewardCup', 'RewardCup', 'RewardCup', 'Other', 'Other', 'Other'}); % Zone factor
+TrialBlock = categorical([1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]); % Trial Block factor
+WithinDesign = table(Zone', TrialBlock', 'VariableNames', {'Zone', 'TrialBlock'});
+
+% Fit repeated measures model
+rm = fitrm(tbl, 'Large_Block1-Other_Block3 ~ 1', 'WithinDesign', WithinDesign);
+
+% Run repeated measures ANOVA
+ranovaResults = ranova(rm, 'WithinModel', 'Zone*TrialBlock');
+
+mauchlyTest = mauchly(rm)
+% Display results
+disp(ranovaResults);
+
+% Display ANOVA results
+fprintf('Zone effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranovaResults{3,2}, ranovaResults{4,2}, ranovaResults{3,4}, ranovaResults{3,5});
+
+% Display ANOVA results
+fprintf('Trial Block effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranovaResults{5,2}, ranovaResults{6,2}, ranovaResults{5,4}, ranovaResults{5,5});
+% Display ANOVA results
+fprintf('Interaction effect (RM ANOVA): F(%d,%d) = %.3f, p = %e\n', ...
+    ranovaResults{7,2}, ranovaResults{8,2}, ranovaResults{7,4}, ranovaResults{7,5});
+
+% Check if interaction is significant (using p < 0.05 threshold)
+pValueInteraction = ranovaResults{7, 5}; % p-value for Zone*TrialBlock interaction
+disp(['Interaction p-value: ', num2str(pValueInteraction)]);
+
+% If interaction is significant, conduct post-hoc tests
+if pValueInteraction < 0.05
+    disp('Significant interaction detected. Conducting Tukey''s multiple comparisons...');
+    fprintf('\n========== POST-HOC TESTS ==========\n');
+    
+    % Reshape data for Tukey's multiple comparisons
+    % Create long-format data for all Zone-Block combinations
+    all_values = [];
+    all_groups = {};
+    subject_ids = [];
+    
+    zone_names = {'Large', 'Small', 'RewardCup', 'Other'};
+    for zone = 1:4 % 1 = Large, 2 = Small, 3 = RewardCup, 4 = Other
+        for block = 1:3
+            block_data = data(:, (zone-1)*3 + block); % Extract appropriate zone and block data
+            
+            all_values = [all_values; block_data];
+            all_groups = [all_groups; repmat({sprintf('%s_Block%d', zone_names{zone}, block)}, length(block_data), 1)];
+            subject_ids = [subject_ids; (1:num_subjects)'];
+        end
+    end
+    
+    % Use anova1 to get stats structure for multcompare
+    [~, ~, stats_tukey] = anova1(all_values, all_groups, 'off');
+    
+    % Perform Tukey's multiple comparisons
+    [c, m, h, gnames] = multcompare(stats_tukey, 'CType', 'tukey-kramer', 'Display', 'off');
+    
+    % Display Tukey's results in a readable format
+    fprintf('\nTukey''s HSD Multiple Comparisons Results:\n');
+    fprintf('%-20s %-20s %10s %10s %10s %10s\n', 'Group 1', 'Group 2', 'Diff', 'Lower CI', 'Upper CI', 'p-value');
+    fprintf('%-20s %-20s %10s %10s %10s %10s\n', repmat('-', 1, 20), repmat('-', 1, 20), repmat('-', 1, 10), repmat('-', 1, 10), repmat('-', 1, 10), repmat('-', 1, 10));
+    
+    for i = 1:size(c, 1)
+        group1_idx = c(i, 1);
+        group2_idx = c(i, 2);
+        group1_name = gnames{group1_idx};
+        group2_name = gnames{group2_idx};
+        diff = c(i, 4);
+        lower_ci = c(i, 3);
+        upper_ci = c(i, 5);
+        p_val = c(i, 6);
+        
+        fprintf('%-20s %-20s %10.3f %10.3f %10.3f %10.3e', ...
+            group1_name, group2_name, diff, lower_ci, upper_ci, p_val);
+        
+        if p_val < 0.05
+            fprintf(' *');
+        end
+        fprintf('\n');
+    end
+    
+    fprintf('\n* indicates significant difference (p < 0.05)\n');
+    
+    % Display group means for reference
+    fprintf('\nGroup Means:\n');
+    for i = 1:length(gnames)
+        fprintf('%-20s: %.3f ± %.3f (SEM)\n', gnames{i}, m(i, 1), m(i, 2));
+    end
+    
+    % Highlight specific comparisons of interest
+    fprintf('\n--- Key Comparisons ---\n');
+    fprintf('Zone comparisons within each block:\n');
+    for block = 1:3
+        fprintf('\n--- Block %d ---\n', block);
+        
+        % Compare all zone pairs within each block
+        zone_pairs = {{'Large', 'Small'}, {'Large', 'RewardCup'}, {'Large', 'Other'}, ...
+                     {'Small', 'RewardCup'}, {'Small', 'Other'}, {'RewardCup', 'Other'}};
+        
+        for pair_idx = 1:length(zone_pairs)
+            zone1_name = sprintf('%s_Block%d', zone_pairs{pair_idx}{1}, block);
+            zone2_name = sprintf('%s_Block%d', zone_pairs{pair_idx}{2}, block);
+            
+            % Find the comparison in the results
+            for i = 1:size(c, 1)
+                group1_name = gnames{c(i, 1)};
+                group2_name = gnames{c(i, 2)};
+                
+                if (strcmp(group1_name, zone1_name) && strcmp(group2_name, zone2_name)) || ...
+                   (strcmp(group1_name, zone2_name) && strcmp(group2_name, zone1_name))
+                    diff = c(i, 4);
+                    lower_ci = c(i, 3);
+                    upper_ci = c(i, 5);
+                    p_val = c(i, 6);
+                    
+                    fprintf('%s vs %s: Diff = %.3f, 95%% CI [%.3f, %.3f], p = %.3e', ...
+                        zone_pairs{pair_idx}{1}, zone_pairs{pair_idx}{2}, abs(diff), lower_ci, upper_ci, p_val);
+                    
+                    if p_val < 0.05
+                        fprintf(' *');
+                    end
+                    fprintf('\n');
+                    break;
+                end
+            end
+        end
+    end
+    
+    % Block comparisons within each zone
+    for zone_idx = 1:4
+        fprintf('\nBlock comparisons within %s Zone:\n', zone_names{zone_idx});
+        zone_blocks = {sprintf('%s_Block1', zone_names{zone_idx}), ...
+                      sprintf('%s_Block2', zone_names{zone_idx}), ...
+                      sprintf('%s_Block3', zone_names{zone_idx})};
+        
+        for i = 1:length(zone_blocks)
+            for j = (i+1):length(zone_blocks)
+                % Find the comparison in the results
+                for k = 1:size(c, 1)
+                    group1_name = gnames{c(k, 1)};
+                    group2_name = gnames{c(k, 2)};
+                    
+                    if (strcmp(group1_name, zone_blocks{i}) && strcmp(group2_name, zone_blocks{j})) || ...
+                       (strcmp(group1_name, zone_blocks{j}) && strcmp(group2_name, zone_blocks{i}))
+                        diff = c(k, 4);
+                        lower_ci = c(k, 3);
+                        upper_ci = c(k, 5);
+                        p_val = c(k, 6);
+                        
+                        fprintf('Block %d vs Block %d: Diff = %.3f, 95%% CI [%.3f, %.3f], p = %.3e', ...
+                            i, j, abs(diff), lower_ci, upper_ci, p_val);
+                        
+                        if p_val < 0.05
+                            fprintf(' *');
+                        end
+                        fprintf('\n');
+                        break;
+                    end
+                end
+            end
+        end
+    end
+    
+else
+    disp('Interaction not significant. Post-hoc tests for interaction not needed.');
+    
+    % If main effects are significant, analyze those
+    pValueZone = ranovaResults{3, 5}; % p-value for Zone main effect
+    pValueBlock = ranovaResults{5, 5};  % p-value for TrialBlock main effect
+    
+    % Check main effect of Zone
+    if pValueZone < 0.05
+        fprintf('\n--- Main effect of Zone is significant (p = %.4f) ---\n', pValueZone);
+        % Compare overall means across zones
+        largeMean = mean(mean(data(:,1:3)));
+        smallMean = mean(mean(data(:,4:6)));
+        rewardCupMean = mean(mean(data(:,7:9)));
+        otherMean = mean(mean(data(:,10:12)));
+        
+        fprintf('Large Zone mean: %.3f\n', largeMean);
+        fprintf('Small Zone mean: %.3f\n', smallMean);
+        fprintf('Reward Cup Zone mean: %.3f\n', rewardCupMean);
+        fprintf('Other Zone mean: %.3f\n', otherMean);
+        
+        % Perform post-hoc comparisons for Zone
+        zoneComp = multcompare(rm, 'Zone', 'ComparisonType', 'bonferroni');
+        
+        % Display results
+        fprintf('\nPost-hoc comparisons for Zone (across all trial blocks):\n');
+        for i = 1:size(zoneComp, 1)
+            fprintf('%s vs %s: Mean Diff = %.3f, CI = [%.3f, %.3f], p = %.3e\n', ...
+                zoneComp.Zone_1(i), zoneComp.Zone_2(i), ...
+                zoneComp.Difference(i), zoneComp.Lower(i), ...
+                zoneComp.Upper(i), zoneComp.pValue(i));
+        end
+    end
+    
+    % Check main effect of Trial Block
+    if pValueBlock < 0.05
+        fprintf('\n--- Main effect of Trial Block is significant (p = %.4f) ---\n', pValueBlock);
+        % Run pairwise comparisons for Trial Block
+        blockComp = multcompare(rm, 'TrialBlock', 'ComparisonType', 'bonferroni');
+        
+        % Display results
+        fprintf('Post-hoc comparisons for Trial Block (across all zones):\n');
+        for i = 1:size(blockComp, 1)
+            fprintf('Block %s vs Block %s: Mean Diff = %.3f, CI = [%.3f, %.3f], p = %.3e\n', ...
+                blockComp.TrialBlock_1(i), blockComp.TrialBlock_2(i), ...
+                blockComp.Difference(i), blockComp.Lower(i), ...
+                blockComp.Upper(i), blockComp.pValue(i));
+        end
+    end
+end

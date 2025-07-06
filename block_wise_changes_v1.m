@@ -552,8 +552,11 @@ piechart([all_conserved_sum/neuron_num, all_lost_sum/neuron_num, all_remapped_su
 figure;
 donutchart([conserved_sum/neuron_num, lost_sum/neuron_num, remapped_sum/neuron_num, remaining_neurons/neuron_num])
 
-all_neurons = [conserved_sum; lost_sum; remapped_sum]
-%all_neurons_2 = [conserved_sum; lost_sum; remapped_sum]
+% all_neurons = [conserved_sum; lost_sum; remapped_sum]
+% all_neurons_2 = [conserved_sum; lost_sum; remapped_sum]
+
+% all_neurons = [all_conserved_sum; all_lost_sum; all_remapped_sum]
+all_neurons_2 = [all_conserved_sum; all_lost_sum; all_remapped_sum]
 
 %% chi-square test on all_neurons. load in data for 1 set of all_neurons above, then load in second set and create all_neurons_2, then run code below
 
@@ -571,6 +574,8 @@ for i = 1:size(all_neurons, 1)
         expected = mean(observed);
         chi2_stat = sum((observed - expected).^2 ./ expected);
         p_values(i,j) = 1 - chi2cdf(chi2_stat, 1); % degrees of freedom = 1
+        chi2_stat_all(i,j) = chi2_stat;
+        clear chi2_stat
     end
 end
 

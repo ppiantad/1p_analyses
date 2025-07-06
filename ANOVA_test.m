@@ -1,8 +1,8 @@
 %%  FOR GENERAL analyses of 1p: Tukey's for multiple comparisons
 clc
 % Combine data for analysis
-% data = [large_choice, small_choice]; % Combine large and small choices
-data = [large_path_length, small_path_length]; % Combine large and small choices
+data = [large_choice, small_choice]; % Combine large and small choices
+% data = [large_path_length, small_path_length]; % Combine large and small choices
 
 num_subjects = size(data, 1); % Number of subjects (mice)
 

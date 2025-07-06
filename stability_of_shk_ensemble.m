@@ -205,6 +205,25 @@ xline(0);
 xlabel('Time from choice/shock (s)');
 % legend({'pre-choice active', 'post-choice reward active', 'consumption', 'not active'}, 'Location','northwest')
 
+%%
+figure;
+hold on
+width = 400; % Width of the figure
+height = 550; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-8 8]);
+ylim([-0.5 1.3]);
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.5 0 0.5 1.0]);
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(shk_consistent==1, :)), std(neuron_mean_array{1, 1}(shk_consistent==1, :))/sqrt(size(neuron_mean_array{1, 1}(shk_consistent==1, :), 1)), 'lineProps', {'color','k'});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 2}(shk_consistent==1, :)), std(neuron_mean_array{1, 2}(shk_consistent==1, :))/sqrt(size(neuron_mean_array{1, 2}(shk_consistent==1, :), 1)), 'lineProps', {'color', 'r'});
+% xtickformat('%.2f');
+ytickformat('%.1f');
+xline(0);
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from choice/shock (s)');
+% legend({'pre-choice active', 'post-choice reward active', 'consumption', 'not active'}, 'Location','northwest')
+
 %% for checking whether unnormalized traces look similar - just in case the comparison as plotted above w/ zscores doesn't fly with reviewers? can use the data below, zscore all in one array, and plot separately (still need to do this)
 plot_me = 3;
 

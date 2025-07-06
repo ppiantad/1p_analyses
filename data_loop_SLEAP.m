@@ -77,7 +77,7 @@ for ii = 1:size(animalIDs,1)
             end
         end
 
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'AA', 1);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'SHK', 1);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
@@ -560,6 +560,190 @@ set(gca, 'XTick', [-6, 0, 6], 'YTick', [0 2.5 5]);
 shadedErrorBar(ts1, mean_large, sem_large, 'lineProps', {'color', 'r'});
 hold on;shadedErrorBar(ts1, mean_small, sem_small, 'lineProps', {'color', 'k'});
 plot(ts1, perm_p_sig+1)
+
+%% for PdCO vs mCherry
+
+
+
+
+
+% Find indices where Animals match valid_animalIDs
+valid_idx = ismember(animalIDs, PdCO_IDs);
+
+% Filter path_length_table to only include valid animals
+valid_animalIDs = animalIDs(valid_idx, :);
+filtered_neuron_mean_unnormalized = neuron_mean_unnormalized(valid_idx, :);
+filtered_neuron_sem_unnormalized = neuron_sem_unnormalized(valid_idx, :);
+
+% Extract TreatmentCondition for the matched valid_animalIDs
+[~, loc] = ismember(valid_animalIDs, PdCO_IDs);
+
+% Get the corresponding TreatmentCondition from risk_table
+filtered_treatment_conditions = PdCO_treatment_groups(loc);
+
+% Find indices where TreatmentCondition is 'mCherry'
+mCherry_idx = strcmp(filtered_treatment_conditions, 'mCherry');
+hM4Di_idx = strcmp(filtered_treatment_conditions, 'PdCO');
+
+
+filtered_neuron_mean_unnormalized_mCherry = filtered_neuron_mean_unnormalized(mCherry_idx == 1, :);
+filtered_neuron_mean_unnormalized_hM4Di = filtered_neuron_mean_unnormalized(hM4Di_idx == 1, :);
+filtered_neuron_sem_unnormalized_mCherry = filtered_neuron_sem_unnormalized(mCherry_idx == 1, :);
+filtered_neuron_sem_unnormalized_hM4Di = filtered_neuron_sem_unnormalized(hM4Di_idx == 1, :);
+
+
+mean_large = nanmean(filtered_neuron_mean_unnormalized_mCherry, 1);
+mean_small = nanmean(filtered_neuron_mean_unnormalized_hM4Di, 1);
+sem_large = nanstd(filtered_neuron_mean_unnormalized_mCherry, 0, 1) ./ sqrt(size(filtered_neuron_mean_unnormalized_mCherry, 1));
+sem_small = nanstd(filtered_neuron_mean_unnormalized_hM4Di, 0, 1) ./ sqrt(size(filtered_neuron_mean_unnormalized_hM4Di, 1));
+
+
+behav_data_hM4Di = behav_tbl_iter{1, 1}(hM4Di_idx);
+behav_data_mCherry = behav_tbl_iter{1, 1}(mCherry_idx);
+
+
+concatenatedTable_mCherry = table();
+
+for i = 1:numel(behav_data_mCherry)
+    currentTable = behav_data_mCherry{i};
+    concatenatedTable_mCherry = vertcat(concatenatedTable_mCherry, currentTable);
+end
+
+median_start_time_from_choice_mCherry = median(concatenatedTable_mCherry.stTime - concatenatedTable_mCherry.choiceTime);
+median_collect_time_from_choice_mCherry = median(concatenatedTable_mCherry.collectionTime - concatenatedTable_mCherry.choiceTime);
+
+concatenatedTable_hM4Di = table();
+
+for i = 1:numel(behav_data_hM4Di)
+    currentTable = behav_data_hM4Di{i};
+    concatenatedTable_hM4Di = vertcat(concatenatedTable_hM4Di, currentTable);
+end
+
+median_start_time_from_choice_hM4Di = median(concatenatedTable_hM4Di.stTime - concatenatedTable_hM4Di.choiceTime);
+median_collect_time_from_choice_hM4Di = median(concatenatedTable_hM4Di.collectionTime - concatenatedTable_hM4Di.choiceTime);
+
+
+
+ mean_data_array = {filtered_neuron_mean_unnormalized_mCherry, filtered_neuron_mean_unnormalized_hM4Di};
+ sem_data_array = {filtered_neuron_sem_unnormalized_mCherry, filtered_neuron_sem_unnormalized_hM4Di};
+
+ [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-6 6], [0 5], 3);
+
+
+
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 450; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xline(0);
+xline(median_start_time_from_choice_mCherry, 'g', {'Median', 'start', 'time'})
+xline(median_collect_time_from_choice_mCherry, 'r', {'Median', 'collect', 'latency'})
+xline(median_start_time_from_choice_hM4Di, '--g', {'Median', 'start', 'time'})
+xline(median_collect_time_from_choice_hM4Di, '--r', {'Median', 'collect', 'latency'})
+xlim([-6 6]);
+ylim([0 5]);
+% Set X-axis ticks
+set(gca, 'XTick', [-6, 0, 6], 'YTick', [0 2.5 5]);
+shadedErrorBar(ts1, mean_large, sem_large, 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, mean_small, sem_small, 'lineProps', {'color', 'k'});
+plot(ts1, perm_p_sig+1)
+
+%%
+%% for Females vs Males
+
+
+
+
+
+% Find indices where Animals match valid_animalIDs
+valid_idx = ismember(animalIDs, ChrimsonR_IDs);
+
+% Filter path_length_table to only include valid animals
+valid_animalIDs = animalIDs(valid_idx, :);
+filtered_neuron_mean_unnormalized = neuron_mean_unnormalized(valid_idx, :);
+filtered_neuron_sem_unnormalized = neuron_sem_unnormalized(valid_idx, :);
+
+% Extract TreatmentCondition for the matched valid_animalIDs
+[~, loc] = ismember(valid_animalIDs, ChrimsonR_IDs);
+
+% Get the corresponding TreatmentCondition from risk_table
+filtered_treatment_conditions = ChrimsonR_treatment_groups(loc);
+
+% Find indices where TreatmentCondition is 'mCherry'
+mCherry_idx = strcmp(filtered_treatment_conditions, 'Female');
+hM4Di_idx = strcmp(filtered_treatment_conditions, 'Male');
+
+
+filtered_neuron_mean_unnormalized_mCherry = filtered_neuron_mean_unnormalized(mCherry_idx == 1, :);
+filtered_neuron_mean_unnormalized_hM4Di = filtered_neuron_mean_unnormalized(hM4Di_idx == 1, :);
+filtered_neuron_sem_unnormalized_mCherry = filtered_neuron_sem_unnormalized(mCherry_idx == 1, :);
+filtered_neuron_sem_unnormalized_hM4Di = filtered_neuron_sem_unnormalized(hM4Di_idx == 1, :);
+
+
+mean_large = nanmean(filtered_neuron_mean_unnormalized_mCherry, 1);
+mean_small = nanmean(filtered_neuron_mean_unnormalized_hM4Di, 1);
+sem_large = nanstd(filtered_neuron_mean_unnormalized_mCherry, 0, 1) ./ sqrt(size(filtered_neuron_mean_unnormalized_mCherry, 1));
+sem_small = nanstd(filtered_neuron_mean_unnormalized_hM4Di, 0, 1) ./ sqrt(size(filtered_neuron_mean_unnormalized_hM4Di, 1));
+
+
+behav_data_hM4Di = behav_tbl_iter{1, 1}(hM4Di_idx);
+behav_data_mCherry = behav_tbl_iter{1, 1}(mCherry_idx);
+
+
+concatenatedTable_mCherry = table();
+
+for i = 1:numel(behav_data_mCherry)
+    currentTable = behav_data_mCherry{i};
+    concatenatedTable_mCherry = vertcat(concatenatedTable_mCherry, currentTable);
+end
+
+median_start_time_from_choice_mCherry = median(concatenatedTable_mCherry.stTime - concatenatedTable_mCherry.choiceTime);
+median_collect_time_from_choice_mCherry = median(concatenatedTable_mCherry.collectionTime - concatenatedTable_mCherry.choiceTime);
+
+concatenatedTable_hM4Di = table();
+
+for i = 1:numel(behav_data_hM4Di)
+    currentTable = behav_data_hM4Di{i};
+    concatenatedTable_hM4Di = vertcat(concatenatedTable_hM4Di, currentTable);
+end
+
+median_start_time_from_choice_hM4Di = median(concatenatedTable_hM4Di.stTime - concatenatedTable_hM4Di.choiceTime);
+median_collect_time_from_choice_hM4Di = median(concatenatedTable_hM4Di.collectionTime - concatenatedTable_hM4Di.choiceTime);
+
+
+
+ mean_data_array = {filtered_neuron_mean_unnormalized_mCherry, filtered_neuron_mean_unnormalized_hM4Di};
+ sem_data_array = {filtered_neuron_sem_unnormalized_mCherry, filtered_neuron_sem_unnormalized_hM4Di};
+
+ [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-6 6], [0 5], 3);
+
+
+
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 450; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xline(0);
+xline(median_start_time_from_choice_mCherry, 'g', {'Median', 'start', 'time'})
+xline(median_collect_time_from_choice_mCherry, 'r', {'Median', 'collect', 'latency'})
+xline(median_start_time_from_choice_hM4Di, '--g', {'Median', 'start', 'time'})
+xline(median_collect_time_from_choice_hM4Di, '--r', {'Median', 'collect', 'latency'})
+xlim([-6 6]);
+ylim([0 5]);
+% Set X-axis ticks
+set(gca, 'XTick', [-6, 0, 6], 'YTick', [0 2.5 5]);
+shadedErrorBar(ts1, mean_large, sem_large, 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, mean_small, sem_small, 'lineProps', {'color', 'k'});
+plot(ts1, perm_p_sig+1)
+
 
 %% for analyzing shock test, grouping ranges of intensities together
 
