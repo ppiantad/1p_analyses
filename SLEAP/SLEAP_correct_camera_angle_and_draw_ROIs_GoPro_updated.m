@@ -7,7 +7,7 @@
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'D:\risk videos\BLA PdCO vs mCherry';
+metaDirectory = 'F:\RDT FEMALES';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 p = get(0, "MonitorPositions");
@@ -16,7 +16,7 @@ p = get(0, "MonitorPositions");
 for i = 1:length(metaDirectory_subfolders)
     % Check if the item in subfolders is a directory (not "." or "..") or
     % one of the sets of files that I haven't analyzed yet (PR currently)
-    if metaDirectory_subfolders(i).isdir && ~strcmp(metaDirectory_subfolders(i).name, '.') && ~strcmp(metaDirectory_subfolders(i).name, '..') && ~contains(metaDirectory_subfolders(i).name, 'PR') && ~contains(metaDirectory_subfolders(i).name, 'not in final dataset')
+    if metaDirectory_subfolders(i).isdir && ~strcmp(metaDirectory_subfolders(i).name, '.') && ~strcmp(metaDirectory_subfolders(i).name, '..') && ~contains(metaDirectory_subfolders(i).name, 'PR') && ~contains(metaDirectory_subfolders(i).name, 'HOTPLATE') && ~contains(metaDirectory_subfolders(i).name, 'not in final dataset')
         % Get the full path of the subfolder
         metasubfolderPath = fullfile(metaDirectory, metaDirectory_subfolders(i).name);
         % Create a cell array for the subfolder path and append it
@@ -35,7 +35,7 @@ for zz = 1:size(metafolder_list, 1)
     for i = 1:length(subfolders)
         % Check if the item in subfolders is a directory (not "." or "..") or
         % one of the sets of files that I haven't analyzed yet (PR currently)
-        if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..') && ~contains(subfolders(i).name, 'PR')
+        if subfolders(i).isdir && ~strcmp(subfolders(i).name, '.') && ~strcmp(subfolders(i).name, '..') && ~contains(subfolders(i).name, 'HOT PLATE') && ~contains(subfolders(i).name, 'PR')
             % Get the full path of the subfolder
             subfolderPath = fullfile(startDirectory, subfolders(i).name);
             % Create a cell array for the subfolder path and append it
@@ -48,9 +48,9 @@ for zz = 1:size(metafolder_list, 1)
 
     for ii = 1:size(folder_list, 1)
         folder_list_string = strsplit(folder_list{ii}, '\');
-        current_animal = folder_list_string{4}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
+        current_animal = folder_list_string{3}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
         current_animal = matlab.lang.makeValidName(current_animal);
-        current_session = folder_list_string{5};
+        current_session = folder_list_string{4};
         current_session = regexprep(current_session,{' ', '-'}, '_');
         modifiedString = lower(strrep(strrep(folder_list_string{end}, ' ', ''), '-', ''));
 

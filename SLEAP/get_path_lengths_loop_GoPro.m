@@ -1,5 +1,27 @@
+
+session_to_analyze = 'RDT_D1';
+
+
+if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
+    fieldsToRemove = {'BLA_Insc_13', 'BLA_Insc_18', 'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_41'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final_SLEAP, fieldsToRemove{i})
+            final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+        end
+    end
+elseif strcmp('RDT_D2', session_to_analyze)
+
+    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_39'};
+
+    for i = 1:length(fieldsToRemove)
+        if isfield(final_SLEAP, fieldsToRemove{i})
+            final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+        end
+    end
+end
+
 animalIDs = (fieldnames(final_SLEAP));
-session_to_analyze = 'RDT_OPTO_CHOICE';
 
 b1_large_path_length = [];
 b2_large_path_length = [];
@@ -369,3 +391,208 @@ xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
 % grid on;
 
 hold off;
+
+%% for Females vs Males
+
+% Find indices where Animals match valid_animalIDs
+valid_idx = ismember(path_length_table.Animals, risk_table.valid_animalIDs);
+
+% Filter path_length_table to only include valid animals
+filtered_path_length_table = path_length_table(valid_idx, :);
+
+% Extract TreatmentCondition for the matched valid_animalIDs
+[~, loc] = ismember(filtered_path_length_table.Animals, risk_table.valid_animalIDs);
+
+% Get the corresponding TreatmentCondition from risk_table
+filtered_treatment_conditions = risk_table.TreatmentCondition(loc);
+
+% Find indices where TreatmentCondition is 'mCherry'
+mCherry_idx = strcmp(filtered_treatment_conditions, 'Female');
+
+% Extract the relevant data
+large_choice_mCherry = [filtered_path_length_table.b1_small_path_length(mCherry_idx), ...
+                         filtered_path_length_table.b2_small_path_length(mCherry_idx), ...
+                         filtered_path_length_table.b3_small_path_length(mCherry_idx)];
+
+
+
+% Find indices where TreatmentCondition is 'mCherry'
+hM4Di_idx = strcmp(filtered_treatment_conditions, 'Male');
+
+% Extract the relevant data
+large_choice_hM4Di = [filtered_path_length_table.b1_small_path_length(hM4Di_idx), ...
+                         filtered_path_length_table.b2_small_path_length(hM4Di_idx), ...
+                         filtered_path_length_table.b3_small_path_length(hM4Di_idx)];
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Set axis limits, labels, and legend
+ylim([0 2500]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:500:2500);
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+% ylim([0 1.1 * max([mean_large + sem_large, ...
+%                    mean_small + sem_small])]); % Adjust ylim dynamically
+% set(gca, 'ytick', 0:25:100);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%% for Females vs Males
+
+% Find indices where Animals match valid_animalIDs
+valid_idx = ismember(path_length_table.Animals, risk_table.valid_animalIDs);
+
+% Filter path_length_table to only include valid animals
+filtered_path_length_table = path_length_table(valid_idx, :);
+
+% Extract TreatmentCondition for the matched valid_animalIDs
+[~, loc] = ismember(filtered_path_length_table.Animals, risk_table.valid_animalIDs);
+
+% Get the corresponding TreatmentCondition from risk_table
+filtered_treatment_conditions = risk_table.TreatmentCondition(loc);
+
+% Find indices where TreatmentCondition is 'mCherry'
+mCherry_idx = strcmp(filtered_treatment_conditions, 'Female');
+
+% Extract the relevant data
+large_choice_mCherry = [filtered_path_length_table.b1_large_path_length(mCherry_idx), ...
+                         filtered_path_length_table.b2_large_path_length(mCherry_idx), ...
+                         filtered_path_length_table.b3_large_path_length(mCherry_idx)];
+
+
+
+% Find indices where TreatmentCondition is 'mCherry'
+hM4Di_idx = strcmp(filtered_treatment_conditions, 'Male');
+
+% Extract the relevant data
+large_choice_hM4Di = [filtered_path_length_table.b1_large_path_length(hM4Di_idx), ...
+                         filtered_path_length_table.b2_large_path_length(hM4Di_idx), ...
+                         filtered_path_length_table.b3_large_path_length(hM4Di_idx)];
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small'); % Add caps with 'CapSize'
+
+% Set axis limits, labels, and legend
+ylim([0 2500]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:500:2500);
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+% ylim([0 1.1 * max([mean_large + sem_large, ...
+%                    mean_small + sem_small])]); % Adjust ylim dynamically
+% set(gca, 'ytick', 0:25:100);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+

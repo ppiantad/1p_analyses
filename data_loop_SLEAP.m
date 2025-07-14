@@ -4,39 +4,57 @@ iter = 0
 
 
 %% Edit these uservariables with what you want to look at
-uv.evtWin = [-4 2]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
+uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
 uv.BLper = [-10 -5];
 uv.dt = 1/10; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
+
+animalIDs = (fieldnames(final_SLEAP));
 
 session_to_analyze = 'RDT_D1';
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'choiceTime';
+epoc_to_align = 'collectionTime';
 ts1 = (uv.evtWin(1):uv.dt:uv.evtWin(2)-uv.dt);
 
 % neuron_num = 0;
 use_normalized_time = 0;
 
 clear neuron_mean neuron_sem zall_mean zall_array zall_to_BL_array zsd_array trials ii neuron_mean_unnorm_concat neuron_mean_unnormalized sem_all zall_mean_all 
-if strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
-    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_41'};
 
-    for i = 1:length(fieldsToRemove)
-        if isfield(final_SLEAP, fieldsToRemove{i})
-            final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+if any(startsWith(string(animalIDs), 'RDT-F'))
+    if strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
+        fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_41'};
+
+        for i = 1:length(fieldsToRemove)
+            if isfield(final_SLEAP, fieldsToRemove{i})
+                final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+            end
+        end
+    elseif strcmp('RDT_D2', session_to_analyze)
+
+        fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_39'};
+
+        for i = 1:length(fieldsToRemove)
+            if isfield(final_SLEAP, fieldsToRemove{i})
+                final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+            end
         end
     end
-elseif strcmp('RDT_D2', session_to_analyze)
 
-    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_39'};
+else
+    if strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
+        fieldsToRemove = {'BLA_Insc_35', 'BLA_Insc_38', 'BLA_Insc_41'};
 
-    for i = 1:length(fieldsToRemove)
-        if isfield(final_SLEAP, fieldsToRemove{i})
-            final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+        for i = 1:length(fieldsToRemove)
+            if isfield(final_SLEAP, fieldsToRemove{i})
+                final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+            end
         end
+
     end
+
 end
 
 
@@ -77,7 +95,7 @@ for ii = 1:size(animalIDs,1)
             end
         end
 
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'SHK', 1);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3, 'SHK', 0);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
@@ -234,7 +252,7 @@ consumption_indices = ts1 >= consumption_window(1) & ts1 <= consumption_window(2
 % auc_pre_choice = zeros(size(neuron_mean_array));
 % auc_post_choice = zeros(size(neuron_mean_array));
 % auc_consumption = zeros(size(neuron_mean_array));
-pre_choice_neuron_count = 0;
+mouse_count = 0;
 % Iterate over each element of neuron_mean_array
 for j = 1:size(unnormalized_mouse, 2)
     prechoice_mean(:, j) = mean(neuron_mean_all_unnormalized{1, j}(:, pre_choice_indices), 2);
@@ -690,8 +708,8 @@ sem_large = nanstd(filtered_neuron_mean_unnormalized_mCherry, 0, 1) ./ sqrt(size
 sem_small = nanstd(filtered_neuron_mean_unnormalized_hM4Di, 0, 1) ./ sqrt(size(filtered_neuron_mean_unnormalized_hM4Di, 1));
 
 
-behav_data_hM4Di = behav_tbl_iter{1, 1}(hM4Di_idx);
-behav_data_mCherry = behav_tbl_iter{1, 1}(mCherry_idx);
+behav_data_hM4Di = behav_tbl_iter{iter, 1}(hM4Di_idx);
+behav_data_mCherry = behav_tbl_iter{iter, 1}(mCherry_idx);
 
 
 concatenatedTable_mCherry = table();
@@ -719,7 +737,7 @@ median_collect_time_from_choice_hM4Di = median(concatenatedTable_hM4Di.collectio
  mean_data_array = {filtered_neuron_mean_unnormalized_mCherry, filtered_neuron_mean_unnormalized_hM4Di};
  sem_data_array = {filtered_neuron_sem_unnormalized_mCherry, filtered_neuron_sem_unnormalized_hM4Di};
 
- [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-6 6], [0 5], 3);
+ [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-4 4], [0 15], 3);
 
 
 
@@ -733,17 +751,133 @@ height = 450; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 xline(0);
 xline(median_start_time_from_choice_mCherry, 'g', {'Median', 'start', 'time'})
-xline(median_collect_time_from_choice_mCherry, 'r', {'Median', 'collect', 'latency'})
-xline(median_start_time_from_choice_hM4Di, '--g', {'Median', 'start', 'time'})
-xline(median_collect_time_from_choice_hM4Di, '--r', {'Median', 'collect', 'latency'})
-xlim([-6 6]);
-ylim([0 5]);
+xline(median_collect_time_from_choice_mCherry, 'g', {'Median', 'collect', 'latency'})
+xline(median_start_time_from_choice_hM4Di, 'k', {'Median', 'start', 'time'})
+xline(median_collect_time_from_choice_hM4Di, 'k', {'Median', 'collect', 'latency'})
+xlim([-8 8]);
+ylim([0 15]);
 % Set X-axis ticks
-set(gca, 'XTick', [-6, 0, 6], 'YTick', [0 2.5 5]);
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [0:5:15]);
 shadedErrorBar(ts1, mean_large, sem_large, 'lineProps', {'color', 'r'});
 hold on;shadedErrorBar(ts1, mean_small, sem_small, 'lineProps', {'color', 'k'});
 plot(ts1, perm_p_sig+1)
 
+
+pre_choice_window = [-4 0];     % Pre-choice period: -4 to 0 s
+post_choice_window = [0 1];     % Post-choice period: 0 to 2 s
+consumption_window = [1 3];     % Consumption period: 1 to 3 s if using data aligned to collect, do 0 to 2 to keep things consistent
+
+% Find indices corresponding to each time window
+pre_choice_indices = ts1 >= pre_choice_window(1) & ts1 <= pre_choice_window(2);
+post_choice_indices = ts1 >= post_choice_window(1) & ts1 <= post_choice_window(2);
+consumption_indices = ts1 >= consumption_window(1) & ts1 <= consumption_window(2);
+
+
+mouse_count = 0;
+% Iterate over each element of neuron_mean_array
+for i = 1:size(filtered_neuron_mean_unnormalized_mCherry, 1)
+    mouse_count = mouse_count+1;
+    % Compute AUC for each time window
+    % AUC(qq,1)=trapz(ZallMean(qq,ts1(1,:) < 0 & ts1(1,:) > -5)); % -0 -2 %proxy for pre-choice
+    action_auc_pre_choice_females(iter, mouse_count) = trapz(filtered_neuron_mean_unnormalized_mCherry(i, pre_choice_indices));
+    action_auc_post_choice_females(iter, mouse_count) = trapz(filtered_neuron_mean_unnormalized_mCherry(i, post_choice_indices));
+    action_auc_consumption_females(iter, mouse_count) = trapz(filtered_neuron_mean_unnormalized_mCherry(i, consumption_indices));
+end
+
+mouse_count = 0;
+% Iterate over each element of neuron_mean_array
+for i = 1:size(filtered_neuron_mean_unnormalized_hM4Di, 1)
+    mouse_count = mouse_count+1;
+    % Compute AUC for each time window
+    % AUC(qq,1)=trapz(ZallMean(qq,ts1(1,:) < 0 & ts1(1,:) > -5)); % -0 -2 %proxy for pre-choice
+    action_auc_pre_choice_males(iter, mouse_count) = trapz(filtered_neuron_mean_unnormalized_hM4Di(i, pre_choice_indices));
+    action_auc_post_choice_males(iter, mouse_count) = trapz(filtered_neuron_mean_unnormalized_hM4Di(i, post_choice_indices));
+    action_auc_consumption_males(iter, mouse_count) = trapz(filtered_neuron_mean_unnormalized_hM4Di(i, consumption_indices));
+end
+
+
+%%
+%%
+% Create sample data for testing (replace with your actual data)
+% mCherry_data_means = [action_auc_pre_choice_females];
+% hM4Di_data_mean = [action_auc_pre_choice_males];
+
+% mCherry_data_means = [action_auc_post_choice_females];
+% hM4Di_data_mean = [action_auc_post_choice_males];
+
+mCherry_data_means = [action_auc_consumption_females];
+hM4Di_data_mean = [action_auc_consumption_males];
+
+% Combine the datasets for easier handling
+all_data = {mCherry_data_means, hM4Di_data_mean};
+
+% Calculate means for bar heights (mean of each row)
+means = [mean(mCherry_data_means, 2), mean(hM4Di_data_mean, 2)];
+
+% Calculate SEM for error bars (SEM = std/sqrt(n))
+sem = [std(mCherry_data_means, 0, 2) ./ sqrt(size(mCherry_data_means, 2)), ...
+       std(hM4Di_data_mean, 0, 2) ./ sqrt(size(hM4Di_data_mean, 2))];
+
+% Grouped positions for the bars
+x = [1, 2, 3; 5, 6, 7]; % First group at positions 1,2,3; second group at 5,6,7
+
+% Create figure
+figure('Position', [100, 100, 300, 450]); % Made wider to accommodate 6 bars
+hold on;
+
+% Loop through each dataset
+for i = 1:size(all_data, 2)
+    data = all_data{i}; % Current dataset
+    
+    % Plot bars for each row (3 bars per dataset)
+    for row = 1:3
+        bar_x = x(i, row); % Position for the current bar
+        bar(bar_x, means(row, i), 0.6); % Plot bar
+        
+        % Add error bars
+        errorbar(bar_x, means(row, i), sem(row, i), 'k', 'LineWidth', 1.5, 'CapSize', 8);
+    end
+    
+    % Overlay scatter points and connect with lines
+    jittered_x = zeros(size(data)); % To store jittered x-coordinates
+    
+    if i <= 1
+        % Add jitter to x-coordinates and plot scatter points
+        for col = 1:size(data, 2) % For each column (data point)
+            for row = 1:3 % For each row
+                scatter_x = x(i, row) + (rand(1, 1) - 0.5) * 0.3; % Add jitter
+                jittered_x(row, col) = scatter_x; % Store jittered x-coordinate
+                scatter(scatter_x, data(row, col), 50, 'green', 'filled', 'square');
+            end
+        end
+        % Connect scatter points with lines (each column connected across rows)
+        for col = 1:size(data, 2)
+            plot(jittered_x(:, col), data(:, col), 'green-', 'LineWidth', 0.5);
+        end
+    else
+        % Add jitter to x-coordinates and plot scatter points
+        for col = 1:size(data, 2) % For each column (data point)
+            for row = 1:3 % For each row
+                scatter_x = x(i, row) + (rand(1, 1) - 0.5) * 0.3; % Add jitter
+                jittered_x(row, col) = scatter_x; % Store jittered x-coordinate
+                scatter(scatter_x, data(row, col), 40, 'k', 'filled');
+            end
+        end
+        % Connect scatter points with lines (each column connected across rows)
+        for col = 1:size(data, 2)
+            plot(jittered_x(:, col), data(:, col), 'k-', 'LineWidth', 0.5);
+        end
+    end
+end
+
+% Adjustments for aesthetics
+set(gca, 'XTick', [2, 6], 'XTickLabel', {'F', 'M'});
+% xlabel('Groups');
+% ylabel('Values');
+ylim([0 40]);
+yticks([0:10:40]);
+xlim([0 8]);
+hold off;
 
 %% for analyzing shock test, grouping ranges of intensities together
 

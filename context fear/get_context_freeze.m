@@ -9,7 +9,9 @@
 
 % experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 
-experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
+
+experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
 
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
 
@@ -26,7 +28,7 @@ tolerance_samples = round(tolerance_duration * frame_rate);
 
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D3';
+session_to_analyze = 'D1_Morning';
 
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
@@ -318,20 +320,20 @@ errorbar(shk_x, shk_means, shk_sems, 'k', 'LineStyle', 'none', 'LineWidth', 1);
 
 jitter_amount = 0.2;
 % uncomment below for individual datapoints
-% for i = 1:size(no_shk_data, 2) % Loop over groups (columns)
-%     no_shk_data_temp = [];
-%     shk_data_temp = [];
-% 
-%     no_shk_data_temp = no_shk_data{1, i};
-%     shk_data_temp = shk_data{1, i};
-% 
-%     % Scatter points for no_shk_data
-%     scatter(no_shk_x(i) + jitter_amount * (rand(size(no_shk_data_temp, 1), 1) - 0.5), ...
-%             no_shk_data_temp, 30, group_colors{i}, 'filled');
-%     % Scatter points for shk_data
-%     scatter(shk_x(i) + jitter_amount * (rand(size(shk_data_temp, 1), 1) - 0.5), ...
-%             shk_data_temp, 30, group_colors{i}, 'filled');
-% end
+for i = 1:size(no_shk_data, 2) % Loop over groups (columns)
+    no_shk_data_temp = [];
+    shk_data_temp = [];
+
+    no_shk_data_temp = no_shk_data{1, i};
+    shk_data_temp = shk_data{1, i};
+
+    % Scatter points for no_shk_data
+    scatter(no_shk_x(i) + jitter_amount * (rand(size(no_shk_data_temp, 1), 1) - 0.5), ...
+            no_shk_data_temp, 30, group_colors{i}, 'filled');
+    % Scatter points for shk_data
+    scatter(shk_x(i) + jitter_amount * (rand(size(shk_data_temp, 1), 1) - 0.5), ...
+            shk_data_temp, 30, group_colors{i}, 'filled');
+end
 
 % Customization
 xticks([mean(no_shk_x), mean(shk_x)]); % Set ticks at the center of each group
@@ -782,12 +784,14 @@ end
 % experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 % experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
+% experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
+
+experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
 
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
 
 % Define parameters
-threshold = 1; % Velocity threshold
+threshold = 4; % Velocity threshold
 sample_duration = 0.03; % Duration of each sample in seconds
 min_duration = 2; % Minimum duration to trigger labeling in seconds
 frame_rate = 30; % Frames per second

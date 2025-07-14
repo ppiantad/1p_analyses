@@ -7,7 +7,7 @@ ts1 = (-10:.1:10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'I:\MATLAB\raw data for WSLS etc\Females vs Males';
+metaDirectory = 'E:\MATLAB\raw data for WSLS etc\SPN NAcSh OPTO';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 missing_start_val_count = 0;

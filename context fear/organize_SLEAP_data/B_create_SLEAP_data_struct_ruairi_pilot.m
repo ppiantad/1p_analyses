@@ -1,5 +1,5 @@
 % Define the top-level directory
-top_level_directory = 'F:\DREADD'; % Update this to your top-level directory
+top_level_directory = 'E:\Inscopix Mice 072025'; % Update this to your top-level directory
 
 SLEAP_and_freeze_combined_filepaths = dir(fullfile(top_level_directory, '**', '*SLEAP_and_freezing_combined*.csv'));
 
@@ -54,7 +54,7 @@ end
 
 
 %%
-experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
+experimental_grps = readtable('D:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
 animalIDs = fieldnames(final_DLC);
 
 for dd = 1:size(experimental_grps, 1)

@@ -1,5 +1,5 @@
 % Define the top-level directory
-top_level_directory = 'F:\DREADD'; % Update this to your top-level directory
+top_level_directory = 'E:\Inscopix Mice 072025'; % Update this to your top-level directory
 
 % Initialize a list to store matched folders
 matched_folders = {};
