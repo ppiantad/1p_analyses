@@ -562,7 +562,7 @@ axis equal;
 
 %%
 % String to compare
-targetAnimal = 'BLA_Insc_40';
+targetAnimal = 'BLA_Insc_27';
 
 % Perform element-wise comparison
 animal_index_to_plot = find(strcmp(animalIDs, targetAnimal));

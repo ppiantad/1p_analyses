@@ -55,12 +55,12 @@ uv.ca_data_type = "C_raw"; % C % C_raw %S
 % CNMFe_data.spike_prob: CASCADE inferred spikes - multiply x sampling rate
 % (10) for spike rate
 
-session_to_analyze = 'Pre_RDT_RM';
+session_to_analyze = 'RDT_D1';
 uv.yoke_data = 0; % set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'choiceTime'; % stTime choiceTime collectionTime
-period_of_interest = 'prechoice';
-
+epoc_to_align = 'stTime'; % stTime choiceTime collectionTime
+period_of_interest = 'postchoice';
+ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
 if strcmp(epoc_to_align, 'stTime')
     period_of_interest = 'trial_start';
     uv.evtSigWin.outcome = [-1 1]; %for trial start
@@ -68,7 +68,7 @@ elseif strcmp(epoc_to_align, 'choiceTime')
     if strcmp(period_of_interest, 'prechoice')
         uv.evtSigWin.outcome = [-4 0]; %for pre-choice   [-4 0]    [-4 1] [-4 -0.5]
     elseif strcmp(period_of_interest, 'postchoice')
-        uv.evtSigWin.outcome = [0 2]; %for SHK or immediate post-choice [0 2] [0 1]
+        uv.evtSigWin.outcome = [0 3]; %for SHK or immediate post-choice [0 2] [0 1]
     end
 elseif strcmp(epoc_to_align, 'collectionTime')
     period_of_interest = 'reward_collection';
@@ -81,7 +81,7 @@ elseif strcmp(epoc_to_align, 'PressTime')
     end
 end
 
-ts1 = (uv.evtWin(1):.1:uv.evtWin(2)-0.1);
+
 animalIDs = (fieldnames(final));
 neuron_num = 0;
 use_normalized_time = 0;
@@ -222,7 +222,7 @@ for ii = 1:size(fieldnames(final),1)
                 BehavData(101:end,:) = [];
             end
         else
-            [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
+            [BehavData,trials,varargin_identity_class]=TrialFilter_test(BehavData,  'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 1); %'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 1    % 'OMITALL', 0, 'BLANK_TOUCH', 0, 'SHK', 0, 'BLOCK', 2, 'BLOCK', 3
         
         end
 
@@ -336,7 +336,34 @@ for ii = 1:size(fieldnames(final),1)
 
         end
         clear evtWinSpan e
+        
+        % uncomment if you want to filter down to half of a given session's
+        % trials
+        % if any(BehavData.Block == 1)
+        %     % Block 1: select first half of all trials
+        %     numTrials = height(BehavData);
+        %     halfTrials = floor(numTrials / 2);
+        %     eTS = BehavData.(epoc_to_align)(1:halfTrials);
+        % 
+        % elseif any(BehavData.Block == 2) || any(BehavData.Block == 3)
+        %     % Blocks 2/3: select first half of each block separately
+        %     block2_idx = find(BehavData.Block == 2);
+        %     block3_idx = find(BehavData.Block == 3);
+        % 
+        %     % Get first half of each block
+        %     half_block2 = block2_idx(1:floor(length(block2_idx)/2));
+        %     half_block3 = block3_idx(1:floor(length(block3_idx)/2));
+        % 
+        %     % Combine and sort to maintain temporal order
+        %     selected_idx = sort([half_block2; half_block3]);
+        % 
+        %     eTS = BehavData.(epoc_to_align)(selected_idx);
+        % end
+
+
         eTS = BehavData.(epoc_to_align); %get time stamps
+
+
         eTS_collection = BehavData.collectionTime; %get time stamps
         if strcmp(epoc_to_align, 'choiceTime') & uv.evtSigWin.outcome == [-4 0] %for REW collection
             other_evtWinIdx1{iter,:} = ts1 >= 0 & ts1 <= 2; %ts1 >= 0 & ts1 <= 2;

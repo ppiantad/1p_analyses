@@ -72,7 +72,7 @@ for ii = 1:size(animalIDs, 1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
         % Extract the table for easy reference
-        data = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData  ;
+        data_table = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData  ;
 
         % Initialize counters for trials where a shock is followed by an abort or no abort
         total_shock_abort_trials = 0;
@@ -80,30 +80,30 @@ for ii = 1:size(animalIDs, 1)
         rows_for_new_table = 1;
         % Loop through each row
         i = 1;
-        while i <= height(data) - 1
+        while i <= height(data_table) - 1
             % Check if the current trial is a shock (shock == 1)
-            if data.shock(i) == 1
+            if data_table.shock(i) == 1
                 % Initialize a flag to determine if we found a matching condition
                 match_found = false;
-                behav_data_extracted(rows_for_new_table, :) = data(i, :);
+                behav_data_extracted(rows_for_new_table, :) = data_table(i, :);
                 rows_for_new_table = rows_for_new_table + 1;
                 % Look for a matching condition in the subsequent rows
                 j = i + 1;
-                while j <= height(data) && ~match_found
+                while j <= height(data_table) && ~match_found
                     % Check if the trial is an abort (type_binary == 1)
-                    if data.type_binary(j) == 1 || data.type_binary(j) == 2
+                    if data_table.type_binary(j) == 1 || data_table.type_binary(j) == 2
                         % Increment abort counter and mark as found
                         total_shock_abort_trials = total_shock_abort_trials + 1;
                         match_found = true;
                         % behav_data_shk_to_abort(rows_for_new_table+1, :) = data([i, j], :);
-                        behav_data_extracted(rows_for_new_table, :) = data(j, :);
+                        behav_data_extracted(rows_for_new_table, :) = data_table(j, :);
                         rows_for_new_table = rows_for_new_table + 1;
                         % Check if the trial has a bigSmall event (bigSmall == 1)
-                    elseif data.bigSmall(j) == 1.2 || data.bigSmall(j) == 0.3
+                    elseif data_table.bigSmall(j) == 1.2 || data_table.bigSmall(j) == 0.3
                         % Increment no-abort counter and mark as found
                         total_shock_no_abort_trials = total_shock_no_abort_trials + 1;
                         match_found = true;
-                        behav_data_extracted(rows_for_new_table, :) = data(j, :);
+                        behav_data_extracted(rows_for_new_table, :) = data_table(j, :);
                         rows_for_new_table = rows_for_new_table + 1;
                     else
                         % Move to the next row if no match is found
@@ -139,7 +139,7 @@ for ii = 1:size(animalIDs, 1)
     currentanimal = char(animalIDs(ii));
     if isfield(final.(currentanimal), session_to_analyze)
         % Extract the table for easy reference
-        data = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData  ;
+        data_table = final_behavior.(currentanimal).(session_to_analyze).uv.BehavData  ;
 
         % Initialize counters for trials where a shock is followed by an abort or no abort
         total_shock_abort_trials = 0;
@@ -148,20 +148,20 @@ for ii = 1:size(animalIDs, 1)
         rows_for_new_table = 1;
         % Loop through each row
         i = 1;
-        while i <= height(data) - 1
+        while i <= height(data_table) - 1
             % Check if the current trial is a shock (shock == 1)
-            if data.shock(i) == 1
+            if data_table.shock(i) == 1
                 % Initialize a flag to determine if we found a matching condition
                 match_found = false;
-                behav_data_extracted(rows_for_new_table, :) = data(i, :);
+                behav_data_extracted(rows_for_new_table, :) = data_table(i, :);
                 rows_for_new_table = rows_for_new_table + 1;
                 % Look for a matching condition in the subsequent rows
                 shock_abort_sequence = 0;
                 sequence = sequence + 1;
                 j = i + 1;
-                while j <= height(data) && ~match_found
+                while j <= height(data_table) && ~match_found
                     % Check if the trial is an abort (type_binary == 1)
-                    if data.type_binary(j) == 1 || data.type_binary(j) == 2
+                    if data_table.type_binary(j) == 1 || data_table.type_binary(j) == 2
                         % Increment abort counter and mark as found
 
                         shock_abort_sequence = shock_abort_sequence + 1;
@@ -169,7 +169,7 @@ for ii = 1:size(animalIDs, 1)
 
                         j = j + 1;
                         % Check if the trial has a bigSmall event (bigSmall == 1)
-                    elseif data.bigSmall(j) == 1.2 || data.bigSmall(j) == 0.3
+                    elseif data_table.bigSmall(j) == 1.2 || data_table.bigSmall(j) == 0.3
                         % Increment no-abort counter and mark as found
 
                         match_found = true;
@@ -197,7 +197,7 @@ end
 combined_data = [total_shock_abort_trials_array ; total_shock_no_abort_trials_array]';
 figure();
 coordLineStyle = 'k.';
-boxplot(combined_data, 'Notch', 'on', 'Symbol', coordLineStyle); hold on;
+boxplot(combined_data, 'Notch', 'off', 'Symbol', coordLineStyle); hold on;
 parallelcoords(combined_data, 'Color', 0.7*[1 1 1], 'LineStyle', '-',...
   'Marker', '.', 'MarkerSize', 10);
 
@@ -379,25 +379,25 @@ for kk = 1:length(meanZallMouse) %1:length(meanZallMouse)
     % meanNestedCellArray = meanNestedCellArray(respClass_all_array_mouse{kk, 4} == 1);
 
     % Extract the data for easy reference
-    data = behav_data_extracted_array{1, kk};
+    data_table = behav_data_extracted_array{1, kk};
 
     % Find indices of even-numbered rows
     % because of the above code, the even rows contain data from shk + 1
     % trials, while the odd rows contain data from shk trials themselves
-    even_rows = 2:2:height(data);
-    odd_rows = 1:2:height(data);
+    even_rows = 2:2:height(data_table);
+    odd_rows = 1:2:height(data_table);
     % Initialize the categorical_outcome variable with NaNs
-    categorical_outcome = nan(height(data), 1);
+    categorical_outcome = nan(height(data_table), 1);
 
     % Loop through each even-numbered row
     % determine whether a trial a choice (bigSmall > 0) or an abort
     % (type_binary > 0)
     for i = even_rows
         % Check if bigSmall > 0
-        if data.bigSmall(i) > 0
+        if data_table.bigSmall(i) > 0
             categorical_outcome(i) = 1;
             % Check if type_binary > 0
-        elseif data.type_binary(i) > 0
+        elseif data_table.type_binary(i) > 0
             categorical_outcome(i) = 0;
         end
     end
@@ -584,7 +584,7 @@ for kk = 1:length(meanZallMouse) %1:length(meanZallMouse)
     % meanNestedCellArray = meanNestedCellArray(respClass_all_array_mouse{kk, 4} == 1);
     
     % Extract the data for easy reference
-    data = behav_data_extracted_array{1, kk};
+    data_table = behav_data_extracted_array{1, kk};
 
 
     % Get the trial choices for the current mouse

@@ -203,3 +203,168 @@ current_epoc = {...
     'choiceTime';
 
     };
+
+%% decoding for revisions - seeing if it makes sense to swap to within-epoch for shuffle SUBSET OF COMPARISONS use for Fig. 2
+
+neuron_subgroup = {...
+
+    'pre-choice';
+
+    'pre-choice';
+
+    'post-choice reward';
+
+    'post-choice reward';
+
+    'consumption';
+    'consumption';
+
+    'true neutral';
+    'true neutral';
+    };
+
+shuffle_confirm = [...
+
+    0;
+
+    1;
+
+    0;
+
+    1;
+
+    0;
+    1;
+    0;
+
+    1;
+    ];
+ca_period_to_use = [...
+
+    -4 0;
+
+    -4 0;
+
+    0 2;
+
+    0 2;
+
+    1 3;
+    1 3;
+
+    1 3;
+    1 3;
+    ];
+current_epoc = {...
+
+    'choiceTime';
+
+    'choiceTime';
+
+    'choiceTime';
+
+    'choiceTime';
+
+    'collectionTime';
+    'collectionTime';
+
+    'collectionTime';
+    'collectionTime';
+    };
+
+%% decoding for revisions - seeing if it makes sense to swap to within-epoch for shuffle SUBSET OF COMPARISONS use for Fig. 2
+% and also now trying to decoding from NR cells for each respective
+% ensemble/epoch
+
+neuron_subgroup = {...
+
+    'pre-choice';
+
+    'pre-choice';
+
+    'post-choice reward';
+
+    'post-choice reward';
+
+    'consumption';
+    'consumption';
+
+    'true neutral';
+    'true neutral';
+
+    'true neutral';
+    'true neutral';
+
+    'true neutral';
+    'true neutral';
+    };
+
+shuffle_confirm = [...
+
+    0;
+
+    1;
+
+    0;
+
+    1;
+
+    0;
+    1;
+
+    0;
+    1;
+
+    0;
+    1;
+    0;
+    1;
+    ];
+ca_period_to_use = [...
+
+    -4 0;
+
+    -4 0;
+
+    0 2;
+
+    0 2;
+
+    1 3;
+    1 3;
+
+    1 3;
+    1 3;
+
+    -4 0;
+
+    -4 0;
+
+    0 2;
+
+    0 2;
+    ];
+current_epoc = {...
+
+    'choiceTime';
+
+    'choiceTime';
+
+    'choiceTime';
+
+    'choiceTime';
+
+    'collectionTime';
+    'collectionTime';
+
+    'collectionTime';
+    'collectionTime';
+
+    'choiceTime';
+    'choiceTime';
+
+    'choiceTime';
+    'choiceTime';
+    };
+
+

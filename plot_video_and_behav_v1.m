@@ -5,8 +5,11 @@
 %for RM video, use BLA_Insc_25 frames 15000 to 16000
 %for AA video, use BLA_Insc_27 frames 24000 to 25000
 
-select_mouse = 'BLA_Insc_27'; 
-first_session = 'RDT_D1';
+select_mouse = 'BLA_Insc_25'; 
+first_session = 'Pre_RDT_RM';
+
+% select_mouse = 'BLA_Insc_27'; 
+% first_session = 'RDT_D1';
 
 % Load behavioral data
 BehavData = final_behavior.(select_mouse).(first_session).uv.BehavData;
@@ -22,7 +25,8 @@ stTime_to_frames = round(stTime*10);
 playback_speed = 1;  % Change this value: 1x, 2x, 3x, etc.
 
 % Load the MPG video
-mpg_video_file = 'downsampled_video_BLA-Insc-27_RDT_D1.avi';
+mpg_video_file = 'downsampled_video_BLA-Insc-25_PRERDT_RM.avi';
+% mpg_video_file = 'downsampled_video_BLA-Insc-27_RDT_D1.avi';
 mpg_video = VideoReader(mpg_video_file);
 mpg_num_frames = mpg_video.NumFrames;
 mpg_frame_rate = mpg_video.FrameRate;

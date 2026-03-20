@@ -15,12 +15,7 @@ C = {...
     outer_pie};
 
 % Spider plot
-nested_pie(C,'PercentStatus', {'on', 'on'}, 'RhoLower', 0.4);
-
-% Title
-title('Nested Pie Chart');
-
-figure; donutchart(outer_pie, 'InnerRadius', 0.5, 'ExplodedWedges', [1 2])
+nested_pie(C,'LegendOrder', [2 1], 'PercentStatus', {'on', 'on'}, 'RhoLower', 0.4);
 
 
 total_BLA_neurons = only_shk_sum_BLA/(percent_shk_only_BLA/100);
@@ -75,8 +70,8 @@ C = {...
     outer_pie};
 
 % Spider plot
-nested_pie(C,...
-    'PercentStatus', {'on', 'on'}, 'RhoLower', 0.4);
+% Spider plot
+nested_pie(C,'LegendOrder', [2 1], 'PercentStatus', {'on', 'on'}, 'RhoLower', 0.4);
 
 % Title
 title('Nested Pie Chart');

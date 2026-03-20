@@ -814,3 +814,230 @@ xlim([-20 120])
 
 hold off
 
+%%
+% Loop through each line and plot
+figure;
+% Set figure size
+width = 400; % Width of the figure
+height = 400; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+for j = 1:size(large_block_3_true_indices , 1) %num_lines
+    plot_index = large_block_3_true_indices (j);
+    x = [];
+    y = [];
+    % figure; %comment me out if you want everything plotted on the same fig! 
+    
+    % Extract X-Y coordinates
+    x = filtered_motion{plot_index}(1, :);
+    y = filtered_motion{plot_index}(2, :);
+
+    x = sgolayfilt(x, 3, 11);
+    y = sgolayfilt(y, 3, 11);
+
+    % Plot the line using scatter with varying marker colors
+    % scatter(x, y, 50, ">", 'filled');
+    hold on;
+    plot(x, y, 'Color', 'b');
+    % % Add a black square at the start of the line
+    scatter(x(1), y(1), 200, 'b', 's', 'filled');
+
+    % Add a black circke at the choice time
+    scatter(choice_times{1, large_block_3_true_indices(j)}(1), choice_times{1, large_block_3_true_indices(j)}(2), 200, 'b', 'o', 'filled');
+
+
+    % Add a black triangle at the end of the line
+    scatter(x(end), y(end), 200, 'b', '^', 'filled');
+end
+
+
+
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
+
+
+hold on;
+% Set figure size
+width = 400; % Width of the figure
+height = 400; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+for j = 1:size(small_block_3_true_indices , 1) %num_lines
+    plot_index = small_block_3_true_indices (j);
+    x = [];
+    y = [];
+    % figure; %comment me out if you want everything plotted on the same fig! 
+    
+    % Extract X-Y coordinates
+    x = filtered_motion{plot_index}(1, :);
+    y = filtered_motion{plot_index}(2, :);
+    
+    x = sgolayfilt(x, 3, 11);
+    y = sgolayfilt(y, 3, 11);
+
+    % % Plot the line using scatter with varying marker colors
+    % scatter(x, y, 50, marker_colors_mapped, 'filled');
+    hold on;
+    plot(x, y, 'Color', 'r');
+    % Add a black square at the start of the line
+    scatter(x(1), y(1), 200, 'r', 's', 'filled');
+
+    % Add a black circke at the choice time
+    scatter(choice_times{1, small_block_3_true_indices(j)}(1), choice_times{1, small_block_3_true_indices(j)}(2), 200, 'r', 'o', 'filled');
+
+
+    % Add a black triangle at the end of the line
+    scatter(x(end), y(end), 200, 'r', '^', 'filled');
+end
+
+
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
+
+xlim([-20 120])
+
+hold off
+
+%%
+% Loop through each line and plot
+figure;
+% Set figure size
+width = 400; % Width of the figure
+height = 400; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+for j = 1:size(large_block_1_true_indices , 1) %num_lines
+    plot_index = large_block_1_true_indices (j);
+    x = [];
+    y = [];
+    % figure; %comment me out if you want everything plotted on the same fig! 
+    
+    % Extract X-Y coordinates
+    x = filtered_motion{plot_index}(1, :);
+    y = filtered_motion{plot_index}(2, :);
+    
+    x = sgolayfilt(x, 3, 11);
+    y = sgolayfilt(y, 3, 11);
+    % Plot the line using scatter with varying marker colors
+    % scatter(x, y, 50, ">", 'filled');
+    hold on;
+    plot(x, y, 'Color', 'b');
+    % % Add a black square at the start of the line
+    scatter(x(1), y(1), 200, 'b', 's', 'filled');
+
+    % Add a black circke at the choice time
+    scatter(choice_times{1, large_block_1_true_indices(j)}(1), choice_times{1, large_block_1_true_indices(j)}(2), 200, 'b', 'filled');
+
+
+    % Add a black triangle at the end of the line
+    scatter(x(end), y(end), 200, 'b', '^', 'filled');
+end
+
+
+
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
+
+
+% Set figure size
+width = 400; % Width of the figure
+height = 400; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+for j = 1:size(small_block_1_true_indices , 1) %num_lines
+    plot_index = small_block_1_true_indices (j);
+    x = [];
+    y = [];
+    % figure; %comment me out if you want everything plotted on the same fig! 
+    
+    % Extract X-Y coordinates
+    x = filtered_motion{plot_index}(1, :);
+    y = filtered_motion{plot_index}(2, :);
+    x = sgolayfilt(x, 3, 11);
+    y = sgolayfilt(y, 3, 11);    
+
+
+    % % Plot the line using scatter with varying marker colors
+    % scatter(x, y, 50, marker_colors_mapped, 'filled');
+    hold on;
+    plot(x, y, 'Color', 'r');
+    % Add a black square at the start of the line
+    scatter(x(1), y(1), 200, 'r', 's', 'filled');
+
+    % Add a black circke at the choice time
+    scatter(choice_times{1, small_block_1_true_indices(j)}(1), choice_times{1, small_block_1_true_indices(j)}(2), 200, 'r', 'o', 'filled');
+
+
+    % Add a black triangle at the end of the line
+    scatter(x(end), y(end), 200, 'r', '^', 'filled');
+end
+% Plot circles and squares from shapeData
+for k = 1:numel(shapeData)
+    if strcmp(shapeData{k}.Type, 'Circle')
+        viscircles(shapeData{k}.Center, shapeData{k}.Radius);
+    elseif strcmp(shapeData{k}.Type, 'Square')
+        if strcmp(shapeData{k}.Location, 'left screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'b');
+        elseif strcmp(shapeData{k}.Location, 'right screen')
+            square_center = shapeData{k}.Center;
+            square_size = shapeData{k}.Size;
+            % square_rotation = shapeData{k}.Rotation;
+            rectangle('Position', [square_center - square_size / 2, square_size], 'EdgeColor', 'r');
+        end
+    end
+end
+xlim([-20 120])
+hold off
+
+

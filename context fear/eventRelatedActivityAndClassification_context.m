@@ -30,7 +30,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 
-session_to_analyze = 'D4';
+session_to_analyze = 'D3';
 
 % Parameters
 session_duration = 12 * 60; % seconds
@@ -234,7 +234,7 @@ for ii = 1:size(fieldnames(final),1)
 
         % get freeze on times by running get_context_freeze for the
         % relevant session
-        freeze_on_times = final_DLC.(currentanimal).(session_to_analyze).freeze_times_mouse(1, :);
+        freeze_on_times = final_DLC.(currentanimal).(session_to_analyze).freeze_times_mouse(2, :);
 
         eTS = freeze_on_times';
         % 
@@ -638,7 +638,7 @@ figure('Position', [100, 100, 700, 450]); % [left, bottom, width, height]
 hold on;
 
 h(1) = shadedErrorBar(ts1, mean(mean_data_experimental_mice(respClass_experimental_mice == 1, :)), mean(sem_data_experimental_mice(respClass_experimental_mice == 1, :)), 'lineProps', {'color', 'r'});
-h(2) = shadedErrorBar(ts1, mean(mean_data_one_context_mice(respClass_one_context_mice == 1, :)), mean(sem_data_one_context_mice(respClass_one_context_mice == 1, :)), 'lineProps', {'color', 'r'});
+h(2) = shadedErrorBar(ts1, mean(mean_data_one_context_mice(respClass_one_context_mice == 1, :)), mean(sem_data_one_context_mice(respClass_one_context_mice == 1, :)), 'lineProps', {'color', 'b'});
 
 % legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
 % Adjust x-axis ticks and labels
@@ -653,7 +653,7 @@ figure('Position', [100, 100, 700, 450]); % [left, bottom, width, height]
 hold on;
 
 h(1) = shadedErrorBar(ts1, mean(mean_data_experimental_mice(respClass_experimental_mice == 2, :)), mean(sem_data_experimental_mice(respClass_experimental_mice == 2, :)), 'lineProps', {'color', 'r'});
-h(2) = shadedErrorBar(ts1, mean(mean_data_one_context_mice(respClass_one_context_mice == 2, :)), mean(sem_data_one_context_mice(respClass_one_context_mice == 2, :)), 'lineProps', {'color', 'r'});
+h(2) = shadedErrorBar(ts1, mean(mean_data_one_context_mice(respClass_one_context_mice == 2, :)), mean(sem_data_one_context_mice(respClass_one_context_mice == 2, :)), 'lineProps', {'color', 'b'});
 
 % legend([h(1).mainLine h(2).mainLine], 'new (safe block)', 'new (risky blocks)')
 % Adjust x-axis ticks and labels

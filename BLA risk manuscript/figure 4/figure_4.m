@@ -39,7 +39,7 @@ second_session = 'RDT_D1';
 % update the session etc as necessary! 
 
 % BehavData = final.(select_mouse).(first_session).choiceTime.uv.BehavData;
-BehavData = final.(select_mouse).(first_session).uv.BehavData;
+BehavData = final_behavior.(select_mouse).(first_session).uv.BehavData;
 % because the first trial possible is ALWAYS 60 seconds after ABET is
 % issued, you can determine what adjustment has been made to this column
 % (adding time to account for calcium recording starting first) by
@@ -78,25 +78,25 @@ Tris = [1:numTrials]';
 %     0.13, 0.55, 0.13; % forest green
 % ];
 
-% custom_colormap = [
-%     1, 1, 1;         % white
-%     0.9, 0.95, 0.95;
-%     0.8, 0.9, 0.9;
-%     0.6, 0.85, 0.85;
-%     0.4, 0.8, 0.8;
-%     0.2, 0.8, 0.8;
-%     0.0, 0.8, 0.8;   % robin's egg blue
-% ];
-
 custom_colormap = [
     1, 1, 1;         % white
-    0.9, 0.9, 0.95;
-    0.8, 0.8, 0.9;
-    0.6, 0.6, 0.8;
-    0.4, 0.4, 0.7;
-    0.2, 0.2, 0.6;
-    0.0, 0.0, 0.55;   % dark blue
+    0.9, 0.95, 0.95;
+    0.8, 0.9, 0.9;
+    0.6, 0.85, 0.85;
+    0.4, 0.8, 0.8;
+    0.2, 0.8, 0.8;
+    0.0, 0.8, 0.8;   % robin's egg blue
 ];
+
+% custom_colormap = [
+%     1, 1, 1;         % white
+%     0.9, 0.9, 0.95;
+%     0.8, 0.8, 0.9;
+%     0.6, 0.6, 0.8;
+%     0.4, 0.4, 0.7;
+%     0.2, 0.2, 0.6;
+%     0.0, 0.0, 0.55;   % dark blue
+% ];
 
 % custom_colormap = [
 %     1, 1, 1; % white
@@ -1112,7 +1112,7 @@ end
  mean_data_array = {neuron_mean_array{1, 1}(prechoice_block_1==1, :), neuron_mean_array{1, 8}(prechoice_block_1==1, :)};
  sem_data_array = {neuron_sem_array{1, 1}(prechoice_block_1==1, :), neuron_sem_array{1, 8}(prechoice_block_1==1, :)};
 
- [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 1]);
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 1], [0 0.6], 3);
 
 
 
@@ -1120,13 +1120,41 @@ end
  mean_data_array = {neuron_mean_array{1, 2}(postchoice_reward_block_1==1, :), neuron_mean_array{1, 9}(postchoice_reward_block_1==1, :)};
  sem_data_array = {neuron_sem_array{1, 2}(postchoice_reward_block_1==1, :), neuron_sem_array{1, 9}(postchoice_reward_block_1==1, :)};
 
- [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 1])
+ % [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 3], [-0.1 1], 3)
+ 
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 3], [-0.1 0.8], 3)
 
  %%
  mean_data_array = {neuron_mean_array{1, 3}(collect_block_1==1, :), neuron_mean_array{1, 10}(collect_block_1==1, :)};
  sem_data_array = {neuron_sem_array{1, 3}(collect_block_1==1, :), neuron_sem_array{1, 10}(collect_block_1==1, :)};
 
- [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 1]);
+ % [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [0 4], [-0.2 0.8], 3);
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [0 4], [-0.2 0.8], 3);
+
+
+
+%%
+ mean_data_array = {neuron_mean_array{1, 1}(prechoice_block_1==1, :), neuron_mean_array{1, 4}(prechoice_block_1==1, :)};
+ sem_data_array = {neuron_sem_array{1, 1}(prechoice_block_1==1, :), neuron_sem_array{1, 4}(prechoice_block_1==1, :)};
+
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-5 1], [0 0.6], 3);
+
+
+
+ %%
+ mean_data_array = {neuron_mean_array{1, 2}(postchoice_reward_block_1==1, :), neuron_mean_array{1, 5}(postchoice_reward_block_1==1, :)};
+ sem_data_array = {neuron_sem_array{1, 2}(postchoice_reward_block_1==1, :), neuron_sem_array{1, 5}(postchoice_reward_block_1==1, :)};
+
+ % [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 3], [-0.1 1], 3)
+ 
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-1 3], [-0.1 0.8], 3)
+
+ %%
+ mean_data_array = {neuron_mean_array{1, 3}(collect_block_1==1, :), neuron_mean_array{1, 6}(collect_block_1==1, :)};
+ sem_data_array = {neuron_sem_array{1, 3}(collect_block_1==1, :), neuron_sem_array{1, 6}(collect_block_1==1, :)};
+
+ % [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [0 4], [-0.2 0.8], 3);
+ [comparison] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [0 4], [-0.2 0.8], 3);
 
 
 

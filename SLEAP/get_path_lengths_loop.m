@@ -232,7 +232,7 @@ figure;
 hold on;
 
 % Set figure size
-width = 200; % Width of the figure
+width = 100; % Width of the figure
 height = 450; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 
@@ -269,6 +269,7 @@ xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
 % ylim([0 1.1 * max([mean_large_path + sem_large, ...
 %                    mean_small_path + sem_small])]); % Adjust ylim dynamically
 set(gca, 'ytick', 0:200:1000);
+ylim([0 800])
 % xlabel('Condition');
 % ylabel('Mean ± SEM');
 % legend('Location', 'Best');

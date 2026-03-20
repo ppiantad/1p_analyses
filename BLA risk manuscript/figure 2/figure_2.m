@@ -1271,7 +1271,7 @@ legend('Positive correlation', 'Negative correlation', 'No sig correlation');
 
 %%
 
-array_for_means = 1; 
+array_for_means = 3; 
 
 
 for q = 1:length (behav_tbl_iter{array_for_means, 1})
@@ -1300,8 +1300,8 @@ for q = 1:length (behav_tbl_iter{array_for_means, 1})
         delay_to_initiation_by_mouse{q} = delay_to_initiation;
         delay_to_collect_post_shk_by_mouse{q} = delay_to_collect_post_shk;
         trial_types_by_mouse{q} = trial_types;
-        % consum_times = nestedCellArray_1.collectionTime_end - nestedCellArray_1.collectionTime;
-        % consum_times_by_mouse{q} = consum_times;
+        consum_times = nestedCellArray_1.collectionTime_end - nestedCellArray_1.collectionTime;
+        consum_times_by_mouse{q} = consum_times;
         clear trial_choice_times delay_to_initiation delay_to_collect_post_shk trial_types consum_times
     end
 
@@ -1311,7 +1311,7 @@ end
 trial_types_concat = cat(1, trial_types_by_mouse{:});
 trial_choice_times_concat = cat(1, trial_choice_times_by_mouse{:});
 rew_collect_times_concat = cat(1, delay_to_collect_post_shk_by_mouse{:});
-% consum_times_concat = cat(1, consum_times_by_mouse{:});
+consum_times_concat = cat(1, consum_times_by_mouse{:});
 
 bar_separation_value = 3;
 
@@ -1342,6 +1342,29 @@ plot([0.8, 1.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); % Red line for trial
 
 
 [h_choice_times p_choice_times, ~, stats_choice_times] = ttest2(trial_choice_times_concat(trial_types_concat == 1.2), trial_choice_times_concat(trial_types_concat == 0.3))
+
+% tests for normality for reviewers
+[h_choice_times_large_normality, p_choicetimes_large_normality] = kstest(trial_choice_times_concat(trial_types_concat == 1.2))
+[h,p,adstat,cv] = adtest(trial_choice_times_concat(trial_types_concat == 1.2))
+[h_choice_times_small_normality, p_choicetimes_small_normality] = kstest(trial_choice_times_concat(trial_types_concat == 0.3))
+[h,p,adstat,cv] = adtest(trial_choice_times_concat(trial_types_concat == 0.3))
+
+normalitytest(trial_choice_times_concat(trial_types_concat == 1.2)')
+normalitytest(trial_choice_times_concat(trial_types_concat == 0.3)')
+
+[p_rank_sum_choice_times h_rank_sum_choice_times stats_rank_sum_choice_times] = ranksum(trial_choice_times_concat(trial_types_concat == 1.2), trial_choice_times_concat(trial_types_concat == 0.3))
+
+U_choice_times = (stats_rank_sum_choice_times.ranksum  ) - [size(trial_choice_times_concat(trial_types_concat == 1.2), 1)*(size(rew_collect_times_concat(trial_types_concat == 1.2), 1)+1)/2];
+
+
+normalitytest(rew_collect_times_concat(trial_types_concat == 1.2)')
+normalitytest(rew_collect_times_concat(trial_types_concat == 0.3)')
+
+[p_rank_sum_collect_times h_rank_sum_collect_times stats_rank_sum_collect_times] = ranksum(rew_collect_times_concat(trial_types_concat == 1.2), rew_collect_times_concat(trial_types_concat == 0.3))
+
+U_collect_times = (stats_rank_sum_collect_times.ranksum  ) - [size(rew_collect_times_concat(trial_types_concat == 1.2), 1)*(size(rew_collect_times_concat(trial_types_concat == 1.2), 1)+1)/2];
+
+
 
 hold off;
 title('Trial Choice Times');
@@ -1405,7 +1428,7 @@ yline(0);
 xtickformat('%.1f');
 ytickformat('%.1f');
 
-variable_to_correlate = trial_choice_times_by_mouse;
+variable_to_correlate = consum_times_by_mouse;
 
 
 %%
@@ -1415,9 +1438,9 @@ variable_to_correlate = trial_choice_times_by_mouse;
 meanZallMouse = cell(size(zall_mouse, 2), 1);
 
 % Define the time range for 0 to 2 seconds
-timeRange = (ts1 >= -4) & (ts1 <= 0);
+% timeRange = (ts1 >= -4) & (ts1 <= 0);
 % timeRange = (ts1 >= 0) & (ts1 <= 2);
-% timeRange = (ts1 >= 1) & (ts1 <= 3);
+timeRange = (ts1 >= 1) & (ts1 <= 3);
 
 
 % Iterate through each cell in the zall_mouse array
@@ -1566,12 +1589,12 @@ hold off;
 
 %% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
 % only_shk_responsive_corrs = allCorrelations(kmeans_idx' == 3);
-only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
+% only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
 % only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 == 1);
-% only_shk_responsive_corrs = allCorrelations(collect_block_1 == 1);
+only_shk_responsive_corrs = allCorrelations(collect_block_1 == 1);
 % only_shk_responsive_corrs = allCorrelations(prechoice_blocks_2_and_3 == 1);
 % not_shk_responsive_corrs = allCorrelations(prechoice_block_1 ~=1);
-% not_shk_responsive_corrs = allCorrelations(kmeans_idx' ~= 3);
+% not_shk_responsive_corrs = allCorrelations(kmeans_idx' ~= 3);c
 not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
 
 % Now, allCorrelations contains all the correlation coefficients
@@ -1867,11 +1890,10 @@ select_mouse_index = find(strcmp(animalIDs, select_mouse));
 % find(correlationResults{5, 1} < -0.3)
 % start_time = -4;% sub-window start time
 % end_time = 0; % sub-window end time
-% 
 % sub_window_idx = ts1 >= start_time & ts1 <= end_time;
-% sub_window_activity_session_1 = zall_mouse{5, 1}{1, 63}(:, sub_window_idx);
-% r_val_for_representative = correlationResults{5, 1}(1, 63)
-% p_val_for_representative = correlationResults_sig{5, 1}(1, 63)
+% sub_window_activity_session_1 = zall_mouse{5, 1}{1, 44}(:, sub_window_idx);
+% r_val_for_representative = correlationResults{5, 1}(1, 44)
+% p_val_for_representative = correlationResults_sig{5, 1}(1, 44)
 % choice_times_mouse = trial_choice_times_by_mouse{1, 5};
 % trial_types = trial_types_by_mouse{1, 5};
 
@@ -1880,9 +1902,9 @@ find(correlationResults{5, 1} < -0.3)
 start_time = 0;% sub-window start time
 end_time = 2; % sub-window end time
 sub_window_idx = ts1 >= start_time & ts1 <= end_time;
-sub_window_activity_session_1 = zall_mouse{5, 1}{1, 104}(:, sub_window_idx);
-r_val_for_representative = correlationResults{5, 1}(1, 104)
-p_val_for_representative = correlationResults_sig{5, 1}(1, 104)
+sub_window_activity_session_1 = zall_mouse{5, 1}{1, 65}(:, sub_window_idx);
+r_val_for_representative = correlationResults{5, 1}(1, 65)
+p_val_for_representative = correlationResults_sig{5, 1}(1, 65)
 choice_times_mouse = trial_choice_times_by_mouse{1, 5};
 trial_types = trial_types_by_mouse{1, 5};
 
@@ -1938,55 +1960,43 @@ scatter(x, y, 36, colors, 'filled', 'MarkerEdgeColor', 'k'); % Use 'colors' for 
 
 hold on;
 
-% Add a regression line
-coefficients = polyfit(x, y, 1);
-x_fit = linspace(min(x), max(x), 100);
-y_fit = polyval(coefficients, x_fit);
-plot(x_fit, y_fit, 'r');
+% Add separate regression lines for each trial type
+% Large reward trials (1.2) - Blue dashed line
+x_large = x(trial_types == 1.2);
+y_large = y(trial_types == 1.2);
+coefficients_large = polyfit(x_large, y_large, 1);
+x_fit_large = linspace(min(x_large), max(x_large), 100);
+y_fit_large = polyval(coefficients_large, x_fit_large);
+plot(x_fit_large, y_fit_large, 'b', 'LineWidth', 2);
 
-% Calculate R-squared value
-y_pred = polyval(coefficients, x);
-ssr = sum((y_pred - mean(y)).^2);
-sst = sum((y - mean(y)).^2);
-r_squared = ssr / sst;
+% Calculate R-squared for large reward trials
+y_pred_large = polyval(coefficients_large, x_large);
+ssr_large = sum((y_pred_large - mean(y_large)).^2);
+sst_large = sum((y_large - mean(y_large)).^2);
+r_squared_large = ssr_large / sst_large;
 
-% Add R-squared value to the plot
-text(min(x) + 0.1, max(y) - 0.1, ['R^2 = ' num2str(r_squared)], 'FontSize', 12);
+% Small reward trials (0.3) - Red dashed line
+x_small = x(trial_types == 0.3);
+y_small = y(trial_types == 0.3);
+coefficients_small = polyfit(x_small, y_small, 1);
+x_fit_small = linspace(min(x_small), max(x_small), 100);
+y_fit_small = polyval(coefficients_small, x_fit_small);
+plot(x_fit_small, y_fit_small, 'r', 'LineWidth', 2);
+
+% Calculate R-squared for small reward trials
+y_pred_small = polyval(coefficients_small, x_small);
+ssr_small = sum((y_pred_small - mean(y_small)).^2);
+sst_small = sum((y_small - mean(y_small)).^2);
+r_squared_small = ssr_small / sst_small;
+
+% Add R-squared values to the plot
+text(min(x) + 0.1, max(y) - 0.1, ['Large R^2 = ' num2str(r_squared_large, '%.3f')], 'FontSize', 10, 'Color', 'b');
+text(min(x) + 0.1, max(y) - 0.3, ['Small R^2 = ' num2str(r_squared_small, '%.3f')], 'FontSize', 10, 'Color', 'r');
 
 % Add labels and a legend if needed
 xlabel('Mean Sub-window Activity Session 1');
 ylabel('Choice Times Mouse');
-title('Scatter Plot with Regression Line and R^2 Value');
-hold off;
-
-
-% prechoice representative: 
-find(correlationResults{5, 1} < -0.5)
-start_time = -4;% sub-window start time
-end_time = 0; % sub-window end time
-
-sub_window_idx = ts1 >= start_time & ts1 <= end_time;
-sub_window_activity_session_1 = mean(zall_mouse{5, 1}{1, 63}(:, sub_window_idx), 2);
-
-data_to_sort = zall_mouse{5, 1}{1, 63}(:, sub_window_idx);
-choice_times_mouse = trial_choice_times_by_mouse{1, 5};
-trial_types = trial_types_by_mouse{1, 5};
-
-
-trials_for_scatter = 1:size(choice_times_mouse_sorted, 1)
-
-[choice_times_mouse_sorted, sort_indices_choice_times] = sort(choice_times_mouse);
-choice_times_mouse_sorted = choice_times_mouse_sorted * -1;
-data_to_sort_sorted = data_to_sort(sort_indices_choice_times, :);
-figure;
-imagesc(ts1, [], data_to_sort_sorted); % Plot the heatmap
-hold on;
-
-% Plot the scatter points with transparency and smaller marker size
-scatter(choice_times_mouse_sorted, trials_for_scatter, 'Marker', 's', ...
-    'MarkerFaceColor', 'red', 'MarkerEdgeColor', 'none', 'MarkerFaceAlpha', 0.5);
-xline(0)
-xlim([-8 1])
+title('Scatter Plot with Regression Lines by Trial Type');
 hold off;
 
 %% these arrays are just the combined_data = [mean_sub_window_activity_session_1 , mean_sub_window_activity_session_2] arrays from above, but saved for Early & Late

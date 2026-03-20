@@ -1,3 +1,6 @@
+
+
+%%
 if size(respClass_all_array, 2) == 10 | size(respClass_all_array, 2) == 11 | size(respClass_all_array, 2) == 12
     comparison_arrays = [1 2 3; 8 9 10]
 elseif size(respClass_all_array, 2) == 6
@@ -189,7 +192,7 @@ shk_activated_sum = sum(shk_activated);
 figure; plot(ts1, nanmean(neuron_mean_array{1, 4}(shk_activated,:))); hold on; plot(ts1,  nanmean(neuron_mean_array{1, 2}(respClass_all_array{1,2} == 1,:)));
 
 
-figure; shadedErrorBar
+
 
 
 total_modulated = [(sum(post_choice_rew_event)/neuron_num)*100 (sum(shk_event)/neuron_num)*100];
@@ -914,17 +917,29 @@ select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
 
 %shk representative:
+% find(correlationResults{5, 1} > 0.5)
+% start_time = 0;% sub-window start time
+% end_time = 5; % sub-window end time
+% sub_window_idx = ts1 >= start_time & ts1 <= end_time;
+% sub_window_activity_session_1 = zall_mouse{5, 4}{1, 104}(:, sub_window_idx);
+% r_val_for_representative = correlationResults{5, 1}(1, 104)
+% p_val_for_representative = correlationResults_sig{5, 1}(1, 104)
+% choice_times_mouse = variable_to_correlate{1, 5};
+% % trial_types = trial_types_by_mouse{1, 5};
+% trial_types = trial_types_second_var_by_mouse{1, 5};
+
+
+%shk representative:
 find(correlationResults{5, 1} > 0.5)
 start_time = 0;% sub-window start time
 end_time = 5; % sub-window end time
 sub_window_idx = ts1 >= start_time & ts1 <= end_time;
-sub_window_activity_session_1 = zall_mouse{5, 4}{1, 104}(:, sub_window_idx);
-r_val_for_representative = correlationResults{5, 1}(1, 104)
-p_val_for_representative = correlationResults_sig{5, 1}(1, 104)
+sub_window_activity_session_1 = zall_mouse{5, 4}{1, 80}(:, sub_window_idx);
+r_val_for_representative = correlationResults{5, 1}(1, 80)
+p_val_for_representative = correlationResults_sig{5, 1}(1, 80)
 choice_times_mouse = variable_to_correlate{1, 5};
 % trial_types = trial_types_by_mouse{1, 5};
 trial_types = trial_types_second_var_by_mouse{1, 5};
-
 
 
 %CREATE SCATTER PLOT BASED ON SPECIFIC EVENTS - ASSUMING THEY ARE IN PAIRS.
@@ -1001,12 +1016,16 @@ hold on
 width = 300; % Width of the figure
 height = 600; % Height of the figure (width is half of height)
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
-xlim([-8 8]);
-ylim([-0.5 1.2]);
+xlim([-1 8]);
+ylim([-0.4 0.4]);
 % Set X-axis ticks
-set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.5 0 0.5 1]);
-shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(collect_block_1==1, :)), nanmean(neuron_sem_array{1, 4}(collect_block_1==1, :)), 'lineProps', {'color', 'r'});
-hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 10}(respClass_all_array{1, 4}==1, :)), nanmean(neuron_sem_array{1, 10}(respClass_all_array{1, 4}==1, :)), 'lineProps', {'color', 'k'});
+set(gca, 'XTick', [-1, 0, 8], 'YTick', [-0.4 0 0.4]);
+
+
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :)), std(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :))/sqrt(size(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :), 1)), 'lineProps', {'color', 'r'});
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{1, 10}==1, :)), std(neuron_mean_array{1, 4}(respClass_all_array{1, 10}==1, :))/sqrt(size(neuron_mean_array{1, 4}(respClass_all_array{1, 10}==1, :), 1)), 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 10}(respClass_all_array{1, 4}==1, :)), std(neuron_mean_array{1, 10}(respClass_all_array{1, 4}==1, :))/sqrt(size(neuron_mean_array{1, 10}(respClass_all_array{1, 4}==1, :), 1)), 'lineProps', {'color', 'k'});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 10}(respClass_all_array{1, 10}==1, :)), std(neuron_mean_array{1, 10}(respClass_all_array{1, 10}==1, :))/sqrt(size(neuron_mean_array{1, 10}(respClass_all_array{1, 10}==1, :), 1)), 'lineProps', {'color', 'blue'});
 
 xline(0);
 % xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
@@ -1015,3 +1034,542 @@ xlabel('Time from Large Rew Choice (s)');
 legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
 
 hold off
+
+
+%%
+pun_excited_by_consum = respClass_all_array{1, 4}==1 & respClass_all_array{1, 10}==1;
+pun_inhibited_by_consum = respClass_all_array{1, 4}==1 & respClass_all_array{1, 10}==2;
+pun_neutral_to_consum = respClass_all_array{1, 4}==1 & respClass_all_array{1, 10}==3;
+
+
+consum_excited_by_pun = respClass_all_array{1, 4}==1 & respClass_all_array{1, 10}==1;
+consum_inhibited_by_pun = respClass_all_array{1, 4}==2 & respClass_all_array{1, 10}==1;
+consum_neutral_to_pun = respClass_all_array{1, 4}==3 & respClass_all_array{1, 10}==1;
+
+
+
+figure; piechart([sum(pun_excited_by_consum) sum(pun_inhibited_by_consum) sum(pun_neutral_to_consum)])
+figure; piechart([sum(consum_excited_by_pun) sum(consum_inhibited_by_pun) sum(consum_neutral_to_pun)])
+
+%%
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-1 8]);
+ylim([-0.4 0.4]);
+% Set X-axis ticks
+set(gca, 'XTick', [-1, 0, 8], 'YTick', [-0.4 0 0.4]);
+
+
+% shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :)), std(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :))/sqrt(size(neuron_mean_array{1, 4}(respClass_all_array{1, 4}==1, :), 1)), 'lineProps', {'color', 'r'});
+shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 4}(pun_inhibited_by_consum==1, :)), std(neuron_mean_array{1, 4}(pun_inhibited_by_consum==1, :))/sqrt(size(neuron_mean_array{1, 4}(pun_inhibited_by_consum==1, :), 1)), 'lineProps', {'color', 'r'});
+hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 10}(respClass_all_array{1, 4}==1, :)), std(neuron_mean_array{1, 10}(respClass_all_array{1, 4}==1, :))/sqrt(size(neuron_mean_array{1, 10}(respClass_all_array{1, 4}==1, :), 1)), 'lineProps', {'color', 'k'});
+
+xline(0);
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+
+hold off
+
+%% for reviewers
+prechoice_and_abort = find(respClass_all_array{1, 11}  == 1 & prechoice_blocks_2_and_3 == 1)
+prechoice_not_abort = find(respClass_all_array{1, 11}  == 3 & prechoice_blocks_2_and_3 == 1)
+abort_not_prechoice = find(respClass_all_array{1, 11}  == 1 & prechoice_blocks_2_and_3 == 0)
+
+%% for heatmap, change "plot_num" (what neuron to plot) and array_to_plot (# corresponds to which dataset)
+
+plot_num = 86
+array_to_plot = 5; % depends on the structure of zall
+
+select_mouse = 'BLA_Insc_24';
+
+% for RDT D1 BLA_Insc_24:
+%prechoice and abort neuron num 6
+%prechoice not abort = 55
+%abort not prehoice = 86
+%shock num 11
+
+
+% for RDT D1 BLA_Insc_40:
+%prechoice neuron num 12
+%postchoice rew num 70
+%consumption num 10
+%shock num 11
+
+
+select_mouse_index = find(strcmp(animalIDs, select_mouse));
+
+first_session = 'RDT_D1';
+
+second_session = 'RDT_D1';
+
+
+
+% in order to trim off excess (because calcium recording starts before
+% behavior), you'll need the start time. unfortunately I don't save that
+% variable in the "final" struct, but you can get it from the adjustment to
+% some of the columns of BehavData. e.g., see below - but make sure to
+% update the session etc as necessary! 
+
+% BehavData = final.(select_mouse).(first_session).choiceTime.uv.BehavData;
+% BehavData = final.(select_mouse).(first_session).uv.BehavData;
+% because the first trial possible is ALWAYS 60 seconds after ABET is
+% issued, you can determine what adjustment has been made to this column
+% (adding time to account for calcium recording starting first) by
+% subtracting off 60 from the first element
+% stTime = BehavData.TrialPossible(1)-60; 
+
+
+
+% time2Collect = BehavData.collectionTime(trials_per_mouse{select_mouse_index, array_to_plot}) - BehavData.choiceTime(trials_per_mouse{select_mouse_index, array_to_plot});
+% trialStartTime = BehavData.stTime(trials_per_mouse{select_mouse_index, array_to_plot}) - BehavData.choiceTime(trials_per_mouse{select_mouse_index, array_to_plot});
+% median_trialStartTime = median(trialStartTime)
+% median_time2Collect = median(time2Collect)
+% xline(median_trialStartTime)
+% xline(median_time2Collect)
+% [numTrials, ~] = size(time2Collect);
+% Tris = [1:numTrials]';
+
+% Define the custom colormap from white to orange
+% custom_colormap = [
+%     1, 1, 1; % white
+%     1, 0.9, 0.8;
+%     1, 0.8, 0.6;
+%     1, 0.7, 0.4;
+%     1, 0.6, 0.2;
+%     1, 0.5, 0; % orange
+% ];
+
+
+custom_colormap = [
+    1, 1, 1;       % white
+    0.9, 0.95, 0.9;
+    0.8, 0.9, 0.8;
+    0.6, 0.8, 0.6;
+    0.4, 0.7, 0.4;
+    0.2, 0.6, 0.2;
+    0.13, 0.55, 0.13; % forest green
+];
+
+% custom_colormap = [
+%     1, 1, 1;         % white
+%     0.9, 0.95, 0.95;
+%     0.8, 0.9, 0.9;
+%     0.6, 0.85, 0.85;
+%     0.4, 0.8, 0.8;
+%     0.2, 0.8, 0.8;
+%     0.0, 0.8, 0.8;   % robin's egg blue
+% ];
+
+% custom_colormap = [
+%     1, 1, 1;         % white
+%     0.9, 0.9, 0.95;
+%     0.8, 0.8, 0.9;
+%     0.6, 0.6, 0.8;
+%     0.4, 0.4, 0.7;
+%     0.2, 0.2, 0.6;
+%     0.0, 0.0, 0.55;   % dark blue
+% ];
+
+% custom_colormap = [
+%     1, 1, 1; % white
+%     1, 0.9, 0.9;
+%     1, 0.8, 0.8;
+%     1, 0.7, 0.7;
+%     1, 0.6, 0.6;
+%     1, 0.5, 0.5;
+%     1, 0.4, 0.4;
+%     1, 0.3, 0.3;
+%     1, 0.2, 0.2;
+%     1, 0.1, 0.1;
+%     1, 0, 0;   % red
+% ];
+
+
+% Generate more intermediate colors for a smoother transition
+n = 256; % Number of colors
+custom_colormap = interp1(linspace(0, 1, size(custom_colormap, 1)), custom_colormap, linspace(0, 1, n));
+
+% Create a figure with a narrow width and taller height
+figure('Position', [100, 100, 200, 600]); % [left, bottom, width, height]
+
+% Create a tiled layout with 2 rows and 1 column
+tiledlayout(2, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
+
+% First tile (heatmap)
+ax1 = nexttile;
+hold on;
+
+% Plot the heatmap
+imagesc(ts1, 1:size(zall_array{array_to_plot, plot_num}, 1), zall_array{array_to_plot, plot_num});
+
+
+% Apply the custom colormap
+colormap(custom_colormap);
+
+% Restrict the color axis range to [-1, 1]
+clim([-1 1]);
+
+% Add a separate axes for the colorbar to associate it only with the upper tile
+c = colorbar(ax1, 'eastoutside');
+set(c, 'YTick', clim); % 
+
+ylim([0.5, size(zall_array{array_to_plot, plot_num}, 1) + 0.5]);
+
+xlim([-8 8]);
+% Set X-axis ticks
+set(gca, 'XTick', []);
+set(gca, 'YTick', [1, size(zall_array{array_to_plot, plot_num}, 1)]);
+xline(0)
+% scatter(time2Collect, Tris               , 'Marker', 'p')
+% scatter(trialStartTime, Tris, 'Marker', 's')
+fontsize(18, 'points')
+hold off;
+
+% Second tile (mean and raw data)
+ax2 = nexttile;
+hold on;
+
+
+% Plot the raw data in grey with transparency
+for trial = 1:size(zall_array{array_to_plot, plot_num}, 1)
+    plot(ts1, zall_array{array_to_plot, plot_num}(trial, :), 'Color', [custom_colormap(end, :), 0.5]);
+end
+
+% Plot the mean as a thick black line
+meanData = mean(zall_array{array_to_plot, plot_num});
+plot(ts1, meanData, 'r', 'LineWidth', 2, 'Color', 'k');
+
+ylim([-3 4]);
+xlim([-8 8]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8]);
+xline(0)
+yline(0)
+fontsize(18, 'points')
+hold off;
+
+
+
+%%
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-8 8]);
+ylim([-0.3 0.3]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.3 0 0.3]);
+
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 1}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 1}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 1}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'r'});
+% shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 2}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 2}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 2}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'r'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 3}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 3}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 3}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'K'});
+% shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 4}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 4}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 4}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'B'});
+% hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
+
+xline(0);
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+
+hold off
+
+
+%%
+
+% abort_but_not_postchoice_vs_consum = respClass_all_array{1,11} == 1 & respClass_all_array{1,10} == 3 & respClass_all_array{1,9} == 3;
+
+abort_but_not_postchoice_vs_consum = respClass_all_array{1,11} == 1 & postchoice_reward_blocks_2_and_3 ~= 1 & collect_blocks_2_and_3 ~= 1 & prechoice_blocks_2_and_3 ~= 1;
+
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-8 8]);
+ylim([-0.3 0.3]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.3 0 0.3]);
+
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 1}  (abort_but_not_postchoice_vs_consum==1, :)), nanstd(zall_mean_all_array{1, 1}(abort_but_not_postchoice_vs_consum==1, :)/sqrt(size(zall_mean_all_array{1, 1}(abort_but_not_postchoice_vs_consum==1, :), 1))), 'lineProps', {'color', 'b'});
+% shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 2}  (abort_but_not_postchoice_vs_consum==1, :)), nanstd(zall_mean_all_array{1, 2}(abort_but_not_postchoice_vs_consum==1, :)/sqrt(size(zall_mean_all_array{1, 2}(abort_but_not_postchoice_vs_consum==1, :), 1))), 'lineProps', {'color', 'r'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 3}  (abort_but_not_postchoice_vs_consum==1, :)), nanstd(zall_mean_all_array{1, 3}(abort_but_not_postchoice_vs_consum==1, :)/sqrt(size(zall_mean_all_array{1, 3}(abort_but_not_postchoice_vs_consum==1, :), 1))), 'lineProps', {'color', 'k'});
+% shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 4}  (abort_but_not_postchoice_vs_consum==1, :)), nanstd(zall_mean_all_array{1, 4}(abort_but_not_postchoice_vs_consum==1, :)/sqrt(size(zall_mean_all_array{1, 4}(abort_but_not_postchoice_vs_consum==1, :), 1))), 'lineProps', {'color', 'k'});
+% hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
+
+xline(0);
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+
+hold off
+
+
+%%
+
+pun_but_not_postchoice = respClass_all_array{1, 4}==1 & respClass_all_array{1, 9} == 3;
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-8 8]);
+ylim([-0.3 0.3]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.3 0 0.3]);
+
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 1}  (pun_but_not_postchoice==1, :)), nanstd(zall_mean_all_array{1, 1}(pun_but_not_postchoice==1, :)/sqrt(size(zall_mean_all_array{1, 1}(pun_but_not_postchoice==1, :), 1))), 'lineProps', {'color', 'r'});
+% shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 2}  (pun_but_not_postchoice==1, :)), nanstd(zall_mean_all_array{1, 2}(pun_but_not_postchoice==1, :)/sqrt(size(zall_mean_all_array{1, 2}(pun_but_not_postchoice==1, :), 1))), 'lineProps', {'color', 'r'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 3}  (pun_but_not_postchoice==1, :)), nanstd(zall_mean_all_array{1, 3}(pun_but_not_postchoice==1, :)/sqrt(size(zall_mean_all_array{1, 3}(pun_but_not_postchoice==1, :), 1))), 'lineProps', {'color', 'K'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 3}  (respClass_all_array{1, 4}==3, :)), nanstd(zall_mean_all_array{1, 3}(respClass_all_array{1, 4}==3, :)/sqrt(size(zall_mean_all_array{1, 4}(respClass_all_array{1, 4}==3, :), 1))), 'lineProps', {'color', 'B'});
+% shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 1}  (postchoice_reward_blocks_2_and_3==1, :)), nanstd(zall_mean_all_array{1, 1}(postchoice_reward_blocks_2_and_3==1, :)/sqrt(size(zall_mean_all_array{1, 1}(postchoice_reward_blocks_2_and_3==1, :), 1))), 'lineProps', {'color', 'B'});
+
+% hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
+
+xline(0);
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+
+hold off
+
+mean_data_array = {zall_mean_all_array{1, 1}(pun_but_not_postchoice==1, :), zall_mean_all_array{1, 3}(pun_but_not_postchoice==1, :), zall_mean_all_array{1, 3}(respClass_all_array{1, 4} == 3, :)};
+sem_data_array = {sem_all_array{1, 1}(pun_but_not_postchoice==1, :), sem_all_array{1, 3}(pun_but_not_postchoice==1, :), sem_all_array{1, 3}(respClass_all_array{1, 4} == 3, :)};
+
+% [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2], 3);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.1 0.3], 3);
+
+
+
+%%
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-2 3]);
+ylim([-0.1 0.3]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.1:0.1:0.3]);
+
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 1}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 1}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 1}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'r'});
+% shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 2}  (pun_but_not_postchoice==1, :)), nanstd(zall_mean_all_array{1, 2}(pun_but_not_postchoice==1, :)/sqrt(size(zall_mean_all_array{1, 2}(pun_but_not_postchoice==1, :), 1))), 'lineProps', {'color', 'r'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 3}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 3}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 3}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'K'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 3}  (respClass_all_array{1, 4} == 3, :)), nanstd(zall_mean_all_array{1, 3}(respClass_all_array{1, 4} == 3, :)/sqrt(size(zall_mean_all_array{1, 3}(respClass_all_array{1, 4} == 3, :), 1))), 'lineProps', {'color', 'B'});
+% shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 1}  (postchoice_reward_blocks_2_and_3==1, :)), nanstd(zall_mean_all_array{1, 1}(postchoice_reward_blocks_2_and_3==1, :)/sqrt(size(zall_mean_all_array{1, 1}(postchoice_reward_blocks_2_and_3==1, :), 1))), 'lineProps', {'color', 'B'});
+
+% hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
+
+xline(0);
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+
+hold off
+
+
+mean_data_array = {zall_mean_all_array{1, 1}(respClass_all_array{1, 4}==1, :), zall_mean_all_array{1, 3}(respClass_all_array{1, 4}==1, :), zall_mean_all_array{1, 3}(respClass_all_array{1, 4} == 3, :)};
+sem_data_array = {sem_all_array{1, 1}(respClass_all_array{1, 4}==1, :), sem_all_array{1, 3}(respClass_all_array{1, 4}==1, :), sem_all_array{1, 3}(respClass_all_array{1, 4} == 3, :)};
+
+% [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2], 3);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.1 0.3], 3);
+
+
+%%
+
+% RUN data_loop.m with
+% 'REW', 0.3, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0
+% 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0
+% 'AA', 1
+% 'AA', 2
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-2 3]);
+ylim([-0.1 0.3]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.1:0.1:0.3]);
+
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 12}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 12}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'r'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 13}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 13}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 13}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'K'});
+
+
+% hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
+
+xline(0);
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+
+hold off
+
+
+mean_data_array = {zall_mean_all_array{1, 12}(respClass_all_array{1, 4}==1, :), zall_mean_all_array{1, 13}(respClass_all_array{1, 4}==1, :)};
+sem_data_array = {sem_all_array{1, 12}(respClass_all_array{1, 4}==1, :), sem_all_array{1, 13}(respClass_all_array{1, 4}==1, :)};
+
+% [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2], 3);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.1 0.3], 3);
+
+%%
+
+% RUN data_loop.m with
+% 'REW', 0.3, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0
+% 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0
+% 'AA', 1
+% 'AA', 2
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-2 3]);
+ylim([-0.1 0.3]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.1:0.1:0.3]);
+
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 14}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 14}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 14}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'r'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 15}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 15}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 15}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'K'});
+
+
+% hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
+
+xline(0);
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+
+hold off
+small_abort_data = zall_mean_all_array{1, 15}(respClass_all_array{1, 4}==1, :);
+small_abort_sem_data = sem_all_array{1, 15}(respClass_all_array{1, 4}==1, :);
+small_abort_no_nan_filter = ~isnan(small_abort_data);
+small_abort_no_nan_data = small_abort_data(small_abort_no_nan_filter(:, 1), :);
+
+small_abort_no_nan_sem = small_abort_sem_data(small_abort_no_nan_filter(:, 1), :);
+
+mean_data_array = {zall_mean_all_array{1, 14}(respClass_all_array{1, 4}==1, :), small_abort_no_nan_data};
+sem_data_array = {sem_all_array{1, 14}(respClass_all_array{1, 4}==1, :), small_abort_no_nan_sem};
+
+% [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2], 3);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.1 0.2], 3);
+
+
+%%
+% RUN data_loop.m with
+% 'REW', 0.3, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0
+% 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0
+% 'AA', 1
+% 'AA', 2
+% 'REW', 1.2, 'BLOCK', 1, 'SHK', 0
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-2 3]);
+ylim([-0.1 0.3]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.1:0.1:0.3]);
+
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 12}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 12}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'r'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 13}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 13}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 13}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'K'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 16}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 16}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 16}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'K'});
+
+
+% hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
+
+xline(0);
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+
+hold off
+
+
+mean_data_array = {zall_mean_all_array{1, 12}(respClass_all_array{1, 4}==1, :), zall_mean_all_array{1, 13}(respClass_all_array{1, 4}==1, :), zall_mean_all_array{1, 16}(respClass_all_array{1, 4}==1, :)};
+sem_data_array = {sem_all_array{1, 12}(respClass_all_array{1, 4}==1, :), sem_all_array{1, 13}(respClass_all_array{1, 4}==1, :), sem_all_array{1, 16}(respClass_all_array{1, 4}==1, :)};
+
+% [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2], 3);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.1 0.3], 3);
+
+
+%%
+
+% RUN data_loop.m with
+% 'REW', 0.3, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0
+% 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0
+% 'AA', 1
+% 'AA', 2
+% 
+
+figure;
+hold on
+% Create a histogram for allCorrelations
+
+width = 300; % Width of the figure
+height = 600; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+xlim([-2 3]);
+ylim([-0.1 0.3]);
+% Set X-axis ticks
+set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.1:0.1:0.3]);
+
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 14}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 14}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 14}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'r'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 15}  (respClass_all_array{1, 4}==1, :)), nanstd(zall_mean_all_array{1, 15}(respClass_all_array{1, 4}==1, :)/sqrt(size(zall_mean_all_array{1, 15}(respClass_all_array{1, 4}==1, :), 1))), 'lineProps', {'color', 'K'});
+shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 14}  (respClass_all_array{1, 4}==3, :)), nanstd(zall_mean_all_array{1, 14}(respClass_all_array{1, 4}==3, :)/sqrt(size(zall_mean_all_array{1, 14}(respClass_all_array{1, 4}==3, :), 1))), 'lineProps', {'color', 'g'});
+
+
+
+% hold on;shadedErrorBar(ts1, nanmean(zall_mean_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), nanmean(sem_all_array{1, 12}(respClass_all_array{1, 11}==1, :)), 'lineProps', {'color', 'k'});
+
+xline(0);
+% xline(median_start_time_from_choice, 'g', {'Median', 'start', 'time'})
+% xline(median_collect_time_from_choice, 'r', {'Median', 'collect', 'latency'})
+xlabel('Time from Large Rew Choice (s)');
+legend({'pre-choice active', 'post-choice reward active', 'consumption'}, 'Location','northwest')
+
+hold off
+small_abort_data = zall_mean_all_array{1, 15}(respClass_all_array{1, 4}==1, :);
+small_abort_sem_data = sem_all_array{1, 15}(respClass_all_array{1, 4}==1, :);
+small_abort_no_nan_filter = ~isnan(small_abort_data);
+small_abort_no_nan_data = small_abort_data(small_abort_no_nan_filter(:, 1), :);
+
+small_abort_no_nan_sem = small_abort_sem_data(small_abort_no_nan_filter(:, 1), :);
+
+mean_data_array = {zall_mean_all_array{1, 14}(respClass_all_array{1, 4}==1, :), zall_mean_all_array{1, 14}(respClass_all_array{1, 4}==3, :), small_abort_no_nan_data};
+sem_data_array = {sem_all_array{1, 14}(respClass_all_array{1, 4}==1, :), sem_all_array{1, 14}(respClass_all_array{1, 4}==3, :), small_abort_no_nan_sem};
+
+% [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2], 3);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.1 0.2], 3);

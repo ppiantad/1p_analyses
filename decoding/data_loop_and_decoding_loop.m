@@ -1,7 +1,7 @@
 % to use this code, use decoding_variables_to_use to load data
 % plus need to load relevant 10x dataset, run block_wise_changes_v1 etc
 iter = 0;
-num_iterations = 5;
+num_iterations = 75; %75
 caTraceTrials_mouse_iterations = cell(1, num_iterations);
 uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5]
 uv.BLper = [-10 -5];
@@ -35,7 +35,37 @@ elseif strcmp('RDT_D2', session_to_analyze)
 end
 
 
+for ii = 1:size(prechoice_block_1_mouse, 1)
+    prechoice_sizes(ii) = sum(prechoice_block_1_mouse{ii, 1} == 1);
 
+end
+
+
+for ii = 1:size(postchoice_reward_block_1_mouse, 1)
+    postchoice_sizes(ii) = sum(postchoice_reward_block_1_mouse{ii, 1} == 1);
+
+end
+
+for ii = 1:size(collect_block_1_mouse, 1)
+    collect_sizes(ii) = sum(collect_block_1_mouse{ii, 1} == 1);
+
+end
+
+
+
+for ii = 1:size(true_neutral_block_1_mouse, 1)
+    neutral_sizes(ii) = sum(true_neutral_block_1_mouse{ii, 1} == 1);
+
+end
+
+all_sizes = [prechoice_sizes postchoice_sizes collect_sizes neutral_sizes]
+
+min_size = min(all_sizes)
+
+
+size_prechoice = sum(prechoice_block_1)
+size_postchoice = sum(postchoice_reward_block_1)
+size_collect = sum(collect_block_1)
 
 
 use_normalized_time = 0;
@@ -283,6 +313,8 @@ for dd = 1:size(neuron_subgroup, 1)
                                 ca = ca(collect_block_1_mouse{ii, 1} == 1, :);
                             elseif strcmp(neuron_subgroup{dd}, 'true neutral')
                                 ca = ca(true_neutral_block_1_mouse{ii, 1} == 1, :);
+                                % index = sort(randsample(1:size(ca, 1), 5));
+                                % ca = ca(index, :);
                             end
                             % ca = ca(respClass_all_array_mouse_pre_choice_active{ii, 1} == 1, :);
                             % ca = ca(respClass_all_array_mouse_post_choice_reward{ii, 1} == 1, :);
@@ -556,11 +588,13 @@ end
 
 %%
 % Initialize variables to store means and standard deviations for each group
-group_means = zeros(4, 2); % 5 groups, 4 bars per group
-group_stddevs = zeros(4, 2);
+num_pairs = 6 %4; % Since you have 8 cells, there are 4 pairs
+
+group_means = zeros(num_pairs, 2); % 5 groups, 4 bars per group
+group_stddevs = zeros(num_pairs, 2);
 
 % Calculate means and standard deviations for each group
-for i = 1:4
+for i = 1:num_pairs
     group_data = cell2mat(cross_mouse_accuracy_per_iteration(:, (i-1)*2 + 1:i*2));
     for j = 1:2
         set_data = group_data(:, (j-1)*5 + 1:j*5);
@@ -617,48 +651,48 @@ legend('Pre-choice epoch', 'Post-choice epoch', 'Consumption epoch', 'Shuffle (C
 
 %%
 
-% Initialize vectors to store results
-num_pairs = 4; % Since you have 8 cells, there are 4 pairs
-h_values = zeros(1, num_pairs);
-p_values = zeros(1, num_pairs);
-
-for i = 1:num_pairs
-    % Get the index for the paired cells
-    idx1 = (i - 1) * 2 + 1;
-    idx2 = idx1 + 1;
-    
-    % Convert each cell to a matrix and compute mean accuracy
-    data_matrix_1 = cell2mat(accuracy_per_iteration{1, idx1}');
-    mean_accuracy_1 = mean(data_matrix_1, 1);
-    
-    data_matrix_2 = cell2mat(accuracy_per_iteration{1, idx2}');
-    mean_accuracy_2 = mean(data_matrix_2, 1);
-    
-    % Perform paired-samples t-test
-    [h,p,ci,stats] = ttest(mean_accuracy_1, mean_accuracy_2);
-    
-    % Store results
-    h_values(i) = h;
-    p_values(i) = p;
-    df_values(i) = stats.df;
-    t_values(i) = stats.tstat;
-end
-
-% Display results
-disp('Paired t-test results:');
-disp(table((1:num_pairs)', h_values', df_values', t_values', p_values', 'VariableNames', {'Pair', 'h', 'df', 't-value', 'p'}));
+% % Initialize vectors to store results
+% num_pairs = 6; % Since you have 8 cells, there are 4 pairs
+% h_values = zeros(1, num_pairs);
+% p_values = zeros(1, num_pairs);
+% 
+% for i = 1:num_pairs
+%     % Get the index for the paired cells
+%     idx1 = (i - 1) * 2 + 1;
+%     idx2 = idx1 + 1;
+% 
+%     % Convert each cell to a matrix and compute mean accuracy
+%     data_matrix_1 = cell2mat(accuracy_per_iteration{1, idx1}');
+%     mean_accuracy_1 = mean(data_matrix_1, 1);
+% 
+%     data_matrix_2 = cell2mat(accuracy_per_iteration{1, idx2}');
+%     mean_accuracy_2 = mean(data_matrix_2, 1);
+% 
+%     % Perform paired-samples t-test
+%     [h,p,ci,stats] = ttest(mean_accuracy_1, mean_accuracy_2);
+% 
+%     % Store results
+%     h_values(i) = h;
+%     p_values(i) = p;
+%     df_values(i) = stats.df;
+%     t_values(i) = stats.tstat;
+% end
+% 
+% % Display results
+% disp('Paired t-test results:');
+% disp(table((1:num_pairs)', h_values', df_values', t_values', p_values', 'VariableNames', {'Pair', 'h', 'df', 't-value', 'p'}));
 
 %%
 % Define figure width and height (adjust as needed)
 fig_width = 300; % Width in pixels
-fig_height = 600; % Height in pixels
+fig_height = 300; % Height in pixels %600
 
 % Create figure with custom size
 figure('Position', [100, 100, fig_width, fig_height]); 
 hold on;
 
 % Number of pairs
-num_pairs = 4; 
+num_pairs = 6; 
 mean_values = zeros(num_pairs, 2); % Store means for each pair
 sem_values = zeros(num_pairs, 2); % Store SEM for each pair
 all_data = cell(num_pairs, 2); % Store individual data for scatter
@@ -722,7 +756,297 @@ end
 
 % Labels & Aesthetics
 yticks(y_positions);
-yticklabels({'Non-resp', 'Consum.', 'Post-choiceRew', 'Pre-choice'}); % Reverse order
+yticklabels({'Non-resp. (Post-choice)','Non-resp. (Pre-choice)', 'Non-resp. (Consum)', 'Consum.', 'Post-choiceRew', 'Pre-choice'}); % Reverse order
+% xlabel('Mean Accuracy');
+% title('Paired Accuracy Comparisons');
+% legend({'Condition 1', 'Condition 2'}, 'Location', 'SouthEast');
+set(gca, 'FontSize', 12);
+% Set X-axis limits and define ticks explicitly
+xlim([0.35, 1]); 
+xticks(0.4:0.1:1); % Tick marks at each value from 0.4 to 0.9
+box off;
+hold off;
+
+
+%%
+% Initialize vectors to store results
+num_pairs = 6; % Since you have 8 cells, there are 4 pairs
+h_values = zeros(1, num_pairs);
+p_values = zeros(1, num_pairs);
+
+for i = 1:num_pairs
+    % Get the index for the paired cells
+    idx1 = (i - 1) * 2 + 1;
+    idx2 = idx1 + 1;
+    
+    % Convert each cell to a matrix and compute mean accuracy
+    data_matrix_1 = cell2mat(f1_score_per_iteration{1, idx1}');
+    mean_accuracy_1 = mean(data_matrix_1, 1);
+    
+    data_matrix_2 = cell2mat(f1_score_per_iteration{1, idx2}');
+    mean_accuracy_2 = mean(data_matrix_2, 1);
+    
+    % Perform paired-samples t-test
+    [h,p,ci,stats] = ttest(mean_accuracy_1, mean_accuracy_2);
+    
+    % Store results
+    h_values(i) = h;
+    p_values(i) = p;
+    df_values(i) = stats.df;
+    t_values(i) = stats.tstat;
+end
+
+% Display results
+disp('Paired t-test results:');
+disp(table((1:num_pairs)', h_values', df_values', t_values', p_values', 'VariableNames', {'Pair', 'h', 'df', 't-value', 'p'}));
+
+%%
+% Define figure width and height (adjust as needed)
+fig_width = 300; % Width in pixels
+fig_height = 300; % Height in pixels %600
+
+% Create figure with custom size
+figure('Position', [100, 100, fig_width, fig_height]); 
+hold on;
+
+% Number of pairs
+num_pairs = 3; 
+mean_values = zeros(num_pairs, 2); % Store means for each pair
+sem_values = zeros(num_pairs, 2); % Store SEM for each pair
+all_data = cell(num_pairs, 2); % Store individual data for scatter
+
+% Process data for plotting
+for i = 1:num_pairs
+    idx1 = (i - 1) * 2 + 1;
+    idx2 = idx1 + 1;
+    
+    % Convert cell contents to matrices and compute means
+    data_matrix_1 = cell2mat(f1_score_per_iteration{1, idx1}');
+    data_matrix_2 = cell2mat(f1_score_per_iteration{1, idx2}');
+    
+    % Mean values
+    mean_values(i, 1) = mean(mean(data_matrix_1, 1));
+    mean_values(i, 2) = mean(mean(data_matrix_2, 1));
+    
+    % Standard Error of the Mean (SEM)
+    sem_values(i, 1) = std(mean(data_matrix_1, 1)) / sqrt(size(data_matrix_1, 1));
+    sem_values(i, 2) = std(mean(data_matrix_2, 1)) / sqrt(size(data_matrix_2, 1));
+    
+    % Store data for scatter plot
+    all_data{i, 1} = mean(data_matrix_1, 1);
+    all_data{i, 2} = mean(data_matrix_2, 1);
+end
+
+% Reverse order of bars
+mean_values = flipud(mean_values);
+sem_values = flipud(sem_values);
+all_data = flipud(all_data);
+
+% Create horizontal bar plot
+y_positions = 1:num_pairs; % Set positions for the pairs
+bar_width = 0.6; % Bar width to allow space for scatter points
+
+% Plot bars
+bar_handles = barh(y_positions, mean_values, bar_width, 'grouped');
+bar_handles(1).FaceColor = [0.2, 0.4, 0.8]; % Color for first condition
+bar_handles(2).FaceColor = [0.8, 0.4, 0.2]; % Color for second condition
+
+% Get the actual bar positions
+x_offsets = [bar_handles(1).XEndPoints; bar_handles(2).XEndPoints];
+
+% Add error bars centered on bars
+errorbar(mean_values(:,1), x_offsets(1,:), sem_values(:,1), 'horizontal', 'k', 'linestyle', 'none', 'linewidth', 1.5);
+errorbar(mean_values(:,2), x_offsets(2,:), sem_values(:,2), 'horizontal', 'k', 'linestyle', 'none', 'linewidth', 1.5);
+
+% Add scatter points & connect them
+for i = 1:num_pairs
+    % Get scatter y-positions directly over bars
+    y1 = x_offsets(1, i) * ones(size(all_data{i, 1}));
+    y2 = x_offsets(2, i) * ones(size(all_data{i, 2}));
+    
+    % Scatter individual points
+    scatter(all_data{i, 1}, y1, 50, 'b', 'filled', 'MarkerFaceAlpha', 0.6);
+    scatter(all_data{i, 2}, y2, 50, 'r', 'filled', 'MarkerFaceAlpha', 0.6);
+    
+    % Connect points with lines
+    plot([all_data{i, 1}; all_data{i, 2}], [y1; y2], 'k-', 'LineWidth', 1);
+end
+
+% Labels & Aesthetics
+yticks(y_positions);
+yticklabels({'Consum.', 'Post-choiceRew', 'Pre-choice'}); % Reverse order
+% xlabel('Mean Accuracy');
+% title('Paired Accuracy Comparisons');
+% legend({'Condition 1', 'Condition 2'}, 'Location', 'SouthEast');
+set(gca, 'FontSize', 12);
+% Set X-axis limits and define ticks explicitly
+xlim([0.35, 1]); 
+xticks(0.4:0.1:1); % Tick marks at each value from 0.4 to 0.9
+box off;
+hold off;
+%%
+% Define figure width and height (adjust as needed)
+fig_width = 300; % Width in pixels
+fig_height = 300; % Height in pixels %600
+
+% Create figure with custom size
+figure('Position', [100, 100, fig_width, fig_height]); 
+hold on;
+
+% Number of pairs
+num_pairs = 3; 
+mean_values = zeros(num_pairs, 2); % Store means for each pair
+sem_values = zeros(num_pairs, 2); % Store SEM for each pair
+all_data = cell(num_pairs, 2); % Store individual data for scatter
+
+% Process data for plotting
+for i = 1:num_pairs
+    idx1 = (i - 1) * 2 + 1;
+    idx2 = idx1 + 1;
+    
+    % Convert cell contents to matrices and compute means
+    data_matrix_1 = cell2mat(f1_score_per_iteration{1, idx1}');
+    data_matrix_2 = cell2mat(f1_score_per_iteration{1, idx2}');
+    
+    % Mean values
+    mean_values(i, 1) = mean(mean(data_matrix_1, 1));
+    mean_values(i, 2) = mean(mean(data_matrix_2, 1));
+    
+    % Standard Error of the Mean (SEM)
+    sem_values(i, 1) = std(mean(data_matrix_1, 1)) / sqrt(size(data_matrix_1, 1));
+    sem_values(i, 2) = std(mean(data_matrix_2, 1)) / sqrt(size(data_matrix_2, 1));
+    
+    % Store data for scatter plot
+    all_data{i, 1} = mean(data_matrix_1, 1);
+    all_data{i, 2} = mean(data_matrix_2, 1);
+end
+
+% Reverse order of bars
+mean_values = flipud(mean_values);
+sem_values = flipud(sem_values);
+all_data = flipud(all_data);
+
+% Create horizontal bar plot
+y_positions = 1:num_pairs; % Set positions for the pairs
+bar_width = 0.6; % Bar width to allow space for scatter points
+
+% Plot bars
+bar_handles = barh(y_positions, mean_values, bar_width, 'grouped');
+bar_handles(1).FaceColor = [0.2, 0.4, 0.8]; % Color for first condition
+bar_handles(2).FaceColor = [0.8, 0.4, 0.2]; % Color for second condition
+
+% Get the actual bar positions
+x_offsets = [bar_handles(1).XEndPoints; bar_handles(2).XEndPoints];
+
+% Add error bars centered on bars
+errorbar(mean_values(:,1), x_offsets(1,:), sem_values(:,1), 'horizontal', 'k', 'linestyle', 'none', 'linewidth', 1.5);
+errorbar(mean_values(:,2), x_offsets(2,:), sem_values(:,2), 'horizontal', 'k', 'linestyle', 'none', 'linewidth', 1.5);
+
+% Add scatter points & connect them
+for i = 1:num_pairs
+    % Get scatter y-positions directly over bars
+    y1 = x_offsets(1, i) * ones(size(all_data{i, 1}));
+    y2 = x_offsets(2, i) * ones(size(all_data{i, 2}));
+    
+    % Scatter individual points
+    scatter(all_data{i, 1}, y1, 50, 'b', 'filled', 'MarkerFaceAlpha', 0.6);
+    scatter(all_data{i, 2}, y2, 50, 'r', 'filled', 'MarkerFaceAlpha', 0.6);
+    
+    % Connect points with lines
+    plot([all_data{i, 1}; all_data{i, 2}], [y1; y2], 'k-', 'LineWidth', 1);
+end
+
+% Labels & Aesthetics
+yticks(y_positions);
+yticklabels({'Consum.', 'Post-choiceRew', 'Pre-choice'}); % Reverse order
+% xlabel('Mean Accuracy');
+% title('Paired Accuracy Comparisons');
+% legend({'Condition 1', 'Condition 2'}, 'Location', 'SouthEast');
+set(gca, 'FontSize', 12);
+% Set X-axis limits and define ticks explicitly
+xlim([0.35, 1]); 
+xticks(0.4:0.1:1); % Tick marks at each value from 0.4 to 0.9
+box off;
+hold off;
+
+%% FOR SUPPLEMENTAL FIG W/ NON-RESPONSIVE NEURONS
+
+shuffle_data_for_figs = f1_score_per_iteration(1, 7:12);
+shuffle_data_for_figs_reformat = [shuffle_data_for_figs(1, 1:2) shuffle_data_for_figs(1, 5:6) shuffle_data_for_figs(1, 3:4)];
+% Define figure width and height (adjust as needed)
+fig_width = 300; % Width in pixels
+fig_height = 300; % Height in pixels %600
+
+% Create figure with custom size
+figure('Position', [100, 100, fig_width, fig_height]); 
+hold on;
+
+% Number of pairs
+num_pairs = 3; 
+mean_values = zeros(num_pairs, 2); % Store means for each pair
+sem_values = zeros(num_pairs, 2); % Store SEM for each pair
+all_data = cell(num_pairs, 2); % Store individual data for scatter
+
+% Process data for plotting
+for i = 1:num_pairs
+    idx1 = (i - 1) * 2 + 1;
+    idx2 = idx1 + 1;
+    
+    % Convert cell contents to matrices and compute means
+    data_matrix_1 = cell2mat(shuffle_data_for_figs_reformat{1, idx1}');
+    data_matrix_2 = cell2mat(shuffle_data_for_figs_reformat{1, idx2}');
+    
+    % Mean values
+    mean_values(i, 1) = mean(mean(data_matrix_1, 1));
+    mean_values(i, 2) = mean(mean(data_matrix_2, 1));
+    
+    % Standard Error of the Mean (SEM)
+    sem_values(i, 1) = std(mean(data_matrix_1, 1)) / sqrt(size(data_matrix_1, 1));
+    sem_values(i, 2) = std(mean(data_matrix_2, 1)) / sqrt(size(data_matrix_2, 1));
+    
+    % Store data for scatter plot
+    all_data{i, 1} = mean(data_matrix_1, 1);
+    all_data{i, 2} = mean(data_matrix_2, 1);
+end
+
+% Reverse order of bars
+mean_values = flipud(mean_values);
+sem_values = flipud(sem_values);
+all_data = flipud(all_data);
+
+% Create horizontal bar plot
+y_positions = 1:num_pairs; % Set positions for the pairs
+bar_width = 0.6; % Bar width to allow space for scatter points
+
+% Plot bars
+bar_handles = barh(y_positions, mean_values, bar_width, 'grouped');
+bar_handles(1).FaceColor = [0.2, 0.4, 0.8]; % Color for first condition
+bar_handles(2).FaceColor = [0.8, 0.4, 0.2]; % Color for second condition
+
+% Get the actual bar positions
+x_offsets = [bar_handles(1).XEndPoints; bar_handles(2).XEndPoints];
+
+% Add error bars centered on bars
+errorbar(mean_values(:,1), x_offsets(1,:), sem_values(:,1), 'horizontal', 'k', 'linestyle', 'none', 'linewidth', 1.5);
+errorbar(mean_values(:,2), x_offsets(2,:), sem_values(:,2), 'horizontal', 'k', 'linestyle', 'none', 'linewidth', 1.5);
+
+% Add scatter points & connect them
+for i = 1:num_pairs
+    % Get scatter y-positions directly over bars
+    y1 = x_offsets(1, i) * ones(size(all_data{i, 1}));
+    y2 = x_offsets(2, i) * ones(size(all_data{i, 2}));
+    
+    % Scatter individual points
+    scatter(all_data{i, 1}, y1, 50, 'b', 'filled', 'MarkerFaceAlpha', 0.6);
+    scatter(all_data{i, 2}, y2, 50, 'r', 'filled', 'MarkerFaceAlpha', 0.6);
+    
+    % Connect points with lines
+    plot([all_data{i, 1}; all_data{i, 2}], [y1; y2], 'k-', 'LineWidth', 1);
+end
+
+% Labels & Aesthetics
+yticks(y_positions);
+yticklabels({'Consum', 'Post-choice','Pre-choice', }); % Reverse order
 % xlabel('Mean Accuracy');
 % title('Paired Accuracy Comparisons');
 % legend({'Condition 1', 'Condition 2'}, 'Location', 'SouthEast');

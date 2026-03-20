@@ -45,7 +45,9 @@ post_choice_active_ind = find(respClass_all_array{1,2} == 1);
 post_choice_active_block_2_3_ind = find(respClass_all_array{1,9} == 1);
 aa_active_ind = find(respClass_all_array{1,11} == 1);
 % consum_inhibited_ind = find(all_consum_inhibited == 1);
+% setListData = {shk_ind, aa_active_ind, consum_active_block_2_3, pre_choice_active_block_2_3_ind};
 setListData = {shk_ind, aa_active_ind, consum_active_block_2_3};
+% setLabels = ["SHK", "Approach-Abort", "Consum", "Pre-choice"];
 setLabels = ["SHK", "Approach-Abort", "Consum"];
 figure;
 ve_diagram = vennEulerDiagram(setListData, setLabels, 'drawProportional', true);
@@ -55,6 +57,27 @@ ve_diagram.ShowIntersectionAreas = true;
 % h.SetLabels = [];
 
 shk_alone = respClass_all_array{1,4} == 1  & prechoice_block_1 ~=1 & postchoice_reward_block_1 ~= 1 & collect_block_1 ~= 1 & respClass_all_array{1,11} ~= 1;
+
+
+%%
+% close all; clear all; clc; % CLEANING
+
+% Define the number of sets
+numSets = 4;
+
+% Define the values for each set
+sets = {shk_ind, aa_active_ind, consum_active_block_2_3, pre_choice_active_block_2_3_ind};
+
+% Define the labels for each set
+setLabels = {'Set 1', 'Set 2', 'Set 3', 'Set 4'};
+
+% Define the sizes of the circles for each set
+circleSizes = [size(shk_ind, 2), size(aa_active_ind, 2), size(consum_active_block_2_3, 2), size(pre_choice_active_block_2_3_ind, 2)];
+
+% Define the colors for each set
+colors = {[1 0 0], [0 1 0], [0 0 1], [1 1 0]}; % edittable colours i.e. JET, SUMMER, etc...
+
+DrawVennDiag(numSets,sets,setLabels,circleSizes,colors) % Execution of the function
 %% chi-square test of proportions to see if more the proprtion of AA that are also shock cells is greater than consumption that are also shock
 % based on https://www.mathworks.com/matlabcentral/answers/96572-how-can-i-perform-a-chi-square-test-to-determine-how-statistically-different-two-proportions-are-in
 aa_and_shk = respClass_all_array{1,11} == 1 & respClass_all_array{1,4} == 1 & respClass_all_array{1,10} ~= 1;
@@ -332,6 +355,27 @@ sem_data_array = {neuron_sem_array{1, 11}(respClass_all_array{1, 4} == 1, :), ne
 
 % [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2], 3);
 [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.1 0.10], 3);
+
+
+%% %run data_loop with
+% [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0);
+% 
+mean_data_array = {neuron_mean_array{1, 11}(respClass_all_array{1, 4} == 1, :), neuron_mean_array{1, 11}(respClass_all_array{1, 4} == 3, :), zall_mean_all_array{1, 12}(respClass_all_array{1, 4} == 1, :)};
+sem_data_array = {neuron_sem_array{1, 11}(respClass_all_array{1, 4} == 1, :), neuron_sem_array{1, 11}(respClass_all_array{1, 4} == 3, :), sem_all_array{1, 12}(respClass_all_array{1, 4} == 1, :)};
+
+% [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2], 3);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.1 0.10], 3);
+
+
+%% run data_loop with
+% [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 2, 'BLOCK', 3, 'SHK', 0);
+% [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'REW', 1.2, 'BLOCK', 1, 'SHK', 0)
+mean_data_array = {neuron_mean_array{1, 11}(respClass_all_array{1, 4} == 1, :), neuron_mean_array{1, 11}(respClass_all_array{1, 4} == 3, :), zall_mean_all_array{1, 12}(respClass_all_array{1, 4} == 1, :), zall_mean_all_array{1, 13}(respClass_all_array{1, 4} == 1, :)};
+sem_data_array = {neuron_sem_array{1, 11}(respClass_all_array{1, 4} == 1, :), neuron_sem_array{1, 11}(respClass_all_array{1, 4} == 3, :), zall_mean_all_array{1, 12}(respClass_all_array{1, 4} == 1, :), sem_all_array{1, 13}(respClass_all_array{1, 4} == 1, :)};
+
+% [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.2 0.2], 3);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 3], [-0.1 0.10], 3);
+
 
 %%
 

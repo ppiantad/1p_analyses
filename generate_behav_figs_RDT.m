@@ -8,9 +8,11 @@
 
 animalIDs = (fieldnames(final_behavior));
 
-session_to_analyze = 'RDT_OPTO_CHOICE'
+session_to_analyze = 'RDT_D1'
 
 if any(startsWith(string(animalIDs), 'RDT-F'))
+
+else
     if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze) | strcmp('PR_D1', session_to_analyze)
         fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_13'};
 
@@ -183,6 +185,10 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
         % block_2_mouse(ii,:) = [block_2(1, 1) block_2(end, 2)];
         block_3_large_choice_percent = sum(BehavData.bigSmall == 1.2 & BehavData.Block == 3 & BehavData.ForceFree == 0)/sum(((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0) & BehavData.Block == 3);  
         block_3_small_choice_percent = sum(BehavData.bigSmall == 0.3 & BehavData.Block == 3 & BehavData.ForceFree == 0)/sum(((BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3) & BehavData.ForceFree == 0) & BehavData.Block == 3);  
+        block_1_shock_total = sum(BehavData.shock == 1 & BehavData.Block == 1);
+        block_2_shock_total = sum(BehavData.shock == 1 & BehavData.Block == 2);
+        block_3_shock_total = sum(BehavData.shock == 1 & BehavData.Block == 3);
+
         block_1_omission_total = sum(BehavData.omissionALL == 1 & BehavData.Block == 1);
         block_2_omission_total = sum(BehavData.omissionALL == 1 & BehavData.Block == 2);
         block_3_omission_total = sum(BehavData.omissionALL == 1 & BehavData.Block == 3);
@@ -239,6 +245,10 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
         
         
         end
+        block_1_collect_latency_all = mean(BehavData.collect_latency(BehavData.Block == 1 & [BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3]));
+        block_2_collect_latency_all = mean(BehavData.collect_latency(BehavData.Block == 2 & [BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3]));
+        block_3_collect_latency_all = mean(BehavData.collect_latency(BehavData.Block == 3 & [BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3]));
+
         block_1_large_collect_latency = mean(BehavData.collect_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 1));
         block_2_large_collect_latency = mean(BehavData.collect_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 2));
         block_3_large_collect_latency = mean(BehavData.collect_latency(BehavData.bigSmall == 1.2 & BehavData.Block == 3));
@@ -250,6 +260,15 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
         block_1_small_collect_latency = mean(BehavData.collect_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 1));
         block_2_small_collect_latency = mean(BehavData.collect_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 2));
         block_3_small_collect_latency = mean(BehavData.collect_latency(BehavData.bigSmall == 0.3 & BehavData.Block == 3));
+        
+        [BehavData_filter_for_ITI_calc,trials,varargin]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0); 
+        ITI_times =  BehavData_filter_for_ITI_calc.stTime(2:end) - BehavData_filter_for_ITI_calc.collectionTime(1:end-1);
+        blocks_for_ITI_times = BehavData_filter_for_ITI_calc.Block(2:end);
+        
+        block_1_mean_ITI_length = mean(ITI_times(blocks_for_ITI_times == 1));
+        block_2_mean_ITI_length = mean(ITI_times(blocks_for_ITI_times == 2));
+        block_3_mean_ITI_length = mean(ITI_times(blocks_for_ITI_times == 3));
+
         if ismember('type_binary', BehavData.Properties.VariableNames)
             large_aborts = sum(BehavData.type_binary == 1); %[] sum(BehavData.type_binary == 1)
             small_aborts = sum(BehavData.type_binary == 2);
@@ -288,7 +307,43 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
 
         end
         trials_completed = sum(BehavData.bigSmall == 1.2 | BehavData.bigSmall == 0.3);
-        session_length = BehavData.collectionTime(end); 
+        % Find indices of trials that are NOT Blank Touch
+        valid_trials = find(BehavData.Blank_Touch ~= 1 & BehavData.Blank_Touch ~= 2 & BehavData.omissionALL ~= 1);
+
+        % Get the last valid trial index
+        if contains(session_to_analyze, 'RDT')
+            if ~isempty(valid_trials)
+                if trials_completed >= 90
+                    last_valid_idx = valid_trials(end);
+
+                    % Get the collection time for that trial
+                    session_length = BehavData.collectionTime(last_valid_idx);
+
+                elseif trials_completed <= 90
+
+                    % hardcoded the session length for RDT
+                    session_length = 5460;
+                end
+            else
+                % Handle case where all trials are Blank Touch
+                session_length = NaN;  % or whatever default you prefer
+                warning('All trials are Blank Touch; no valid collection time found.');
+            end
+        else
+
+            if ~isempty(valid_trials)
+
+                last_valid_idx = valid_trials(end);
+
+                % Get the collection time for that trial
+                session_length = BehavData.collectionTime(last_valid_idx);
+
+            else
+                % Handle case where all trials are Blank Touch
+                session_length = NaN;  % or whatever default you prefer
+                warning('All trials are Blank Touch; no valid collection time found.');
+            end
+        end
 
 
         risk_table(ii,:) = array2table([...
@@ -299,6 +354,9 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
             block_1_small_choice_percent,...
             block_2_small_choice_percent,...
             block_3_small_choice_percent,...
+            block_1_shock_total,...
+            block_2_shock_total,...
+            block_3_shock_total,...
             block_1_omission_total,...
             block_2_omission_total,...
             block_3_omission_total,...
@@ -334,6 +392,9 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
             block_1_small_choice_latency,...
             block_2_small_choice_latency,...
             block_3_small_choice_latency,...
+            block_1_collect_latency_all,...
+            block_2_collect_latency_all,...
+            block_3_collect_latency_all,...
             block_1_large_collect_latency,...
             block_2_large_collect_latency,...
             block_3_large_collect_latency,...
@@ -356,6 +417,9 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
             block_2_small_choice_latency_following_shk,...
             block_3_small_choice_latency_following_shk,...
             session_length,...
+            block_1_mean_ITI_length,...
+            block_2_mean_ITI_length,...
+            block_3_mean_ITI_length,...
             ]);
 
         variable_names = [...
@@ -366,6 +430,9 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
             "block_1_small",...
             "block_2_small",...
             "block_3_small",...
+            "block_1_shock_total",...
+            "block_2_shock_total",...
+            "block_3_shock_total",...
             "block_1_omission_total",...
             "block_2_omission_total",...
             "block_3_omission_total",...
@@ -401,6 +468,9 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
             "block_1_small_choice_latency",...
             "block_2_small_choice_latency",...
             "block_3_small_choice_latency",...
+            "block_1_collect_latency_all",...
+            "block_2_collect_latency_all",...
+            "block_3_collect_latency_all",...
             "block_1_large_collect_latency",...
             "block_2_large_collect_latency",...
             "block_3_large_collect_latency",...
@@ -423,6 +493,9 @@ for ii = 1:size(valid_animalIDs,1) % 1:size(fieldnames(final),1)
             "block_2_small_choice_latency_following_shk",...
             "block_3_small_choice_latency_following_shk",...
             "session_length",...
+            "block_1_mean_ITI_length",...
+            "block_2_mean_ITI_length",...
+            "block_3_mean_ITI_length",...
             ];
 
         if ismember('trial_after_shk', BehavData.Properties.VariableNames)
@@ -1199,7 +1272,7 @@ figure;
 hold on;
 
 % Set figure size
-width = 200; % Width of the figure
+width = 100; % Width of the figure
 height = 450; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 
@@ -1236,6 +1309,7 @@ xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
 % ylim([0 1.1 * max([mean_large + sem_large, ...
 %                    mean_small + sem_small])]); % Adjust ylim dynamically
 set(gca, 'ytick', 0:5:20);
+ylim([0 20])
 % xlabel('Condition');
 % ylabel('Mean ± SEM');
 % legend('Location', 'Best');
@@ -1275,7 +1349,7 @@ figure;
 hold on;
 
 % Set figure size
-width = 200; % Width of the figure
+width = 100; % Width of the figure
 height = 450; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 
@@ -1312,6 +1386,7 @@ xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
 % ylim([0 1.1 * max([mean_large + sem_large, ...
 %                    mean_small + sem_small])]); % Adjust ylim dynamically
 set(gca, 'ytick', 0:1:5);
+ylim([0 4])
 % xlabel('Condition');
 % ylabel('Mean ± SEM');
 % legend('Location', 'Best');
@@ -1347,7 +1422,7 @@ figure;
 hold on;
 
 % Set figure size
-width = 200; % Width of the figure
+width = 100; % Width of the figure
 height = 450; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 
@@ -1384,6 +1459,7 @@ xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
 % ylim([0 1.1 * max([mean_large + sem_large, ...
 %                    mean_small + sem_small])]); % Adjust ylim dynamically
 set(gca, 'ytick', 0:1:5);
+ylim([0 5])
 % xlabel('Condition');
 % ylabel('Mean ± SEM');
 % legend('Location', 'Best');
@@ -1892,8 +1968,8 @@ xticklabels({'0', '50', '75'}); % Provide labels for each x_point
 xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
 
 % Set axis limits, labels, and legend
-ylim([0 15]); % Adjust ylim dynamically
-set(gca, 'ytick', 0:5:15);
+ylim([0 30]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:10:30);
 % xlabel('Condition');
 % ylabel('Mean ± SEM');
 % legend('Location', 'Best');
@@ -2000,22 +2076,22 @@ hold on;
 
 % Set figure size
 width = 200; % Width of the figure
-height = 250; % Height of the figure
+height = 450; % Height of the figure
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size
 
-% % Plot individual lines for "Large" data
-% for i = 1:size(large_choice_mCherry, 1)
-%     plot(x_points, large_choice_mCherry(i, :), '-', ...
-%         'Color', mCherry_color, ... % Blue with 60% opacity
-%         'LineWidth', 1.2);
-% end
-% 
-% % Plot individual lines for "Small" data
-% for i = 1:size(large_choice_hM4Di, 1)
-%     plot(x_points, large_choice_hM4Di(i, :), '-', ...
-%         'Color', hM4Di_color, ... % Red with 60% opacity
-%         'LineWidth', 1.2);
-% end
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', hM4Di_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
 
 
 % Plot with error bars for "Large" and "Small"
@@ -2033,8 +2109,8 @@ xticklabels({'0', '50', '75'}); % Provide labels for each x_point
 xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
 
 % Set axis limits, labels, and legend
-ylim([0 15]); % Adjust ylim dynamically
-set(gca, 'ytick', 0:5:15);
+ylim([0 60]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:20:60);
 % xlabel('Condition');
 % ylabel('Mean ± SEM');
 % legend('Location', 'Best');
@@ -2044,6 +2120,259 @@ set(gca, 'ytick', 0:5:15);
 % grid on;
 
 hold off;
+
+%%
+mCherry_session_length = [risk_table.session_length(strcmp('mCherry', risk_table.TreatmentCondition))]
+hm4di_session_length = [risk_table.session_length(strcmp('hM4Di', risk_table.TreatmentCondition))]
+
+bar_separation_value = 3;
+
+figure;
+width = 200; % Width of the figure
+height = 450; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Swarm chart for Type 1.2 correlations
+swarmchart(ones(1, length(mCherry_session_length)), mCherry_session_length, 90, 'o', 'MarkerFaceColor', mCherry_color);
+hold on;
+swarmchart(ones(1, length(hm4di_session_length)) * bar_separation_value, hm4di_session_length, 100, 'square', 'MarkerFaceColor', hM4Di_color);
+
+% Plot mean lines for Type 1.2 correlations
+plot([0.5; 1.5], [mean(mCherry_session_length); mean(mCherry_session_length)], 'LineWidth', 3, 'Color', 'red');
+plot([bar_separation_value - 0.5; bar_separation_value + 0.5], [mean(hm4di_session_length); mean(hm4di_session_length)], 'LineWidth', 3, 'Color', 'blue');
+
+
+% General plot settings
+yline(0, 'k--');
+xticks([1, bar_separation_value, bar_separation_value + 2]);
+xticklabels({'Type 1.2 SHK Resp.', 'Type 1.2 Not SHK Resp.'});
+xtickformat('%.1f');
+ytickformat('%.1f');
+hold off;
+
+[h p ci stats] = ttest2(mCherry_session_length, hm4di_session_length)
+
+
+%% for hM4Di vs mCherry
+
+large_choice_mCherry = [risk_table.block_1_mean_ITI_length(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_2_mean_ITI_length(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_3_mean_ITI_length(strcmp('mCherry', risk_table.TreatmentCondition))];
+large_choice_hM4Di = [risk_table.block_1_mean_ITI_length(strcmp('hM4Di', risk_table.TreatmentCondition)), risk_table.block_2_mean_ITI_length(strcmp('hM4Di', risk_table.TreatmentCondition)), risk_table.block_3_mean_ITI_length(strcmp('hM4Di', risk_table.TreatmentCondition))];
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', hM4Di_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, hM4Di_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', hM4Di_color, 'MarkerFaceColor', hM4Di_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 80]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:10:80);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+yline(8)
+hold off;
+
+%%
+large_choice_mCherry = [risk_table.large_consum_duration_block_1(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.large_consum_duration_block_2(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.large_consum_duration_block_3(strcmp('mCherry', risk_table.TreatmentCondition))];
+large_choice_hM4Di = [risk_table.large_consum_duration_block_1(strcmp('hM4Di', risk_table.TreatmentCondition)), risk_table.large_consum_duration_block_2(strcmp('hM4Di', risk_table.TreatmentCondition)), risk_table.large_consum_duration_block_3(strcmp('hM4Di', risk_table.TreatmentCondition))];
+
+
+mean_mCherry = nanmean(large_choice_mCherry, 1);
+mean_hM4Di = nanmean(large_choice_hM4Di, 1);
+
+
+sem_mCherry = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_hM4Di = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', hM4Di_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_hM4Di, sem_hM4Di, hM4Di_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', hM4Di_color, 'MarkerFaceColor', hM4Di_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 6]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:2:6);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+
+%%
+large_choice_mCherry = [risk_table.small_consum_duration_block_1(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.small_consum_duration_block_2(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.small_consum_duration_block_3(strcmp('mCherry', risk_table.TreatmentCondition))];
+large_choice_hM4Di = [risk_table.small_consum_duration_block_1(strcmp('hM4Di', risk_table.TreatmentCondition)), risk_table.small_consum_duration_block_2(strcmp('hM4Di', risk_table.TreatmentCondition)), risk_table.small_consum_duration_block_3(strcmp('hM4Di', risk_table.TreatmentCondition))];
+
+
+mean_mCherry = nanmean(large_choice_mCherry, 1);
+mean_hM4Di = nanmean(large_choice_hM4Di, 1);
+
+
+sem_mCherry = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_hM4Di = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', hM4Di_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_hM4Di, sem_hM4Di, hM4Di_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', hM4Di_color, 'MarkerFaceColor', hM4Di_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 6]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:2:6);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
 %% for stGtACR vs mCherry
 
 large_choice_mCherry = [risk_table.block_1_large(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_2_large(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_3_large(strcmp('mCherry', risk_table.TreatmentCondition))]*100;
@@ -2476,6 +2805,107 @@ set(gca, 'ytick', 0:25:125);
 hold off;
 
 %%
+mCherry_session_length = [risk_table.session_length(strcmp('mCherry', risk_table.TreatmentCondition))]
+hm4di_session_length = [risk_table.session_length(strcmp('stGtACR', risk_table.TreatmentCondition))]
+
+bar_separation_value = 3;
+
+figure;
+width = 200; % Width of the figure
+height = 450; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Swarm chart for Type 1.2 correlations
+swarmchart(ones(1, length(mCherry_session_length)), mCherry_session_length, 90, 'o', 'MarkerFaceColor', mCherry_color);
+hold on;
+swarmchart(ones(1, length(hm4di_session_length)) * bar_separation_value, hm4di_session_length, 100, 'square', 'MarkerFaceColor', stGtACR_color);
+
+% Plot mean lines for Type 1.2 correlations
+plot([0.5; 1.5], [mean(mCherry_session_length); mean(mCherry_session_length)], 'LineWidth', 3, 'Color', 'red');
+plot([bar_separation_value - 0.5; bar_separation_value + 0.5], [mean(hm4di_session_length); mean(hm4di_session_length)], 'LineWidth', 3, 'Color', 'blue');
+
+
+% General plot settings
+yline(0, 'k--');
+xticks([1, bar_separation_value, bar_separation_value + 2]);
+xticklabels({'Type 1.2 SHK Resp.', 'Type 1.2 Not SHK Resp.'});
+xtickformat('%.1f');
+ytickformat('%.1f');
+hold off;
+
+[h p ci stats] = ttest2(mCherry_session_length, hm4di_session_length)
+
+
+%% for hM4Di vs mCherry
+
+large_choice_mCherry = [risk_table.block_1_mean_ITI_length(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_2_mean_ITI_length(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_3_mean_ITI_length(strcmp('mCherry', risk_table.TreatmentCondition))];
+large_choice_hM4Di = [risk_table.block_1_mean_ITI_length(strcmp('stGtACR', risk_table.TreatmentCondition)), risk_table.block_2_mean_ITI_length(strcmp('stGtACR', risk_table.TreatmentCondition)), risk_table.block_3_mean_ITI_length(strcmp('stGtACR', risk_table.TreatmentCondition))];
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', stGtACR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, stGtACR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', stGtACR_color, 'MarkerFaceColor', stGtACR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 150]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:150);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+yline(8)
+hold off;
 %% for PdCO vs mCherry
 
 large_choice_mCherry = [risk_table.block_1_large(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_2_large(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_3_large(strcmp('mCherry', risk_table.TreatmentCondition))]*100;
@@ -4260,6 +4690,166 @@ set(gca, 'ytick', 0:5:15);
 
 hold off;
 
+%%
+mCherry_session_length = [risk_table.session_length(strcmp('mCherry', risk_table.TreatmentCondition))]
+PdCO_session_length = [risk_table.session_length(strcmp('PdCO', risk_table.TreatmentCondition))]
+ChrimsonR_session_length = [risk_table.session_length(strcmp('ChrimsonR', risk_table.TreatmentCondition))]
+
+bar_separation_value = [3 5];
+
+figure;
+width = 200; % Width of the figure
+height = 450; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Swarm chart for Type 1.2 correlations
+swarmchart(ones(1, length(mCherry_session_length)), mCherry_session_length, 90, 'o', 'MarkerFaceColor', mCherry_color);
+hold on;
+swarmchart(ones(1, length(PdCO_session_length)) * bar_separation_value(1), PdCO_session_length, 100, '^', 'MarkerFaceColor', PdCO_color);
+hold on;
+swarmchart(ones(1, length(ChrimsonR_session_length)) * bar_separation_value(2), ChrimsonR_session_length, 100, 'square', 'MarkerFaceColor', ChrimsonR_color);
+
+
+
+% Plot mean lines for Type 1.2 correlations
+plot([0.5; 1.5], [mean(mCherry_session_length); mean(mCherry_session_length)], 'LineWidth', 3, 'Color', 'red');
+plot([bar_separation_value(1) - 0.5; bar_separation_value(1) + 0.5], [mean(PdCO_session_length); mean(PdCO_session_length)], 'LineWidth', 3, 'Color', 'blue');
+plot([bar_separation_value(2) - 0.5; bar_separation_value(2) + 0.5], [mean(ChrimsonR_session_length); mean(ChrimsonR_session_length)], 'LineWidth', 3, 'Color', 'black');
+
+% General plot settings
+yline(0, 'k--');
+xticks([1, bar_separation_value, bar_separation_value + 2]);
+xticklabels({'Type 1.2 SHK Resp.', 'Type 1.2 Not SHK Resp.'});
+xtickformat('%.1f');
+ytickformat('%.1f');
+hold off;
+
+% Concatenate all your data into one column vector
+all_data = [mCherry_session_length; PdCO_session_length; ChrimsonR_session_length];
+
+% Create a grouping variable that identifies which group each observation belongs to
+group = [ones(length(mCherry_session_length), 1); 
+         2*ones(length(PdCO_session_length), 1); 
+         3*ones(length(ChrimsonR_session_length), 1)];
+
+% Perform the one-way ANOVA
+[p, tbl, stats] = anova1(all_data, group);
+
+
+% If the ANOVA is significant, do pairwise comparisons
+if p < 0.05
+    figure;
+    [c, m, h, gnames] = multcompare(stats);
+    
+    % Convert to a table with descriptive column names
+    comparison_table = array2table(c, ...
+        'VariableNames', {'Group1', 'Group2', 'LowerCI', 'MeanDiff', 'UpperCI', 'pValue'});
+    
+    % Display the table
+    disp('Pairwise Comparisons:');
+    disp(comparison_table);
+    
+    % Show only significant comparisons
+    sig_comparisons = comparison_table(comparison_table.pValue < 0.05, :);
+    disp('Significant pairwise comparisons (p < 0.05):');
+    disp(sig_comparisons);
+    %p-values are Tukey's
+end
+
+
+%% for PdCO vs ChrimsonR vs mCherry
+
+large_choice_mCherry = [risk_table.block_1_mean_ITI_length(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_2_mean_ITI_length(strcmp('mCherry', risk_table.TreatmentCondition)), risk_table.block_3_mean_ITI_length(strcmp('mCherry', risk_table.TreatmentCondition))];
+large_choice_PdCO = [risk_table.block_1_mean_ITI_length(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.block_2_mean_ITI_length(strcmp('PdCO', risk_table.TreatmentCondition)), risk_table.block_3_mean_ITI_length(strcmp('PdCO', risk_table.TreatmentCondition))];
+large_choice_ChrimsonR = [risk_table.block_1_mean_ITI_length(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.block_2_mean_ITI_length(strcmp('ChrimsonR', risk_table.TreatmentCondition)), risk_table.block_3_mean_ITI_length(strcmp('ChrimsonR', risk_table.TreatmentCondition))];
+
+mean_mCherry = nanmean(large_choice_mCherry, 1);
+mean_PdCO = nanmean(large_choice_PdCO, 1);
+mean_ChrimsonR = nanmean(large_choice_ChrimsonR, 1);
+
+sem_mCherry = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_PdCO = nanstd(large_choice_PdCO, 0, 1) ./ sqrt(size(large_choice_PdCO, 1));
+sem_ChrimsonR = nanstd(large_choice_ChrimsonR, 0, 1) ./ sqrt(size(large_choice_ChrimsonR, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_PdCO, 1)
+    plot(x_points, large_choice_PdCO(i, :), '-', ...
+        'Color', PdCO_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_ChrimsonR, 1)
+    plot(x_points, large_choice_ChrimsonR(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_mCherry, sem_mCherry, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_PdCO, sem_PdCO, PdCO_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', PdCO_color, 'MarkerFaceColor', PdCO_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_ChrimsonR, sem_ChrimsonR, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 120]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:20:120);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+yline(8)
+hold off;
+
+
+
+
+
+
+
+
+
 
 %% for A2A vs D1 vs Control
 
@@ -4345,7 +4935,9 @@ set(gca, 'ytick', 0:25:100);
 % grid on;
 
 hold off;
-
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
 %% for A2A vs D1 vs Control
 
 large_choice_Control = [risk_table.block_1_small(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_2_small(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_3_small(strcmp('Control', risk_table.TreatmentCondition))]*100;
@@ -4430,7 +5022,9 @@ set(gca, 'ytick', 0:25:100);
 % grid on;
 
 hold off;
-
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
 %% for A2A vs D1 vs Control
 
 large_choice_Control = [risk_table.block_1_choice_latency_all(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_2_choice_latency_all(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_3_choice_latency_all(strcmp('Control', risk_table.TreatmentCondition))];
@@ -4515,7 +5109,9 @@ set(gca, 'ytick', 0:5:15);
 % grid on;
 
 hold off;
-
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
 %% for A2A vs D1 vs Control
 
 large_choice_Control = [risk_table.block_1_large_collect_latency(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_2_large_collect_latency(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_3_large_collect_latency(strcmp('Control', risk_table.TreatmentCondition))];
@@ -4601,7 +5197,9 @@ set(gca, 'ytick', 0:5:15);
 
 hold off;
 
-
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
 %% for A2A vs D1 vs Control
 
 large_choice_Control = [risk_table.block_1_omission_total(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_2_omission_total(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_3_omission_total(strcmp('Control', risk_table.TreatmentCondition))];
@@ -4686,6 +5284,9 @@ set(gca, 'ytick', 0:10:40);
 % grid on;
 
 hold off;
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
 %% for A2A vs D1 vs Control
 
 large_choice_Control = [risk_table.large_aborts_block_1(strcmp('Control', risk_table.TreatmentCondition)), risk_table.large_aborts_block_2(strcmp('Control', risk_table.TreatmentCondition)), risk_table.large_aborts_block_3(strcmp('Control', risk_table.TreatmentCondition))];
@@ -4770,7 +5371,9 @@ set(gca, 'ytick', 0:30:90);
 % grid on;
 
 hold off;
-
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
 
 %% for A2A vs D1 vs Control
 
@@ -4856,7 +5459,107 @@ set(gca, 'ytick', 0:30:90);
 % grid on;
 
 hold off;
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
+%% for A2A vs D1 vs Control
 
+large_aborts_Control = [risk_table.large_aborts_block_1(strcmp('Control', risk_table.TreatmentCondition)), risk_table.large_aborts_block_2(strcmp('Control', risk_table.TreatmentCondition)), risk_table.large_aborts_block_3(strcmp('Control', risk_table.TreatmentCondition))];
+large_aborts_A2A = [risk_table.large_aborts_block_1(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.large_aborts_block_2(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.large_aborts_block_3(strcmp('A2A', risk_table.TreatmentCondition))];
+large_aborts_D1 = [risk_table.large_aborts_block_1(strcmp('D1', risk_table.TreatmentCondition)), risk_table.large_aborts_block_2(strcmp('D1', risk_table.TreatmentCondition)), risk_table.large_aborts_block_3(strcmp('D1', risk_table.TreatmentCondition))];
+
+small_aborts_Control = [risk_table.small_aborts_block_1(strcmp('Control', risk_table.TreatmentCondition)), risk_table.small_aborts_block_2(strcmp('Control', risk_table.TreatmentCondition)), risk_table.small_aborts_block_3(strcmp('Control', risk_table.TreatmentCondition))];
+small_aborts_A2A = [risk_table.small_aborts_block_1(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.small_aborts_block_2(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.small_aborts_block_3(strcmp('A2A', risk_table.TreatmentCondition))];
+small_aborts__D1 = [risk_table.small_aborts_block_1(strcmp('D1', risk_table.TreatmentCondition)), risk_table.small_aborts_block_2(strcmp('D1', risk_table.TreatmentCondition)), risk_table.small_aborts_block_3(strcmp('D1', risk_table.TreatmentCondition))];
+
+
+
+large_choice_Control = [large_aborts_Control + small_aborts_Control];
+large_choice_A2A = [large_aborts_A2A + small_aborts_A2A];
+large_choice_D1 = [large_aborts_D1 + small_aborts__D1];
+
+mean_Control = nanmean(large_choice_Control, 1);
+mean_A2A = nanmean(large_choice_A2A, 1);
+mean_D1 = nanmean(large_choice_D1, 1);
+
+sem_Control = nanstd(large_choice_Control, 0, 1) ./ sqrt(size(large_choice_Control, 1));
+sem_A2A = nanstd(large_choice_A2A, 0, 1) ./ sqrt(size(large_choice_A2A, 1));
+sem_D1 = nanstd(large_choice_D1, 0, 1) ./ sqrt(size(large_choice_D1, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_Control, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_Control, 1)
+    plot(x_points, large_choice_Control(i, :), '-', ...
+        'Color', Control_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_A2A, 1)
+    plot(x_points, large_choice_A2A(i, :), '-', ...
+        'Color', A2A_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_D1, 1)
+    plot(x_points, large_choice_D1(i, :), '-', ...
+        'Color', D1_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_Control, sem_Control, Control_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', Control_color, 'MarkerFaceColor', Control_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_A2A, sem_A2A, A2A_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', A2A_color, 'MarkerFaceColor', A2A_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_D1, sem_D1, D1_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', D1_color, 'MarkerFaceColor', D1_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 90]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:30:90);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
 %%
 large_choice_Control = [risk_table.large_consum_duration_block_1(strcmp('Control', risk_table.TreatmentCondition)), risk_table.large_consum_duration_block_2(strcmp('Control', risk_table.TreatmentCondition)), risk_table.large_consum_duration_block_3(strcmp('Control', risk_table.TreatmentCondition))];
 large_choice_A2A = [risk_table.large_consum_duration_block_1(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.large_consum_duration_block_2(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.large_consum_duration_block_3(strcmp('A2A', risk_table.TreatmentCondition))];
@@ -5026,8 +5729,431 @@ set(gca, 'ytick', 0:5:15);
 
 hold off;
 
+%% for A2A vs D1 vs Control
+
+large_choice_Control = [risk_table.block_1_collect_latency_all(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_2_collect_latency_all(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_3_collect_latency_all(strcmp('Control', risk_table.TreatmentCondition))];
+large_choice_A2A = [risk_table.block_1_collect_latency_all(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.block_2_collect_latency_all(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.block_3_collect_latency_all(strcmp('A2A', risk_table.TreatmentCondition))];
+large_choice_D1 = [risk_table.block_1_collect_latency_all(strcmp('D1', risk_table.TreatmentCondition)), risk_table.block_2_collect_latency_all(strcmp('D1', risk_table.TreatmentCondition)), risk_table.block_3_collect_latency_all(strcmp('D1', risk_table.TreatmentCondition))];
+
+mean_Control = nanmean(large_choice_Control, 1);
+mean_A2A = nanmean(large_choice_A2A, 1);
+mean_D1 = nanmean(large_choice_D1, 1);
+
+sem_Control = nanstd(large_choice_Control, 0, 1) ./ sqrt(size(large_choice_Control, 1));
+sem_A2A = nanstd(large_choice_A2A, 0, 1) ./ sqrt(size(large_choice_A2A, 1));
+sem_D1 = nanstd(large_choice_D1, 0, 1) ./ sqrt(size(large_choice_D1, 1));
 
 
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_Control, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_Control, 1)
+    plot(x_points, large_choice_Control(i, :), '-', ...
+        'Color', Control_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_A2A, 1)
+    plot(x_points, large_choice_A2A(i, :), '-', ...
+        'Color', A2A_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_D1, 1)
+    plot(x_points, large_choice_D1(i, :), '-', ...
+        'Color', D1_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_Control, sem_Control, Control_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', Control_color, 'MarkerFaceColor', Control_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_A2A, sem_A2A, A2A_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', A2A_color, 'MarkerFaceColor', A2A_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_D1, sem_D1, D1_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', D1_color, 'MarkerFaceColor', D1_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 17]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:5:15);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
+%% for A2A vs D1 vs Control
+
+large_choice_Control = [risk_table.block_1_omission_total(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_2_omission_total(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_3_omission_total(strcmp('Control', risk_table.TreatmentCondition))];
+large_choice_A2A = [risk_table.block_1_omission_total(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.block_2_omission_total(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.block_3_omission_total(strcmp('A2A', risk_table.TreatmentCondition))];
+large_choice_D1 = [risk_table.block_1_omission_total(strcmp('D1', risk_table.TreatmentCondition)), risk_table.block_2_omission_total(strcmp('D1', risk_table.TreatmentCondition)), risk_table.block_3_omission_total(strcmp('D1', risk_table.TreatmentCondition))];
+
+mean_Control = nanmean(large_choice_Control, 1);
+mean_A2A = nanmean(large_choice_A2A, 1);
+mean_D1 = nanmean(large_choice_D1, 1);
+
+sem_Control = nanstd(large_choice_Control, 0, 1) ./ sqrt(size(large_choice_Control, 1));
+sem_A2A = nanstd(large_choice_A2A, 0, 1) ./ sqrt(size(large_choice_A2A, 1));
+sem_D1 = nanstd(large_choice_D1, 0, 1) ./ sqrt(size(large_choice_D1, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_Control, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_Control, 1)
+    plot(x_points, large_choice_Control(i, :), '-', ...
+        'Color', Control_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_A2A, 1)
+    plot(x_points, large_choice_A2A(i, :), '-', ...
+        'Color', A2A_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_D1, 1)
+    plot(x_points, large_choice_D1(i, :), '-', ...
+        'Color', D1_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_Control, sem_Control, Control_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', Control_color, 'MarkerFaceColor', Control_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_A2A, sem_A2A, A2A_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', A2A_color, 'MarkerFaceColor', A2A_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_D1, sem_D1, D1_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', D1_color, 'MarkerFaceColor', D1_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 45]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:5:45);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
+
+%% for A2A vs D1 vs Control
+
+large_choice_Control = [risk_table.block_1_shock_total(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_2_shock_total(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_3_shock_total(strcmp('Control', risk_table.TreatmentCondition))];
+large_choice_A2A = [risk_table.block_1_shock_total(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.block_2_shock_total(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.block_3_shock_total(strcmp('A2A', risk_table.TreatmentCondition))];
+large_choice_D1 = [risk_table.block_1_shock_total(strcmp('D1', risk_table.TreatmentCondition)), risk_table.block_2_shock_total(strcmp('D1', risk_table.TreatmentCondition)), risk_table.block_3_shock_total(strcmp('D1', risk_table.TreatmentCondition))];
+
+mean_Control = nanmean(large_choice_Control, 1);
+mean_A2A = nanmean(large_choice_A2A, 1);
+mean_D1 = nanmean(large_choice_D1, 1);
+
+sem_Control = nanstd(large_choice_Control, 0, 1) ./ sqrt(size(large_choice_Control, 1));
+sem_A2A = nanstd(large_choice_A2A, 0, 1) ./ sqrt(size(large_choice_A2A, 1));
+sem_D1 = nanstd(large_choice_D1, 0, 1) ./ sqrt(size(large_choice_D1, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_Control, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_Control, 1)
+    plot(x_points, large_choice_Control(i, :), '-', ...
+        'Color', Control_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_A2A, 1)
+    plot(x_points, large_choice_A2A(i, :), '-', ...
+        'Color', A2A_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_D1, 1)
+    plot(x_points, large_choice_D1(i, :), '-', ...
+        'Color', D1_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_Control, sem_Control, Control_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', Control_color, 'MarkerFaceColor', Control_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_A2A, sem_A2A, A2A_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', A2A_color, 'MarkerFaceColor', A2A_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_D1, sem_D1, D1_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', D1_color, 'MarkerFaceColor', D1_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 20]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:5:20);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
+
+%%
+Control_session_length = [risk_table.session_length(strcmp('Control', risk_table.TreatmentCondition))]
+A2A_session_length = [risk_table.session_length(strcmp('A2A', risk_table.TreatmentCondition))]
+D1_session_length = [risk_table.session_length(strcmp('D1', risk_table.TreatmentCondition))]
+
+bar_separation_value = [3 5];
+
+figure;
+width = 200; % Width of the figure
+height = 450; % Height of the figure (width is half of height)
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+% Swarm chart for Type 1.2 correlations
+swarmchart(ones(1, length(Control_session_length)), Control_session_length, 90, 'o', 'MarkerFaceColor', Control_color);
+hold on;
+swarmchart(ones(1, length(A2A_session_length)) * bar_separation_value(1), A2A_session_length, 100, '^', 'MarkerFaceColor', A2A_color);
+hold on;
+swarmchart(ones(1, length(D1_session_length)) * bar_separation_value(2), D1_session_length, 100, 'square', 'MarkerFaceColor', D1_color);
+
+
+
+% Plot mean lines for Type 1.2 correlations
+plot([0.5; 1.5], [mean(Control_session_length); mean(Control_session_length)], 'LineWidth', 3, 'Color', 'red');
+plot([bar_separation_value(1) - 0.5; bar_separation_value(1) + 0.5], [mean(A2A_session_length); mean(A2A_session_length)], 'LineWidth', 3, 'Color', 'blue');
+plot([bar_separation_value(2) - 0.5; bar_separation_value(2) + 0.5], [mean(D1_session_length); mean(D1_session_length)], 'LineWidth', 3, 'Color', 'black');
+
+% General plot settings
+
+
+ylim([0 6000]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:1000:6000);
+xticks([1, bar_separation_value, bar_separation_value + 2]);
+xticklabels({'Type 1.2 SHK Resp.', 'Type 1.2 Not SHK Resp.'});
+xtickformat('%.1f');
+ytickformat('%.1f');
+
+
+hold off;
+
+% Concatenate all your data into one column vector
+all_data = [Control_session_length; A2A_session_length; D1_session_length];
+
+% Create a grouping variable that identifies which group each observation belongs to
+group = [ones(length(Control_session_length), 1); 
+         2*ones(length(A2A_session_length), 1); 
+         3*ones(length(D1_session_length), 1)];
+
+% Perform the one-way ANOVA
+[p, tbl, stats] = anova1(all_data, group);
+
+
+% If the ANOVA is significant, do pairwise comparisons
+if p < 0.05
+    figure;
+    [c, m, h, gnames] = multcompare(stats);
+    
+    % Convert to a table with descriptive column names
+    comparison_table = array2table(c, ...
+        'VariableNames', {'Group1', 'Group2', 'LowerCI', 'MeanDiff', 'UpperCI', 'pValue'});
+    
+    % Display the table
+    disp('Pairwise Comparisons:');
+    disp(comparison_table);
+    
+    % Show only significant comparisons
+    sig_comparisons = comparison_table(comparison_table.pValue < 0.05, :);
+    disp('Significant pairwise comparisons (p < 0.05):');
+    disp(sig_comparisons);
+    %p-values are Tukey's
+end
+
+
+%%
+
+large_choice_Control = [risk_table.block_1_mean_ITI_length(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_2_mean_ITI_length(strcmp('Control', risk_table.TreatmentCondition)), risk_table.block_3_mean_ITI_length(strcmp('Control', risk_table.TreatmentCondition))];
+large_choice_A2A = [risk_table.block_1_mean_ITI_length(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.block_2_mean_ITI_length(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.block_3_mean_ITI_length(strcmp('A2A', risk_table.TreatmentCondition))];
+large_choice_D1 = [risk_table.block_1_mean_ITI_length(strcmp('D1', risk_table.TreatmentCondition)), risk_table.block_2_mean_ITI_length(strcmp('D1', risk_table.TreatmentCondition)), risk_table.block_3_mean_ITI_length(strcmp('D1', risk_table.TreatmentCondition))];
+
+mean_Control = nanmean(large_choice_Control, 1);
+mean_A2A = nanmean(large_choice_A2A, 1);
+mean_D1 = nanmean(large_choice_D1, 1);
+
+sem_Control = nanstd(large_choice_Control, 0, 1) ./ sqrt(size(large_choice_Control, 1));
+sem_A2A = nanstd(large_choice_A2A, 0, 1) ./ sqrt(size(large_choice_A2A, 1));
+sem_D1 = nanstd(large_choice_D1, 0, 1) ./ sqrt(size(large_choice_D1, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_Control, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_Control, 1)
+    plot(x_points, large_choice_Control(i, :), '-', ...
+        'Color', Control_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_A2A, 1)
+    plot(x_points, large_choice_A2A(i, :), '-', ...
+        'Color', A2A_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_D1, 1)
+    plot(x_points, large_choice_D1(i, :), '-', ...
+        'Color', D1_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_Control, sem_Control, Control_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', Control_color, 'MarkerFaceColor', Control_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_A2A, sem_A2A, A2A_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', A2A_color, 'MarkerFaceColor', A2A_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_D1, sem_D1, D1_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', D1_color, 'MarkerFaceColor', D1_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 120]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:20:120);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+yline(8)
+hold off;
+
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
 %%
 
 
@@ -6344,3 +7470,586 @@ males_completed_percent = 100-males_did_not_complete_percent;
 
 figure; donutchart([females_did_not_complete_percent females_completed_percent], 'InnerRadius', 0.7, 'StartAngle', 270)
 figure; donutchart([males_did_not_complete_percent males_completed_percent], 'InnerRadius', 0.7, 'StartAngle', 270)
+
+%%
+sum_shocks = risk_table.block_1_shock_total + risk_table.block_2_shock_total + + risk_table.block_3_shock_total
+
+
+x = risk_table.Mean_1_to_3;
+y = sum_shocks;
+
+% Calculate the coefficient of determination (r-squared value)
+p = polyfit(x, y, 1);
+y_fit = polyval(p, x);
+y_mean = mean(y);
+SS_tot = sum((y - y_mean).^2);
+SS_res = sum((y - y_fit).^2);
+r_squared = 1 - (SS_res / SS_tot);
+figure;
+% Plot the scatter plot
+scatter(x, y);
+hold on;
+
+% Plot the linear fit line
+plot(x, y_fit, 'r');
+
+% Add title and labels
+title(['Scatter Plot with R-Squared = ', num2str(r_squared)]);
+xlabel('RDT D1 AVG Risk %');
+ylabel('# shocks received');
+
+% Show the legend
+legend('Data', 'Linear Fit', 'Location', 'best');
+
+% Release hold
+hold off;
+
+figure;
+width = 250; % Width of the figure
+height = 150; % Height of the figure (width is half of height)
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+
+hold on;
+scatter(x, y, 100)
+% Set the axis labels to have 2 decimal places
+xtickformat('%.2f');
+ytickformat('%.2f');
+% Add a regression line (You can keep this part unchanged)
+coefficients = polyfit(x, y, 1);
+x_fit = linspace(min(x), max(x), 100);
+y_fit = polyval(coefficients, x_fit);
+plot(x_fit, y_fit, 'r');
+
+% Calculate R-squared value (You can keep this part unchanged)
+y_pred = polyval(coefficients, x);
+ssr = sum((y_pred - mean(y)).^2);
+sst = sum((y - mean(y)).^2);
+r_squared = ssr / sst;
+
+% can also calculate the r-squared this way
+% Calculate the R^2 value
+[r, pval] = corrcoef(x, y); % Compute correlation coefficient matrix
+rsq = r(1, 2)^2; % Extract and square the correlation coefficient
+% Get axes limits
+ax = gca;
+xLimits = xlim(ax);
+yLimits = ylim(ax);
+
+% Set text position relative to axes limits
+xPos = xLimits(2) - 0.05 * range(xLimits); % Slightly inside the top-right
+yPos = yLimits(2) - 0.05 * range(yLimits); % Slightly inside the top-right
+
+% Add R-squared value to the plot (You can keep this part unchanged)
+text(xPos, yPos, ...
+    {['R^2 = ' num2str(r_squared, '%.2f')], ...
+     ['p = ' num2str(pval(2), '%.2f')]}, ...
+    'FontSize', 12, ...
+    'Color', 'blue', ...
+    'HorizontalAlignment', 'right', ... % Align text to the right
+    'VerticalAlignment', 'top');       % Align text to the top
+
+
+% Add labels and a legend if needed
+xlabel('Riskiness');
+ylabel('Free-feed weight (g)');
+% title('Scatter Plot with Regression Line and R^2 Value');
+hold off;
+
+
+%%
+%% for BLA-NAcSh Contingent vs Yoked
+
+large_choice_mCherry = [risk_table.block_1_large(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_2_large(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_3_large(strcmp('Conting', risk_table.TreatmentCondition))]*100;
+large_choice_hM4Di = [risk_table.block_1_large(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_2_large(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_3_large(strcmp('Yoked', risk_table.TreatmentCondition))]*100;
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 100]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:100);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%% for BLA-NAcSh Contingent vs Yoked
+
+large_choice_mCherry = [risk_table.block_1_small(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_2_small(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_3_small(strcmp('Conting', risk_table.TreatmentCondition))]*100;
+large_choice_hM4Di = [risk_table.block_1_small(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_2_small(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_3_small(strcmp('Yoked', risk_table.TreatmentCondition))]*100;
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 100]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:100);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%% 
+
+large_choice_mCherry = [risk_table.large_aborts_block_1(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.large_aborts_block_2(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.large_aborts_block_3(strcmp('Conting', risk_table.TreatmentCondition))];
+large_choice_hM4Di = [risk_table.large_aborts_block_1(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.large_aborts_block_2(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.large_aborts_block_3(strcmp('Yoked', risk_table.TreatmentCondition))];
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 115]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:100);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%%
+
+large_choice_mCherry = [risk_table.block_1_large_choice_latency(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_2_large_choice_latency(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_3_large_choice_latency(strcmp('Conting', risk_table.TreatmentCondition))];
+large_choice_hM4Di = [risk_table.block_1_large_choice_latency(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_2_large_choice_latency(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_3_large_choice_latency(strcmp('Yoked', risk_table.TreatmentCondition))];
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 20]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:5:20);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%%
+
+large_choice_mCherry = [risk_table.block_1_omission_total(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_2_omission_total(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_3_omission_total(strcmp('Conting', risk_table.TreatmentCondition))];
+large_choice_hM4Di = [risk_table.block_1_omission_total(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_2_omission_total(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_3_omission_total(strcmp('Yoked', risk_table.TreatmentCondition))];
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 30]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:5:30);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%%
+
+large_choice_mCherry = [risk_table.block_1_large_collect_latency(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_2_large_collect_latency(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_3_large_collect_latency(strcmp('Conting', risk_table.TreatmentCondition))];
+large_choice_hM4Di = [risk_table.block_1_large_collect_latency(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_2_large_collect_latency(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_3_large_collect_latency(strcmp('Yoked', risk_table.TreatmentCondition))];
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 6]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:1:5);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+%%
+
+large_choice_mCherry = [risk_table.block_1_shock_total(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_2_shock_total(strcmp('Conting', risk_table.TreatmentCondition)), risk_table.block_3_shock_total(strcmp('Conting', risk_table.TreatmentCondition))];
+large_choice_hM4Di = [risk_table.block_1_shock_total(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_2_shock_total(strcmp('Yoked', risk_table.TreatmentCondition)), risk_table.block_3_shock_total(strcmp('Yoked', risk_table.TreatmentCondition))];
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 15]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:5:15);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;

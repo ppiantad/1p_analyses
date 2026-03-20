@@ -1,6 +1,6 @@
 
 
-metaDirectory = 'D:\MATLAB\my_repo\context fear\temperature & light probe';
+metaDirectory = 'd:\MATLAB\my_repo\context fear\temperature & light probe';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -169,7 +169,7 @@ figure; plot(1:6, binned_brightness)
 
 %%
 
-session_to_analyze = 'D4_Discrimination';
+session_to_analyze = 'D3_Discrimination';
 
 if strcmp(session_to_analyze, 'D3_Discrimination')
     timing_info = mouse_session_times(:, 6:7);
@@ -202,7 +202,7 @@ for ii = 1:size(mouse_number, 2)
 
     % Extract the relevant columns
     time_column = timeofday(light_temp_struct.(session_to_analyze){:, 2}); % Convert table column to array
-    temperature_column = light_temp_struct.(session_to_analyze){:, 3}; % Extract temperature data
+    temperature_column = light_temp_struct.(session_to_analyze){:, 3} % Extract temperature data
     brightness_column = light_temp_struct.(session_to_analyze){:, 4}; % Extract temperature data
 
     % % Define the time range
@@ -214,6 +214,7 @@ for ii = 1:size(mouse_number, 2)
 
     % Extract the corresponding temperature data
     filtered_temperature = temperature_column(valid_indices);
+    filtered_temp_mouse{ii} = filtered_temperature';
     filtered_time = time_column(valid_indices);
     filtered_brightness = brightness_column(valid_indices);
 
@@ -239,7 +240,127 @@ for ii = 1:size(mouse_number, 2)
    binned_brightness_mouse(:, ii) = binned_brightness;
    binned_brightness_sem_mouse(:, ii) = binned_brightness_sem;
 
+
+   binned_temp = zeros(total_bins, 1); % Preallocate for efficiency
+
+   for ff = 1:total_bins
+       % Find indices where time falls within the bin
+       valid_indices = (time_seconds > discrimination_bins_seconds(ff,1)) & ...
+           (time_seconds < discrimination_bins_seconds(ff,2));
+
+       % Take the mean of the filtered brightness values within the time bin
+       binned_temp(ff) = mean(filtered_temperature(valid_indices));
+       binned_temp_sem(ff) = std(filtered_temperature(valid_indices))/sqrt(size(filtered_temperature, 1));
+   end
+
+   binned_temp_mouse(:, ii) = binned_temp;
+   binned_temp_sem_mouse(:, ii) = binned_temp_sem;
+
 end
 
+% figure;
+% shadedErrorBar(1:6, mean(binned_brightness_mouse, 2), mean(binned_brightness_sem_mouse, 2))
+% ylim([0 100])
+% 
+% figure;
+% shadedErrorBar(1:6, mean(binned_temp_mouse, 2), mean(binned_temp_sem_mouse, 2))
+% ylim([76 78])
+
+
 figure;
-shadedErrorBar(1:6, mean(binned_brightness_mouse, 2), mean(binned_brightness_sem_mouse, 2))
+shadedErrorBar(1:6, mean(binned_brightness_mouse, 2), std(binned_brightness_mouse, [], 2))
+ylim([0 100])
+
+figure;
+shadedErrorBar(1:6, mean(binned_temp_mouse, 2), std(binned_temp_mouse, [], 2))
+ylim([74 80])
+yticks([74:1:80])
+%%
+% Assuming filtered_temp_mouse is your 1x4 cell array
+% where each cell contains a 1xN array of temperature data
+
+% Initialize cell array to store temperature changes
+temp_changes = cell(1, 4);
+
+% Loop through each cell
+for i = 1:4
+    % Extract the temperature data from current cell
+    temp_data = filtered_temp_mouse{i};
+    
+    % Calculate baseline mean from first 20 columns
+    baseline_mean = mean(temp_data(1:20));
+    
+    % Calculate change from baseline for each column
+    % (positive values = increase, negative = decrease)
+    temp_changes{i} = temp_data - baseline_mean;
+    
+    % Optional: Display results for this cell
+    fprintf('Cell %d:\n', i);
+    fprintf('  Baseline mean (first 20 samples): %.2f\n', baseline_mean);
+    fprintf('  Max temperature change: %.2f\n', max(temp_changes{i}));
+    fprintf('  Min temperature change: %.2f\n', min(temp_changes{i}));
+    fprintf('  Mean temperature change: %.2f\n', mean(temp_changes{i}));
+    fprintf('\n');
+end
+
+% Optional: Plot the temperature changes for visualization
+figure;
+for i = 1:4
+    subplot(2, 2, i);
+    plot(temp_changes{i});
+    hold on;
+    yline(0, 'k--', 'LineWidth', 1); % Add zero reference line
+    xlabel('Time (sec)');
+    % ylabel('Temperature change from baseline');
+    title(sprintf('Mouse %d: Temperature Change', i));
+    grid on;
+    ylim([0 1])
+    yticks([0 1])
+end
+% sgtitle('Temperature Changes Relative to Baseline (First 20 Samples)');
+
+%%
+% Find the minimum length across all cells
+min_length = inf;
+for i = 1:4
+    min_length = min(min_length, length(temp_changes{i}));
+end
+
+% Trim all arrays to the minimum length
+temp_changes_trimmed = zeros(4, min_length);  % Create matrix for easier mean/std calculation
+for i = 1:4
+    temp_changes_trimmed(i, :) = temp_changes{i}(1:min_length);
+end
+
+% Calculate mean and standard deviation across mice (rows)
+mean_temp_change = mean(temp_changes_trimmed, 1);  % Mean across rows
+std_temp_change = std(temp_changes_trimmed, 0, 1);  % Std across rows
+
+% Plot using shadedErrorBar
+figure;
+shadedErrorBar(1:min_length, mean_temp_change, std_temp_change)
+xlabel('Time (samples)');
+ylabel('Temperature change from baseline (°C)');
+title('Average Temperature Change Across Mice');
+grid on;
+
+% Add a reference line at zero
+hold on;
+yline(0, 'k--', 'LineWidth', 1, 'Alpha', 0.5);
+
+% Optional: Set y-axis limits based on your data range
+% You might want to adjust these based on your actual temperature changes
+ylim([-2 2]);  % Adjust as needed for your data
+yticks([-2:0.5:2]);  % Adjust as needed
+
+% Display info about trimming
+fprintf('Arrays trimmed to uniform length: %d samples\n', min_length);
+for i = 1:4
+    original_length = length(temp_changes{i});
+    if original_length > min_length
+        fprintf('  Cell %d: trimmed from %d to %d samples (%d samples removed)\n', ...
+            i, original_length, min_length, original_length - min_length);
+    else
+        fprintf('  Cell %d: no trimming needed (%d samples)\n', i, original_length);
+    end
+end

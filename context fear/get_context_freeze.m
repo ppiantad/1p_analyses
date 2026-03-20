@@ -3,23 +3,30 @@
 
 %% conditioning
 
-% experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
-% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\S1_mice_pilot.xlsx');
+
+% experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
 
 % experimental_grps = readtable('e:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
 
-% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
+% experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
 
-experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
+% experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\Re_DREADD_mice_corrected.xlsx');
 
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
 
+% experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\all_DREADD_mice_corrected.xlsx');
+
+experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
+
+%%
 % Define parameters
 threshold = 1; % Velocity threshold
 frame_rate = 30; % Frames per second
 sample_duration = 1/frame_rate; % Duration of each sample in seconds
-min_duration = 2; % Minimum duration to trigger labeling in seconds
+min_duration = 5; % Minimum duration to trigger labeling in seconds
 tolerance_duration = 0.1; % Maximum duration of dips to ignore (seconds)
 
 % Calculate the minimum number of consecutive rows needed
@@ -28,7 +35,7 @@ tolerance_samples = round(tolerance_duration * frame_rate);
 
 animalIDs = fieldnames(final_DLC);
 
-session_to_analyze = 'D1_Morning';
+session_to_analyze = 'D2_Afternoon';
 
 mouse_count = 0;
 for gg = 1:size(animalIDs, 1)
@@ -41,7 +48,27 @@ for gg = 1:size(animalIDs, 1)
         if isfield(final_DLC.(current_mouse), session_to_analyze)
             mouse_count = mouse_count+1;
             DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).movement_data;
-            
+            % Add this section within your mouse loop, after loading DLC_data_mouse
+            % (around line 77, after the line: DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).movement_data;)
+
+            % Calculate total distance traveled
+            if ismember('body_x_pix', DLC_data_mouse.Properties.VariableNames) && ismember('body_y_pix', DLC_data_mouse.Properties.VariableNames)
+                % Get x and y coordinates
+                x_coords = DLC_data_mouse.body_x_pix;
+                y_coords = DLC_data_mouse.body_y_pix;
+
+                % Calculate differences between consecutive points
+                dx = diff(x_coords);
+                dy = diff(y_coords);
+
+                % Calculate Euclidean distance for each step
+                step_distances = sqrt(dx.^2 + dy.^2);
+
+                % Sum to get total distance traveled
+                total_distance_traveled(mouse_count) = sum(step_distances, 'omitnan');
+            else
+                total_distance_traveled(mouse_count) = NaN;
+            end
             body_velocity = [];
             labels = [];
             % Get the body_velocity column
@@ -94,20 +121,20 @@ for gg = 1:size(animalIDs, 1)
             end
 
             % Add the labels as a new column to the table
-            % final_DLC.(current_mouse).(session_to_analyze).movement_data.freeze_label = labels;
+            final_DLC.(current_mouse).(session_to_analyze).movement_data.freeze_label = labels;
 
-            final_DLC.(current_mouse).(session_to_analyze).freeze_frames_mouse = freeze_frames_mouse{gg};
-            final_DLC.(current_mouse).(session_to_analyze).freeze_times_mouse = freeze_times_mouse{gg};
-
-
-            final_DLC.(current_mouse).(session_to_analyze).move_frames_mouse = move_frames_mouse{gg};
-            final_DLC.(current_mouse).(session_to_analyze).move_times_mouse = move_times_mouse{gg};
+            % final_DLC.(current_mouse).(session_to_analyze).freeze_frames_mouse = freeze_frames_mouse{gg};
+            % final_DLC.(current_mouse).(session_to_analyze).freeze_times_mouse = freeze_times_mouse{gg};
+            % 
+            % 
+            % final_DLC.(current_mouse).(session_to_analyze).move_frames_mouse = move_frames_mouse{gg};
+            % final_DLC.(current_mouse).(session_to_analyze).move_times_mouse = move_times_mouse{gg};
 
             % Find the row index where the 'mouse' column matches 'current_mouse'
             row_idx = strcmp(experimental_grps.mouse, current_mouse);
 
-            freeze_data(mouse_count, :) = labels(1:21587)';
-            % freeze_data(mouse_count, :) = DLC_data_mouse.was_freezing(1:21590);
+            % freeze_data(mouse_count, :) = labels(1:21587)';
+            freeze_data(mouse_count, :) = DLC_data_mouse.was_freezing(1:21587);
             experimental_grps_updated(mouse_count, :) = experimental_grps(row_idx, :);
         end
     end
@@ -172,7 +199,7 @@ if any("sex" == string(experimental_grps.Properties.VariableNames)) && ~any("tre
 
 elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames)))
 
-    if all(ismember(["hM4Di"], experimental_grps_updated.treatment))
+    if all(ismember(["hM4Di"], experimental_grps_updated.treatment)) && ~any("region" == string(experimental_grps.Properties.VariableNames))
 
         experimental_data_no_shk_period_mCherry = avg_freeze_no_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry'), :);
         experimental_sem_no_shk_period_mCherry = std(experimental_data_no_shk_period_mCherry)/sqrt(size(experimental_data_no_shk_period_mCherry, 1));
@@ -189,8 +216,27 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         experimental_data_shk_period_hM4Di = avg_freeze_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'hM4Di'), :);
         experimental_sem_shk_period_hM4Di = std(experimental_data_shk_period_hM4Di)/sqrt(size(experimental_data_shk_period_hM4Di, 1));
         experimental_mice_shk_period_hM4Di = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'hM4Di'), :);
+        % Distance for mCherry group
+        distance_mCherry = total_distance_traveled(strcmp(experimental_grps_updated.treatment, 'mCherry'));
+        mean_distance_mCherry = mean(distance_mCherry, 'omitnan');
+        sem_distance_mCherry = std(distance_mCherry, 'omitnan')/sqrt(sum(~isnan(distance_mCherry)));
 
-    elseif all(ismember(["chrimsonr"], experimental_grps_updated.treatment))
+        % Distance for hM4Di group
+        distance_hM4Di = total_distance_traveled(strcmp(experimental_grps_updated.treatment, 'hM4Di'));
+        mean_distance_hM4Di = mean(distance_hM4Di, 'omitnan');
+        sem_distance_hM4Di = std(distance_hM4Di, 'omitnan')/sqrt(sum(~isnan(distance_hM4Di)));
+
+        % Display results
+        fprintf('\n=== Total Distance Traveled (pixels) ===\n');
+        fprintf('mCherry group: %.2f ± %.2f (n=%d)\n', mean_distance_mCherry, sem_distance_mCherry, sum(~isnan(distance_mCherry)));
+        fprintf('hM4Di group: %.2f ± %.2f (n=%d)\n', mean_distance_hM4Di, sem_distance_hM4Di, sum(~isnan(distance_hM4Di)));
+
+        % Perform statistical test
+        [h, p_distance] = ttest2(distance_mCherry, distance_hM4Di);
+        fprintf('t-test p-value: %.4f\n', p_distance);
+
+
+    elseif all(ismember(["chrimsonr"], experimental_grps_updated.treatment)) && ~any("region" == string(experimental_grps.Properties.VariableNames))
 
         experimental_data_no_shk_period_mCherry = avg_freeze_no_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'control'), :);
         experimental_sem_no_shk_period_mCherry = std(experimental_data_no_shk_period_mCherry)/sqrt(size(experimental_data_no_shk_period_mCherry, 1));
@@ -207,6 +253,69 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         experimental_data_shk_period_hM4Di = avg_freeze_shk_period(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'chrimsonr'), :);
         experimental_sem_shk_period_hM4Di = std(experimental_data_shk_period_hM4Di)/sqrt(size(experimental_data_shk_period_hM4Di, 1));
         experimental_mice_shk_period_hM4Di = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'chrimsonr'), :); 
+    
+    elseif all(ismember(["hM4Di"], experimental_grps_updated.treatment)) && any("region" == string(experimental_grps.Properties.VariableNames))
+
+        % Always process mCherry data (regardless of region)
+        mCherry_idx = strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry');
+
+        experimental_data_no_shk_period_mCherry = avg_freeze_no_shk_period(mCherry_idx, :);
+        experimental_sem_no_shk_period_mCherry = std(experimental_data_no_shk_period_mCherry)/sqrt(size(experimental_data_no_shk_period_mCherry, 1));
+        experimental_mice_no_shk_period_mCherry = experimental_grps_updated(mCherry_idx, :);
+
+        experimental_data_shk_period_mCherry = avg_freeze_shk_period(mCherry_idx, :);
+        experimental_sem_shk_period_mCherry = std(experimental_data_shk_period_mCherry)/sqrt(size(experimental_data_shk_period_mCherry, 1));
+        experimental_mice_shk_period_mCherry = experimental_grps_updated(mCherry_idx, :);
+
+        % Distance for mCherry group
+        distance_mCherry = total_distance_traveled(strcmp(experimental_grps_updated.treatment, 'mCherry'));
+        mean_distance_mCherry = mean(distance_mCherry, 'omitnan');
+        sem_distance_mCherry = std(distance_mCherry, 'omitnan')/sqrt(sum(~isnan(distance_mCherry)));
+
+        % Process hM4Di data - split by region if region column exists
+        regions = unique(experimental_grps_updated.region(strcmp(experimental_grps_updated.treatment, 'hM4Di')));
+
+        % Initialize storage structures for each region
+        for r = 1:length(regions)
+            region_name = regions{r};
+
+            % Create indices for this region's hM4Di data
+            hM4Di_region_idx = strcmp(experimental_grps_updated.group, 'Experimental') & ...
+                strcmp(experimental_grps_updated.treatment, 'hM4Di') & ...
+                strcmp(experimental_grps_updated.region, region_name);
+
+            % Create variables with format: experimental_data_no_shk_period_PL_hM4Di
+            eval(sprintf('experimental_data_no_shk_period_%s_hM4Di = avg_freeze_no_shk_period(hM4Di_region_idx, :);', region_name));
+            eval(sprintf('experimental_sem_no_shk_period_%s_hM4Di = std(experimental_data_no_shk_period_%s_hM4Di)/sqrt(size(experimental_data_no_shk_period_%s_hM4Di, 1));', region_name, region_name, region_name));
+            eval(sprintf('experimental_mice_no_shk_period_%s_hM4Di = experimental_grps_updated(hM4Di_region_idx, :);', region_name));
+
+            eval(sprintf('experimental_data_shk_period_%s_hM4Di = avg_freeze_shk_period(hM4Di_region_idx, :);', region_name));
+            eval(sprintf('experimental_sem_shk_period_%s_hM4Di = std(experimental_data_shk_period_%s_hM4Di)/sqrt(size(experimental_data_shk_period_%s_hM4Di, 1));', region_name, region_name, region_name));
+            eval(sprintf('experimental_mice_shk_period_%s_hM4Di = experimental_grps_updated(hM4Di_region_idx, :);', region_name));
+
+            % Distance for this hM4Di region with format: distance_PL_hM4Di
+            distance_idx = strcmp(experimental_grps_updated.treatment, 'hM4Di') & ...
+                strcmp(experimental_grps_updated.region, region_name);
+            eval(sprintf('distance_%s_hM4Di = total_distance_traveled(distance_idx);', region_name));
+            eval(sprintf('mean_distance_%s_hM4Di = mean(distance_%s_hM4Di, ''omitnan'');', region_name, region_name));
+            eval(sprintf('sem_distance_%s_hM4Di = std(distance_%s_hM4Di, ''omitnan'')/sqrt(sum(~isnan(distance_%s_hM4Di)));', region_name, region_name, region_name));
+        end
+
+        % Display results
+        fprintf('\n=== Total Distance Traveled (pixels) ===\n');
+        fprintf('mCherry group (all regions): %.2f ± %.2f (n=%d)\n', mean_distance_mCherry, sem_distance_mCherry, sum(~isnan(distance_mCherry)));
+
+        for r = 1:length(regions)
+            region_name = regions{r};
+            eval(sprintf('fprintf(''hM4Di %s group: %%.2f ± %%.2f (n=%%d)\\n'', mean_distance_%s_hM4Di, sem_distance_%s_hM4Di, sum(~isnan(distance_%s_hM4Di)));', region_name, region_name, region_name, region_name));
+        end
+
+        % Perform statistical tests
+        for r = 1:length(regions)
+            region_name = regions{r};
+            eval(sprintf('[h_%s, p_distance_%s] = ttest2(distance_mCherry, distance_%s_hM4Di);', region_name, region_name, region_name));
+            eval(sprintf('fprintf(''t-test mCherry vs hM4Di-%s p-value: %%.4f\\n'', p_distance_%s);', region_name, region_name));
+        end
     end
 
 
@@ -242,7 +351,7 @@ if any("sex" == string(experimental_grps.Properties.VariableNames)) && ~any("tre
     group_colors = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980]}; % Blue, Orange, Yellow
 
 
-elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames)))
+elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames))) && ~any("region" == string(experimental_grps.Properties.VariableNames))
 
     no_shk_data = {experimental_data_no_shk_period_mCherry, experimental_data_no_shk_period_hM4Di};
     no_shk_means = [mean(experimental_data_no_shk_period_mCherry); ...
@@ -267,6 +376,67 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
 
     % Define colors for groups
     group_colors = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980]}; % Blue, Orange, Yellow
+
+
+
+elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames))) && any("region" == string(experimental_grps.Properties.VariableNames))
+
+  
+    % Get unique regions for hM4Di
+    regions = unique(experimental_grps_updated.region(strcmp(experimental_grps_updated.treatment, 'hM4Di')));
+    
+    % Initialize data arrays
+    no_shk_data = cell(1, 1 + length(regions)); % mCherry + each hM4Di region
+    shk_data = cell(1, 1 + length(regions));
+    no_shk_means = zeros(1 + length(regions), size(experimental_data_no_shk_period_mCherry, 2));
+    no_shk_sems = zeros(1 + length(regions), 1);
+    shk_means = zeros(1 + length(regions), size(experimental_data_shk_period_mCherry, 2));
+    shk_sems = zeros(1 + length(regions), 1);
+    group_labels = cell(1, 1 + length(regions));
+    
+    % First entry is always mCherry (all regions combined)
+    no_shk_data{1} = experimental_data_no_shk_period_mCherry;
+    no_shk_means(1, :) = mean(experimental_data_no_shk_period_mCherry);
+    no_shk_sems(1) = experimental_sem_no_shk_period_mCherry;
+    
+    shk_data{1} = experimental_data_shk_period_mCherry;
+    shk_means(1, :) = mean(experimental_data_shk_period_mCherry);
+    shk_sems(1) = experimental_sem_shk_period_mCherry;
+    
+    group_labels{1} = 'mCherry experimental';
+    
+    % Add each hM4Di region
+    for r = 1:length(regions)
+        region_name = regions{r};
+        idx = 1 + r; % Index in arrays
+        
+        % Get the region-specific hM4Di data using eval
+        eval(sprintf('no_shk_data{%d} = experimental_data_no_shk_period_%s_hM4Di;', idx, region_name));
+        eval(sprintf('no_shk_means(%d, :) = mean(experimental_data_no_shk_period_%s_hM4Di);', idx, region_name));
+        eval(sprintf('no_shk_sems(%d) = experimental_sem_no_shk_period_%s_hM4Di;', idx, region_name));
+        
+        eval(sprintf('shk_data{%d} = experimental_data_shk_period_%s_hM4Di;', idx, region_name));
+        eval(sprintf('shk_means(%d, :) = mean(experimental_data_shk_period_%s_hM4Di);', idx, region_name));
+        eval(sprintf('shk_sems(%d) = experimental_sem_shk_period_%s_hM4Di;', idx, region_name));
+        
+        group_labels{idx} = sprintf('hM4Di %s experimental', region_name);
+    end
+    
+    % Define custom bar positions based on number of groups
+    num_groups = 1 + length(regions);
+    no_shk_x = 1:num_groups; % e.g., [1, 2, 3] for mCherry, PL, RE
+    shk_x = (num_groups + 3):(2*num_groups + 2); % e.g., [5, 6, 7] with gap
+    
+    % Define colors for groups - extend if more than 2 regions
+    if length(regions) == 1
+        group_colors = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980]}; % Blue, Orange
+    elseif length(regions) == 2
+        group_colors = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250]}; % Blue, Orange, Yellow
+    else
+        % Generate more colors if needed
+        cmap = lines(num_groups);
+        group_colors = num2cell(cmap, 2);
+    end
 
 else
 
@@ -309,9 +479,9 @@ hold on;
 bar_width = 0.6; % Adjust bar width
 for i = 1:length(group_labels)
     % Plot "No Shock" bars
-    bar(no_shk_x(i), no_shk_means(i), bar_width, 'FaceColor', group_colors{i}, 'EdgeColor', 'none');
+    bar(no_shk_x(i), no_shk_means(i), bar_width, 'FaceColor', 'none', 'EdgeColor', group_colors{i});
     % Plot "Shock" bars
-    bar(shk_x(i), shk_means(i), bar_width, 'FaceColor', group_colors{i}, 'EdgeColor', 'none');
+    bar(shk_x(i), shk_means(i), bar_width, 'FaceColor', 'none', 'EdgeColor', group_colors{i});
 end
 
 % Add error bars
@@ -338,10 +508,10 @@ end
 % Customization
 xticks([mean(no_shk_x), mean(shk_x)]); % Set ticks at the center of each group
 
-xlim([0, 8]); % Adjust x-axis limits to provide spacing
+% xlim([0, 8]); % Adjust x-axis limits to provide spacing
 
 legend(group_labels, 'Location', 'NorthWest');
-ylim([0 .7])
+ylim([0 1])
 
 hold off;
 
@@ -400,8 +570,8 @@ if any("sex" == string(experimental_grps.Properties.VariableNames)) && ~any("tre
 
     ylim([0 1]); % Set y-axis limits
 
-elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames)))
-    if all(ismember(["hM4Di"], experimental_grps_updated.treatment))
+elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames))) 
+    if all(ismember(["hM4Di"], experimental_grps_updated.treatment)) && ~any("region" == string(experimental_grps.Properties.VariableNames))
         experimental_data_mCherry = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry'), :);
         experimental_sem_mCherry = std(experimental_data_mCherry)/sqrt(size(experimental_data_mCherry, 1));
         experimental_mice_mCherry = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry'), :);
@@ -424,7 +594,7 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
 
         ylim([0 1]); % Set y-axis limits
-    elseif all(ismember(["chrimsonr"], experimental_grps_updated.treatment))
+    elseif all(ismember(["chrimsonr"], experimental_grps_updated.treatment)) && ~any("region" == string(experimental_grps.Properties.VariableNames))
         experimental_data_mCherry = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'control'), :);
         experimental_sem_mCherry = std(experimental_data_mCherry)/sqrt(size(experimental_data_mCherry, 1));
         experimental_mice_mCherry = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'control'), :);
@@ -446,6 +616,82 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
         xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
 
+        ylim([0 1]); % Set y-axis limits
+
+    elseif all(ismember(["hM4Di"], experimental_grps_updated.treatment)) && any("region" == string(experimental_grps.Properties.VariableNames))
+
+        % Always process mCherry data (regardless of region)
+        mCherry_idx = strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry');
+
+        experimental_data_mCherry = binned_data(mCherry_idx, :);
+        experimental_sem_mCherry = std(experimental_data_mCherry)/sqrt(size(experimental_data_mCherry, 1));
+        experimental_mice_mCherry = experimental_grps_updated(mCherry_idx, :);
+
+        % Process hM4Di data - split by region
+        regions = unique(experimental_grps_updated.region(strcmp(experimental_grps_updated.treatment, 'hM4Di')));
+
+        % Initialize storage for each region
+        for r = 1:length(regions)
+            region_name = regions{r};
+
+            % Create indices for this region's hM4Di data
+            hM4Di_region_idx = strcmp(experimental_grps_updated.group, 'Experimental') & ...
+                strcmp(experimental_grps_updated.treatment, 'hM4Di') & ...
+                strcmp(experimental_grps_updated.region, region_name);
+
+            % Create variables with format: experimental_data_PL_hM4Di using binned_data directly
+            eval(sprintf('experimental_data_%s_hM4Di = binned_data(hM4Di_region_idx, :);', region_name));
+            eval(sprintf('experimental_sem_%s_hM4Di = std(experimental_data_%s_hM4Di)/sqrt(size(experimental_data_%s_hM4Di, 1));', region_name, region_name, region_name));
+            eval(sprintf('experimental_mice_%s_hM4Di = experimental_grps_updated(hM4Di_region_idx, :);', region_name));
+        end
+
+        % Create figure with all groups
+        figure('Position', [100, 100, 300, 450]); % [left, bottom, width, height]
+        hold on;
+
+        % Plot mCherry
+        h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_mCherry), experimental_sem_mCherry, 'lineProps', {'color', 'k'});
+
+        % Define colors for hM4Di regions
+        if length(regions) == 1
+            region_colors = {'r'};
+        elseif length(regions) == 2
+            region_colors = {'r', 'b'};
+        else
+            % Generate more colors if needed
+            cmap = lines(length(regions) + 1);
+            region_colors = num2cell(cmap(2:end, :), 2);
+        end
+
+        % Plot each hM4Di region
+        legend_labels = cell(1 + length(regions), 1);
+        legend_labels{1} = 'mCherry';
+
+        for r = 1:length(regions)
+            region_name = regions{r};
+            idx = 1 + r;
+
+            % Plot this region's data
+            if iscell(region_colors{r})
+                color = region_colors{r};
+            else
+                color = region_colors{r};
+            end
+
+            eval(sprintf('h(%d) = shadedErrorBar(1:num_bins, mean(experimental_data_%s_hM4Di), experimental_sem_%s_hM4Di, ''lineProps'', {''color'', ''%s''});', ...
+                idx, region_name, region_name, color));
+
+            legend_labels{idx} = sprintf('hM4Di %s', region_name);
+        end
+
+        % Add legend with all groups
+        legend_handles = arrayfun(@(x) x.mainLine, h);
+        legend(legend_handles, legend_labels);
+
+        % Adjust x-axis ticks and labels
+        xlim([1 num_bins]); % Set x-axis limits to match the data range
+        xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
+        xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
         ylim([0 1]); % Set y-axis limits
     end
 
@@ -487,7 +733,7 @@ end
 
 %% plot individual data from a given session - make sure to update variables and indices if using!
 % Load the data
-body_velocity = final_DLC.D04991        .D1_Afternoon.movement_data.body_velocity; % Assuming this is a table column
+body_velocity = final_DLC.B46837        .D1_Afternoon.movement_data.body_velocity; % Assuming this is a table column
 freeze_data_extracted = freeze_data(1,:); % Get the first row of freeze_data
 
 
@@ -649,7 +895,7 @@ if any("sex" == string(experimental_grps.Properties.VariableNames)) && ~any("tre
     [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1);
 
 elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames)))
-    if all(ismember(["hM4Di"], experimental_grps_updated.treatment))
+    if all(ismember(["hM4Di"], experimental_grps_updated.treatment)) && ~any("region" == string(experimental_grps.Properties.VariableNames))
 
         experimental_data_mCherry = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry'), :);
         experimental_sems_mice_mCherry = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry'), :);
@@ -676,7 +922,7 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         % need to make sure consec_thresh in perm_and_bCI is set to 10!
         [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, xlims_for_plot);
 
-    elseif all(ismember(["chrimsonr"], experimental_grps_updated.treatment))
+    elseif all(ismember(["chrimsonr"], experimental_grps_updated.treatment)) && ~any("region" == string(experimental_grps.Properties.VariableNames))
 
         experimental_data_mCherry = mean_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'control'), :);
         experimental_sems_mice_mCherry = sem_velocity_for_shocks(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'control'), :);
@@ -702,6 +948,102 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         xlims_for_plot = uv.evtWin;
         % need to make sure consec_thresh in perm_and_bCI is set to 10!
         [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, xlims_for_plot);
+
+    elseif all(ismember(["hM4Di"], experimental_grps_updated.treatment)) && any("region" == string(experimental_grps.Properties.VariableNames))
+
+        % Always process mCherry data (regardless of region)
+        mCherry_idx = strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry');
+
+        experimental_data_mCherry = mean_velocity_for_shocks(mCherry_idx, :);
+        experimental_sems_mice_mCherry = sem_velocity_for_shocks(mCherry_idx, :);
+        experimental_sem_mCherry = std(experimental_data_mCherry)/sqrt(size(experimental_data_mCherry, 1));
+        experimental_mice_mCherry = experimental_grps_updated(mCherry_idx, :);
+
+        % Process hM4Di data - split by region
+        regions = unique(experimental_grps_updated.region(strcmp(experimental_grps_updated.treatment, 'hM4Di')));
+
+        % Initialize storage for each region
+        for r = 1:length(regions)
+            region_name = regions{r};
+
+            % Create indices for this region's hM4Di data
+            hM4Di_region_idx = strcmp(experimental_grps_updated.group, 'Experimental') & ...
+                strcmp(experimental_grps_updated.treatment, 'hM4Di') & ...
+                strcmp(experimental_grps_updated.region, region_name);
+
+            % Create variables with format: experimental_data_PL_hM4Di
+            eval(sprintf('experimental_data_%s_hM4Di = mean_velocity_for_shocks(hM4Di_region_idx, :);', region_name));
+            eval(sprintf('experimental_sems_mice_%s_hM4Di = sem_velocity_for_shocks(hM4Di_region_idx, :);', region_name));
+            eval(sprintf('experimental_sem_%s_hM4Di = std(experimental_data_%s_hM4Di)/sqrt(size(experimental_data_%s_hM4Di, 1));', region_name, region_name, region_name));
+            eval(sprintf('experimental_mice_%s_hM4Di = experimental_grps_updated(hM4Di_region_idx, :);', region_name));
+        end
+
+        % Create figure
+        figure('Position', [100, 100, 300, 600]); % [left, bottom, width, height]
+        hold on;
+
+        % Plot mCherry
+        h(1) = shadedErrorBar(ts1, mean(experimental_data_mCherry), experimental_sem_mCherry, 'lineProps', {'color', 'k'});
+
+        % Define colors for hM4Di regions
+        if length(regions) == 1
+            region_colors = {'r'};
+        elseif length(regions) == 2
+            region_colors = {'r', 'b'};
+        else
+            % Generate more colors if needed
+            cmap = lines(length(regions) + 1);
+            region_colors = num2cell(cmap(2:end, :), 2);
+        end
+
+        % Plot each hM4Di region
+        legend_labels = cell(1 + length(regions), 1);
+        legend_labels{1} = 'mCherry';
+
+        for r = 1:length(regions)
+            region_name = regions{r};
+            idx = 1 + r;
+
+            % Get color for this region
+            if iscell(region_colors{r})
+                color = region_colors{r};
+            else
+                color = region_colors{r};
+            end
+
+            % Plot this region's data
+            eval(sprintf('h(%d) = shadedErrorBar(ts1, mean(experimental_data_%s_hM4Di), experimental_sem_%s_hM4Di, ''lineProps'', {''color'', ''%s''});', ...
+                idx, region_name, region_name, color));
+
+            legend_labels{idx} = sprintf('hM4Di %s', region_name);
+        end
+
+        % Add legend
+        legend_handles = arrayfun(@(x) x.mainLine, h);
+        legend(legend_handles, legend_labels);
+
+        ylim([0 90]);
+
+        % Prepare arrays for permutation testing - include all groups
+        mean_data_array = cell(1, 1 + length(regions));
+        sem_data_array = cell(1, 1 + length(regions));
+
+        mean_data_array{1} = experimental_data_mCherry;
+        sem_data_array{1} = experimental_sems_mice_mCherry;
+
+        for r = 1:length(regions)
+            region_name = regions{r};
+            idx = 1 + r;
+            eval(sprintf('mean_data_array{%d} = experimental_data_%s_hM4Di;', idx, region_name));
+            eval(sprintf('sem_data_array{%d} = experimental_sems_mice_%s_hM4Di;', idx, region_name));
+        end
+
+        xlims_for_plot = uv.evtWin;
+        ylims_for_plot = [0 90];
+        input_threshold = 10;
+        % need to make sure consec_thresh in perm_and_bCI is set to 10!
+        [comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, xlims_for_plot, ylims_for_plot, input_threshold);
+
     end
 
 else
@@ -778,23 +1120,32 @@ end
 for i = 1:total_stimuli
     stimulus_frames{i} = stimulus_times{i} * recorded_fps;
 end
-
-
+% 
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\S1_mice_pilot.xlsx');
 % experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\PFC mice.xlsx');
-% experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
-% experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\full_pilot_mice.xlsx');
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_DLC_data\pilot groups.xlsx');
 
-% experimental_grps = readtable('I:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
+% experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_DREADD_mice_corrected.xlsx');
 
-experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
+% experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
+
+% experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\Re_DREADD_mice_corrected.xlsx');
 
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
+% experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\all_DREADD_mice_corrected.xlsx');
+experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
 
+
+
+
+%%
 % Define parameters
-threshold = 4; % Velocity threshold
-sample_duration = 0.03; % Duration of each sample in seconds
-min_duration = 2; % Minimum duration to trigger labeling in seconds
+threshold = 1; % Velocity threshold
 frame_rate = 30; % Frames per second
+sample_duration = 1/frame_rate; % Duration of each sample in seconds
+min_duration = 5; % Minimum duration to trigger labeling in seconds
+% frame_rate = 30; % Frames per second
 % Calculate the minimum number of consecutive rows needed
 min_samples = min_duration / sample_duration;
 
@@ -813,7 +1164,24 @@ for gg = 1:size(animalIDs, 1)
         if isfield(final_DLC.(current_mouse), session_to_analyze)
             mouse_count = mouse_count+1;
             DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).movement_data;
+            % DLC_data_mouse = final_DLC.(current_mouse).(session_to_analyze).DLC_data_raw  ;
+            if ismember('body_x_pix', DLC_data_mouse.Properties.VariableNames) && ismember('body_y_pix', DLC_data_mouse.Properties.VariableNames)
+                % Get x and y coordinates
+                x_coords = DLC_data_mouse.body_x_pix;
+                y_coords = DLC_data_mouse.body_y_pix;
 
+                % Calculate differences between consecutive points
+                dx = diff(x_coords);
+                dy = diff(y_coords);
+
+                % Calculate Euclidean distance for each step
+                step_distances = sqrt(dx.^2 + dy.^2);
+
+                % Sum to get total distance traveled
+                total_distance_traveled(mouse_count) = sum(step_distances, 'omitnan');
+            else
+                total_distance_traveled(mouse_count) = NaN;
+            end
             body_velocity = [];
             labels = [];
             % Get the body_velocity column
@@ -841,8 +1209,9 @@ for gg = 1:size(animalIDs, 1)
             % Find the row index where the 'mouse' column matches 'current_mouse'
             row_idx = strcmp(experimental_grps.mouse, current_mouse);
 
-            freeze_data(mouse_count, :) = labels(1:21590)';
-            % freeze_data(mouse_count, :) = DLC_data_mouse.was_freezing(1:21590)';
+            % freeze_data(mouse_count, :) = labels(1:21590)';
+            % freeze_data(mouse_count, :) = labels(1:21589)';
+            freeze_data(mouse_count, :) = DLC_data_mouse.was_freezing(1:21589)';
             experimental_grps_updated(mouse_count, :) = experimental_grps(row_idx, :);
         end
     end
@@ -974,7 +1343,7 @@ if any("sex" == string(experimental_grps.Properties.VariableNames)) && ~any("tre
 elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames)))
 
 
-    if all(ismember(["hM4Di"], experimental_grps_updated.treatment))
+    if all(ismember(["hM4Di"], experimental_grps_updated.treatment)) && ~any("region" == string(experimental_grps.Properties.VariableNames))
         experimental_data_safe_mCherry = mean_safe_context(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry'), :);
         experimental_mean_safe_mCherry = mean(experimental_data_safe_mCherry);
         experimental_mean_safe_collapsed_mCherry = mean(experimental_data_safe_mCherry, 2);
@@ -999,7 +1368,27 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         experimental_sem_aversive_hM4Di = std(experimental_data_aversive_hM4Di)/sqrt(size(experimental_data_aversive_hM4Di, 1));
         experimental_mice_aversive_hM4Di = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'hM4Di'), :);
 
-    elseif all(ismember(["chrimsonr"], experimental_grps_updated.treatment))
+                % Distance for mCherry group
+        distance_mCherry = total_distance_traveled(strcmp(experimental_grps_updated.treatment, 'mCherry'));
+        mean_distance_mCherry = mean(distance_mCherry, 'omitnan');
+        sem_distance_mCherry = std(distance_mCherry, 'omitnan')/sqrt(sum(~isnan(distance_mCherry)));
+
+        % Distance for hM4Di group
+        distance_hM4Di = total_distance_traveled(strcmp(experimental_grps_updated.treatment, 'hM4Di'));
+        mean_distance_hM4Di = mean(distance_hM4Di, 'omitnan');
+        sem_distance_hM4Di = std(distance_hM4Di, 'omitnan')/sqrt(sum(~isnan(distance_hM4Di)));
+
+        % Display results
+        fprintf('\n=== Total Distance Traveled (pixels) ===\n');
+        fprintf('mCherry group: %.2f ± %.2f (n=%d)\n', mean_distance_mCherry, sem_distance_mCherry, sum(~isnan(distance_mCherry)));
+        fprintf('hM4Di group: %.2f ± %.2f (n=%d)\n', mean_distance_hM4Di, sem_distance_hM4Di, sum(~isnan(distance_hM4Di)));
+
+        % Perform statistical test
+        [h, p_distance] = ttest2(distance_mCherry, distance_hM4Di);
+        fprintf('t-test p-value: %.4f\n', p_distance);
+
+
+    elseif all(ismember(["chrimsonr"], experimental_grps_updated.treatment)) && ~any("region" == string(experimental_grps.Properties.VariableNames))
         experimental_data_safe_mCherry = mean_safe_context(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'control'), :);
         experimental_mean_safe_mCherry = mean(experimental_data_safe_mCherry);
         experimental_mean_safe_collapsed_mCherry = mean(experimental_data_safe_mCherry, 2);
@@ -1023,6 +1412,79 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         experimental_mean_aversive_collapsed_hM4Di = mean(experimental_data_aversive_hM4Di, 2);
         experimental_sem_aversive_hM4Di = std(experimental_data_aversive_hM4Di)/sqrt(size(experimental_data_aversive_hM4Di, 1));
         experimental_mice_aversive_hM4Di = experimental_grps_updated(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'chrimsonr'), :);
+    
+    elseif all(ismember(["hM4Di"], experimental_grps_updated.treatment)) && any("region" == string(experimental_grps.Properties.VariableNames))
+
+        % Always process mCherry data (regardless of region)
+        mCherry_idx = strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry');
+
+        experimental_data_safe_mCherry = mean_safe_context(mCherry_idx, :);
+        experimental_mean_safe_mCherry = mean(experimental_data_safe_mCherry);
+        experimental_mean_safe_collapsed_mCherry = mean(experimental_data_safe_mCherry, 2);
+        experimental_sem_safe_mCherry = std(experimental_data_safe_mCherry)/sqrt(size(experimental_data_safe_mCherry, 1));
+        experimental_mice_safe_mCherry = experimental_grps_updated(mCherry_idx, :);
+
+        experimental_data_aversive_mCherry = mean_aversive_context(mCherry_idx, :);
+        experimental_mean_aversive_mCherry = mean(experimental_data_aversive_mCherry);
+        experimental_mean_aversive_collapsed_mCherry = mean(experimental_data_aversive_mCherry, 2);
+        experimental_sem_aversive_mCherry = std(experimental_data_aversive_mCherry)/sqrt(size(experimental_data_aversive_mCherry, 1));
+        experimental_mice_aversive_mCherry = experimental_grps_updated(mCherry_idx, :);
+
+        % Distance for mCherry group
+        distance_mCherry = total_distance_traveled(strcmp(experimental_grps_updated.treatment, 'mCherry'));
+        mean_distance_mCherry = mean(distance_mCherry, 'omitnan');
+        sem_distance_mCherry = std(distance_mCherry, 'omitnan')/sqrt(sum(~isnan(distance_mCherry)));
+
+        % Process hM4Di data - split by region
+        regions = unique(experimental_grps_updated.region(strcmp(experimental_grps_updated.treatment, 'hM4Di')));
+
+        % Initialize storage for each region
+        for r = 1:length(regions)
+            region_name = regions{r};
+
+            % Create indices for this region's hM4Di data
+            hM4Di_region_idx = strcmp(experimental_grps_updated.group, 'Experimental') & ...
+                strcmp(experimental_grps_updated.treatment, 'hM4Di') & ...
+                strcmp(experimental_grps_updated.region, region_name);
+
+            % Safe context variables with format: experimental_data_safe_PL_hM4Di
+            eval(sprintf('experimental_data_safe_%s_hM4Di = mean_safe_context(hM4Di_region_idx, :);', region_name));
+            eval(sprintf('experimental_mean_safe_%s_hM4Di = mean(experimental_data_safe_%s_hM4Di);', region_name, region_name));
+            eval(sprintf('experimental_mean_safe_collapsed_%s_hM4Di = mean(experimental_data_safe_%s_hM4Di, 2);', region_name, region_name));
+            eval(sprintf('experimental_sem_safe_%s_hM4Di = std(experimental_data_safe_%s_hM4Di)/sqrt(size(experimental_data_safe_%s_hM4Di, 1));', region_name, region_name, region_name));
+            eval(sprintf('experimental_mice_safe_%s_hM4Di = experimental_grps_updated(hM4Di_region_idx, :);', region_name));
+
+            % Aversive context variables with format: experimental_data_aversive_PL_hM4Di
+            eval(sprintf('experimental_data_aversive_%s_hM4Di = mean_aversive_context(hM4Di_region_idx, :);', region_name));
+            eval(sprintf('experimental_mean_aversive_%s_hM4Di = mean(experimental_data_aversive_%s_hM4Di);', region_name, region_name));
+            eval(sprintf('experimental_mean_aversive_collapsed_%s_hM4Di = mean(experimental_data_aversive_%s_hM4Di, 2);', region_name, region_name));
+            eval(sprintf('experimental_sem_aversive_%s_hM4Di = std(experimental_data_aversive_%s_hM4Di)/sqrt(size(experimental_data_aversive_%s_hM4Di, 1));', region_name, region_name, region_name));
+            eval(sprintf('experimental_mice_aversive_%s_hM4Di = experimental_grps_updated(hM4Di_region_idx, :);', region_name));
+
+            % Distance for this hM4Di region with format: distance_PL_hM4Di
+            distance_idx = strcmp(experimental_grps_updated.treatment, 'hM4Di') & ...
+                strcmp(experimental_grps_updated.region, region_name);
+            eval(sprintf('distance_%s_hM4Di = total_distance_traveled(distance_idx);', region_name));
+            eval(sprintf('mean_distance_%s_hM4Di = mean(distance_%s_hM4Di, ''omitnan'');', region_name, region_name));
+            eval(sprintf('sem_distance_%s_hM4Di = std(distance_%s_hM4Di, ''omitnan'')/sqrt(sum(~isnan(distance_%s_hM4Di)));', region_name, region_name, region_name));
+        end
+
+        % Display results
+        fprintf('\n=== Total Distance Traveled (pixels) ===\n');
+        fprintf('mCherry group (all regions): %.2f ± %.2f (n=%d)\n', mean_distance_mCherry, sem_distance_mCherry, sum(~isnan(distance_mCherry)));
+
+        for r = 1:length(regions)
+            region_name = regions{r};
+            eval(sprintf('fprintf(''hM4Di %s group: %%.2f ± %%.2f (n=%%d)\\n'', mean_distance_%s_hM4Di, sem_distance_%s_hM4Di, sum(~isnan(distance_%s_hM4Di)));', region_name, region_name, region_name, region_name));
+        end
+
+        % Perform statistical tests
+        for r = 1:length(regions)
+            region_name = regions{r};
+            eval(sprintf('[h_%s, p_distance_%s] = ttest2(distance_mCherry, distance_%s_hM4Di);', region_name, region_name, region_name));
+            eval(sprintf('fprintf(''t-test mCherry vs hM4Di-%s p-value: %%.4f\\n'', p_distance_%s);', region_name, region_name));
+        end
+
     end
 
 else
@@ -1079,7 +1541,7 @@ if strcmp(session_to_analyze, 'D3')
         interleave_mean_experimental_female(:, [2 4 6]) = experimental_data_aversive_female;
 
 
-    elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames)))
+    elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames))) && ~any("region" == string(experimental_grps.Properties.VariableNames))
 
         interleave_mean_experimental_mCherry = zeros(size(experimental_data_safe_mCherry, 1), 6);
         interleave_mean_experimental_mCherry(:, [1 3 5]) = experimental_data_safe_mCherry;
@@ -1089,6 +1551,24 @@ if strcmp(session_to_analyze, 'D3')
         interleave_mean_experimental_hM4Di(:, [1 3 5]) = experimental_data_safe_hM4Di;
         interleave_mean_experimental_hM4Di(:, [2 4 6]) = experimental_data_aversive_hM4Di;
 
+    elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames))) && any("region" == string(experimental_grps.Properties.VariableNames))
+
+        % Always process mCherry data (regardless of region)
+        interleave_mean_experimental_mCherry = zeros(size(experimental_data_safe_mCherry, 1), 6);
+        interleave_mean_experimental_mCherry(:, [1 3 5]) = experimental_data_safe_mCherry;
+        interleave_mean_experimental_mCherry(:, [2 4 6]) = experimental_data_aversive_mCherry;
+
+        % Process hM4Di data - split by region
+        regions = unique(experimental_grps_updated.region(strcmp(experimental_grps_updated.treatment, 'hM4Di')));
+
+        for r = 1:length(regions)
+            region_name = regions{r};
+
+            % Create interleaved data for each region with format: interleave_mean_experimental_PL_hM4Di
+            eval(sprintf('interleave_mean_experimental_%s_hM4Di = zeros(size(experimental_data_safe_%s_hM4Di, 1), 6);', region_name, region_name));
+            eval(sprintf('interleave_mean_experimental_%s_hM4Di(:, [1 3 5]) = experimental_data_safe_%s_hM4Di;', region_name, region_name));
+            eval(sprintf('interleave_mean_experimental_%s_hM4Di(:, [2 4 6]) = experimental_data_aversive_%s_hM4Di;', region_name, region_name));
+        end
     else
 
         interleave_mean_experimental = zeros(size(experimental_data_safe, 1), 6);
@@ -1123,7 +1603,7 @@ elseif strcmp(session_to_analyze, 'D4')
         interleave_mean_experimental_female(:, [2 4 6]) = experimental_data_safe_female;
 
 
-    elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames)))
+    elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames))) && ~any("region" == string(experimental_grps.Properties.VariableNames))
 
         interleave_mean_experimental_mCherry = zeros(size(experimental_data_safe_mCherry, 1), 6);
         interleave_mean_experimental_mCherry(:, [1 3 5]) = experimental_data_aversive_mCherry;
@@ -1132,7 +1612,26 @@ elseif strcmp(session_to_analyze, 'D4')
         interleave_mean_experimental_hM4Di = zeros(size(experimental_data_safe_hM4Di, 1), 6);
         interleave_mean_experimental_hM4Di(:, [1 3 5]) = experimental_data_aversive_hM4Di;
         interleave_mean_experimental_hM4Di(:, [2 4 6]) = experimental_data_safe_hM4Di;
-        
+   
+
+    elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames))) && any("region" == string(experimental_grps.Properties.VariableNames))
+        % Always process mCherry data (regardless of region)
+        interleave_mean_experimental_mCherry = zeros(size(experimental_data_safe_mCherry, 1), 6);
+        interleave_mean_experimental_mCherry(:, [1 3 5]) = experimental_data_safe_mCherry;
+        interleave_mean_experimental_mCherry(:, [2 4 6]) = experimental_data_aversive_mCherry;
+
+        % Process hM4Di data - split by region
+        regions = unique(experimental_grps_updated.region(strcmp(experimental_grps_updated.treatment, 'hM4Di')));
+
+        for r = 1:length(regions)
+            region_name = regions{r};
+
+            % Create interleaved data for each region with format: interleave_mean_experimental_PL_hM4Di
+            eval(sprintf('interleave_mean_experimental_%s_hM4Di = zeros(size(experimental_data_safe_%s_hM4Di, 1), 6);', region_name, region_name));
+            eval(sprintf('interleave_mean_experimental_%s_hM4Di(:, [1 3 5]) = experimental_data_safe_%s_hM4Di;', region_name, region_name));
+            eval(sprintf('interleave_mean_experimental_%s_hM4Di(:, [2 4 6]) = experimental_data_aversive_%s_hM4Di;', region_name, region_name));
+        end
+
     else
 
         interleave_mean_experimental = zeros(size(experimental_data_safe, 1), 6);
@@ -1158,12 +1657,63 @@ if any("sex" == string(experimental_grps.Properties.VariableNames)) && ~any("tre
     % xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
 
 
-elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames)))
+elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames))) && ~any("region" == string(experimental_grps.Properties.VariableNames))
     figure; shadedErrorBar(1:size(mean(interleave_mean_experimental_mCherry), 2), mean(interleave_mean_experimental_mCherry), std(interleave_mean_experimental_mCherry), 'lineProps', {'color', 'k'});
     hold on; shadedErrorBar(1:size(mean(interleave_mean_experimental_hM4Di), 2), mean(interleave_mean_experimental_hM4Di), std(interleave_mean_experimental_hM4Di), 'lineProps', {'color', 'r'});
     hold off;
     % xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
     % xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
+
+elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames))) && any("region" == string(experimental_grps.Properties.VariableNames))
+    figure;
+    % Plot mCherry (all regions)
+    shadedErrorBar(1:size(mean(interleave_mean_experimental_mCherry), 2), mean(interleave_mean_experimental_mCherry), std(interleave_mean_experimental_mCherry), 'lineProps', {'color', 'k'});
+    hold on;
+
+    % Get regions for hM4Di
+    regions = unique(experimental_grps_updated.region(strcmp(experimental_grps_updated.treatment, 'hM4Di')));
+
+    % Define colors for hM4Di regions
+    if length(regions) == 1
+        region_colors = {'r'};
+    elseif length(regions) == 2
+        region_colors = {'r', 'b'};
+    else
+        % Generate more colors if needed
+        cmap = lines(length(regions) + 1);
+        region_colors = num2cell(cmap(2:end, :), 2);
+    end
+
+    % Plot each hM4Di region
+    legend_labels = cell(1 + length(regions), 1);
+    legend_labels{1} = 'mCherry';
+    h(1) = shadedErrorBar(1:6, mean(interleave_mean_experimental_mCherry), std(interleave_mean_experimental_mCherry), 'lineProps', {'color', 'k'});
+
+    for r = 1:length(regions)
+        region_name = regions{r};
+
+        % Get color for this region
+        if iscell(region_colors{r})
+            color = region_colors{r};
+        else
+            color = region_colors{r};
+        end
+
+        % Plot this region's data
+        eval(sprintf('h(%d) = shadedErrorBar(1:6, mean(interleave_mean_experimental_%s_hM4Di), std(interleave_mean_experimental_%s_hM4Di), ''lineProps'', {''color'', ''%s''});', ...
+            r+1, region_name, region_name, color));
+
+        legend_labels{r+1} = sprintf('hM4Di %s', region_name);
+    end
+
+    % Add legend
+    legend_handles = arrayfun(@(x) x.mainLine, h);
+    legend(legend_handles, legend_labels);
+
+    hold off;
+    % xticks([1:4:num_bins, num_bins]); % Add the last tick explicitly
+    % xticklabels([0:2:12]); % Label ticks with corresponding time in minutes
+
 else
 
     figure; shadedErrorBar(1:size(mean(interleave_mean_experimental), 2), mean(interleave_mean_experimental), std(interleave_mean_experimental));
@@ -1239,7 +1789,7 @@ if any("sex" == string(experimental_grps.Properties.VariableNames)) && ~any("tre
 
 
 elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.VariableNames)))
-    if all(ismember(["hM4Di"], experimental_grps_updated.treatment))
+    if all(ismember(["hM4Di"], experimental_grps_updated.treatment)) && ~any("region" == string(experimental_grps.Properties.VariableNames))
 
         experimental_data_mCherry = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry'), :);
         experimental_sem_mCherry = std(experimental_data_mCherry)/sqrt(size(experimental_data_mCherry, 1));
@@ -1269,7 +1819,7 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         ylim([0 0.8]); % Set y-axis limits
 
 
-    elseif all(ismember(["chrimsonr"], experimental_grps_updated.treatment))
+    elseif all(ismember(["chrimsonr"], experimental_grps_updated.treatment)) && ~any("region" == string(experimental_grps.Properties.VariableNames))
 
         experimental_data_mCherry = binned_data(strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'control'), :);
         experimental_sem_mCherry = std(experimental_data_mCherry)/sqrt(size(experimental_data_mCherry, 1));
@@ -1297,6 +1847,91 @@ elseif all(ismember(["sex", "treatment"], string(experimental_grps.Properties.Va
         % Set axis limits
         xlim([1 num_bins]);
         ylim([0 0.8]); % Set y-axis limits
+
+    elseif all(ismember(["hM4Di"], experimental_grps_updated.treatment)) && any("region" == string(experimental_grps.Properties.VariableNames))
+
+        % Always process mCherry data (regardless of region)
+        mCherry_idx = strcmp(experimental_grps_updated.group, 'Experimental') & strcmp(experimental_grps_updated.treatment, 'mCherry');
+
+        experimental_data_mCherry = binned_data(mCherry_idx, :);
+        experimental_sem_mCherry = std(experimental_data_mCherry)/sqrt(size(experimental_data_mCherry, 1));
+        experimental_mice_mCherry = experimental_grps_updated(mCherry_idx, :);
+
+        % Process hM4Di data - split by region
+        regions = unique(experimental_grps_updated.region(strcmp(experimental_grps_updated.treatment, 'hM4Di')));
+
+        % Initialize storage for each region
+        for r = 1:length(regions)
+            region_name = regions{r};
+
+            % Create indices for this region's hM4Di data
+            hM4Di_region_idx = strcmp(experimental_grps_updated.group, 'Experimental') & ...
+                strcmp(experimental_grps_updated.treatment, 'hM4Di') & ...
+                strcmp(experimental_grps_updated.region, region_name);
+
+            % Create variables with format: experimental_data_PL_hM4Di
+            eval(sprintf('experimental_data_%s_hM4Di = binned_data(hM4Di_region_idx, :);', region_name));
+            eval(sprintf('experimental_sem_%s_hM4Di = std(experimental_data_%s_hM4Di)/sqrt(size(experimental_data_%s_hM4Di, 1));', region_name, region_name, region_name));
+            eval(sprintf('experimental_mice_%s_hM4Di = experimental_grps_updated(hM4Di_region_idx, :);', region_name));
+        end
+
+        % Create figure
+        figure('Position', [100, 100, 900, 450]); % [left, bottom, width, height]
+        hold on;
+
+        % Plot mCherry
+        h(1) = shadedErrorBar(1:num_bins, mean(experimental_data_mCherry), experimental_sem_mCherry, 'lineProps', {'color', 'k'});
+
+        % Define colors for hM4Di regions
+        if length(regions) == 1
+            region_colors = {'r'};
+        elseif length(regions) == 2
+            region_colors = {'r', 'b'};
+        else
+            % Generate more colors if needed
+            cmap = lines(length(regions) + 1);
+            region_colors = num2cell(cmap(2:end, :), 2);
+        end
+
+        % Plot each hM4Di region
+        legend_labels = cell(1 + length(regions), 1);
+        legend_labels{1} = 'mCherry';
+
+        for r = 1:length(regions)
+            region_name = regions{r};
+            idx = 1 + r;
+
+            % Get color for this region
+            if iscell(region_colors{r})
+                color = region_colors{r};
+            else
+                color = region_colors{r};
+            end
+
+            % Plot this region's data
+            eval(sprintf('h(%d) = shadedErrorBar(1:num_bins, mean(experimental_data_%s_hM4Di), experimental_sem_%s_hM4Di, ''lineProps'', {''color'', ''%s''});', ...
+                idx, region_name, region_name, color));
+
+            legend_labels{idx} = sprintf('hM4Di %s', region_name);
+        end
+
+        % Add legend
+        legend_handles = arrayfun(@(x) x.mainLine, h);
+        legend(legend_handles, legend_labels);
+
+        % Calculate x-tick positions and labels
+        x_tick_positions = bins_per_interval:bins_per_interval:num_bins; % [4, 8, 12, ...]
+        time_points = interval:interval:total_time; % Time intervals [2, 4, 6, ...]
+
+        % Set the x-ticks and labels
+        xticks(x_tick_positions); % Exact positions on the axis
+        xticklabels(arrayfun(@num2str, time_points, 'UniformOutput', false)); % Labels for time
+        xlabel('Time (min)');
+
+        % Set axis limits
+        xlim([1 num_bins]);
+        ylim([0 0.8]); % Set y-axis limits
+
     end
 
 else
@@ -1735,3 +2370,113 @@ set(gca, 'XTick', mean(x, 2), 'XTickLabel', {'mCherry', 'hM4Di'});
 ylim([0 0.8])
 hold off;
 
+
+%%
+% Always process mCherry data (regardless of region)
+mCherry_data_means = [mean(experimental_data_aversive_mCherry, 2) mean(experimental_data_safe_mCherry, 2)];
+
+% Get regions for hM4Di
+regions = unique(experimental_grps_updated.region(strcmp(experimental_grps_updated.treatment, 'hM4Di')));
+
+% Create hM4Di data means for each region
+all_data = cell(1, 1 + length(regions));
+all_data{1} = mCherry_data_means;
+
+for r = 1:length(regions)
+    region_name = regions{r};
+    eval(sprintf('hM4Di_%s_data_mean = [mean(experimental_data_aversive_%s_hM4Di, 2) mean(experimental_data_safe_%s_hM4Di, 2)];', region_name, region_name, region_name));
+    eval(sprintf('all_data{%d} = hM4Di_%s_data_mean;', r+1, region_name));
+end
+
+% Calculate means for bar heights
+means = zeros(1 + length(regions), 2);
+means(1, :) = mean(mCherry_data_means);
+
+for r = 1:length(regions)
+    means(r+1, :) = mean(all_data{r+1});
+end
+
+% Grouped positions for the bars - adjust spacing based on number of groups
+if length(regions) == 1
+    x = [1, 2; 3.5, 4.5]; % Two groups
+elseif length(regions) == 2
+    x = [1, 2; 3.5, 4.5; 6, 7]; % Three groups
+else
+    % Generate more positions if needed
+    x = zeros(1 + length(regions), 2);
+    for i = 1:(1 + length(regions))
+        x(i, :) = [(i-1)*2.5 + 1, (i-1)*2.5 + 2];
+    end
+end
+
+% Create labels for x-axis
+x_labels = cell(1 + length(regions), 1);
+x_labels{1} = 'mCherry';
+for r = 1:length(regions)
+    region_name = regions{r};
+    x_labels{r+1} = sprintf('hM4Di %s', region_name);
+end
+
+% Bar plot
+figure('Position', [100, 100, 400 + 100*max(0, length(regions)-1), 450]); % Adjust width based on number of groups
+hold on;
+
+% Define colors for bars
+bar_colors = lines(1 + length(regions));
+
+% Loop through each group to plot bars, scatter points, and lines
+for i = 1:(1 + length(regions))
+    % Bar plot for each group
+    for col = 1:2
+        bar_x = x(i, col); % Position for the current bar
+        bar_h = bar(bar_x, means(i, col), 0.4, 'FaceAlpha', 0.7); % Plot each bar
+        set(bar_h, 'FaceColor', bar_colors(i, :)); % Set color for each group
+    end
+    
+    % Overlay scatter points and connect with lines for the current variable
+    data = all_data{i}; % Current variable's data
+    jittered_x = zeros(size(data)); % To store jittered x-coordinates
+    
+    for j = 1:size(data, 1)
+        % Scatter points for the current row
+        scatter_x = x(i, :) + (rand(1, 2) - 0.5) * 0.2; % Add jitter
+        jittered_x(j, :) = scatter_x; % Store jittered x-coordinates
+        scatter(scatter_x, data(j, :), 40, 'k', 'filled');
+    end
+    
+    % Connect scatter points with a line using jittered x-coordinates
+    for j = 1:size(data, 1)
+        plot(jittered_x(j, :), data(j, :), 'k-', 'LineWidth', 0.5);
+    end
+end
+
+% Adjustments for aesthetics
+set(gca, 'XTick', mean(x, 2), 'XTickLabel', x_labels);
+ylim([0 0.8])
+hold off;
+
+%%
+% Create bar plot for distance traveled
+figure('Position', [100, 100, 200, 400]); % [left, bottom, width, height]
+bar_data = [mean_distance_mCherry, mean_distance_hM4Di];
+bar_errors = [sem_distance_mCherry, sem_distance_hM4Di];
+
+bar(bar_data);
+hold on;
+errorbar(1:2, bar_data, bar_errors, 'k', 'LineStyle', 'none');
+set(gca, 'XTickLabel', {'mCherry', 'hM4Di'});
+ylabel('Total Distance Traveled (pixels)');
+% title(sprintf('Total Distance Traveled - %s', session_to_analyze));
+xlabel('Treatment Group');
+
+% Add individual data points
+scatter(ones(size(distance_mCherry))*1 + randn(size(distance_mCherry))*0.05, distance_mCherry, 30, 'k', 'filled', 'MarkerFaceAlpha', 0.5);
+scatter(ones(size(distance_hM4Di))*2 + randn(size(distance_hM4Di))*0.05, distance_hM4Di, 30, 'k', 'filled', 'MarkerFaceAlpha', 0.5);
+
+% Add significance indicator if significant
+if p_distance < 0.05
+    y_max = max([distance_mCherry; distance_hM4Di]) * 1.1;
+    plot([1, 2], [y_max, y_max], 'k-');
+    text(1.5, y_max*1.05, sprintf('p = %.3f', p_distance), 'HorizontalAlignment', 'center');
+end
+hold off;

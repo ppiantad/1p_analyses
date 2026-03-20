@@ -16,7 +16,7 @@ load('BLA_panneuronal_Risk_2024_03_07_just_CNMFe_and_BehavData.mat')
 % load('BLA_NAcSh_Risk_matched_Pre_RDT_RM_vs_RDT_D1.mat')
 
 %% Edit these uservariables with what you want to look at
-uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10]
+uv.evtWin = [-8 8]; %what time do you want to look at around each event [-2 8] [-10 5] [-10 10] [-4 2]
 uv.BLper = [-10 -5];
 uv.dt = 0.1; %what is your frame rate
 % uv.behav = {'stTime','choiceTime','collectionTime'}; %which behavior/timestamp to look at
@@ -211,6 +211,7 @@ for ii = 1:size(animalIDs,1)
                 % time_normalized_ca{neuron_num} = concatenated_normalized_trial_ca;
                 StartChoiceCollect_times_array{neuron_num} = StartChoiceCollect_times;
                 caTraceTrials = caTraceTrials(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
+                % zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                 zall = zall_window(:, 1:size(ts1, 2)); %added to make sure dimensions are the same as ts1
                 for z = 1:size(zall, 1)
                     % Apply Savitzky-Golay filter to each row

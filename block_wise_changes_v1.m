@@ -691,6 +691,7 @@ for i = 1:length(variables)
     x = eval(variables{i})';  % Get the corresponding data for the current variable
     % y = risk_table.large_abort;  % This is the column you want to correlate with
     y = risk_table.Mean_1_to_3;  % This is the column you want to correlate with
+    % y = sum([risk_table.block_1_shock_total risk_table.block_2_shock_total risk_table.block_3_shock_total], 2);  % This is the column you want to correlate with
     % for BLA-NAcSh data since there are so few cells uncomment below
     % x = eval(variables{i});
     % x = x(num_cells_mouse > 30)';
@@ -862,7 +863,7 @@ diff_risky_vs_safe_prechoice_remapped = mean_prechoice_remapped_mouse_block_2_3-
 
 latency_change = risk_table.block_1_large_choice_latency - (risk_table.block_2_large_choice_latency + risk_table.block_2_small_choice_latency);
 
-x = remapped_postchoice_ratio';
+x = remapped_prechoice_ratio';
 y = risk_table.Mean_1_to_3;
 
 % x = remapped_prechoice_ratio(risk_table.risky == 1)';
@@ -977,4 +978,10 @@ for dd = 1:size(respClass_all_array_mouse, 1)
 
 end
 
+%%
+for hh = 1:size(prechoice_block_1_mouse, 1)
+    sum_prechoice_block(hh, 1) = sum(prechoice_block_1_mouse{hh, 1});  
+    sum_prechoice_block(hh, 2) = sum(prechoice_blocks_2_and_3_mouse{hh, 1}); 
+
+end
 

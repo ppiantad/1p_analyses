@@ -27,7 +27,7 @@ ca_data_type = "C_raw"; % C % C_raw %S
 % (10) for spike rate
 
 
-session_to_analyze = 'D3';
+session_to_analyze = 'D1_Afternoon';
 
 % Parameters
 session_duration = 12 * 60; % seconds
@@ -207,11 +207,11 @@ for ii = 1:size(animalIDs,1)
 
         % freeze_on_times = final_DLC.(currentanimal).(session_to_analyze).move_times_mouse(1, :);
 
-        eTS = freeze_on_times';
-        eTS = eTS(eTS > 10);
+        % eTS = freeze_on_times';
+        % eTS = eTS(eTS > 10);
 
         % eTS = aversive_context_on_times'; %get time stamps
-        % eTS = shk_on'; %get time stamps
+        eTS = shk_on'; %get time stamps
 
 
         zb_session = [];
@@ -340,7 +340,7 @@ mean_data_array = {mean_data_experimental_mice, mean_data_one_context_mice, mean
 sem_data_array = {sem_data_experimental_mice, sem_data_one_context_mice, sem_data_no_shock_mice};
 
 
-[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 4], [-0.6 0.6]);
+[comparison, perm_p_sig] = perm_and_bCI_fn_analysis_PhilDBressel_for_1p(mean_data_array, sem_data_array, ts1, [-2 4], [-0.6 0.6], 3);
 
 
 

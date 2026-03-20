@@ -1,0 +1,3 @@
+experimental_mice_data_table = [experimental_mice_aversive array2table(interleave_mean_experimental)];
+one_context_mice_data_table = [one_context_mice_aversive array2table(interleave_mean_one_context)];
+no_shock_mice_data_table = [no_shock_mice_aversive array2table(interleave_mean_no_shock)];

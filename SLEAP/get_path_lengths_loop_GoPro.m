@@ -1,5 +1,5 @@
 
-session_to_analyze = 'RDT_D1';
+session_to_analyze = 'RDT_D1_CNO';
 
 
 if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)

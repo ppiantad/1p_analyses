@@ -431,7 +431,7 @@ xlim(xlims);
 set(gca);
 ytickformat('%.2f');
 
-for vv = 1:size(pairwise_comps, 2)
+for vv = 1:size(pairwise_comps,2)
 
     if size(comparison,2) == 2
 

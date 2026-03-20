@@ -1,5 +1,5 @@
 % Define the top-level directory
-top_level_directory = 'E:\Inscopix Mice 072025'; % Update this to your top-level directory
+top_level_directory = 'E:\Inscopix_Mice_022026'; % Update this to your top-level directory
 
 SLEAP_and_freeze_combined_filepaths = dir(fullfile(top_level_directory, '**', '*SLEAP_and_freezing_combined*.csv'));
 

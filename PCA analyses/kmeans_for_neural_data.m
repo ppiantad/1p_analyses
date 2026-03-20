@@ -5,24 +5,24 @@
 % data_for_clustering = neuron_mean_array{1, 1}  ;
 
 % data_for_clustering = zscore(data_for_clustering, 0, 2);
-
-data_for_clustering = zall_mean_all_array{1, 1};  
-
-% if you want to pre-specify subwindows to do the clustering on, as is done
-% here: https://www.biorxiv.org/content/10.1101/2024.06.26.600895v4
-% run data_loop on the relevant data (e.g., Pre_RDT_RM, 'OMIT_ALL', 0,
-% 'BLANK_TOUCH', 0)
-prechoice_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= -4 & ts1 <= 0), 2);
-postchoice_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= 0 & ts1 <= 2), 2);
-% also run data_loop for collectionTime
-consumption_means = mean(zall_mean_all_array{1, 2}(:, ts1 >= 1 & ts1 <= 3), 2);
-
-all_means = [prechoice_means postchoice_means consumption_means];
-
-data_for_clustering = all_means;
-
-
-data_for_display = horzcat(zall_mean_all_array{1, 1}, zall_mean_all_array{1, 1}, zall_mean_all_array{1, 2});
+% 
+% data_for_clustering = zall_mean_all_array{1, 1};  
+% 
+% % if you want to pre-specify subwindows to do the clustering on, as is done
+% % here: https://www.biorxiv.org/content/10.1101/2024.06.26.600895v4
+% % run data_loop on the relevant data (e.g., Pre_RDT_RM, 'OMIT_ALL', 0,
+% % 'BLANK_TOUCH', 0)
+% prechoice_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= -4 & ts1 <= 0), 2);
+% postchoice_means = mean(zall_mean_all_array{1, 1}(:, ts1 >= 0 & ts1 <= 2), 2);
+% % also run data_loop for collectionTime
+% consumption_means = mean(zall_mean_all_array{1, 2}(:, ts1 >= 1 & ts1 <= 3), 2);
+% 
+% all_means = [prechoice_means postchoice_means consumption_means];
+% 
+% data_for_clustering = all_means;
+% 
+% 
+% data_for_display = horzcat(zall_mean_all_array{1, 1}, zall_mean_all_array{1, 1}, zall_mean_all_array{1, 2});
 
 % % if you want to pre-specify subwindows to do the clustering on, as is done
 % % here: https://www.biorxiv.org/content/10.1101/2024.06.26.600895v4
@@ -334,3 +334,27 @@ xticks(1:13); % Ensure x-axis has integer labels from 1 to 13
 % Display results
 disp('Cluster counts for remapped neurons:');
 array2table(cluster_counts, 'VariableNames', strcat('Cluster_', string(1:13)))
+
+%% for examining the similarity b/w kmeans and my other approach
+% load 3 variable Pre_RDT_RM data:
+% BLA_Pre_RDT_RM_3_categories_02062025_including_S_array_counts.mat
+% run data_loop to get categories 
+
+
+prechoice_block_1_and_cluster_3 = prechoice_block_1 == 1 & kmeans_idx_new' == 3;
+percent_overlap_prechoice = [sum(prechoice_block_1_and_cluster_3)/ sum(prechoice_block_1 == 1)]*100
+non_overlap_prechoice = 100- percent_overlap_prechoice;
+
+figure; pie([percent_overlap_prechoice non_overlap_prechoice])
+
+postchoice_block_1_and_cluster_2 = postchoice_reward_block_1 == 1 & kmeans_idx_new' == 2;
+percent_overlap_postchoice = [sum(postchoice_block_1_and_cluster_2)/ sum(postchoice_reward_block_1 == 1)]*100
+non_overlap_postchoice = 100- percent_overlap_postchoice;
+
+figure; pie([percent_overlap_postchoice non_overlap_postchoice])
+
+consum_block_1_and_cluster_2 = collect_block_1 == 1 & kmeans_idx_new' == 1;
+percent_overlap_collect = [sum(consum_block_1_and_cluster_2)/ sum(collect_block_1 == 1)]*100
+non_overlap_consum = 100- percent_overlap_collect;
+
+figure; pie([percent_overlap_collect non_overlap_consum])

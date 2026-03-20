@@ -9,7 +9,7 @@ ts1 = (-10:(uv.dt):10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'F:\RDT FEMALES';
+metaDirectory = 'D:\risk videos\BLA-PL PV+ Hajos';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 
@@ -54,9 +54,9 @@ for zz = 1:size(metafolder_list, 1)
 
     for ii = 1:size(folder_list, 1)
         folder_list_string = strsplit(folder_list{ii}, '\');
-        current_animal = folder_list_string{3}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
+        current_animal = folder_list_string{4}; % Would have to change this depending on your folder structure, but there should be an animal name folder given our current workflow.
         current_animal = matlab.lang.makeValidName(current_animal);
-        current_session = folder_list_string{4};
+        current_session = folder_list_string{5};
         current_session = regexprep(current_session,{' ', '-'}, '_');
         modifiedString = lower(strrep(strrep(folder_list_string{end}, ' ', ''), '-', ''));
         
