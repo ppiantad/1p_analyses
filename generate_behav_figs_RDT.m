@@ -6154,6 +6154,184 @@ hold off;
 results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
 'GroupNames', {'Control', 'A2A', 'D1'}, ...
 'ControlGroup', 'Control');
+
+%%
+
+large_choice_Control = [risk_table.win_stay_ratio_block_1(strcmp('Control', risk_table.TreatmentCondition)), risk_table.win_stay_ratio_block_2(strcmp('Control', risk_table.TreatmentCondition)), risk_table.win_stay_ratio_block_3(strcmp('Control', risk_table.TreatmentCondition))];
+large_choice_A2A = [risk_table.win_stay_ratio_block_1(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.win_stay_ratio_block_2(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.win_stay_ratio_block_3(strcmp('A2A', risk_table.TreatmentCondition))];
+large_choice_D1 = [risk_table.win_stay_ratio_block_1(strcmp('D1', risk_table.TreatmentCondition)), risk_table.win_stay_ratio_block_2(strcmp('D1', risk_table.TreatmentCondition)), risk_table.win_stay_ratio_block_3(strcmp('D1', risk_table.TreatmentCondition))];
+
+mean_Control = nanmean(large_choice_Control, 1);
+mean_A2A = nanmean(large_choice_A2A, 1);
+mean_D1 = nanmean(large_choice_D1, 1);
+
+sem_Control = nanstd(large_choice_Control, 0, 1) ./ sqrt(size(large_choice_Control, 1));
+sem_A2A = nanstd(large_choice_A2A, 0, 1) ./ sqrt(size(large_choice_A2A, 1));
+sem_D1 = nanstd(large_choice_D1, 0, 1) ./ sqrt(size(large_choice_D1, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_Control, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_Control, 1)
+    plot(x_points, large_choice_Control(i, :), '-', ...
+        'Color', Control_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_A2A, 1)
+    plot(x_points, large_choice_A2A(i, :), '-', ...
+        'Color', A2A_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_D1, 1)
+    plot(x_points, large_choice_D1(i, :), '-', ...
+        'Color', D1_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_Control, sem_Control, Control_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', Control_color, 'MarkerFaceColor', Control_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_A2A, sem_A2A, A2A_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', A2A_color, 'MarkerFaceColor', A2A_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_D1, sem_D1, D1_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', D1_color, 'MarkerFaceColor', D1_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 1]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:1);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+yline(8)
+hold off;
+
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
+
+%%
+
+large_choice_Control = [risk_table.lose_shift_ratio_block_1(strcmp('Control', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_2(strcmp('Control', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_3(strcmp('Control', risk_table.TreatmentCondition))];
+large_choice_A2A = [risk_table.lose_shift_ratio_block_1(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_2(strcmp('A2A', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_3(strcmp('A2A', risk_table.TreatmentCondition))];
+large_choice_D1 = [risk_table.lose_shift_ratio_block_1(strcmp('D1', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_2(strcmp('D1', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_3(strcmp('D1', risk_table.TreatmentCondition))];
+
+mean_Control = nanmean(large_choice_Control, 1);
+mean_A2A = nanmean(large_choice_A2A, 1);
+mean_D1 = nanmean(large_choice_D1, 1);
+
+sem_Control = nanstd(large_choice_Control, 0, 1) ./ sqrt(size(large_choice_Control, 1));
+sem_A2A = nanstd(large_choice_A2A, 0, 1) ./ sqrt(size(large_choice_A2A, 1));
+sem_D1 = nanstd(large_choice_D1, 0, 1) ./ sqrt(size(large_choice_D1, 1));
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_Control, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_Control, 1)
+    plot(x_points, large_choice_Control(i, :), '-', ...
+        'Color', Control_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_A2A, 1)
+    plot(x_points, large_choice_A2A(i, :), '-', ...
+        'Color', A2A_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_D1, 1)
+    plot(x_points, large_choice_D1(i, :), '-', ...
+        'Color', D1_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_Control, sem_Control, Control_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', Control_color, 'MarkerFaceColor', Control_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_A2A, sem_A2A, A2A_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', A2A_color, 'MarkerFaceColor', A2A_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_D1, sem_D1, D1_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', D1_color, 'MarkerFaceColor', D1_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 1]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:1);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+yline(8)
+hold off;
+
+results = mixed_anova_dunnett(large_choice_Control, large_choice_A2A, large_choice_D1, ...
+'GroupNames', {'Control', 'A2A', 'D1'}, ...
+'ControlGroup', 'Control');
 %%
 
 
@@ -6407,8 +6585,8 @@ xticklabels({'0', '50', '75'}); % Provide labels for each x_point
 xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
 
 % Set axis limits, labels, and legend
-ylim([0 125]); % Adjust ylim dynamically
-set(gca, 'ytick', 0:25:125);
+ylim([0 160]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:150);
 % xlabel('Condition');
 % ylabel('Mean ± SEM');
 % legend('Location', 'Best');
@@ -6478,8 +6656,8 @@ xticklabels({'0', '50', '75'}); % Provide labels for each x_point
 xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
 
 % Set axis limits, labels, and legend
-ylim([0 125]); % Adjust ylim dynamically
-set(gca, 'ytick', 0:25:125);
+ylim([0 160]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:25:150);
 % xlabel('Condition');
 % ylabel('Mean ± SEM');
 % legend('Location', 'Best');
@@ -7062,6 +7240,87 @@ hold off;
 
 %%
 
+% large_choice_mCherry = [risk_table.lose_shift_ratio_block_1(strcmp('Male', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_2(strcmp('Male', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_3(strcmp('Male', risk_table.TreatmentCondition))];
+% large_choice_hM4Di = [risk_table.lose_shift_ratio_block_1(strcmp('Female', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_2(strcmp('Female', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_3(strcmp('Female', risk_table.TreatmentCondition))];
+
+large_choice_mCherry = [zeros(sum(strcmp('Male', risk_table.TreatmentCondition)), 1), risk_table.lose_shift_ratio_block_2(strcmp('Male', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_3(strcmp('Male', risk_table.TreatmentCondition))];
+large_choice_hM4Di = [zeros(sum(strcmp('Female', risk_table.TreatmentCondition)), 1), risk_table.lose_shift_ratio_block_2(strcmp('Female', risk_table.TreatmentCondition)), risk_table.lose_shift_ratio_block_3(strcmp('Female', risk_table.TreatmentCondition))];
+
+
+
+
+mean_large = nanmean(large_choice_mCherry, 1);
+mean_small = nanmean(large_choice_hM4Di, 1);
+sem_large = nanstd(large_choice_mCherry, 0, 1) ./ sqrt(size(large_choice_mCherry, 1));
+sem_small = nanstd(large_choice_hM4Di, 0, 1) ./ sqrt(size(large_choice_hM4Di, 1));
+
+
+
+
+
+
+
+% X-axis points
+x_points = 1:size(large_choice_mCherry, 2);
+
+
+% Plotting
+figure;
+hold on;
+
+% Set figure size
+width = 200; % Width of the figure
+height = 450; % Height of the figure
+set(gcf, 'Position', [50, 25, width, height]); % Set position and size
+
+% Plot individual lines for "Large" data
+for i = 1:size(large_choice_mCherry, 1)
+    plot(x_points, large_choice_mCherry(i, :), '-', ...
+        'Color', mCherry_color, ... % Blue with 60% opacity
+        'LineWidth', 1.2);
+end
+
+% Plot individual lines for "Small" data
+for i = 1:size(large_choice_hM4Di, 1)
+    plot(x_points, large_choice_hM4Di(i, :), '-', ...
+        'Color', ChrimsonR_color, ... % Red with 60% opacity
+        'LineWidth', 1.2);
+end
+
+
+% Plot with error bars for "Large" and "Small"
+errorbar(x_points, mean_large, sem_large, mCherry_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', mCherry_color, 'MarkerFaceColor', mCherry_color, ...
+    'CapSize', 10, 'DisplayName', 'Large', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+errorbar(x_points, mean_small, sem_small, ChrimsonR_symbol, ...
+    'LineWidth', 1.5, 'MarkerSize', 10, 'Color', ChrimsonR_color, 'MarkerFaceColor', ChrimsonR_color, ...
+    'CapSize', 10, 'DisplayName', 'Small', 'MarkerEdgeColor', 'none'); % Add caps with 'CapSize'
+
+% Format the X-axis
+xticks(x_points); % Set x-ticks at valid x_points
+xticklabels({'0', '50', '75'}); % Provide labels for each x_point
+xlim([0.5, length(x_points) + 0.5]); % Add buffer on both sides of x-axis
+
+% Set axis limits, labels, and legend
+ylim([0 1]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:0.2:1);
+% xlabel('Condition');
+% ylabel('Mean ± SEM');
+% legend('Location', 'Best');
+
+% Title and grid for clarity
+% title('Cross-Session Risk Analysis');
+% grid on;
+
+hold off;
+
+
+
+
+
+%%
+
 large_choice_mCherry = [risk_table.block_1_large_choice_latency_following_shk(strcmp('Male', risk_table.TreatmentCondition)), risk_table.block_2_large_choice_latency_following_shk(strcmp('Male', risk_table.TreatmentCondition)), risk_table.block_3_large_choice_latency_following_shk(strcmp('Male', risk_table.TreatmentCondition))];
 large_choice_hM4Di = [risk_table.block_1_large_choice_latency_following_shk(strcmp('Female', risk_table.TreatmentCondition)), risk_table.block_2_large_choice_latency_following_shk(strcmp('Female', risk_table.TreatmentCondition)), risk_table.block_3_large_choice_latency_following_shk(strcmp('Female', risk_table.TreatmentCondition))];
 
@@ -7205,15 +7464,182 @@ hold off;
 
 
 %%
-
+treatment = risk_table.TreatmentCondition;
 gray_color = [.8 .8 .8];
 
 % x = risk_table.shock_sens;
 x = risk_table.Mean_1_to_3;
-% y = risk_table.session_weight_percent_free_feed;
+y = risk_table.session_weight_percent_free_feed;
 % y = risk_table.freefeed_weight;
-y = risk_table.shock_sens;
+% y = risk_table.shock_sens;
 % treatment = risk_table.TreatmentCondition;
+
+% Separate data by treatment group
+female_idx = strcmp(treatment, 'Female');
+male_idx = strcmp(treatment, 'Male');
+
+x_female = x(female_idx);
+y_female = y(female_idx);
+x_male = x(male_idx);
+y_male = y(male_idx);
+
+% Calculate regression statistics for females
+coefficients_female = polyfit(x_female, y_female, 1);
+y_pred_female = polyval(coefficients_female, x_female);
+ssr_female = sum((y_pred_female - mean(y_female)).^2);
+sst_female = sum((y_female - mean(y_female)).^2);
+r_squared_female = ssr_female / sst_female;
+[r_female, pval_female] = corrcoef(x_female, y_female);
+r_val_female = r_female(1, 2);
+p_val_female = pval_female(1, 2);
+
+% Calculate regression statistics for males
+coefficients_male = polyfit(x_male, y_male, 1);
+y_pred_male = polyval(coefficients_male, x_male);
+ssr_male = sum((y_pred_male - mean(y_male)).^2);
+sst_male = sum((y_male - mean(y_male)).^2);
+r_squared_male = ssr_male / sst_male;
+[r_male, pval_male] = corrcoef(x_male, y_male);
+r_val_male = r_male(1, 2);
+p_val_male = pval_male(1, 2);
+
+% Calculate regression statistics for all
+coefficients_all = polyfit(x, y, 1);
+y_pred_all = polyval(coefficients_all, x);
+ssr_all = sum((y_pred_all - mean(y)).^2);
+sst_all = sum((y - mean(y)).^2);
+r_squared_all = ssr_all / sst_all;
+[r_all, pval_all] = corrcoef(x, y);
+r_val_all = r_all(1, 2);
+p_val_all = pval_all(1, 2);
+
+% Create figure with specified dimensions
+figure;
+width = 350; % Width of the figure
+height = 350; % Height of the figure
+set(gcf, 'Position', [100, 100, width, height]); % Set position and size [left, bottom, width, height]
+hold on;
+
+% Plot scatter points for each group
+scatter(x_female, y_female, 100, 'green', 'filled', "square");
+scatter(x_male, y_male, 100, gray_color, 'filled');
+
+% Set the axis labels to have 2 decimal places
+xtickformat('%.2f');
+ytickformat('%.2f');
+
+% Create regression lines
+x_fit_female = linspace(min(x_female), max(x_female), 100);
+y_fit_female = polyval(coefficients_female, x_fit_female);
+x_fit_male = linspace(min(x_male), max(x_male), 100);
+y_fit_male = polyval(coefficients_male, x_fit_male);
+x_fit_all = linspace(min(x), max(x), 100);
+y_fit_all = polyval(coefficients_all, x_fit_all);
+
+% Plot regression lines
+plot(x_fit_female, y_fit_female, 'Color', 'green', 'LineWidth', 2); % Pink line
+plot(x_fit_male, y_fit_male, 'Color', gray_color, 'LineWidth', 2); % Black line
+plot(x_fit_all, y_fit_all, 'Color', 'black', 'LineWidth', 2); % Black line
+
+% Get axes limits for text positioning
+ax = gca;
+xLimits = xlim(ax);
+yLimits = ylim(ax);
+
+% Position text for females (upper right area)
+xPos_female = xLimits(2) - 0.05 * range(xLimits);
+yPos_female = yLimits(2) - 0.05 * range(yLimits);
+
+% Position text for males (lower right area)
+xPos_male = xLimits(2) - 0.05 * range(xLimits);
+yPos_male = yLimits(2) - 0.25 * range(yLimits);
+
+% Add statistics text for females
+text(xPos_female, yPos_female, ...
+    {['Female:'], ...
+     ['R^2 = ' num2str(r_squared_female, '%.2f')], ...
+     ['R = ' num2str(r_val_female, '%.2f')], ...
+     ['p = ' num2str(p_val_female, '%.2f')]}, ...
+    'FontSize', 10, ...
+    'Color', 'green', ... % Pink color
+    'HorizontalAlignment', 'right', ...
+    'VerticalAlignment', 'top', ...
+    'FontWeight', 'bold');
+
+% Add statistics text for males
+text(xPos_male, yPos_male, ...
+    {['Male:'], ...
+     ['R^2 = ' num2str(r_squared_male, '%.2f')], ...
+     ['R = ' num2str(r_val_male, '%.2f')], ...
+     ['p = ' num2str(p_val_male, '%.2f')]}, ...
+    'FontSize', 10, ...
+    'Color', gray_color, ...
+    'HorizontalAlignment', 'right', ...
+    'VerticalAlignment', 'top', ...
+    'FontWeight', 'bold');
+
+% Add statistics text for females
+text(xPos_female, yPos_female, ...
+    {['Female:'], ...
+     ['R^2 = ' num2str(r_squared_all, '%.2f')], ...
+     ['R = ' num2str(r_val_all, '%.2f')], ...
+     ['p = ' num2str(p_val_all, '%.2f')]}, ...
+    'FontSize', 10, ...
+    'Color', 'black', ... % Pink color
+    'HorizontalAlignment', 'right', ...
+    'VerticalAlignment', 'top', ...
+    'FontWeight', 'bold');
+
+% Add labels and legend
+xlabel('Riskiness');
+ylabel('Percent free-feeding weight');
+legend({'Female', 'Male', 'Female fit', 'Male fit'}, 'Location', 'best');
+
+hold off;
+
+% Display summary statistics in command window
+fprintf('Female group statistics:\n');
+fprintf('  R-squared: %.3f\n', r_squared_female);
+fprintf('  R: %.3f\n', r_val_female);
+fprintf('  p-value: %.3f\n', p_val_female);
+fprintf('  Regression equation: y = %.3fx + %.3f\n\n', coefficients_female(1), coefficients_female(2));
+
+fprintf('Male group statistics:\n');
+fprintf('  R-squared: %.3f\n', r_squared_male);
+fprintf('  R: %.3f\n', r_val_male);
+fprintf('  p-value: %.3f\n', p_val_male);
+fprintf('  Regression equation: y = %.3fx + %.3f\n', coefficients_male(1), coefficients_male(2));
+
+%% use below if correlating w/ shock test data because the male/female group is missing 1 mouse for whom the video is screwed up
+treatment = risk_table.TreatmentCondition;
+gray_color = [.8 .8 .8];
+
+
+
+shock_sens_extracted = risk_table.shock_sens;
+for hh = 1:size(shock_sens_extracted, 1)
+    indiv_shock(hh, 1) = sum(shock_sens_extracted{hh});
+
+end
+
+is_missing_shock_test = isnan(indiv_shock);
+treatment = treatment(~is_missing_shock_test)
+% x = risk_table.shock_sens;
+
+x = indiv_shock;
+y = risk_table.Mean_1_to_3;
+% y = risk_table.freefeed_weight;
+% y = risk_table.shock_sens;
+% y = risk_table.session_weight_raw_grams;
+% y = risk_table.session_weight_percent_free_feed;
+% y = risk_table.shock_sens;
+% y = risk_table.session_length;  
+% y = risk_table.pre_training_sessions_sum;  
+% y = risk_table.sessions_to_rm_criterion;  
+
+
+x = x(~is_missing_shock_test);
+y = y(~is_missing_shock_test);
 
 % Separate data by treatment group
 female_idx = strcmp(treatment, 'Female');
@@ -7353,11 +7779,11 @@ fprintf('  Regression equation: y = %.3fx + %.3f\n', coefficients_male(1), coeff
 
 %%
 % Extract data
-
+% 
 % y = risk_table.freefeed_weight;
 % y = risk_table.session_weight_raw_grams;
-% y = risk_table.session_weight_percent_free_feed;
-y = risk_table.shock_sens;
+y = risk_table.session_weight_percent_free_feed;
+% y = risk_table.shock_sens;
 % y = risk_table.session_length;  
 % y = risk_table.pre_training_sessions_sum;  
 % y = risk_table.sessions_to_rm_criterion;  
@@ -7412,8 +7838,117 @@ scatter(x_male_scatter, y_male, 50, 'black', 'filled', "o");
 % Customize the plot
 set(gca, 'XTick', [1, 2]);
 set(gca, 'XTickLabel', {'Female', 'Male'});
-ylim([0 0.7]); % Adjust ylim dynamically
-set(gca, 'ytick', 0:.2:.7);
+% ylim([50 100]); % Adjust ylim dynamically
+% set(gca, 'ytick', 50:10:100);
+% ylim([0 35]); % Adjust ylim dynamically
+% set(gca, 'ytick', 0:5:35);
+ylim([0 25]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:5:25);
+xlabel('Treatment Condition');
+ylabel('Weight');
+% title('Footshock Sensitivity by Treatment Group');
+
+% Add sample sizes to the plot
+text(1, min(ylim) + 0.1 * range(ylim), ['n = ' num2str(length(y_female))], ...
+    'HorizontalAlignment', 'center', 'FontSize', 10, 'Color', 'green', 'FontWeight', 'bold');
+text(2, min(ylim) + 0.1 * range(ylim), ['n = ' num2str(length(y_male))], ...
+    'HorizontalAlignment', 'center', 'FontSize', 10, 'Color', 'black', 'FontWeight', 'bold');
+
+% Add legend
+legend({'Mean ± SEM', '', 'Female', 'Male'}, 'Location', 'best');
+
+hold off;
+
+% Display summary statistics in command window
+fprintf('Summary Statistics:\n');
+fprintf('Female group:\n');
+fprintf('  Mean: %.3f\n', mean_female);
+fprintf('  Standard Error: %.3f\n', se_female);
+fprintf('  Sample size: %d\n\n', length(y_female));
+
+fprintf('Male group:\n');
+fprintf('  Mean: %.3f\n', mean_male);
+fprintf('  Standard Error: %.3f\n', se_male);
+fprintf('  Sample size: %d\n', length(y_male));
+
+% Perform t-test to compare groups
+[h, p_ttest, ci, stats] = ttest2(y_female, y_male);
+fprintf('\nStatistical comparison (two-sample t-test):\n');
+fprintf('  df: %.10f\n', stats.df);
+fprintf('  t-val: %.10f\n', stats.tstat);
+fprintf('  p-value: %.10f\n', p_ttest);
+
+if h == 1
+    fprintf('  Result: Significantly different (p < 0.05)\n');
+else
+    fprintf('  Result: Not significantly different (p >= 0.05)\n');
+end
+
+%% for shock test since a mouse is missing some data
+% Extract data
+% 
+treatment = risk_table.TreatmentCondition;
+shock_sens_extracted = risk_table.shock_sens;
+for hh = 1:size(shock_sens_extracted, 1)
+    indiv_shock(hh, 1) = sum(shock_sens_extracted{hh});
+
+end
+
+is_missing_shock_test = isnan(indiv_shock);
+treatment = treatment(~is_missing_shock_test)
+
+y = indiv_shock(~is_missing_shock_test);
+
+
+% Separate data by treatment group
+female_idx = strcmp(treatment, 'Female');
+male_idx = strcmp(treatment, 'Male');
+
+y_female = y(female_idx);
+y_male = y(male_idx);
+
+% Calculate means for bar plot
+mean_female = mean(y_female);
+mean_male = mean(y_male);
+
+% Calculate standard errors for error bars
+se_female = std(y_female) / sqrt(length(y_female));
+se_male = std(y_male) / sqrt(length(y_male));
+
+% Create figure
+figure;
+width = 300; % Width of the figure
+height = 400; % Height of the figure
+set(gcf, 'Position', [100, 100, width, height]);
+
+% Create bar plot
+bar_data = [mean_female, mean_male];
+bar_colors = [[0 1 0]; 0 0 0]; % Pink for female, black for male
+b = bar(bar_data, 'FaceColor', 'flat');
+b.CData = bar_colors;
+
+hold on;
+
+% Add error bars
+errorbar([1, 2], [mean_female, mean_male], [se_female, se_male], ...
+    'k', 'LineWidth', 1.5, 'CapSize', 10);
+
+% Add individual data points as scatter overlay
+% Female data points
+x_female_scatter = ones(length(y_female), 1) + 0.1 * randn(length(y_female), 1); % Add jitter
+scatter(x_female_scatter, y_female, 70, 'green', 'filled', "square");
+
+% Male data points
+x_male_scatter = 2 * ones(length(y_male), 1) + 0.1 * randn(length(y_male), 1); % Add jitter
+scatter(x_male_scatter, y_male, 50, 'black', 'filled', "o");
+
+% Customize the plot
+set(gca, 'XTick', [1, 2]);
+set(gca, 'XTickLabel', {'Female', 'Male'});
+% ylim([50 100]); % Adjust ylim dynamically
+% set(gca, 'ytick', 50:10:100);
+ylim([0 0.6]); % Adjust ylim dynamically
+set(gca, 'ytick', 0:0.2:0.6);
 xlabel('Treatment Condition');
 ylabel('Weight');
 % title('Footshock Sensitivity by Treatment Group');
@@ -7444,11 +7979,110 @@ fprintf('  Sample size: %d\n', length(y_male));
 % Perform t-test to compare groups
 [h, p_ttest] = ttest2(y_female, y_male);
 fprintf('\nStatistical comparison (two-sample t-test):\n');
-fprintf('  p-value: %.4f\n', p_ttest);
+fprintf('  df: %.10f\n', stats.df);
+fprintf('  t-val: %.10f\n', stats.tstat);
+fprintf('  p-value: %.10f\n', p_ttest);
 if h == 1
     fprintf('  Result: Significantly different (p < 0.05)\n');
 else
     fprintf('  Result: Not significantly different (p >= 0.05)\n');
+end
+
+
+%%
+% Shock sensitivity: 3-column cell array, paired bars per column
+%
+% shock_sens rows correspond to rows in risk_table. Each entry is either
+% a 1x3 numeric vector or NaN.
+
+treatment = risk_table.TreatmentCondition;
+female_idx = strcmp(treatment, 'Female');
+male_idx   = strcmp(treatment, 'Male');
+
+n_cols = 3;
+
+% Build numeric matrix from cell array (NaN rows stay NaN across all cols)
+ss_mat = NaN(length(shock_sens), n_cols);
+for ii = 1:length(shock_sens)
+    v = shock_sens{ii};
+    if isnumeric(v) && ~isscalar(v)
+        ss_mat(ii, :) = v(:)';
+    end
+end
+
+% Split by group
+ss_female = ss_mat(female_idx, :);
+ss_male   = ss_mat(male_idx,   :);
+
+% Per-column mean and SEM, ignoring NaN
+mean_f = nanmean(ss_female, 1);   % 1x3
+mean_m = nanmean(ss_male,   1);
+
+se_f = nanstd(ss_female, 0, 1) ./ sqrt(sum(~isnan(ss_female), 1));
+se_m = nanstd(ss_male,   0, 1) ./ sqrt(sum(~isnan(ss_male),   1));
+
+% means_data: rows = column groups (1-3), cols = [Female, Male]
+means_data = [mean_f(:), mean_m(:)];   % 3x2
+
+% Create figure
+figure;
+set(gcf, 'Position', [100, 100, 500, 400]);
+
+% Convert hex colors to RGB triplets for scatter compatibility
+hex2rgb = @(h) sscanf(h(2:end), '%2x%2x%2x')' / 255;
+mCherry_rgb   = hex2rgb(mCherry_color);
+ChrimsonR_rgb = hex2rgb(ChrimsonR_color);
+
+% mCherry = Female, ChrimsonR = Male
+b = bar(means_data, 'grouped');
+b(1).FaceColor = mCherry_color;    % Female
+b(2).FaceColor = ChrimsonR_color;  % Male
+
+hold on;
+
+% Use XEndPoints for exact bar centers (accounts for grouping internally)
+x_centers_f = b(1).XEndPoints;
+x_centers_m = b(2).XEndPoints;
+
+% Error bars
+errorbar(x_centers_f, mean_f, se_f, 'k', 'LineWidth', 1.5, 'CapSize', 8, 'LineStyle', 'none');
+errorbar(x_centers_m, mean_m, se_m, 'k', 'LineWidth', 1.5, 'CapSize', 8, 'LineStyle', 'none');
+
+% Extract marker characters from symbol strings
+mCherry_marker   = mCherry_symbol(mCherry_symbol   ~= '-');   % 'o'
+ChrimsonR_marker = ChrimsonR_symbol(ChrimsonR_symbol ~= '-');  % 's'
+
+% Scatter individual points
+jitter_sd = 0.04;
+for col = 1:n_cols
+    y_f = ss_female(:, col);
+    y_f = y_f(~isnan(y_f));
+    x_f = x_centers_f(col) + jitter_sd * randn(length(y_f), 1);
+    scatter(x_f, y_f, 50, mCherry_rgb, 'filled', 'Marker', mCherry_marker);
+
+    y_m = ss_male(:, col);
+    y_m = y_m(~isnan(y_m));
+    x_m = x_centers_m(col) + jitter_sd * randn(length(y_m), 1);
+    scatter(x_m, y_m, 50, ChrimsonR_rgb, 'filled', 'Marker', ChrimsonR_marker);
+end
+
+set(gca, 'XTick', 1:n_cols, 'XTickLabel', {'Shock 1', 'Shock 2', 'Shock 3'});
+xlabel('Shock Intensity Column');
+ylabel('Shock Sensitivity');
+legend({'Female (mCherry)', 'Male (ChrimsonR)'}, 'Location', 'best');
+
+hold off;
+
+% Summary statistics and t-tests per column
+fprintf('\nShock Sensitivity by Column:\n');
+col_labels = {'Col 1', 'Col 2', 'Col 3'};
+for col = 1:n_cols
+    y_f = ss_female(:, col);  y_f = y_f(~isnan(y_f));
+    y_m = ss_male(:, col);    y_m = y_m(~isnan(y_m));
+    [h_col, p_col] = ttest2(y_f, y_m);
+    fprintf('  %s – Female: mean=%.3f se=%.3f n=%d | Male: mean=%.3f se=%.3f n=%d | t-test p=%.4f\n', ...
+        col_labels{col}, mean(y_f), se_f(col), length(y_f), ...
+        mean(y_m), se_m(col), length(y_m), p_col);
 end
 
 %%

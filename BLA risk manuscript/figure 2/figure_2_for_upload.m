@@ -58,8 +58,7 @@ custom_colormap = [
 % ];
 
 
-% Generate more intermediate colors for a smoother transition
-n = 256; % Number of colors
+n = 256; 
 custom_colormap = interp1(linspace(0, 1, size(custom_colormap, 1)), custom_colormap, linspace(0, 1, n));
 
 
@@ -72,9 +71,9 @@ custom_colormap = interp1(linspace(0, 1, size(custom_colormap, 1)), custom_color
 %consumption num 10
 %shock num 11
 
-pre_choice_window = [-4 0];     % Pre-choice period: -4 to 0 s
-post_choice_window = [0 2];     % Post-choice period: 0 to 2 s
-consumption_window = [2 5];     % Consumption period: 1 to 3 s if using data aligned to collect, do 0 to 2 to keep things consistent. if you want to show that consum neurons peak after collect, use something like 2-5
+pre_choice_window = [-4 0];     
+post_choice_window = [0 2];   
+consumption_window = [2 5];    
 
 windows = {pre_choice_window, post_choice_window, consumption_window};
 plot_num = [15, 70, 10];
@@ -103,75 +102,47 @@ first_session = 'Pre_RDT_RM';
 
 second_session = 'RDT_D1';
 
-
-% Get the number of neurons
 num_neurons = length(plot_num);
 
-% Create a new figure
 figure;
 
 for neuron_idx = 1:num_neurons
-    % Get the current neuron and corresponding time window
     current_neuron = plot_num(neuron_idx);
     current_window = windows{neuron_idx};
     array_to_plot_current = array_to_plot(neuron_idx);
-    % Get the data for the current neuron
     neuron_data = zall_mouse{select_mouse_index, array_to_plot_current}{1, current_neuron};
     neuron_data_s_array = caTraceTrials_spikes_mouse{select_mouse_index, array_to_plot_current}{1, current_neuron};
-    % Restrict time indices based on the current window
     time_indices = ts1 >= current_window(1) & ts1 <= current_window(2);
     restricted_data = neuron_data(:, time_indices);
-    
-    % Compute the mean activity within the restricted window for each trial
     mean_activity = mean(restricted_data, 2);
     
-    % Sort trials by mean activity in descending order
     [~, sorted_trial_indices] = sort(mean_activity, 'descend');
-    
-    % Select the top 5 trials with the highest mean activity
     selected_trials = sorted_trial_indices(1:min(5, size(neuron_data, 1)));
     
-    % Determine Y-axis limits for this neuron
     y_limits = [min(neuron_data(:)), max(neuron_data(:))];
     
     for subplot_idx = 1:length(selected_trials)
-        % Calculate subplot position
         subplot_idx_global = (neuron_idx - 1) * 5 + subplot_idx;
         subplot(num_neurons, 5, subplot_idx_global);
         hold on;
         
-        % Get the selected trial
         trial = selected_trials(subplot_idx);
         
-        % Plot the selected trial
         plot(ts1, neuron_data(trial, :), 'Color', [custom_colormap(end, :), 0.5]);
         hold on; plot(ts1, neuron_data_s_array(trial, :), 'Color', [custom_colormap(end, :), 0.5]);
-        % % Plot the mean as a thick black line
-        % meanData = mean(neuron_data);
-        % plot(ts1, meanData, 'LineWidth', 2, 'Color', 'k');
-        
-        % Set axis limits and labels
+
         ylim(y_limits);
         xlim([-8 8]);
         set(gca, 'XTick', [-8, 0, 8]);
         
-        % Add reference lines
+
         xline(0, 'k--');
         yline(0, 'k--');
-        
-        % % Add title for the subplot
-        % if neuron_idx == 1
-        %     title(['Trial ' num2str(trial)]);
-        % end
-        
-        % Adjust font size
         set(gca, 'FontSize', 12);
         
         hold off;
     end
     
-    % % Add a label to the Y-axis for the first column in each row
-    % ylabel(['Neuron ' num2str(current_neuron)], 'FontSize', 14);
 end
 
 
@@ -184,51 +155,37 @@ consumption_neurons = neuron_mean_array{1, 1}(collect_block_1, :);
 
 only_active_array_stacked = [pre_choice_neurons; post_choice_reward_neurons; consumption_neurons];
 
-% Sort the rows of activated_neuron_mean based on peak_times.
+% sort by peak time
 [peak_values, time_of_peak_activity] = max(pre_choice_neurons, [], 2);
 [~, sort_indices] = sort(time_of_peak_activity);
 pre_choice_neurons_sorted = pre_choice_neurons(sort_indices, :);
 
 
-
-% Sort the rows of activated_neuron_mean based on peak_times.
 [peak_values, time_of_peak_activity] = max(post_choice_reward_neurons, [], 2);
 [~, sort_indices] = sort(time_of_peak_activity);
 post_choice_reward_neurons_sorted = post_choice_reward_neurons(sort_indices, :);
 
 
-% Sort the rows of activated_neuron_mean based on peak_times.
 [peak_values, time_of_peak_activity] = max(consumption_neurons, [], 2);
 [~, sort_indices] = sort(time_of_peak_activity);
 consumption_neurons_sorted = consumption_neurons(sort_indices, :);
 
 sorted_only_active_array_stacked = [pre_choice_neurons_sorted; post_choice_reward_neurons_sorted; consumption_neurons_sorted];
 
-% Now, activated_neuron_mean_sorted contains the rows of neuron_mean filtered by respClass_all == 1
-% and sorted by the time of peak activity.
+
 
 figure;
-% Generate the heatmap
 imagesc(ts1, 1, sorted_only_active_array_stacked);
-
-% Add a colorbar and axis labels
 colorbar;
 xlabel('Time (s)');
 ylabel('Neuron');
-
-% Reverse the y-axis so that the highest mean activity is at the top
 set(gca, 'YDir', 'reverse');
 clim([-1 1])
 xline(0);
-
-
-% If you want to customize the color map, you can use colormap function
-% For example, using a blue-white-red colormap:
 colormap(gray);
 
-% If you want to limit the color scale to the range [0, 1]
-caxis([-1 1]); % Assuming correlations range from -1 to 1
-% Add a separate axes for the colorbar to associate it only with the upper tile
+
+caxis([-1 1]); 
 c = colorbar('eastoutside');
 set(c, 'YTick', clim); % 
 
@@ -243,7 +200,6 @@ figure;
 pre_choice_active_ind = find(respClass_all_array{1,1} == 1);
 consum_active_ind = find(respClass_all_array{1,3} == 1);
 post_choice_active_ind = find(respClass_all_array{1,2} == 1);
-% consum_inhibited_ind = find(all_consum_inhibited == 1);
 setListData = {pre_choice_active_ind, consum_active_ind, post_choice_active_ind};
 setLabels = ["Pre-choice excited", "Consumption excited", "Post-choice excited"];
 
@@ -255,68 +211,36 @@ h.ShowIntersectionAreas = true;
 
 
 %% Fig. 2H
-%These data can be used to plot the median or mean choice
-% time on a PCA graph, for example
+
 
 behav_tbl_iter_single = behav_tbl_iter(1);
 
-% Initialize the concatenated table
 concatenatedTable = table();
 
-% Iterate through the 3x1 cell array
+
 for i = 1:numel(behav_tbl_iter_single)
-    % Assuming each cell contains a 12x1 cell array of tables
-    twelveByOneCellArray = behav_tbl_iter_single{i};
-    
-    % Initialize a temporary table to store the concatenated tables for this cell
+    twelveByOneCellArray = behav_tbl_iter_single{i};    
     tempTable = table();
-    
-    % Iterate through the 12x1 cell array
     for j = 1:numel(twelveByOneCellArray)
-        % Assuming each cell in the 12x1 cell array contains a table
         currentTable = twelveByOneCellArray{j};
-        
-        % Concatenate the current table to the temporary table vertically
         tempTable = vertcat(tempTable, currentTable);
     end
-    
-    % Concatenate the temporary table to the overall concatenated table vertically
     concatenatedTable = vertcat(concatenatedTable, tempTable);
 end
-
-median_choice_time_block_1 = median(concatenatedTable.choiceTime(concatenatedTable.Block == 1) - concatenatedTable.stTime(concatenatedTable.Block == 1));
-median_choice_time_block_2 = median(concatenatedTable.choiceTime(concatenatedTable.Block == 2) - concatenatedTable.stTime(concatenatedTable.Block == 2));
-median_choice_time_block_3 = median(concatenatedTable.choiceTime(concatenatedTable.Block == 3) - concatenatedTable.stTime(concatenatedTable.Block == 3));
-
-median_collect_time_block_1 = median(concatenatedTable.collectionTime(concatenatedTable.Block == 1) - concatenatedTable.stTime(concatenatedTable.Block == 1));
-median_collect_time_block_2 = median(concatenatedTable.collectionTime(concatenatedTable.Block == 2) - concatenatedTable.stTime(concatenatedTable.Block == 2));
-median_collect_time_block_3 = median(concatenatedTable.collectionTime(concatenatedTable.Block == 3) - concatenatedTable.stTime(concatenatedTable.Block == 3));
-
-
-
 
 
 median_start_time_from_choice = median(concatenatedTable.stTime - concatenatedTable.choiceTime);
 median_collect_time_from_choice = median(concatenatedTable.collectionTime - concatenatedTable.choiceTime);
 
-median_start_time_from_choice_large = median(concatenatedTable.stTime(concatenatedTable.bigSmall == 1.2) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 1.2));
-median_start_time_from_choice_small = median(concatenatedTable.stTime(concatenatedTable.bigSmall == 0.3) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 0.3));
-
-median_collect_time_from_choice_large = median(concatenatedTable.collectionTime(concatenatedTable.bigSmall == 1.2) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 1.2));
-median_collect_time_from_choice_small = median(concatenatedTable.collectionTime(concatenatedTable.bigSmall == 0.3) - concatenatedTable.choiceTime(concatenatedTable.bigSmall == 0.3));
-
-
-
 % For Figure 2H (top)
 figure;
 hold on
-% Create a histogram for allCorrelations
 
-width = 350; % Width of the figure
-height = 300; % Height of the figure (width is half of height)
-set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+
+width = 350;
+height = 300;
+set(gcf, 'Position', [50, 25, width, height]);
 xlim([-8 8]);
-% Set X-axis ticks
 set(gca, 'XTick', [-8, 0, 8], 'YTick', [-0.6, 0, 0.6]);
 shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(prechoice_block_1==1, :)), std(neuron_mean_array{1, 1}(prechoice_block_1==1, :)/sqrt(size(neuron_mean_array{1, 1}(prechoice_block_1==1, :), 1))), 'lineProps', {'color', batlowW(iter,:)});
 hold on;shadedErrorBar(ts1, nanmean(neuron_mean_array{1, 1}(postchoice_reward_block_1==1, :)), std(neuron_mean_array{1, 1}(postchoice_reward_block_1==1, :)/sqrt(size(neuron_mean_array{1, 1}(postchoice_reward_block_1==1, :), 1))), 'lineProps', {'color', batlowW(iter,:)});
@@ -331,33 +255,22 @@ hold off
 
 
 % For Figure 2H (bottom)
-% Get AUCs for the relevant periods for the 3 defined events
-% Define time windows
-pre_choice_window = [-4 0];     % Pre-choice period: -4 to 0 s
-post_choice_window = [0 2];     % Post-choice period: 0 to 2 s
-consumption_window = [1 3];     % Consumption period: 1 to 3 s if using data aligned to collect, do 0 to 2 to keep things consistent
+pre_choice_window = [-4 0];  
+post_choice_window = [0 2];   
+consumption_window = [1 3];     
 
-% Initialize arrays to store AUCs
-% auc_pre_choice = zeros(size(neuron_mean_array));
-% auc_post_choice = zeros(size(neuron_mean_array));
-% auc_consumption = zeros(size(neuron_mean_array));
+
 pre_choice_neuron_count = 0;
-% Iterate over each element of neuron_mean_array
+
 for i = 1:size(neuron_mean_array{1,1}, 1)
-    % Select data where exclusive_activated_session_1 is 1
     if prechoice_block_1(i) == 1
         pre_choice_neuron_count = pre_choice_neuron_count+1;
         selected_data = neuron_mean_array{1, 1}(i, :);
-        % % Extract time variable (assuming it's named 'ts1')
-        % ts1_data = ts1{i}(exclusive_activated_session_1{i} == 1);
 
-        % Find indices corresponding to each time window
         pre_choice_indices = ts1 >= pre_choice_window(1) & ts1 <= pre_choice_window(2);
         post_choice_indices = ts1 >= post_choice_window(1) & ts1 <= post_choice_window(2);
         consumption_indices = ts1 >= consumption_window(1) & ts1 <= consumption_window(2);
 
-        % Compute AUC for each time window
-        % AUC(qq,1)=trapz(ZallMean(qq,ts1(1,:) < 0 & ts1(1,:) > -5)); % -0 -2 %proxy for pre-choice
         action_auc_pre_choice(pre_choice_neuron_count) = trapz(selected_data(pre_choice_indices));
         action_auc_post_choice(pre_choice_neuron_count) = trapz(selected_data(post_choice_indices));
         action_auc_consumption(pre_choice_neuron_count) = trapz(selected_data(consumption_indices));
@@ -367,22 +280,15 @@ for i = 1:size(neuron_mean_array{1,1}, 1)
 end
 
 post_choice_neuron_count = 0;
-% Iterate over each element of neuron_mean_array
 for i = 1:size(neuron_mean_array{1,1}, 1)
-    % Select data where exclusive_activated_session_1 is 1
     if postchoice_reward_block_1(i) == 1
         post_choice_neuron_count = post_choice_neuron_count+1;
         selected_data = neuron_mean_array{1, 1}(i, :);
-        % % Extract time variable (assuming it's named 'ts1')
-        % ts1_data = ts1{i}(exclusive_activated_session_1{i} == 1);
 
-        % Find indices corresponding to each time window
         pre_choice_indices = ts1 >= pre_choice_window(1) & ts1 <= pre_choice_window(2);
         post_choice_indices = ts1 >= post_choice_window(1) & ts1 <= post_choice_window(2);
         consumption_indices = ts1 >= consumption_window(1) & ts1 <= consumption_window(2);
 
-        % Compute AUC for each time window
-        % AUC(qq,1)=trapz(ZallMean(qq,ts1(1,:) < 0 & ts1(1,:) > -5)); % -0 -2 %proxy for pre-choice
         post_choice_reward_auc_pre_choice(post_choice_neuron_count) = trapz(selected_data(pre_choice_indices));
         post_choice_reward_auc_post_choice(post_choice_neuron_count) = trapz(selected_data(post_choice_indices));
         post_choice_reward_auc_consumption(post_choice_neuron_count) = trapz(selected_data(consumption_indices));
@@ -393,22 +299,15 @@ end
 
 
 consumption_neuron_count = 0;
-% Iterate over each element of neuron_mean_array
 for i = 1:size(neuron_mean_array{1,3}, 1)
-    % Select data where exclusive_activated_session_1 is 1
     if collect_block_1(i) == 1
         consumption_neuron_count = consumption_neuron_count+1;
         selected_data = neuron_mean_array{1, 3}(i, :);
-        % % Extract time variable (assuming it's named 'ts1')
-        % ts1_data = ts1{i}(exclusive_activated_session_1{i} == 1);
 
-        % Find indices corresponding to each time window
         pre_choice_indices = ts1 >= pre_choice_window(1) & ts1 <= pre_choice_window(2);
         post_choice_indices = ts1 >= post_choice_window(1) & ts1 <= post_choice_window(2);
         consumption_indices = ts1 >= consumption_window(1) & ts1 <= consumption_window(2);
 
-        % Compute AUC for each time window
-        % AUC(qq,1)=trapz(ZallMean(qq,ts1(1,:) < 0 & ts1(1,:) > -5)); % -0 -2 %proxy for pre-choice
         consumption_auc_pre_choice(consumption_neuron_count) = trapz(selected_data(pre_choice_indices));
         consumption_auc_post_choice(consumption_neuron_count) = trapz(selected_data(post_choice_indices));
         consumption_auc_consumption(consumption_neuron_count) = trapz(selected_data(consumption_indices));
@@ -417,109 +316,50 @@ for i = 1:size(neuron_mean_array{1,3}, 1)
     end
 end
 
-% Calculate mean and SEM for pre-choice period
 mean_pre_choice = [mean(action_auc_pre_choice(:)), mean(post_choice_reward_auc_pre_choice(:)), mean(consumption_auc_pre_choice(:))];
 sem_pre_choice = [std(action_auc_pre_choice(:))/sqrt(numel(action_auc_pre_choice)), std(post_choice_reward_auc_pre_choice(:))/sqrt(numel(post_choice_reward_auc_pre_choice)), std(consumption_auc_pre_choice(:))/sqrt(numel(consumption_auc_pre_choice))];
 
-% Calculate mean and SEM for post-choice period
 mean_post_choice = [mean(action_auc_post_choice(:)), mean(post_choice_reward_auc_post_choice(:)), mean(consumption_auc_post_choice(:))];
 sem_post_choice = [std(action_auc_post_choice(:))/sqrt(numel(action_auc_post_choice)), std(post_choice_reward_auc_post_choice(:))/sqrt(numel(post_choice_reward_auc_post_choice)), std(consumption_auc_post_choice(:))/sqrt(numel(consumption_auc_post_choice))];
 
-% Calculate mean and SEM for consumption period
 mean_consumption = [mean(action_auc_consumption(:)), mean(post_choice_reward_auc_consumption(:)), mean(consumption_auc_consumption(:))];
 sem_consumption = [std(action_auc_consumption(:))/sqrt(numel(action_auc_consumption)), std(post_choice_reward_auc_consumption(:))/sqrt(numel(post_choice_reward_auc_consumption)), std(consumption_auc_consumption(:))/sqrt(numel(consumption_auc_consumption))];
 
-% Plot the bar graph
+
 figure;
-width = 350; % Width of the figure
-height = 200; % Height of the figure (width is half of height)
-set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+width = 350; 
+height = 200; 
+set(gcf, 'Position', [50, 25, width, height]); 
 set(gca, 'YTick', [-10, 0, 10]);
-bar_groups = 1:3; % Number of groups
-bar_width = 0.3; % Width of each bar (adjust as needed)
+bar_groups = 1:3; 
+bar_width = 0.3; 
 hold on;
 bar(bar_groups - bar_width, mean_pre_choice, bar_width, 'b');
 bar(bar_groups, mean_post_choice, bar_width, 'g');
 bar(bar_groups + bar_width, mean_consumption, bar_width, 'r');
 
-% Add error bars
 errorbar(bar_groups - bar_width, mean_pre_choice, sem_pre_choice, 'k', 'LineStyle', 'none');
 errorbar(bar_groups, mean_post_choice, sem_post_choice, 'k', 'LineStyle', 'none');
 errorbar(bar_groups + bar_width, mean_consumption, sem_consumption, 'k', 'LineStyle', 'none');
 
-% Customize the plot
-xlabel('AUC Periods');
 ylabel('Mean AUC');
-title('Mean AUC for Different Periods');
 legend('Pre-choice', 'Post-choice', 'Consumption');
 xticks(bar_groups);
-xticklabels({'Set 1', 'Set 2', 'Set 3'}); % Replace with actual labels
-grid off; % Remove grid lines
+grid off;
 hold off;
 
-% Combine the data into a single matrix
 action_data = [action_auc_pre_choice(:); action_auc_post_choice(:); action_auc_consumption(:)];
 
-% Create group labels
-groups = [ones(size(action_auc_consumption(:)));  % Group 1: action_auc_consumption
-          2*ones(size(action_auc_post_choice(:))); % Group 2: action_auc_post_choice
-          3*ones(size(action_auc_pre_choice(:)))]; % Group 3: action_auc_pre_choice
+groups = [ones(size(action_auc_consumption(:)));  
+          2*ones(size(action_auc_post_choice(:))); 
+          3*ones(size(action_auc_pre_choice(:)))]; 
 
-figure;
-% Perform one-way ANOVA
-[p_anova, tbl, stats] = anova1(action_data, groups, 'off');
 
-% Perform post-hoc Tukey's HSD test
-c = multcompare(stats, 'CType', 'tukey-kramer');
-
-% Extract p-values and group means
-p_values = c(:, 6);
-group_means = c(:, 4);
-
-% Set significance threshold
-alpha = 0.05;
-
-% Determine significant pairs
-significant_pairs = c(p_values < alpha, 1:2);
-
-% Display results
-disp('Significant pairwise comparisons:');
-for i = 1:size(significant_pairs, 1)
-    fprintf('Group %d vs Group %d\n', significant_pairs(i, 1), significant_pairs(i, 2));
-end
-
-% Combine the data into a single matrix
 postchoice_data = [post_choice_reward_auc_pre_choice(:); post_choice_reward_auc_post_choice(:); post_choice_reward_auc_consumption(:)];
 
-% Create group labels
-groups = [ones(size(post_choice_reward_auc_consumption(:)));  % Group 1: action_auc_consumption
-          2*ones(size(post_choice_reward_auc_post_choice(:))); % Group 2: action_auc_post_choice
-          3*ones(size(post_choice_reward_auc_pre_choice(:)))]; % Group 3: action_auc_pre_choice
-
-figure;
-% Perform one-way ANOVA
-[p_anova, tbl, stats] = anova1(postchoice_data, groups, 'off');
-
-% Perform post-hoc Tukey's HSD test
-c = multcompare(stats, 'CType', 'tukey-kramer');
-
-% Extract p-values and group means
-p_values = c(:, 6);
-group_means = c(:, 4);
-
-% Set significance threshold
-alpha = 0.05;
-
-% Determine significant pairs
-significant_pairs = c(p_values < alpha, 1:2);
-
-% Display results
-disp('Significant pairwise comparisons:');
-for i = 1:size(significant_pairs, 1)
-    fprintf('Group %d vs Group %d\n', significant_pairs(i, 1), significant_pairs(i, 2));
-end
-
-
+groups = [ones(size(post_choice_reward_auc_consumption(:)));  
+          2*ones(size(post_choice_reward_auc_post_choice(:))); 
+          3*ones(size(post_choice_reward_auc_pre_choice(:)))]; 
 
 
 
@@ -528,10 +368,8 @@ end
 % create correlation matrix heatmap with exclusively active cells
 test = [];
 test = [neuron_mean_array{1, 1}(prechoice_block_1 == 1, :)];
-% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}==1 & respClass_all_array{1, 3}~=1, :)];
 test = [test; neuron_mean_array{1, 1}(postchoice_reward_block_1 == 1, :)];
 test = [test; neuron_mean_array{1, 1}(collect_block_1 == 1,:)];
-% test = [test; neuron_mean_array{1, 1}(respClass_all_array{1, 1}~=1 & respClass_all_array{1, 2}~=1 & respClass_all_array{1,3}~=1, :)];
 
 pre_choice_index = [1:sum(prechoice_block_1)];
 post_choice_index = [pre_choice_index(end)+1:pre_choice_index(end)+sum(postchoice_reward_block_1)];
@@ -560,7 +398,7 @@ end
 figure;
 imagesc(correlation_matrix);
 
-axis square; %
+axis square; 
 
 ylim([1  size(test, 1)])
 
@@ -581,9 +419,6 @@ action_correl_matrix = correlation_matrix(pre_choice_index, pre_choice_index);
 
 n = size(pre_choice_index, 2); 
 k = 2;   
-
-num_combinations = nchoosek(n, k);
-disp(['Number of distinct pairwise combinations: ', num2str(num_combinations)]);
 
 
 
@@ -616,11 +451,6 @@ end
 action_comparisons_possible = [action_positive_count + action_negative_count + action_no_correlation_count];
 
 
-disp(['Number of positive correlations: ', num2str(action_positive_count)]);
-disp(['Number of negative correlations: ', num2str(action_negative_count)]);
-disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(action_no_correlation_count)]);
-
-
 action_data = [(action_positive_count/action_comparisons_possible)*100, (action_negative_count/action_comparisons_possible)*100, (action_no_correlation_count/action_comparisons_possible)*100];
 
 
@@ -631,9 +461,6 @@ post_choice_correl_matrix = correlation_matrix(post_choice_index, post_choice_in
 
 n = size(post_choice_index, 2); 
 k = 2;   
-
-num_combinations = nchoosek(n, k);
-disp(['Number of distinct pairwise combinations: ', num2str(num_combinations)]);
 
 
 
@@ -664,11 +491,6 @@ end
 
 post_choice_comparisons_possible = [post_choice_positive_count + post_choice_negative_count + post_choice_no_correlation_count];
 
-
-disp(['Number of positive correlations: ', num2str(post_choice_positive_count)]);
-disp(['Number of negative correlations: ', num2str(post_choice_negative_count)]);
-disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(post_choice_no_correlation_count)]);
-
 post_choice_data = [(post_choice_positive_count/post_choice_comparisons_possible)*100, (post_choice_negative_count/post_choice_comparisons_possible)*100, (post_choice_no_correlation_count/post_choice_comparisons_possible)*100];
 
 consumption_p_value_matrix = p_value_matrix(consumption_index, consumption_index);
@@ -677,16 +499,12 @@ consumption_correl_matrix = correlation_matrix(consumption_index, consumption_in
 n = size(consumption_index, 2); 
 k = 2;  
 
-num_combinations = nchoosek(n, k);
-disp(['Number of distinct pairwise combinations: ', num2str(num_combinations)]);
-
-
 
 consumption_positive_count = 0;
 consumption_negative_count = 0;
 consumption_no_correlation_count = 0;
 
-% Get the size of the correlation matrix
+
 matrix_size = size(consumption_correl_matrix, 1);
 uu = 1
 
@@ -710,10 +528,6 @@ end
 consumption_comparisons_possible = [consumption_positive_count + consumption_negative_count + consumption_no_correlation_count];
 
 
-disp(['Number of positive correlations: ', num2str(consumption_positive_count)]);
-disp(['Number of negative correlations: ', num2str(consumption_negative_count)]);
-disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(consumption_no_correlation_count)]);
-
 
 consumption_data = [(consumption_positive_count/consumption_comparisons_possible)*100, (consumption_negative_count/consumption_comparisons_possible)*100, (consumption_no_correlation_count/consumption_comparisons_possible)*100];
 
@@ -723,10 +537,6 @@ action_post_choice_correl_matrix = correlation_matrix(pre_choice_index, post_cho
 n1 = size(action_post_choice_p_value_matrix, 1); 
 n2 = size(action_post_choice_p_value_matrix, 2); 
 k = 2;    
-
-num_combinations = nchoosek(n1, k) * nchoosek(n2, k);
-disp(['Number of unique pairwise combinations: ', num2str(num_combinations)]);
-
 
 action_post_choice_positive_count = 0;
 action_post_choice_negative_count = 0;
@@ -751,11 +561,6 @@ for i = 1:num_neurons_1
     end
 end
 
-
-disp(['Number of positive correlations: ', num2str(action_post_choice_positive_count)]);
-disp(['Number of negative correlations: ', num2str(action_post_choice_negative_count)]);
-disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(action_post_choice_no_correlation_count)]);
-
 action_post_choice_comparisons_possible = [action_post_choice_positive_count+action_post_choice_negative_count+action_post_choice_no_correlation_count];
 
 
@@ -768,11 +573,6 @@ action_consumption_correl_matrix = correlation_matrix(pre_choice_index, consumpt
 n1 = size(action_consumption_p_value_matrix, 1); 
 n2 = size(action_consumption_p_value_matrix, 2);
 k = 2;   
-
-num_combinations = nchoosek(n1, k) * nchoosek(n2, k);
-disp(['Number of unique pairwise combinations: ', num2str(num_combinations)]);
-
-
 
 
 action_consumption_positive_count = 0;
@@ -799,10 +599,6 @@ for i = 1:num_neurons_1
 end
 
 
-disp(['Number of positive correlations: ', num2str(action_consumption_positive_count)]);
-disp(['Number of negative correlations: ', num2str(action_consumption_negative_count)]);
-disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(action_consumption_no_correlation_count)]);
-
 action_consumption_comparisons_possible = [action_consumption_positive_count+action_consumption_negative_count+action_consumption_no_correlation_count];
 
 
@@ -817,8 +613,6 @@ n1 = size(post_choice_consumption_p_value_matrix, 1);
 n2 = size(post_choice_consumption_p_value_matrix, 2); 
 k = 2;    
 
-num_combinations = nchoosek(n1, k) * nchoosek(n2, k);
-disp(['Number of unique pairwise combinations: ', num2str(num_combinations)]);
 
 
 post_choice_consumption_positive_count = 0;
@@ -845,21 +639,16 @@ for i = 1:num_neurons_1
 end
 
 
-disp(['Number of positive correlations: ', num2str(post_choice_consumption_positive_count)]);
-disp(['Number of negative correlations: ', num2str(post_choice_consumption_negative_count)]);
-disp(['Number of no correlations (p-value > ', num2str(alpha), '): ', num2str(post_choice_consumption_no_correlation_count)]);
-
 post_choice_consumption_comparisons_possible = [post_choice_consumption_positive_count+post_choice_consumption_negative_count+post_choice_consumption_no_correlation_count];
 
 
 
 post_choice_consumption_data = [(post_choice_consumption_positive_count/post_choice_consumption_comparisons_possible)*100, (post_choice_consumption_negative_count/post_choice_consumption_comparisons_possible)*100, (post_choice_consumption_no_correlation_count/post_choice_consumption_comparisons_possible)*100];
-%
 
 x = 1:6;
 figure;
 barh(x, [action_data; post_choice_data; consumption_data; action_post_choice_data; action_consumption_data; post_choice_consumption_data], 'stacked');
-legend('Positive correlation', 'Negative correlation', 'No sig correlation');
+legend('Positive', 'Negative', 'No sig correl');
 
 
 
@@ -871,13 +660,6 @@ array_for_means = 3;
 for q = 1:length (behav_tbl_iter{array_for_means, 1})
     nestedCellArray_1 = behav_tbl_iter{array_for_means, 1}{q};
     if ~isempty(nestedCellArray_1)
-        % nestedCellArray_2 = behav_tbl_iter{2, 1}{q};
-        % if size(nestedCellArray_1, 1) > size(nestedCellArray_2, 1)
-        %     delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime(1:end-1,:);
-        % else
-        %     delay_to_initiation = nestedCellArray_2.stTime - nestedCellArray_1.choiceTime;
-        % end
-        %
 
         for zz = 1:size(nestedCellArray_1, 1)
             valid_start_times = nestedCellArray_1.stTime(2:end);
@@ -911,28 +693,27 @@ bar_separation_value = 3;
 
 figure;
 
-% Adjust figure dimensions for subplots
-width = 400; % Adjusted width for 3 subplots
-height = 500; % Height of the figure
+
+width = 400; 
+height = 500; 
 set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
 
-% Subplot 1: trial_choice_times_concat
-subplot(1, 3, 1); % First subplot
+
+subplot(1, 3, 1); 
 hold on;
-% Define colors based on trial_types_concat
-colors = repmat([0.5, 0.5, 0.5], length(trial_choice_times_concat), 1); % Default to gray
-colors(trial_types_concat == 1.2, :) = repmat([0, 0, 1], sum(trial_types_concat == 1.2), 1); % Blue for trial_types_concat == 1.2
-colors(trial_types_concat == 0.3, :) = repmat([1, 0, 0], sum(trial_types_concat == 0.3), 1); % Red for trial_types_concat == 0.3
+colors = repmat([0.5, 0.5, 0.5], length(trial_choice_times_concat), 1); 
+colors(trial_types_concat == 1.2, :) = repmat([0, 0, 1], sum(trial_types_concat == 1.2), 1); 
+colors(trial_types_concat == 0.3, :) = repmat([1, 0, 0], sum(trial_types_concat == 0.3), 1); 
 
-% Create the swarmchart with colors
+
 s = swarmchart(ones(1, length(trial_choice_times_concat)), trial_choice_times_concat, 36, colors, 'filled');
-s.MarkerEdgeColor = 'k'; % Black stroke for all circles
+s.MarkerEdgeColor = 'k'; 
 
-% Calculate and plot means for each group
+
 mean_12 = mean(trial_choice_times_concat(trial_types_concat == 1.2));
 mean_03 = mean(trial_choice_times_concat(trial_types_concat == 0.3));
-plot([0.8, 1.2], [mean_12, mean_12], 'b-', 'LineWidth', 2); % Blue line for trial_types_concat == 1.2
-plot([0.8, 1.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); % Red line for trial_types_concat == 0.3
+plot([0.8, 1.2], [mean_12, mean_12], 'b-', 'LineWidth', 2);
+plot([0.8, 1.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); 
 
 
 [h_choice_times p_choice_times, ~, stats_choice_times] = ttest2(trial_choice_times_concat(trial_types_concat == 1.2), trial_choice_times_concat(trial_types_concat == 0.3))
@@ -961,37 +742,35 @@ U_collect_times = (stats_rank_sum_collect_times.ranksum  ) - [size(rew_collect_t
 
 
 hold off;
-title('Trial Choice Times');
-xlabel('Trial');
-ylabel('Time');
-yline(0); % Add yline if needed
+xlabel('Choice latency');
+ylabel('Choice latency (s)');
+yline(0); 
 xtickformat('%.1f');
 ytickformat('%.1f');
 
-% Subplot 2: rew_collect_times_concat
-subplot(1, 3, 2); % Second subplot
+
+subplot(1, 3, 2); 
 hold on;
-% Define colors based on trial_types_concat
-colors = repmat([0.5, 0.5, 0.5], length(rew_collect_times_concat), 1); % Default to gray
-colors(trial_types_concat == 1.2, :) = repmat([0, 0, 1], sum(trial_types_concat == 1.2), 1); % Blue for trial_types_concat == 1.2
-colors(trial_types_concat == 0.3, :) = repmat([1, 0, 0], sum(trial_types_concat == 0.3), 1); % Red for trial_types_concat == 0.3
 
-% Create the swarmchart with colors
+colors = repmat([0.5, 0.5, 0.5], length(rew_collect_times_concat), 1); %
+colors(trial_types_concat == 1.2, :) = repmat([0, 0, 1], sum(trial_types_concat == 1.2), 1); 
+colors(trial_types_concat == 0.3, :) = repmat([1, 0, 0], sum(trial_types_concat == 0.3), 1); 
+
+
 s = swarmchart(ones(1, length(rew_collect_times_concat)) * bar_separation_value, rew_collect_times_concat, 36, colors, 'filled');
-s.MarkerEdgeColor = 'k'; % Black stroke for all circles
+s.MarkerEdgeColor = 'k'; 
 
-% Calculate and plot means for each group
+
 mean_12 = mean(rew_collect_times_concat(trial_types_concat == 1.2));
 mean_03 = mean(rew_collect_times_concat(trial_types_concat == 0.3));
-plot([bar_separation_value - 0.2, bar_separation_value + 0.2], [mean_12, mean_12], 'b-', 'LineWidth', 2); % Blue line for trial_types_concat == 1.2
-plot([bar_separation_value - 0.2, bar_separation_value + 0.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); % Red line for trial_types_concat == 0.3
+plot([bar_separation_value - 0.2, bar_separation_value + 0.2], [mean_12, mean_12], 'b-', 'LineWidth', 2); 
+plot([bar_separation_value - 0.2, bar_separation_value + 0.2], [mean_03, mean_03], 'r-', 'LineWidth', 2); 
 
 [h_rew_times p_rew_times, ~, stats_rew_times] = ttest2(rew_collect_times_concat(trial_types_concat == 1.2), rew_collect_times_concat(trial_types_concat == 0.3))
 
 hold off;
-title('Reward Collection Times');
-xlabel('Reward Collection');
-ylabel('Time');
+xlabel('Reward collection');
+ylabel('Collection latency (s)');
 yline(0);
 xtickformat('%.1f');
 ytickformat('%.1f');
@@ -1070,16 +849,13 @@ for i = 1:length(meanZallMouse)
     
 
     trialChoiceTimes = variable_to_correlate{i}';
-    % trialChoiceTimes = variable_to_correlate{i};
-
-    % trialChoiceTimes =  trialChoiceTimes(trial_types_by_mouse{1, i} == 1.2);
         
 
     for j = 1:length(meanNestedCellArray)
 
         meanValues = meanNestedCellArray{j};
         
-        % meanValues = meanValues(trial_types_by_mouse{1, i} == 1.2)
+
         
 
 
@@ -1105,45 +881,31 @@ for i = 1:length(meanZallMouse)
 end
 
 
-%
-% Assuming correlationResults is defined and contains the correlation coefficients
 
-% Initialize an empty array to collect all correlation coefficients
 allCorrelations = [];
 
-% Iterate through each level of correlationResults
+
 for i = 1:length(correlationResults)
-    % Get the current nested cell array of correlation coefficients
+
     correlationNestedArray = correlationResults{i};
-    
-    % Iterate through each cell in the nested cell array
     for j = 1:length(correlationNestedArray)
-        % Get the current correlation coefficient
         correlationCoeff = correlationNestedArray(j);
-        
-        % Check if the coefficient is not NaN (if applicable)
         if ~isnan(correlationCoeff)
-            % Append the coefficient to the allCorrelations array
             allCorrelations = [allCorrelations; correlationCoeff];
         end
     end
 end
 
-% Now, allCorrelations contains all the correlation coefficients
-% Create a histogram of the correlation coefficients
 figure;
 histogram(allCorrelations);
-xlabel('Correlation Coefficient');
+xlabel('Correlation coefficient');
 ylabel('Frequency');
-title('Histogram of Correlation Coefficients');
 
-% Optionally, you can add a vertical line at 0 for reference
 hold on;
 yLimits = ylim;
 plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
-% SHK responsive neurons assumed to be stored in respClass_all_array{1, 1} for this purpose - change as necessary
 % only_shk_responsive_corrs = allCorrelations(kmeans_idx' == 3);
 % only_shk_responsive_corrs = allCorrelations(prechoice_block_1 == 1);
 % only_shk_responsive_corrs = allCorrelations(postchoice_reward_block_1 == 1);
@@ -1153,81 +915,58 @@ only_shk_responsive_corrs = allCorrelations(collect_block_1 == 1);
 % not_shk_responsive_corrs = allCorrelations(kmeans_idx' ~= 3);c
 not_shk_responsive_corrs = allCorrelations(true_neutral ==1);
 
-% Now, allCorrelations contains all the correlation coefficients
-% Create a histogram of the correlation coefficients
 figure;
 histogram(only_shk_responsive_corrs);
-xlabel('Correlation Coefficient');
-ylabel('Frequency');
-title('Histogram of Correlation Coefficients');
+xlabel('Correlation coefficient');
 
-% Optionally, you can add a vertical line at 0 for reference
 hold on;
 yLimits = ylim;
 plot([0 0], yLimits, 'r--', 'LineWidth', 2);
 hold off;
 
-%
-% Assuming the following variables are defined:
-% allCorrelations: array containing correlation coefficients from correlationResults
-% only_shk_responsive_corrs: array containing correlation coefficients from a different variable
 
-% Calculate means
 mean_only_shk = mean(only_shk_responsive_corrs);
 mean_not_shk = mean(not_shk_responsive_corrs);
 
-% Create a histogram for allCorrelations
 figure;
-width = 250; % Width of the figure
-height = 250; % Height of the figure (width is half of height)
-set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+width = 250;
+height = 250; 
+set(gcf, 'Position', [50, 25, width, height]); 
 histogram(not_shk_responsive_corrs , 'Normalization', 'probability', 'FaceColor', 'blue','BinWidth', 0.05,'LineStyle','none');
 hold on;
 
-% Create a histogram for only_shk_responsive_corrs on the same figure
+
 histogram(only_shk_responsive_corrs, 'Normalization', 'probability', 'FaceColor', 'red', 'BinWidth', 0.05, 'LineStyle','none');
 xline(mean_only_shk, 'r')
 xline(mean_not_shk, 'g')
-% Add labels and title
-xlabel('Correlation Coefficient');
+xlabel('Correlation coefficient');
 ylabel('Probability');
-% title('Histograms of Correlation Coefficients');
-% legend('All Correlations', 'Only SHK Responsive Correlations');
 
-% Optionally, you can add a vertical line at 0 for reference
+
 yLimits = [0 0.15];
 plot([0 0], yLimits, 'k', 'LineWidth', 2);
 xtickformat('%.2f');
 ytickformat('%.2f');
 hold off;
-
-% Perform a Kolmogorov-Smirnov test to compare the two distributions
 [h, p, k] = kstest2(not_shk_responsive_corrs , only_shk_responsive_corrs)
 
-% Display the results of the statistical test
+% stats
 fprintf('Kolmogorov-Smirnov test result:\n');
 fprintf('h = %d (0 means the null hypothesis cannot be rejected, 1 means it can be rejected)\n', h);
 fprintf('p-value = %.4f\n', p);
 
 [h,p,ci,stats] = ttest2(not_shk_responsive_corrs , only_shk_responsive_corrs)
 
-
-
-
-
-%
-
 bar_separation_value = 3;
 
 figure;
-width = 250; % Width of the figure
-height = 250; % Height of the figure (width is half of height)
-set(gcf, 'Position', [50, 25, width, height]); % Set position and size [left, bottom, width, height]
+width = 250; 
+height = 250; 
+set(gcf, 'Position', [50, 25, width, height]); 
 swarmchart(ones(1, length(only_shk_responsive_corrs)), only_shk_responsive_corrs)
 hold on
 swarmchart(ones(1, length(not_shk_responsive_corrs))*bar_separation_value, not_shk_responsive_corrs)
 
-% yline(mean(only_shk_responsive_corrs), ones(length(only_shk_responsive_corrs)))
 plot([0.5; 1.5], [mean(only_shk_responsive_corrs); mean(only_shk_responsive_corrs)], 'LineWidth',3)
 plot([bar_separation_value-.5; bar_separation_value+.5], [mean(not_shk_responsive_corrs); mean(not_shk_responsive_corrs)], 'LineWidth',3)
 yline(0);
@@ -1272,24 +1011,6 @@ trial_types = trial_types_by_mouse{1, 5};
 % trial_types = trial_types_by_mouse{1, 5};
 
 
-
-%CREATE SCATTER PLOT BASED ON SPECIFIC EVENTS - ASSUMING THEY ARE IN PAIRS.
-%CHECK AND UPDATE START & END TIME DEPENDING ON EVENT OF INTEREST
-paired_neurons = respClass_all_array{1, 1} == 1 & respClass_all_array{1, 2} == 1;
-% start_time = 0;% sub-window start time
-% end_time = 2; % sub-window end time
-
-% Extract the corresponding columns from neuron_mean
-
-
-% sub_window_activity_session_1 = zall_mouse{5, 1}{1, 104}(:, sub_window_idx);
-% choice_times_mouse = trial_choice_times_by_mouse{1, 5};
-% trial_types = trial_types_by_mouse{1, 5};
-
-% % Assume A and B are your 143x21 arrays
-% correlation_coefficients = arrayfun(@(i) corr(sub_window_activity_session_1 (i, :)', sub_window_activity_session_2 (i, :)'), 1:size(sub_window_activity_session_1 , 1));
-
-
 mean_sub_window_activity_session_1 = mean(sub_window_activity_session_1, 2);
 
 
@@ -1297,25 +1018,16 @@ x = mean_sub_window_activity_session_1;
 y = choice_times_mouse;
 size(y)
 
-% x = mean_sub_window_activity_session_1(trial_types == 1.2);
-% y = choice_times_mouse(trial_types == 1.2);
-% trial_types = trial_types(trial_types == 1.2);
-
-
-% Define colors based on trial types
 colors = repmat([0.5, 0.5, 0.5], length(trial_types), 1); % Default to gray
 colors(trial_types == 1.2, :) = repmat([0, 0, 1], sum(trial_types == 1.2), 1); % Blue for trial_types == 1.2
 colors(trial_types == 0.3, :) = repmat([1, 0, 0], sum(trial_types == 0.3), 1); % Red for trial_types == 0.3
 
-% Create scatter plot
 figure;
 set(gcf, 'Position', [100, 100, 200, 200]); % Adjust figure position and size
 scatter(x, y, 36, colors, 'filled', 'MarkerEdgeColor', 'k'); % Use 'colors' for MarkerFaceColor
 
 hold on;
 
-% Add separate regression lines for each trial type
-% Large reward trials (1.2) - Blue dashed line
 x_large = x(trial_types == 1.2);
 y_large = y(trial_types == 1.2);
 coefficients_large = polyfit(x_large, y_large, 1);
@@ -1323,13 +1035,11 @@ x_fit_large = linspace(min(x_large), max(x_large), 100);
 y_fit_large = polyval(coefficients_large, x_fit_large);
 plot(x_fit_large, y_fit_large, 'b', 'LineWidth', 2);
 
-% Calculate R-squared for large reward trials
 y_pred_large = polyval(coefficients_large, x_large);
 ssr_large = sum((y_pred_large - mean(y_large)).^2);
 sst_large = sum((y_large - mean(y_large)).^2);
 r_squared_large = ssr_large / sst_large;
 
-% Small reward trials (0.3) - Red dashed line
 x_small = x(trial_types == 0.3);
 y_small = y(trial_types == 0.3);
 coefficients_small = polyfit(x_small, y_small, 1);
@@ -1337,20 +1047,16 @@ x_fit_small = linspace(min(x_small), max(x_small), 100);
 y_fit_small = polyval(coefficients_small, x_fit_small);
 plot(x_fit_small, y_fit_small, 'r', 'LineWidth', 2);
 
-% Calculate R-squared for small reward trials
 y_pred_small = polyval(coefficients_small, x_small);
 ssr_small = sum((y_pred_small - mean(y_small)).^2);
 sst_small = sum((y_small - mean(y_small)).^2);
 r_squared_small = ssr_small / sst_small;
 
-% Add R-squared values to the plot
 text(min(x) + 0.1, max(y) - 0.1, ['Large R^2 = ' num2str(r_squared_large, '%.3f')], 'FontSize', 10, 'Color', 'b');
 text(min(x) + 0.1, max(y) - 0.3, ['Small R^2 = ' num2str(r_squared_small, '%.3f')], 'FontSize', 10, 'Color', 'r');
 
-% Add labels and a legend if needed
-xlabel('Mean Sub-window Activity Session 1');
-ylabel('Choice Times Mouse');
-title('Scatter Plot with Regression Lines by Trial Type');
+xlabel('Mean dF/F activity');
+ylabel('Latency');
 hold off;
 
 

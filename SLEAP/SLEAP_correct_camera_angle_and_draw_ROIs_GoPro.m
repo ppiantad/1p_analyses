@@ -7,7 +7,7 @@
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'D:\risk videos\BLA hM4Di vs mCherry';
+metaDirectory = 'F:\risk videos\RDT Males & Females';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 p = get(0, "MonitorPositions");
@@ -108,7 +108,7 @@ for zz = 1:size(metafolder_list, 1)
                 movie = files(idx); %build a mat file index
                 clear idx files
 
-                if isempty(csvs) | isempty(movie)
+                if isempty(movie) %isempty(csvs) | isempty(movie)
                     disp('Missing behavior csvs or video file, skipping folder');
                     continue
                 else

@@ -1,11 +1,11 @@
 
 animalIDs = (fieldnames(final_SLEAP));
 
-select_mouse = 'RRD458';
+select_mouse = 'RDT_M_7';
 
 select_mouse_index = find(strcmp(animalIDs, select_mouse));
 
-session_to_analyze = 'RDT_OPTO_CHOICE';
+session_to_analyze = 'RDT_D1';
 
 shapeData = final_SLEAP.(select_mouse).(session_to_analyze).shapeData;
 
@@ -813,7 +813,7 @@ for k = 1:numel(shapeData)
     end
 end
 
-xlim([-20 120])
+% xlim([-20 120])
 
 hold off
 

@@ -15,7 +15,7 @@ session_to_analyze = 'RDT_D1';
 
 yoke_data = 0; % 1, set to 1 if you want to be prompted to yoke the number of trials analyzed, set to 0 otherwise
 
-epoc_to_align = 'collectionTime';
+epoc_to_align = 'choiceTime';
 ts1 = (uv.evtWin(1):uv.dt:uv.evtWin(2)-uv.dt);
 
 % neuron_num = 0;
@@ -45,14 +45,21 @@ if any(startsWith(string(animalIDs), 'RDT-F'))
 
 else
     if strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
-        fieldsToRemove = {'BLA_Insc_35', 'BLA_Insc_38', 'BLA_Insc_41'};
+        fieldsToRemove = {'BLA_Insc_35', 'BLA_Insc_38', 'BLA_Insc_41', 'RDT_M_5'};
 
         for i = 1:length(fieldsToRemove)
             if isfield(final_SLEAP, fieldsToRemove{i})
                 final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
             end
         end
+    elseif  strcmp('SHOCK_TEST', session_to_analyze)
+        fieldsToRemove = {'RDT_F_13'};
 
+        for i = 1:length(fieldsToRemove)
+            if isfield(final_SLEAP, fieldsToRemove{i})
+                final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+            end
+        end
     end
 
 end
@@ -95,7 +102,7 @@ for ii = 1:size(animalIDs,1)
             end
         end
 
-        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'OMITALL', 0, 'BLANK_TOUCH', 0, 'BLOCK', 3, 'SHK', 0);
+        [BehavData,trials, varargin_identity_class]=TrialFilter_test(BehavData, 'SHK', 1);
 
         varargin_strings = string(varargin_identity_class);
         varargin_strings = strrep(varargin_strings, '0.3', 'Small');
@@ -914,7 +921,8 @@ end
 
 % Find indices where Animals match valid_animalIDs
 % valid_idx = ismember(animalIDs, hM4Di_IDs);
-valid_idx = ismember(animalIDs, stGtACR_IDs);
+% valid_idx = ismember(animalIDs, stGtACR_IDs);
+valid_idx = ismember(animalIDs, ChrimsonR_IDs);
 
 % Filter path_length_table to only include valid animals
 valid_animalIDs = animalIDs(valid_idx, :);

@@ -9,7 +9,7 @@ ts1 = (-10:(uv.dt):10-0.1);
 % Define the directory path you want to start with
 % startDirectory = 'I:\MATLAB\Sean CNMFe\pan-neuronal BLA\BLA-Insc-24';
 
-metaDirectory = 'D:\risk videos\BLA-PL PV+ Hajos';
+metaDirectory = 'F:\risk videos\RDT Males & Females';
 metaDirectory_subfolders = dir(metaDirectory );
 metafolder_list = {};
 

@@ -1,25 +1,25 @@
 
-session_to_analyze = 'RDT_D1_CNO';
+session_to_analyze = 'RDT_D1';
 
-
-if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
-    fieldsToRemove = {'BLA_Insc_13', 'BLA_Insc_18', 'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_41'};
-
-    for i = 1:length(fieldsToRemove)
-        if isfield(final_SLEAP, fieldsToRemove{i})
-            final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
-        end
-    end
-elseif strcmp('RDT_D2', session_to_analyze)
-
-    fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_39'};
-
-    for i = 1:length(fieldsToRemove)
-        if isfield(final_SLEAP, fieldsToRemove{i})
-            final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
-        end
-    end
-end
+% 
+% if strcmp('RM_D1', session_to_analyze)| strcmp('RDT_D1', session_to_analyze) | strcmp('Pre_RDT_RM', session_to_analyze)
+%     fieldsToRemove = {'BLA_Insc_13', 'BLA_Insc_18', 'BLA_Insc_28', 'BLA_Insc_29', 'BLA_Insc_38', 'BLA_Insc_39', 'BLA_Insc_41', 'RDT_M_5'};
+% 
+%     for i = 1:length(fieldsToRemove)
+%         if isfield(final_SLEAP, fieldsToRemove{i})
+%             final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+%         end
+%     end
+% elseif strcmp('RDT_D2', session_to_analyze)
+% 
+%     fieldsToRemove = {'BLA_Insc_28', 'BLA_Insc_39'};
+% 
+%     for i = 1:length(fieldsToRemove)
+%         if isfield(final_SLEAP, fieldsToRemove{i})
+%             final_SLEAP = rmfield(final_SLEAP, fieldsToRemove{i});
+%         end
+%     end
+% end
 
 animalIDs = (fieldnames(final_SLEAP));
 

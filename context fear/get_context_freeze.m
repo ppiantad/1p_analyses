@@ -17,9 +17,11 @@
 
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
 
-% experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\all_DREADD_mice_corrected.xlsx');
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\all_DREADD_mice_corrected.xlsx');
 
-experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
+experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\vHPC_DREADD_mice.xlsx');
+
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
 
 %%
 % Define parameters
@@ -1133,8 +1135,10 @@ end
 % experimental_grps = readtable('d:\MATLAB\my_repo\context fear\organize_SLEAP_data\Re_DREADD_mice_corrected.xlsx');
 
 % experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_imaging_DRN_stim_mice.xlsx');
-% experimental_grps = readtable('E:\MATLAB\my_repo\context fear\organize_SLEAP_data\all_DREADD_mice_corrected.xlsx');
-experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\all_DREADD_mice_corrected.xlsx');
+
+experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\vHPC_DREADD_mice.xlsx');
+% experimental_grps = readtable('i:\MATLAB\my_repo\context fear\organize_SLEAP_data\PL_new_imaging.xlsx');
 
 
 
